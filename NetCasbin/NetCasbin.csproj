@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Casbin移植到dotnet core平台</Description>
+    <Authors>Zhikui H</Authors>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
+  </ItemGroup>
+
+</Project>
