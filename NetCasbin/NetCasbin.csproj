@@ -2,8 +2,16 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <Description>Casbin移植到dotnet core平台</Description>
+    <Description>Casbin ported to dotnet core</Description>
     <Authors>Zhikui H</Authors>
+    <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/casbin-net/Casbin.NET</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/casbin-net/Casbin.NET/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryType>GIT</RepositoryType>
+    <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
+    <Company>Zhikui H</Company>
+    <Copyright>Apache License 2.0</Copyright>
+    <PackageReleaseNotes>Implemented APIs：Enforcement、RBAC、ABAC、Adapter、Management API、RBAC API、Filtered Adapter、Role Manager</PackageReleaseNotes>
   </PropertyGroup>
 
   <ItemGroup>

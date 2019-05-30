@@ -2,6 +2,12 @@
 
 **News**: still worry about how to write the correct Casbin policy? `Casbin online editor` is coming to help! Try it at: http://casbin.org/editor/
 
+## Get Started
+
+```
+dotnet add package NetCasbin --version 1.0.0
+```
+
 ## Table of contents
 
 - [Supported models](#supported-models)
