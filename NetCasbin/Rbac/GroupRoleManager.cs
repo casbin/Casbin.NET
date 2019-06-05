@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin.Rabc
+namespace NetCasbin.Rbac
 {
     public class GroupRoleManager : DefaultRoleManager
     {
@@ -11,7 +10,7 @@ namespace NetCasbin.Rabc
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="name1"></param>
         /// <param name="name2"></param>
@@ -28,13 +27,9 @@ namespace NetCasbin.Rabc
             {
                 try
                 {
-                    var groups = base.GetRoles(name1);
-                    if (groups == null)
-                    {
-                        groups = new List<string>();
-                    }
+                    var groups = base.GetRoles(name1) ?? new List<string>();
 
-                    foreach (String group in groups)
+                    foreach (var group in groups)
                     {
                         if (HasLink(group, name2, domain))
                         {
@@ -42,7 +37,7 @@ namespace NetCasbin.Rabc
                         }
                     }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
                     return false;
                 }
