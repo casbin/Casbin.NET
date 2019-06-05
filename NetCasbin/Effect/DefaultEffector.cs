@@ -2,9 +2,19 @@
 
 namespace NetCasbin.Effect
 {
+    /// <summary>
+    /// DefaultEffector is default effector for Casbin.
+    /// </summary>
     public class DefaultEffector : IEffector
     {
-        public bool MergeEffects(string expr, NetCasbin.Effect.Effect[] effects, float[] results)
+        /// <summary>
+        ///  mergeEffects merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="expr"></param>
+        /// <param name="effects"></param>
+        /// <param name="results"></param>
+        /// <returns></returns>
+        public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
             bool result = false;
             if (expr.Equals("some(where (p_eft == allow))"))

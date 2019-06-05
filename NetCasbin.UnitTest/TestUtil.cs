@@ -48,7 +48,7 @@ namespace NetCasbin.Test
 
         internal static void testGetGroupingPolicy(Enforcer e, List<List<String>> res)
         {
-            List<List<String>> myRes = e.getGroupingPolicy(); 
+            List<List<String>> myRes = e.GetGroupingPolicy(); 
             Assert.Equal(res, myRes);
         }
 

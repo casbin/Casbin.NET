@@ -6,14 +6,17 @@ using System.Text.RegularExpressions;
 namespace NetCasbin.Util
 {
     public static class BuiltInFunctions
-    {
+    { 
         /// <summary>
+        ///  determines whether key1 matches the pattern of key2 (similar to 
+        ///  RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*"
+        ///  
         /// key1是否匹配key2（类似RESTful路径），key2能包含*
         /// 例如："/foo/bar"匹配"/foo/*"
         /// </summary>
-        /// <param name="key1"></param>
-        /// <param name="key2"></param>
-        /// <returns></returns>
+        /// <param name="key1">the first argument.</param>
+        /// <param name="key2">the second argument.</param>
+        /// <returns>whether key1 matches key2.</returns>
         public static Boolean KeyMatch(string key1, string key2)
         {
             int i = key2.IndexOf('*');
@@ -28,6 +31,57 @@ namespace NetCasbin.Util
                 return key1.Substring(0, i).Equals(key2.Substring(0, i));
             }
             return key1.Equals(key2.Substring(0, i));
+        }
+
+        /// <summary>
+        /// keyMatch2 determines whether key1 matches the pattern of key2 (similar to
+        /// RESTful path), key2 can contain a*. For example, "/foo/bar" matches
+        /// "/foo/*", "/resource1" matches "/:resource"
+        /// </summary>
+        /// <param name="key1">the first argument.</param>
+        /// <param name="key2">the second argument.</param>
+        /// <returns>whether key1 matches key2.</returns>
+        public static bool KeyMatch2(string key1, string key2)
+        {
+            key2 = key2.Replace("/*", "/.*");
+
+            Regex regex = new Regex("(.*):[^/]+(.*)");
+
+            while (true)
+            {
+                if (!key2.Contains("/:"))
+                {
+                    break;
+                }
+
+                key2 = regex.Replace(key2, "$1[^/]+$2");
+            }
+            return RegexMatch(key1, key2);
+        }
+
+        /// <summary>
+        ///  keyMatch3 determines whether key1 matches the pattern of key2 (similar to
+        ///  RESTful path), key2 can contain a *. For example, "/foo/bar" matches
+        ///  "/foo/*", "/resource1" matches "/{resource}"
+        /// </summary>
+        /// <param name="key1">the first argument.</param>
+        /// <param name="key2">the second argument.</param>
+        /// <returns>whether key1 matches key2.</returns>
+        public static bool KeyMatch3(string key1, string key2)
+        {
+            key2 = key2.Replace("/*", "/.*");
+
+            Regex regex = new Regex("(.*)\\{[^/]+\\}(.*)");
+            while (true)
+            {
+                if (!key2.Contains("/{"))
+                {
+                    break;
+                }
+
+                key2 = regex.Replace(key2, "$1[^/]+$2");
+            }
+            return RegexMatch(key1, key2);
         }
 
         /// <summary>
@@ -69,48 +123,26 @@ namespace NetCasbin.Util
             return false;
         }
 
-        public static bool KeyMatch2(string key1, string key2)
-        {
-            key2 = key2.Replace("/*", "/.*");
-
-            Regex regex = new Regex("(.*):[^/]+(.*)");
-
-            while (true)
-            {
-                if (!key2.Contains("/:"))
-                {
-                    break;
-                }
-
-                key2 = regex.Replace(key2, "$1[^/]+$2");
-            }
-            return RegexMatch(key1, key2);
-        }
-
-        public static bool KeyMatch3(string key1, string key2)
-        {
-            key2 = key2.Replace("/*", "/.*");
-
-            Regex regex = new Regex("(.*)\\{[^/]+\\}(.*)");
-            while (true)
-            {
-                if (!key2.Contains("/{"))
-                {
-                    break;
-                }
-
-                key2 = regex.Replace(key2, "$1[^/]+$2");
-            }
-            return RegexMatch(key1, key2);
-        }
-
-
+        /// <summary>
+        /// determines whether key1 matches the pattern of key2 in regular
+        /// expression.
+        /// </summary>
+        /// <param name="key1">the first argument.</param>
+        /// <param name="key2">the second argument.</param>
+        /// <returns>whether key1 matches key2.</returns>
         public static Boolean RegexMatch(String key1, String key2)
         {
             return Regex.Match(key1, key2).Success;
         }
 
         delegate bool GCall(string arg1, string arg2, string domain = null);
+
+        /// <summary>
+        /// GenerateGFunction is the factory method of the g(_, _) function.
+        /// </summary>
+        /// <param name="name">the name of the g(_, _) function, can be "g", "g2", ..</param>
+        /// <param name="rm"> the role manager used by the function.</param>
+        /// <returns>the function.</returns>
         internal static AbstractFunction GenerateGFunction(string name, IRoleManager rm)
         {
             bool Call(string arg1, string arg2, string domain = null)

@@ -18,6 +18,11 @@ namespace NetCasbin.Config
             _data = new Dictionary<String, IDictionary<String, String>>();
         }
 
+        /// <summary>
+        /// newConfig create an empty configuration representation from file.
+        /// </summary>
+        /// <param name="configFilePath">the path of the model file.</param>
+        /// <returns>the constructor of Config.</returns>
         public static Config NewConfig(String configFilePath)
         {
             Config c = new Config();
@@ -25,6 +30,11 @@ namespace NetCasbin.Config
             return c;
         }
 
+        /// <summary>
+        /// newConfigFromText create an empty configuration representation from text.
+        /// </summary>
+        /// <param name="text">the model text.</param>
+        /// <returns> the constructor of Config.</returns>
         public static Config NewConfigFromText(String text)
         {
             Config c = new Config();
@@ -32,6 +42,13 @@ namespace NetCasbin.Config
             return c;
         }
 
+        /// <summary>
+        /// addConfig adds a new section->key:value to the configuration.
+        /// </summary>
+        /// <param name="section"></param>
+        /// <param name="option"></param>
+        /// <param name="value"></param>
+        /// <returns></returns>
         private bool AddConfig(string section, string option, string value)
         {
             if (string.IsNullOrEmpty(section))
@@ -113,7 +130,7 @@ namespace NetCasbin.Config
             }
         }
 
-        public Boolean getBool(String key)
+        public Boolean GetBool(String key)
         {
             return Boolean.Parse(Get(key));
         }

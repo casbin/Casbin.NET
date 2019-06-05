@@ -6,7 +6,7 @@ namespace NetCasbin.Rbac
 {
     public class DefaultRoleManager : IRoleManager
     {
-        private const string DOMAIN_ERROR = "domain应该只有一个参数值";
+        private const string DOMAIN_ERROR = "error: domain should be 1 parameter";
         private readonly Dictionary<String, Role> _allRoles;
         private readonly int _maxHierarchyLevel;
 
