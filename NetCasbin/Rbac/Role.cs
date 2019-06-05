@@ -1,15 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
-namespace NetCasbin.Rabc
+namespace NetCasbin.Rbac
 {
     public class Role
     {
         private string _name;
 
-        private Dictionary<string, Role> _roles = new Dictionary<string, Role>();
+        private readonly Dictionary<string, Role> _roles = new Dictionary<string, Role>();
 
         public Role(string name)
         {
@@ -18,12 +16,8 @@ namespace NetCasbin.Rabc
 
         public string Name
         {
-            get => this._name;
-
-            set
-            {
-                this._name = value;
-            }
+            get => _name;
+            set => _name = value;
         }
 
         public void AddRole(Role role)

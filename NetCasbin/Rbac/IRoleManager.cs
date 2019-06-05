@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin.Rabc
+namespace NetCasbin.Rbac
 {
     public interface IRoleManager
     {

@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
+﻿using NetCasbin.Rbac;
+using System;
 using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using NetCasbin.Rabc;
 
 namespace NetCasbin
 {
@@ -34,7 +31,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  ipMatch determines whether IP address ip1 matches the pattern of IP address        
+        ///  ipMatch determines whether IP address ip1 matches the pattern of IP address
         ///  ip2, ip2 can be an IP address or a CIDR pattern. For example, "192.168.2.123"
         ///  matches "192.168.2.0/24"
         /// </summary>

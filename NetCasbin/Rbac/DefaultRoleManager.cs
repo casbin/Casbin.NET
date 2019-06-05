@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetCasbin.Rabc
+namespace NetCasbin.Rbac
 {
     public class DefaultRoleManager : IRoleManager
     {
         private const string DOMAIN_ERROR = "domain应该只有一个参数值";
-        private Dictionary<String, Role> _allRoles;
+        private readonly Dictionary<String, Role> _allRoles;
         private readonly int _maxHierarchyLevel;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="maxHierarchyLevel">RBAC最大允许层数</param>
         public DefaultRoleManager(int maxHierarchyLevel)

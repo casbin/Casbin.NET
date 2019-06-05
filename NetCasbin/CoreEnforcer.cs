@@ -1,11 +1,9 @@
 ﻿using DynamicExpresso;
 using NetCasbin.Persist;
-using NetCasbin.Rabc;
+using NetCasbin.Rbac;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Text;
 
 namespace NetCasbin
 {
