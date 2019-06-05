@@ -3,7 +3,7 @@ using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
-namespace NetCasbin
+namespace NetCasbin.Util
 {
     public static class BuiltInFunctions
     {

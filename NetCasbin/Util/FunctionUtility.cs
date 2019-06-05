@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Util
 {
-    public static class FunctionUtils
+    public static class FunctionUtility
     {
         public static String GetStringValue(Dictionary<string, object> env, string argName)
         {

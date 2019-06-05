@@ -1,11 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Effect
 {
     public interface IEffector
     {
-        Boolean MergeEffects(String expr, Effect[] effects, float[] results);
+        Boolean MergeEffects(String expr, NetCasbin.Effect.Effect[] effects, float[] results);
     }
 }

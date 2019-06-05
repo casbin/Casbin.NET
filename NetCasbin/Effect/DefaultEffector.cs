@@ -1,19 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Effect
 {
     public class DefaultEffector : IEffector
     {
-        public bool MergeEffects(string expr, Effect[] effects, float[] results)
+        public bool MergeEffects(string expr, NetCasbin.Effect.Effect[] effects, float[] results)
         {
             bool result = false;
             if (expr.Equals("some(where (p_eft == allow))"))
             {
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Allow)
+                    if (eft == NetCasbin.Effect.Effect.Allow)
                     {
                         result = true;
                         break;
@@ -26,7 +24,7 @@ namespace NetCasbin
 
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Deny)
+                    if (eft == NetCasbin.Effect.Effect.Deny)
                     {
                         result = false;
                         break;
@@ -38,11 +36,11 @@ namespace NetCasbin
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Allow)
+                    if (eft == NetCasbin.Effect.Effect.Allow)
                     {
                         result = true;
                     }
-                    else if (eft == Effect.Deny)
+                    else if (eft == NetCasbin.Effect.Effect.Deny)
                     {
                         result = false;
                         break;
@@ -54,9 +52,9 @@ namespace NetCasbin
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft != Effect.Indeterminate)
+                    if (eft != NetCasbin.Effect.Effect.Indeterminate)
                     {
-                        if (eft == Effect.Allow)
+                        if (eft == NetCasbin.Effect.Effect.Allow)
                         {
                             result = true;
                         }

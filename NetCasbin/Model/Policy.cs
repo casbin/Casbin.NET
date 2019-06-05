@@ -1,9 +1,10 @@
 ﻿using NetCasbin.Rbac;
+using NetCasbin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetCasbin
+namespace NetCasbin.Model
 {
     public class Policy
     {
@@ -72,7 +73,7 @@ namespace NetCasbin
 
         public Boolean HasPolicy(String sec, String ptype, List<String> rule)
         {
-            return Model[sec][ptype]!=null && Model[sec][ptype].Policy.Any(x => Util.ArrayEquals(rule, x));
+            return Model[sec][ptype]!=null && Model[sec][ptype].Policy.Any(x => Utility.ArrayEquals(rule, x));
         }
 
         public Boolean AddPolicy(String sec, String ptype, List<String> rule)
@@ -90,7 +91,7 @@ namespace NetCasbin
             for (int i = 0; i < Model[sec][ptype].Policy.Count; i++)
             {
                 List<String> r = Model[sec][ptype].Policy[i];
-                if (Util.ArrayEquals(rule, r))
+                if (Utility.ArrayEquals(rule, r))
                 {
                     Model[sec][ptype].Policy.RemoveAt(i);
                     return true;
@@ -140,7 +141,7 @@ namespace NetCasbin
                 values.Add(rule[fieldIndex]);
             }
 
-            Util.ArrayRemoveDuplicates(values);
+            Utility.ArrayRemoveDuplicates(values);
             return values;
         }
     }

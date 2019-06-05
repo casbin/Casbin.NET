@@ -1,8 +1,8 @@
-﻿using System;
+﻿using NetCasbin.Util;
+using System;
 using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Model
 {
     public class Model : Policy
     {
@@ -19,7 +19,7 @@ namespace NetCasbin
             Model = new Dictionary<String, Dictionary<String, Assertion>>();
         }
 
-        private Boolean LoadAssertion(Config cfg, String sec, String key)
+        private Boolean LoadAssertion(Config.Config cfg, String sec, String key)
         {
             var secName = sectionNameMap[sec];
             String value = cfg.GetString($"{secName}::{key}");
@@ -27,7 +27,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="sec">"p" or "g"</param>
         /// <param name="key">the policy type, "p", "p2", .. or "g", "g2", ..</param>
@@ -57,7 +57,7 @@ namespace NetCasbin
             }
             else
             {
-                ast.Value = Util.RemoveComments(Util.EscapeAssertion(ast.Value));
+                ast.Value = Utility.RemoveComments(Utility.EscapeAssertion(ast.Value));
             }
 
             if (!Model.ContainsKey(sec))
@@ -84,7 +84,7 @@ namespace NetCasbin
             return i.ToString();
         }
 
-        private void LoadSection(Config cfg, String sec)
+        private void LoadSection(Config.Config cfg, String sec)
         {
             int i = 1;
             while (true)
@@ -102,7 +102,7 @@ namespace NetCasbin
 
         public void LoadModel(String path)
         {
-            Config cfg = Config.NewConfig(path);
+            Config.Config cfg = Config.Config.NewConfig(path);
 
             LoadSection(cfg, "r");
             LoadSection(cfg, "p");
@@ -113,7 +113,7 @@ namespace NetCasbin
 
         public void LoadModelFromText(String text)
         {
-            Config cfg = Config.NewConfigFromText(text);
+            Config.Config cfg = Config.Config.NewConfigFromText(text);
 
             LoadSection(cfg, "r");
             LoadSection(cfg, "p");

@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetCasbin
+namespace NetCasbin.Model
 {
     /// <summary>
     /// 断言
@@ -24,14 +24,8 @@ namespace NetCasbin
 
         public List<List<String>> Policy
         {
-            set
-            {
-                _policy = value;
-            }
-            get
-            {
-                return _policy;
-            }
+            set => _policy = value;
+            get => _policy;
         }
 
         public Assertion()
@@ -43,7 +37,7 @@ namespace NetCasbin
         public void BuildRoleLinks(IRoleManager rm)
         {
             _rm = rm;
-            int count =  Value.ToCharArray().Where(x => x == '_').Count();
+            int count =  Value.ToCharArray().Count(x => x == '_');
             foreach (var rule in _policy)
             {
                 if (count < 2)
