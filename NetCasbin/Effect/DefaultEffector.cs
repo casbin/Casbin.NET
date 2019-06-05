@@ -4,8 +4,18 @@ using System.Text;
 
 namespace NetCasbin
 {
+    /// <summary>
+    /// DefaultEffector is default effector for Casbin.
+    /// </summary>
     public class DefaultEffector : IEffector
     {
+        /// <summary>
+        ///  mergeEffects merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="expr"></param>
+        /// <param name="effects"></param>
+        /// <param name="results"></param>
+        /// <returns></returns>
         public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
             bool result = false;

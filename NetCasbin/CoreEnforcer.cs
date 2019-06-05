@@ -7,6 +7,9 @@ using System.Linq;
 
 namespace NetCasbin
 {
+    /// <summary>
+    /// CoreEnforcer defines the core functionality of an enforcer.
+    /// </summary>
     public class CoreEnforcer
     {
         private IEffector eft;
@@ -33,12 +36,21 @@ namespace NetCasbin
             autoBuildRoleLinks = true;
         }
 
+        /// <summary>
+        /// creates a model.
+        /// </summary>
+        /// <returns></returns>
         public static Model NewModel()
         {
             Model m = new Model();
             return m;
         }
 
+        /// <summary>
+        ///  creates a model.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
         public static Model NewModel(String text)
         {
             Model m = new Model();
@@ -46,6 +58,12 @@ namespace NetCasbin
             return m;
         }
 
+        /// <summary>
+        ///  creates a model.
+        /// </summary>
+        /// <param name="modelPath">the path of the model file.</param>
+        /// <param name="unused">unused parameter, just for differentiating with  NewModel(String text).</param>
+        /// <returns>the model.</returns>
         public static Model NewModel(String modelPath, String unused)
         {
             Model m = new Model();
@@ -57,6 +75,12 @@ namespace NetCasbin
             return m;
         }
 
+        /// <summary>
+        /// LoadModel reloads the model from the model CONF file. Because the policy is
+        /// attached to a model, so the policy is invalidated and needs to be reloaded by
+        /// calling LoadPolicy().
+        /// calling LoadPolicy().
+        /// </summary>
         public void LoadModel()
         {
             model = NewModel();
@@ -64,14 +88,26 @@ namespace NetCasbin
             fm = FunctionMap.LoadFunctionMap();
         }
 
+        /// <summary>
+        /// gets the current model.
+        /// </summary>
+        /// <returns>the model of the enforcer.</returns>
         public Model GetModel() => model;
 
+        /// <summary>
+        /// sets the current model.
+        /// </summary>
+        /// <param name="model"> the model.</param>
         public void SetModel(Model model)
         {
             this.model = model;
             fm = FunctionMap.LoadFunctionMap();
         }
 
+        /// <summary>
+        /// gets the current adapter.
+        /// </summary>
+        /// <returns></returns>
         public IAdapter GetAdapter() => adapter;
 
         public void SetAdapter(IAdapter adapter)
@@ -85,21 +121,35 @@ namespace NetCasbin
             //watcher.setUpdateCallback(this::loadPolicy);
         }
 
+        /// <summary>
+        /// SetRoleManager sets the current role manager.
+        /// </summary>
+        /// <param name="rm"></param>
         public void SetRoleManager(IRoleManager rm)
         {
             this.rm = rm;
         }
 
+        /// <summary>
+        ///  sets the current effector.
+        /// </summary>
+        /// <param name="eft"></param>
         public void SetEffector(IEffector eft)
         {
             this.eft = eft;
         }
 
+        /// <summary>
+        ///  clears all policy.
+        /// </summary>
         public void ClearPolicy()
         {
             model.ClearPolicy();
         }
 
+        /// <summary>
+        ///  reloads the policy from file/database.
+        /// </summary>
         public void LoadPolicy()
         {
             model.ClearPolicy();
@@ -110,6 +160,11 @@ namespace NetCasbin
             }
         }
 
+        /// <summary>
+        ///  reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="filter">he filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
         public bool LoadFilteredPolicy(Filter filter)
         {
             this.model.ClearPolicy();
@@ -130,6 +185,10 @@ namespace NetCasbin
             return true;
         }
 
+        /// <summary>
+        ///  returns true if the loaded policy has been filtered.
+        /// </summary>
+        /// <returns>if the loaded policy has been filtered.</returns>
         public Boolean IsFiltered()
         {
             if ((this.adapter is IFilteredAdapter))
@@ -139,6 +198,10 @@ namespace NetCasbin
             return false;
         }
 
+        /// <summary>
+        /// saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
         public void SavePolicy()
         {
             if (IsFiltered())
@@ -153,27 +216,52 @@ namespace NetCasbin
             }
         }
 
+        /// <summary>
+        /// enableEnforce changes the enforcing state of Casbin, when Casbin is disabled,
+        /// all access will be allowed by the enforce() function.
+        /// </summary>
+        /// <param name="enable"></param>
         public void EnableEnforce(Boolean enable)
         {
             this._enabled = enable;
         }
 
+        /// <summary>
+        ///  enableAutoSave controls whether to save a policy rule automatically to the
+        ///   adapter when it is added or removed.
+        /// </summary>
+        /// <param name="autoSave"></param>
         public void EnableAutoSave(Boolean autoSave)
         {
             this.autoSave = autoSave;
         }
 
+        /// <summary>
+        ///  controls whether to save a policy rule automatically
+        ///   to the adapter when it is added or removed.
+        /// </summary>
+        /// <param name="autoBuildRoleLinks">whether to automatically build the role links.</param>
         public void EnableAutoBuildRoleLinks(Boolean autoBuildRoleLinks)
         {
             this.autoBuildRoleLinks = autoBuildRoleLinks;
         }
 
+        /// <summary>
+        /// BuildRoleLinks manually rebuild the role inheritance relations.
+        /// </summary>
         public void BuildRoleLinks()
         {
             rm.Clear();
             model.BuildRoleLinks(rm);
         }
 
+        /// <summary>
+        /// enforce decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="rvals">the request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>whether to allow the request.</returns>
         public Boolean Enforce(params Object[] rvals)
         {
             if (!_enabled)

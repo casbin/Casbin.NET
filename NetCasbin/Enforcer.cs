@@ -7,6 +7,9 @@ using System.Text;
 
 namespace NetCasbin
 {
+    /// <summary>
+    /// Enforcer = ManagementEnforcer + RBAC API.
+    /// </summary>
     public class Enforcer : ManagementEnforcer
     { 
 

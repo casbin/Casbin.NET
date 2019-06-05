@@ -3,6 +3,9 @@ using System.Linq;
 
 namespace NetCasbin.Rbac
 {
+    /// <summary>
+    /// Role represents the data structure for a role in RBAC.
+    /// </summary>
     public class Role
     {
         private string _name;
