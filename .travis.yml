@@ -1,0 +1,8 @@
+language: csharp
+solution: NetCasbin.sln
+dotnet: 2.1.502
+install:
+script:
+ - dotnet restore
+ - dotnet test
+ - dotnet build 

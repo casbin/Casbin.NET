@@ -1,4 +1,6 @@
 # Casbin.NET
+[![Build Status](https://travis-ci.org/casbin-net/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin-net/Casbin.NET)
+[![Coverage Status](https://coveralls.io/repos/github/casbin-net/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin-net/Casbin.NET)
 
 **News**: still worry about how to write the correct Casbin policy? `Casbin online editor` is coming to help! Try it at: http://casbin.org/editor/
 
