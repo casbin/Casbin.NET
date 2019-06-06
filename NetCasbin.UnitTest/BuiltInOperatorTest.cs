@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using NetCasbin.Util;
 using Xunit;
 
 namespace NetCasbin.Test

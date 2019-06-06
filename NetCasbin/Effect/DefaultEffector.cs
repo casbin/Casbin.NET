@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Effect
 {
     /// <summary>
     /// DefaultEffector is default effector for Casbin.
@@ -23,7 +21,7 @@ namespace NetCasbin
             {
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Allow)
+                    if (eft == NetCasbin.Effect.Effect.Allow)
                     {
                         result = true;
                         break;
@@ -36,7 +34,7 @@ namespace NetCasbin
 
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Deny)
+                    if (eft == NetCasbin.Effect.Effect.Deny)
                     {
                         result = false;
                         break;
@@ -48,11 +46,11 @@ namespace NetCasbin
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft == Effect.Allow)
+                    if (eft == NetCasbin.Effect.Effect.Allow)
                     {
                         result = true;
                     }
-                    else if (eft == Effect.Deny)
+                    else if (eft == NetCasbin.Effect.Effect.Deny)
                     {
                         result = false;
                         break;
@@ -64,9 +62,9 @@ namespace NetCasbin
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft != Effect.Indeterminate)
+                    if (eft != NetCasbin.Effect.Effect.Indeterminate)
                     {
-                        if (eft == Effect.Allow)
+                        if (eft == NetCasbin.Effect.Effect.Allow)
                         {
                             result = true;
                         }

@@ -1,7 +1,7 @@
-﻿using System;
+﻿using NetCasbin.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using Xunit;
 
 namespace NetCasbin.Test
@@ -36,14 +36,14 @@ namespace NetCasbin.Test
         internal static void testGetPolicy(Enforcer e, List<List<String>> res)
         {
             List<List<String>> myRes = e.GetPolicy();
-             Assert.True(Util.Array2DEquals(res, myRes));
+             Assert.True(Utility.Array2DEquals(res, myRes));
         }
 
         internal static void testGetFilteredPolicy(Enforcer e, int fieldIndex, List<List<String>> res, params string[] fieldValues)
         {
             List<List<String>> myRes = e.GetFilteredPolicy(fieldIndex, fieldValues);
 
-            Assert.True(Util.Array2DEquals(res, myRes));
+            Assert.True(Utility.Array2DEquals(res, myRes));
         }
 
         internal static void testGetGroupingPolicy(Enforcer e, List<List<String>> res)
@@ -74,14 +74,14 @@ namespace NetCasbin.Test
         {
             List<String> myRes = e.GetRolesForUser(name);
             string message = "Roles for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Util.SetEquals(res, myRes), message);
+            Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
         internal static void testGetUsers(Enforcer e, String name, List<String> res)
         {
             List<String> myRes = e.GetUsersForRole(name);
             var message = "Users for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Util.SetEquals(res, myRes),message);
+            Assert.True(Utility.SetEquals(res, myRes),message);
         }
 
         internal static void testHasRole(Enforcer e, String name, String role, Boolean res)
@@ -94,7 +94,7 @@ namespace NetCasbin.Test
         {
             List<List<String>> myRes = e.GetPermissionsForUser(name);
             var message = "Permissions for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Util.Array2DEquals(res, myRes));
+            Assert.True(Utility.Array2DEquals(res, myRes));
         }
 
         internal static void testHasPermission(Enforcer e, String name, List<String> permission, Boolean res)
@@ -107,13 +107,13 @@ namespace NetCasbin.Test
         {
             List<String> myRes = e.GetRolesForUserInDomain(name, domain);
             var message = "Roles for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Util.SetEquals(res, myRes), message);
+            Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
         internal static void testGetPermissionsInDomain(Enforcer e, String name, String domain, List<List<String>> res)
         {
             List<List<String>> myRes = e.GetPermissionsForUserInDomain(name, domain);
-            Assert.True(Util.Array2DEquals(res, myRes), "Permissions for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res); 
+            Assert.True(Utility.Array2DEquals(res, myRes), "Permissions for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res); 
         }
     }
 }

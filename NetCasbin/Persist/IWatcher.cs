@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace NetCasbin.Persist
+﻿namespace NetCasbin.Persist
 {
     public interface IWatcher
     {

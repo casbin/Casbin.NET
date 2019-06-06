@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -11,7 +12,6 @@ namespace NetCasbin.Persist.FileAdapter
         protected readonly String filePath;
         private readonly Boolean _readOnly = false;
         private readonly StreamReader _byteArrayInputStream;
-    
 
         public DefaultFileAdapter(String filePath)
         {
@@ -31,7 +31,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        public void LoadPolicy(Model model)
+        public void LoadPolicy(Model.Model model)
         {
             if (filePath != null && !"".Equals(filePath))
             {
@@ -47,7 +47,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        public void SavePolicy(Model model)
+        public void SavePolicy(Model.Model model)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {
@@ -80,20 +80,20 @@ namespace NetCasbin.Persist.FileAdapter
             throw new NotImplementedException("not implemented");
         }
 
-        private List<String> GetModelPolicy(Model model, String ptype)
+        private List<String> GetModelPolicy(Model.Model model, String ptype)
         {
             List<String> policy = new List<string>();
             model.Model[ptype].ToList().ForEach(item =>
             {
                 var k = item.Key;
                 var v = item.Value;
-                List<String> p = v.Policy.Select(x => $"{k}, {Util.ArrayToString(x)}").ToList();
+                List<String> p = v.Policy.Select(x => $"{k}, {Utility.ArrayToString(x)}").ToList();
                 policy.AddRange(p);
             });
             return policy;
         }
 
-        private void LoadPolicyData(Model model, Helper.LoadPolicyLineHandler<String, Model> handler, StreamReader inputStream)
+        private void LoadPolicyData(Model.Model model, Helper.LoadPolicyLineHandler<String, Model.Model> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {

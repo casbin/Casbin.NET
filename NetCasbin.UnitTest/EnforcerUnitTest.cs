@@ -1,9 +1,7 @@
 ﻿using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
 using Xunit;
 
 namespace NetCasbin.Test
@@ -13,7 +11,7 @@ namespace NetCasbin.Test
         [Fact]
         public void testKeyMatchModelInMemory()
         {
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -74,7 +72,7 @@ namespace NetCasbin.Test
         [Fact]
         public void testKeyMatchModelInMemoryDeny()
         {
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "!some(where (p.eft == deny))");
@@ -90,7 +88,7 @@ namespace NetCasbin.Test
         [Fact]
         public void testRBACModelInMemoryIndeterminate()
         {
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -107,7 +105,7 @@ namespace NetCasbin.Test
         [Fact]
         public void testRBACModelInMemory()
         {
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -151,7 +149,7 @@ namespace NetCasbin.Test
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            Model m = CoreEnforcer.NewModel(text);
+            Model.Model m = CoreEnforcer.NewModel(text);
 
             Enforcer e = new Enforcer(m);
 
@@ -174,7 +172,7 @@ namespace NetCasbin.Test
         [Fact]
         public void testNotUsedRBACModelInMemory()
         {
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -387,7 +385,7 @@ namespace NetCasbin.Test
         {
             Enforcer e = new Enforcer();
 
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -407,7 +405,7 @@ namespace NetCasbin.Test
         {
             Enforcer e = new Enforcer();
 
-            Model m = CoreEnforcer.NewModel();
+            Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");

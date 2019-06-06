@@ -1,9 +1,8 @@
-﻿using System;
+﻿using NetCasbin.Util.Function;
+using System;
 using System.Collections.Generic;
-using System.Linq.Expressions;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Model
 {
     public class FunctionMap
     {

@@ -1,6 +1,9 @@
 ﻿using DynamicExpresso;
+using NetCasbin.Effect;
+using NetCasbin.Model;
 using NetCasbin.Persist;
 using NetCasbin.Rbac;
+using NetCasbin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,17 +16,17 @@ namespace NetCasbin
     public class CoreEnforcer
     {
         private IEffector eft;
-        private Boolean _enabled;
+        private bool _enabled;
 
-        protected String modelPath;
-        protected Model model;
+        protected string modelPath;
+        protected Model.Model model;
         protected FunctionMap fm;
 
         protected IAdapter adapter;
         protected IWatcher watcher;
         protected IRoleManager rm;
-        protected Boolean autoSave;
-        protected Boolean autoBuildRoleLinks;
+        protected bool autoSave;
+        protected bool autoBuildRoleLinks;
 
         protected void Initialize()
         {
@@ -42,7 +45,7 @@ namespace NetCasbin
         /// <returns></returns>
         public static Model NewModel()
         {
-            Model m = new Model();
+            Model.Model m = new Model.Model();
             return m;
         }
 
@@ -53,7 +56,7 @@ namespace NetCasbin
         /// <returns></returns>
         public static Model NewModel(String text)
         {
-            Model m = new Model();
+            Model.Model m = new Model.Model();
             m.LoadModelFromText(text);
             return m;
         }
@@ -66,7 +69,7 @@ namespace NetCasbin
         /// <returns>the model.</returns>
         public static Model NewModel(String modelPath, String unused)
         {
-            Model m = new Model();
+            Model.Model m = new Model.Model();
             if (!string.IsNullOrEmpty(modelPath))
             {
                 m.LoadModel(modelPath);
@@ -295,13 +298,13 @@ namespace NetCasbin
                 interpreter.SetFunction(func.Key, func.Value);
             }
 
-            Effect[] policyEffects;
+            Effect.Effect[] policyEffects;
             float[] matcherResults;
             int policyLen;
             object result = null;
             if ((policyLen = model.Model["p"]["p"].Policy.Count) != 0)
             {
-                policyEffects = new Effect[policyLen];
+                policyEffects = new Effect.Effect[policyLen];
                 matcherResults = new float[policyLen];
 
                 for (int i = 0; i < model.Model["p"]["p"].Policy.Count; i++)
@@ -327,7 +330,7 @@ namespace NetCasbin
                     {
                         if (!((Boolean)result))
                         {
-                            policyEffects[i] = Effect.Indeterminate;
+                            policyEffects[i] = Effect.Effect.Indeterminate;
                             continue;
                         }
                     }
@@ -335,7 +338,7 @@ namespace NetCasbin
                     {
                         if ((float)result == 0)
                         {
-                            policyEffects[i] = Effect.Indeterminate;
+                            policyEffects[i] = Effect.Effect.Indeterminate;
                             continue;
                         }
                         else
@@ -352,20 +355,20 @@ namespace NetCasbin
                         String eft = (String)parameters["p_eft"];
                         if (eft.Equals("allow"))
                         {
-                            policyEffects[i] = Effect.Allow;
+                            policyEffects[i] = Effect.Effect.Allow;
                         }
                         else if (eft.Equals("deny"))
                         {
-                            policyEffects[i] = Effect.Deny;
+                            policyEffects[i] = Effect.Effect.Deny;
                         }
                         else
                         {
-                            policyEffects[i] = Effect.Indeterminate;
+                            policyEffects[i] = Effect.Effect.Indeterminate;
                         }
                     }
                     else
                     {
-                        policyEffects[i] = Effect.Allow;
+                        policyEffects[i] = Effect.Effect.Allow;
                     }
 
                     if (model.Model["e"]["e"].Value.Equals("priority(p_eft) || deny"))
@@ -376,7 +379,7 @@ namespace NetCasbin
             }
             else
             {
-                policyEffects = new Effect[1];
+                policyEffects = new Effect.Effect[1];
                 matcherResults = new float[1];
 
                 Dictionary<String, Object> parameters = new Dictionary<string, Object>();
@@ -400,11 +403,11 @@ namespace NetCasbin
 
                 if ((Boolean)result)
                 {
-                    policyEffects[0] = Effect.Allow;
+                    policyEffects[0] = Effect.Effect.Allow;
                 }
                 else
                 {
-                    policyEffects[0] = Effect.Indeterminate;
+                    policyEffects[0] = Effect.Effect.Indeterminate;
                 }
             }
             result = eft.MergeEffects(model.Model["e"]["e"].Value, policyEffects, matcherResults);

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace NetCasbin.Persist.FileAdapter
 {
@@ -19,7 +18,7 @@ namespace NetCasbin.Persist.FileAdapter
         {
         }
 
-        public void LoadFilteredPolicy(Model model, Filter filter)
+        public void LoadFilteredPolicy(Model.Model model, Filter filter)
         {
             if (filter == null)
             {
@@ -36,7 +35,7 @@ namespace NetCasbin.Persist.FileAdapter
             this._filtered = true;
         }
 
-        private void LoadFilteredPolicyFile(Model model, Filter filter, Action<string, Model> handler)
+        private void LoadFilteredPolicyFile(Model.Model model, Filter filter, Action<string, Model.Model> handler)
         {
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             while (!reader.EndOfStream)

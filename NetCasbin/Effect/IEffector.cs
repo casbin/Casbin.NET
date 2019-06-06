@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 
-namespace NetCasbin
+namespace NetCasbin.Effect
 {
     /// <summary>
     /// Effector is the interface for Casbin effectors.

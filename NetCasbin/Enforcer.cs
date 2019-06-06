@@ -1,9 +1,9 @@
-﻿using NetCasbin.Persist;
+﻿using NetCasbin.Model;
+using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace NetCasbin
 {
@@ -11,7 +11,7 @@ namespace NetCasbin
     /// Enforcer = ManagementEnforcer + RBAC API.
     /// </summary>
     public class Enforcer : ManagementEnforcer
-    { 
+    {
 
         public Enforcer() : this("", "")
         {
@@ -26,7 +26,7 @@ namespace NetCasbin
             base.modelPath = modelPath;
         }
 
-        public Enforcer(Model m, IAdapter adapter)
+        public Enforcer(Model.Model m, IAdapter adapter)
         {
             this.adapter = adapter;
             this.watcher = null;
@@ -42,7 +42,7 @@ namespace NetCasbin
             }
         }
 
-        public Enforcer(Model m) :
+        public Enforcer(Model.Model m) :
             this(m, null)
         {
         }
