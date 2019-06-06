@@ -43,7 +43,7 @@ namespace NetCasbin
         /// creates a model.
         /// </summary>
         /// <returns></returns>
-        public static Model NewModel()
+        public static Model.Model NewModel()
         {
             Model.Model m = new Model.Model();
             return m;
@@ -54,7 +54,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static Model NewModel(String text)
+        public static Model.Model NewModel(String text)
         {
             Model.Model m = new Model.Model();
             m.LoadModelFromText(text);
@@ -67,7 +67,7 @@ namespace NetCasbin
         /// <param name="modelPath">the path of the model file.</param>
         /// <param name="unused">unused parameter, just for differentiating with  NewModel(String text).</param>
         /// <returns>the model.</returns>
-        public static Model NewModel(String modelPath, String unused)
+        public static Model.Model NewModel(String modelPath, String unused)
         {
             Model.Model m = new Model.Model();
             if (!string.IsNullOrEmpty(modelPath))
@@ -95,13 +95,13 @@ namespace NetCasbin
         /// gets the current model.
         /// </summary>
         /// <returns>the model of the enforcer.</returns>
-        public Model GetModel() => model;
+        public Model.Model GetModel() => model;
 
         /// <summary>
         /// sets the current model.
         /// </summary>
         /// <param name="model"> the model.</param>
-        public void SetModel(Model model)
+        public void SetModel(Model.Model model)
         {
             this.model = model;
             fm = FunctionMap.LoadFunctionMap();
