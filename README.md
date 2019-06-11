@@ -1,5 +1,4 @@
-Casbin.NET
-====
+# Casbin.NET
 
 [![Build Status](https://travis-ci.org/casbin-net/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin-net/Casbin.NET)
 [![Coverage Status](https://coveralls.io/repos/github/casbin-net/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin-net/Casbin.NET)
@@ -10,16 +9,15 @@ Casbin.NET is a powerful and efficient open-source access control library for C#
 
 ## All the languages supported by Casbin:
 
-[![golang](https://casbin.org/img/langs/golang.png)](https://github.com/casbin/casbin) | [![java](https://casbin.org/img/langs/java.png)](https://github.com/casbin/jcasbin) | [![nodejs](https://casbin.org/img/langs/nodejs.png)](https://github.com/casbin/node-casbin) | [![php](https://casbin.org/img/langs/php.png)](https://github.com/php-casbin/php-casbin)
-----|----|----|----
-[Casbin](https://github.com/casbin/casbin) | [jCasbin](https://github.com/casbin/jcasbin) | [node-Casbin](https://github.com/casbin/node-casbin) | [PHP-Casbin](https://github.com/php-casbin/php-casbin)
-production-ready | production-ready | production-ready | production-ready
+| [![golang](https://casbin.org/img/langs/golang.png)](https://github.com/casbin/casbin) | [![java](https://casbin.org/img/langs/java.png)](https://github.com/casbin/jcasbin) | [![nodejs](https://casbin.org/img/langs/nodejs.png)](https://github.com/casbin/node-casbin) | [![php](https://casbin.org/img/langs/php.png)](https://github.com/php-casbin/php-casbin) |
+| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| [Casbin](https://github.com/casbin/casbin)                                             | [jCasbin](https://github.com/casbin/jcasbin)                                        | [node-Casbin](https://github.com/casbin/node-casbin)                                        | [PHP-Casbin](https://github.com/php-casbin/php-casbin)                                   |
+| production-ready                                                                       | production-ready                                                                    | production-ready                                                                            | production-ready                                                                         |
 
-[![python](https://casbin.org/img/langs/python.png)](https://github.com/casbin/pycasbin) | [![dotnet](https://casbin.org/img/langs/dotnet.png)](https://github.com/casbin-net/Casbin.NET) | [![delphi](https://casbin.org/img/langs/delphi.png)](https://github.com/casbin4d/Casbin4D) | [![rust](https://casbin.org/img/langs/rust.png)](https://github.com/Devolutions/casbin-rs)
-----|----|----|----
-[PyCasbin](https://github.com/casbin/pycasbin) | [Casbin.NET](https://github.com/casbin-net/Casbin.NET) | [Casbin4D](https://github.com/casbin4d/Casbin4D) | [Casbin-RS](https://github.com/Devolutions/casbin-rs)
-production-ready | production-ready | experimental | WIP
-
+| [![python](https://casbin.org/img/langs/python.png)](https://github.com/casbin/pycasbin) | [![dotnet](https://casbin.org/img/langs/dotnet.png)](https://github.com/casbin-net/Casbin.NET) | [![delphi](https://casbin.org/img/langs/delphi.png)](https://github.com/casbin4d/Casbin4D) | [![rust](https://casbin.org/img/langs/rust.png)](https://github.com/Devolutions/casbin-rs) |
+| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| [PyCasbin](https://github.com/casbin/pycasbin)                                           | [Casbin.NET](https://github.com/casbin-net/Casbin.NET)                                         | [Casbin4D](https://github.com/casbin4d/Casbin4D)                                           | [Casbin-RS](https://github.com/Devolutions/casbin-rs)                                      |
+| production-ready                                                                         | production-ready                                                                               | experimental                                                                               | WIP                                                                                        |
 
 ## Table of contents
 
@@ -149,18 +147,18 @@ https://casbin.org/docs/en/tutorials
 
 1. New a Casbin enforcer with a model file and a policy file:
 
-   ```go
-   e := casbin.NewEnforcer("path/to/model.conf", "path/to/policy.csv")
+   ```c#
+   var e = new Enforcer("path/to/model.conf", "path/to/policy.csv")
    ```
 
 Note: you can also initialize an enforcer with policy in DB instead of file, see [Persistence](#persistence) section for details.
 
 2. Add an enforcement hook into your code right before the access happens:
 
-   ```go
-   sub := "alice" // the user that wants to access a resource.
-   obj := "data1" // the resource that is going to be accessed.
-   act := "read" // the operation that the user performs on the resource.
+   ```c#
+   var sub = "alice" // the user that wants to access a resource.
+   var obj = "data1" // the resource that is going to be accessed.
+   var act = "read" // the operation that the user performs on the resource.
 
    if e.Enforce(sub, obj, act) == true {
        // permit alice to read data1
@@ -171,13 +169,13 @@ Note: you can also initialize an enforcer with policy in DB instead of file, see
 
 3. Besides the static policy file, Casbin also provides API for permission management at run-time. For example, You can get all the roles assigned to a user as below:
 
-   ```go
-   roles := e.GetRoles("alice")
+   ```c#
+   var roles = e.GetRoles("alice")
    ```
 
 See [Policy management APIs](#policy-management) for more usage.
 
-4. Please refer to the `_test.go` files for more usage.
+4. Please refer to the `NetCasbin.UnitTest` project for more usage.
 
 ## Policy management
 
