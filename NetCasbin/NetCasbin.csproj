@@ -11,7 +11,8 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>Implemented APIs：Enforcement、RBAC、ABAC、Adapter、Management API、RBAC API、Filtered Adapter、Role Manager</PackageReleaseNotes>
+    <PackageReleaseNotes>update namespace and references to match location with several minor refactors;</PackageReleaseNotes>
+    <Version>1.1.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
