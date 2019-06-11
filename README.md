@@ -160,7 +160,7 @@ Note: you can also initialize an enforcer with policy in DB instead of file, see
    var obj = "data1" // the resource that is going to be accessed.
    var act = "read" // the operation that the user performs on the resource.
 
-   if e.Enforce(sub, obj, act) == true {
+   if (e.Enforce(sub, obj, act)) {
        // permit alice to read data1
    } else {
        // deny the request, show an error
@@ -170,7 +170,7 @@ Note: you can also initialize an enforcer with policy in DB instead of file, see
 3. Besides the static policy file, Casbin also provides API for permission management at run-time. For example, You can get all the roles assigned to a user as below:
 
    ```c#
-   var roles = e.GetRoles("alice")
+   var roles = e.GetRolesForUser("alice")
    ```
 
 See [Policy management APIs](#policy-management) for more usage.
