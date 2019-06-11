@@ -20,11 +20,6 @@ production-ready | production-ready | production-ready | production-ready
 [PyCasbin](https://github.com/casbin/pycasbin) | [Casbin.NET](https://github.com/casbin-net/Casbin.NET) | [Casbin4D](https://github.com/casbin4d/Casbin4D) | [Casbin-RS](https://github.com/Devolutions/casbin-rs)
 production-ready | production-ready | experimental | WIP
 
-## Get Started
-
-```
-dotnet add package NetCasbin --version 1.0.0
-```
 
 ## Table of contents
 
@@ -135,7 +130,7 @@ What Casbin does NOT do:
 ## Installation
 
 ```
-go get github.com/casbin/casbin
+dotnet add package NetCasbin
 ```
 
 ## Documentation
