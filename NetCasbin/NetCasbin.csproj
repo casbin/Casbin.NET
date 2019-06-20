@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <Description>Casbin ported to dotnet core</Description>
-    <Authors>Zhikui H</Authors>
+    <Authors>Casbin、Zhikui H</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
     <PackageProjectUrl>https://github.com/casbin-net/Casbin.NET</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/casbin-net/Casbin.NET/blob/master/LICENSE</PackageLicenseUrl>
@@ -13,6 +13,8 @@
     <Copyright>Apache License 2.0</Copyright>
     <PackageReleaseNotes>update namespace and references to match location with several minor refactors;</PackageReleaseNotes>
     <Version>1.1.0</Version>
+    <PackageId>Casbin.NET</PackageId>
+    <Product>Casbin.NET</Product>
   </PropertyGroup>
 
   <ItemGroup>
