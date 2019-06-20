@@ -1,4 +1,4 @@
-## 1.1.0 - 2019-06-11
+## v1.1.0 - 2019-06-20
 1. namespace typo fixes and clean some references;
 2. update namespace and references to match location with several minor refactors;
-
+3. Rename the solution to Casbin.NET And Rename the package name to Casbin.NET
