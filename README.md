@@ -130,7 +130,7 @@ What Casbin does NOT do:
 ## Installation
 
 ```
-dotnet add package NetCasbin
+dotnet add package Casbin.NET
 ```
 
 ## Documentation
