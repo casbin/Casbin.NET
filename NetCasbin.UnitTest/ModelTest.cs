@@ -374,13 +374,16 @@ namespace NetCasbin.Test
 
         public class TestResource
         {
-            public String Name { set; get; }
-            public String Owner { set; get; }
+#pragma warning disable IDE1006 // 命名样式
+            public String name { set; get; }
+
+            public String owner { set; get; }
+#pragma warning restore IDE1006 // 命名样式
 
             public TestResource(String name, String owner)
             {
-                this.Name = name;
-                this.Owner = owner;
+                this.name = name;
+                this.owner = owner;
             }
 
         }
