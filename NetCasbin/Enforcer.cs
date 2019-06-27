@@ -98,17 +98,31 @@ namespace NetCasbin
             return RemoveFilteredGroupingPolicy(0, user);
         }
 
+        /// <summary>
+        /// DeleteUser deletes a user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns> Returns false if the user does not exist (aka not affected).</returns>
         public Boolean DeleteUser(String user)
         {
             return RemoveFilteredGroupingPolicy(0, user);
         }
 
+        /// <summary>
+        /// DeleteRole deletes a role.
+        /// </summary>
+        /// <param name="role"></param>
         public void DeleteRole(String role)
         {
             RemoveFilteredGroupingPolicy(1, role);
             RemoveFilteredPolicy(0, role);
         }
 
+        /// <summary>
+        /// DeletePermission deletes a permission. 
+        /// </summary>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
         public Boolean DeletePermission(params string[] permission)
         {
             return RemoveFilteredPolicy(1, permission);
@@ -119,6 +133,12 @@ namespace NetCasbin
             return DeletePermission(permission.ToArray() ?? new String[0]);
         }
 
+        /// <summary>
+        /// AddPermissionForUser adds a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
         public Boolean AddPermissionForUser(String user, params string[] permission)
         {
             List<String> parameters = new List<string>();
@@ -132,6 +152,12 @@ namespace NetCasbin
             return AddPermissionForUser(user, permission.ToArray() ?? new String[0]);
         }
 
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns></returns>
         public Boolean DeletePermissionForUser(String user, params string[] permission)
         {
             List<String> parameters = new List<string>();
@@ -140,29 +166,59 @@ namespace NetCasbin
             return RemovePolicy(parameters);
         }
 
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
         public Boolean DeletePermissionForUser(String user, List<String> permission)
         {
-            return DeletePermissionForUser(user, permission.ToArray()?? new String[0]);
+            return DeletePermissionForUser(user, permission.ToArray() ?? new String[0]);
         }
 
-        public Boolean deletePermissionsForUser(String user)
+        /// <summary>
+        /// DeletePermissionsForUser deletes permissions for a user or role. 
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public Boolean DeletePermissionsForUser(String user)
         {
             return RemoveFilteredPolicy(0, user);
         }
 
+        /// <summary>
+        /// GetPermissionsForUser gets permissions for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <returns></returns>
         public List<List<String>> GetPermissionsForUser(String user)
         {
             return GetFilteredPolicy(0, user);
         }
 
+        /// <summary>
+        ///  HasPermissionForUser determines whether a user has a permission.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="permission"></param>
+        /// <returns></returns>
         public Boolean HasPermissionForUser(String user, params string[] permission)
         {
-            List<String> parameters = new List<string>();
-            parameters.Add(user);
+            List<String> parameters = new List<string>
+            {
+                user
+            };
             parameters.AddRange(permission);
-            return HasPolicy(permission);
+            return HasPolicy(parameters);
         }
 
+        /// <summary>
+        /// HasPermissionForUser determines whether a user has a permission.
+        /// </summary>
+        /// <param name="user"></param>
+        /// <param name="permission"></param>
+        /// <returns></returns>
         public Boolean HasPermissionForUser(String user, List<String> permission)
         {
             return HasPermissionForUser(user, permission.ToArray() ?? new String[0]);
@@ -188,7 +244,14 @@ namespace NetCasbin
             return RemoveGroupingPolicy(user, role, domain);
         }
 
-        public List<String> GetImplicitRolesForUser(String name,params string[] domain)
+        /// <summary>
+        /// GetImplicitRolesForUser gets implicit roles that a user has.
+        /// Compared to GetRolesForUser(), this function retrieves indirect roles besides direct roles.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public List<String> GetImplicitRolesForUser(String name, params string[] domain)
         {
             List<String> roles = this.rm.GetRoles(name, domain);
             List<String> res = new List<string>();
@@ -196,7 +259,18 @@ namespace NetCasbin
             res.AddRange(roles.SelectMany(x => this.GetImplicitRolesForUser(x, domain)));
             return res;
         }
-
+        /// <summary>
+        /// <para>gets implicit permissions for a user or role.</para>
+        /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
+        /// <para>For example:</para>
+        /// <para>p, admin, data1, read</para>
+        /// <para>p, alice, data2, read</para>
+        /// <para>g, alice, admin </para>
+        /// <para>GetPermissionsForUser("alice") can only get: [["alice", "data2", "read"]].</para>
+        /// <para>But GetImplicitPermissionsForUser("alice") will get: [["admin", "data1", "read"], ["alice", "data2", "read"]].</para>
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns></returns>
         public List<List<String>> GetImplicitPermissionsForUser(String user)
         {
             List<String> roles = new List<string>();
