@@ -9,7 +9,7 @@ namespace NetCasbin.Test
     public class EnforcerUnitTest : TestUtil
     {
         [Fact]
-        public void testKeyMatchModelInMemory()
+        public void TestKeyMatchModelInMemory()
         {
             Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -21,56 +21,56 @@ namespace NetCasbin.Test
 
             Enforcer e = new Enforcer(m, a);
 
-            testEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-            testEnforce(e, "alice", "/alice_data/resource1", "POST", true);
-            testEnforce(e, "alice", "/alice_data/resource2", "GET", true);
-            testEnforce(e, "alice", "/alice_data/resource2", "POST", false);
-            testEnforce(e, "alice", "/bob_data/resource1", "GET", false);
-            testEnforce(e, "alice", "/bob_data/resource1", "POST", false);
-            testEnforce(e, "alice", "/bob_data/resource2", "GET", false);
-            testEnforce(e, "alice", "/bob_data/resource2", "POST", false);
+            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+            TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
+            TestEnforce(e, "alice", "/alice_data/resource2", "GET", true);
+            TestEnforce(e, "alice", "/alice_data/resource2", "POST", false);
+            TestEnforce(e, "alice", "/bob_data/resource1", "GET", false);
+            TestEnforce(e, "alice", "/bob_data/resource1", "POST", false);
+            TestEnforce(e, "alice", "/bob_data/resource2", "GET", false);
+            TestEnforce(e, "alice", "/bob_data/resource2", "POST", false);
 
-            testEnforce(e, "bob", "/alice_data/resource1", "GET", false);
-            testEnforce(e, "bob", "/alice_data/resource1", "POST", false);
-            testEnforce(e, "bob", "/alice_data/resource2", "GET", true);
-            testEnforce(e, "bob", "/alice_data/resource2", "POST", false);
-            testEnforce(e, "bob", "/bob_data/resource1", "GET", false);
-            testEnforce(e, "bob", "/bob_data/resource1", "POST", true);
-            testEnforce(e, "bob", "/bob_data/resource2", "GET", false);
-            testEnforce(e, "bob", "/bob_data/resource2", "POST", true);
+            TestEnforce(e, "bob", "/alice_data/resource1", "GET", false);
+            TestEnforce(e, "bob", "/alice_data/resource1", "POST", false);
+            TestEnforce(e, "bob", "/alice_data/resource2", "GET", true);
+            TestEnforce(e, "bob", "/alice_data/resource2", "POST", false);
+            TestEnforce(e, "bob", "/bob_data/resource1", "GET", false);
+            TestEnforce(e, "bob", "/bob_data/resource1", "POST", true);
+            TestEnforce(e, "bob", "/bob_data/resource2", "GET", false);
+            TestEnforce(e, "bob", "/bob_data/resource2", "POST", true);
 
-            testEnforce(e, "cathy", "/cathy_data", "GET", true);
-            testEnforce(e, "cathy", "/cathy_data", "POST", true);
-            testEnforce(e, "cathy", "/cathy_data", "DELETE", false);
+            TestEnforce(e, "cathy", "/cathy_data", "GET", true);
+            TestEnforce(e, "cathy", "/cathy_data", "POST", true);
+            TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
 
             e = new Enforcer(m);
             a.LoadPolicy(e.GetModel());
 
-            testEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-            testEnforce(e, "alice", "/alice_data/resource1", "POST", true);
-            testEnforce(e, "alice", "/alice_data/resource2", "GET", true);
-            testEnforce(e, "alice", "/alice_data/resource2", "POST", false);
-            testEnforce(e, "alice", "/bob_data/resource1", "GET", false);
-            testEnforce(e, "alice", "/bob_data/resource1", "POST", false);
-            testEnforce(e, "alice", "/bob_data/resource2", "GET", false);
-            testEnforce(e, "alice", "/bob_data/resource2", "POST", false);
+            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+            TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
+            TestEnforce(e, "alice", "/alice_data/resource2", "GET", true);
+            TestEnforce(e, "alice", "/alice_data/resource2", "POST", false);
+            TestEnforce(e, "alice", "/bob_data/resource1", "GET", false);
+            TestEnforce(e, "alice", "/bob_data/resource1", "POST", false);
+            TestEnforce(e, "alice", "/bob_data/resource2", "GET", false);
+            TestEnforce(e, "alice", "/bob_data/resource2", "POST", false);
 
-            testEnforce(e, "bob", "/alice_data/resource1", "GET", false);
-            testEnforce(e, "bob", "/alice_data/resource1", "POST", false);
-            testEnforce(e, "bob", "/alice_data/resource2", "GET", true);
-            testEnforce(e, "bob", "/alice_data/resource2", "POST", false);
-            testEnforce(e, "bob", "/bob_data/resource1", "GET", false);
-            testEnforce(e, "bob", "/bob_data/resource1", "POST", true);
-            testEnforce(e, "bob", "/bob_data/resource2", "GET", false);
-            testEnforce(e, "bob", "/bob_data/resource2", "POST", true);
+            TestEnforce(e, "bob", "/alice_data/resource1", "GET", false);
+            TestEnforce(e, "bob", "/alice_data/resource1", "POST", false);
+            TestEnforce(e, "bob", "/alice_data/resource2", "GET", true);
+            TestEnforce(e, "bob", "/alice_data/resource2", "POST", false);
+            TestEnforce(e, "bob", "/bob_data/resource1", "GET", false);
+            TestEnforce(e, "bob", "/bob_data/resource1", "POST", true);
+            TestEnforce(e, "bob", "/bob_data/resource2", "GET", false);
+            TestEnforce(e, "bob", "/bob_data/resource2", "POST", true);
 
-            testEnforce(e, "cathy", "/cathy_data", "GET", true);
-            testEnforce(e, "cathy", "/cathy_data", "POST", true);
-            testEnforce(e, "cathy", "/cathy_data", "DELETE", false);
+            TestEnforce(e, "cathy", "/cathy_data", "GET", true);
+            TestEnforce(e, "cathy", "/cathy_data", "POST", true);
+            TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
         }
 
         [Fact]
-        public void testKeyMatchModelInMemoryDeny()
+        public void TestKeyMatchModelInMemoryDeny()
         {
             Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -82,11 +82,11 @@ namespace NetCasbin.Test
 
             Enforcer e = new Enforcer(m, a);
 
-            testEnforce(e, "alice", "/alice_data/resource2", "POST", true);
+            TestEnforce(e, "alice", "/alice_data/resource2", "POST", true);
         }
 
         [Fact]
-        public void testRBACModelInMemoryIndeterminate()
+        public void TestRBACModelInMemoryIndeterminate()
         {
             Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -99,11 +99,11 @@ namespace NetCasbin.Test
 
             e.AddPermissionForUser("alice", "data1", "invalid");
 
-            testEnforce(e, "alice", "data1", "read", false);
+            TestEnforce(e, "alice", "data1", "read", false);
         }
 
         [Fact]
-        public void testRBACModelInMemory()
+        public void TestRBACModelInMemory()
         {
             Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -120,18 +120,18 @@ namespace NetCasbin.Test
             e.AddPermissionForUser("data2_admin", "data2", "write");
             e.AddRoleForUser("alice", "data2_admin");
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", true);
-            testEnforce(e, "alice", "data2", "write", true);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testRBACModelInMemory2()
+        public void TestRBACModelInMemory2()
         {
             String text =
                 "[request_definition]\n"
@@ -159,18 +159,18 @@ namespace NetCasbin.Test
             e.AddPermissionForUser("data2_admin", "data2", "write");
             e.AddRoleForUser("alice", "data2_admin");
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", true);
-            testEnforce(e, "alice", "data2", "write", true);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testNotUsedRBACModelInMemory()
+        public void TestNotUsedRBACModelInMemory()
         {
             Model.Model m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -184,27 +184,27 @@ namespace NetCasbin.Test
             e.AddPermissionForUser("alice", "data1", "read");
             e.AddPermissionForUser("bob", "data2", "write");
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testReloadPolicy()
+        public void TestReloadPolicy()
         {
             Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             e.LoadPolicy();
-            testGetPolicy(e, asList(asList("alice", "data1", "read"), asList("bob", "data2", "write"), asList("data2_admin", "data2", "read"), asList("data2_admin", "data2", "write")));
+            TestGetPolicy(e, AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
         }
 
         [Fact]
-        public void testSavePolicy()
+        public void TestSavePolicy()
         {
             Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -212,7 +212,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void testClearPolicy()
+        public void TestClearPolicy()
         {
             Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -220,60 +220,60 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void testEnableEnforce()
+        public void TestEnableEnforce()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
             e.EnableEnforce(false);
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", true);
-            testEnforce(e, "alice", "data2", "read", true);
-            testEnforce(e, "alice", "data2", "write", true);
-            testEnforce(e, "bob", "data1", "read", true);
-            testEnforce(e, "bob", "data1", "write", true);
-            testEnforce(e, "bob", "data2", "read", true);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", true);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", true);
+            TestEnforce(e, "bob", "data1", "write", true);
+            TestEnforce(e, "bob", "data2", "read", true);
+            TestEnforce(e, "bob", "data2", "write", true);
 
             e.EnableEnforce(true);
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testEnableLog()
+        public void TestEnableLog()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv", true);
             // The log is enabled by default, so the above is the same with:
             // Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
 
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testEnableAutoSave()
+        public void TestEnableAutoSave()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
@@ -283,14 +283,14 @@ namespace NetCasbin.Test
             e.RemovePolicy("alice", "data1", "read");
             // Reload the policy from the storage to see the effect.
             e.LoadPolicy();
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
 
             e.EnableAutoSave(true);
             // Because AutoSave is enabled, the policy change not only affects the policy in Casbin enforcer,
@@ -301,34 +301,34 @@ namespace NetCasbin.Test
 
             // Reload the policy from the storage to see the effect.
             e.LoadPolicy();
-            testEnforce(e, "alice", "data1", "read", true); // Will not be false here.
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true); // Will not be false here.
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testInitWithAdapter()
+        public void TestInitWithAdapter()
         {
             IAdapter adapter = new DefaultFileAdapter("examples/basic_policy.csv");
             Enforcer e = new Enforcer("examples/basic_model.conf", adapter);
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
-            testEnforce(e, "alice", "data2", "read", false);
-            testEnforce(e, "alice", "data2", "write", false);
-            testEnforce(e, "bob", "data1", "read", false);
-            testEnforce(e, "bob", "data1", "write", false);
-            testEnforce(e, "bob", "data2", "read", false);
-            testEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
 
         [Fact]
-        public void testRoleLinks()
+        public void TestRoleLinks()
         {
             Enforcer e = new Enforcer("examples/rbac_model.conf");
             e.EnableAutoBuildRoleLinks(false);
@@ -337,51 +337,51 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void testGetAndSetModel()
+        public void TestGetAndSetModel()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
             Enforcer e2 = new Enforcer("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
 
-            testEnforce(e, "root", "data1", "read", false);
+            TestEnforce(e, "root", "data1", "read", false);
 
             e.SetModel(e2.GetModel());
 
-            testEnforce(e, "root", "data1", "read", true);
+            TestEnforce(e, "root", "data1", "read", true);
         }
 
         [Fact]
-        public void testGetAndSetAdapterInMem()
+        public void TestGetAndSetAdapterInMem()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
             Enforcer e2 = new Enforcer("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
 
-            testEnforce(e, "alice", "data1", "read", true);
-            testEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
 
             IAdapter a2 = e2.GetAdapter();
             e.SetAdapter(a2);
             e.LoadPolicy();
 
-            testEnforce(e, "alice", "data1", "read", false);
-            testEnforce(e, "alice", "data1", "write", true);
+            TestEnforce(e, "alice", "data1", "read", false);
+            TestEnforce(e, "alice", "data1", "write", true);
         }
 
         [Fact]
-        public void testSetAdapterFromFile()
+        public void TestSetAdapterFromFile()
         {
             Enforcer e = new Enforcer("examples/basic_model.conf");
 
-            testEnforce(e, "alice", "data1", "read", false);
+            TestEnforce(e, "alice", "data1", "read", false);
 
             IAdapter a = new DefaultFileAdapter("examples/basic_policy.csv");
             e.SetAdapter(a);
             e.LoadPolicy();
 
-            testEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "read", true);
         }
 
         [Fact]
-        public void testInitEmpty()
+        public void TestInitEmpty()
         {
             Enforcer e = new Enforcer();
 
@@ -397,11 +397,11 @@ namespace NetCasbin.Test
             e.SetAdapter(a);
             e.LoadPolicy();
 
-            testEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
         }
 
         [Fact]
-        public void testInitEmptyByInputStream()
+        public void TestInitEmptyByInputStream()
         {
             Enforcer e = new Enforcer();
 
@@ -418,7 +418,7 @@ namespace NetCasbin.Test
                 e.SetAdapter(a);
                 e.LoadPolicy();
 
-                testEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+                TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             }
 
         }

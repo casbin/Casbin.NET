@@ -141,8 +141,10 @@ namespace NetCasbin
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
         public Boolean AddPermissionForUser(String user, params string[] permission)
         {
-            List<String> parameters = new List<string>();
-            parameters.Add(user);
+            List<String> parameters = new List<string>
+            {
+                user
+            };
             parameters.AddRange(permission);
             return AddPolicy(parameters);
         }
@@ -160,8 +162,10 @@ namespace NetCasbin
         /// <returns></returns>
         public Boolean DeletePermissionForUser(String user, params string[] permission)
         {
-            List<String> parameters = new List<string>();
-            parameters.Add(user);
+            List<String> parameters = new List<string>
+            {
+                user
+            };
             parameters.AddRange(permission);
             return RemovePolicy(parameters);
         }
@@ -273,8 +277,10 @@ namespace NetCasbin
         /// <returns></returns>
         public List<List<String>> GetImplicitPermissionsForUser(String user)
         {
-            List<String> roles = new List<string>();
-            roles.Add(user);
+            List<String> roles = new List<string>
+            {
+                user
+            };
             roles.AddRange(this.GetImplicitRolesForUser(user));
             List<List<String>> res = new List<List<string>>();
             foreach (String n in roles)
