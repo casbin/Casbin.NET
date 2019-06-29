@@ -11,8 +11,11 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>update namespace and references to match location with several minor refactors;</PackageReleaseNotes>
-    <Version>1.1.0</Version>
+    <PackageReleaseNotes>## v1.1.1 - 2019-06-29
+1. Fix:the user parameter are not being used in HasPermissionForUser();
+2. Call model.HasPolicy(...) to determine if the same policy already exists;
+</PackageReleaseNotes>
+    <Version>1.1.1</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
   </PropertyGroup>

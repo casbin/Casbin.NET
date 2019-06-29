@@ -33,7 +33,11 @@ namespace NetCasbin.Persist
                     return;
                 }
 
-                policy.Policy.Add(tokens.Skip(1).ToList());
+                var content = tokens.Skip(1).ToList();
+                if (!model.HasPolicy(sec, key, content))
+                {
+                    policy.Policy.Add(content);
+                }
             }
         }
     }
