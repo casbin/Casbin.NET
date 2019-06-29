@@ -7,7 +7,7 @@
 
 **News**: still worry about how to write the correct Casbin policy? `Casbin online editor` is coming to help! Try it at: http://casbin.org/editor/
 
-Casbin.NET is a powerful and efficient open-source access control library for C# projects. It provides support for enforcing authorization based on various [access control models](https://en.wikipedia.org/wiki/Computer_security_model).
+Casbin.NET is a powerful and efficient open-source access control library for .NET (C#) projects. It provides support for enforcing authorization based on various [access control models](https://en.wikipedia.org/wiki/Computer_security_model).
 
 ## All the languages supported by Casbin:
 
