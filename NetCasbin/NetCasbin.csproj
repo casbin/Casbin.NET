@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+	<DebugType>full</DebugType>
     <Description>Casbin ported to dotnet core</Description>
     <Authors>Casbin, Zhikui H</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
