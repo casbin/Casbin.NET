@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/casbin/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin/Casbin.NET)
 [![Coverage Status](https://coveralls.io/repos/github/casbin/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin/Casbin.NET)
 [![Release](https://img.shields.io/github/release/casbin/Casbin.NET.svg)](https://github.com/casbin/Casbin.NET/releases/latest)
-[![Gitter](https://badges.gittercasbin.im/Join%20Chat.svg)](https://gitter.im/casbin/lobby)
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/casbin/lobby)
 
 **News**: still worry about how to write the correct Casbin policy? `Casbin online editor` is coming to help! Try it at: http://casbin.org/editor/
 
