@@ -1,9 +1,9 @@
 # Casbin.NET
 
-[![Build Status](https://travis-ci.org/casbin-net/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin-net/Casbin.NET)
-[![Coverage Status](https://coveralls.io/repos/github/casbin-net/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin-net/Casbin.NET)
-[![Release](https://img.shields.io/github/release/casbin-net/Casbin.NET.svg)](https://github.com/casbin-net/Casbin.NET/releases/latest)
-[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/casbin/lobby)
+[![Build Status](https://travis-ci.org/casbin/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin/Casbin.NET)
+[![Coverage Status](https://coveralls.io/repos/github/casbin/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin/Casbin.NET)
+[![Release](https://img.shields.io/github/release/casbin/Casbin.NET.svg)](https://github.com/casbin/Casbin.NET/releases/latest)
+[![Gitter](https://badges.gittercasbin.im/Join%20Chat.svg)](https://gitter.im/casbin/lobby)
 
 **News**: still worry about how to write the correct Casbin policy? `Casbin online editor` is coming to help! Try it at: http://casbin.org/editor/
 
@@ -16,9 +16,9 @@ Casbin.NET is a powerful and efficient open-source access control library for .N
 | [Casbin](https://github.com/casbin/casbin)                                             | [jCasbin](https://github.com/casbin/jcasbin)                                        | [node-Casbin](https://github.com/casbin/node-casbin)                                        | [PHP-Casbin](https://github.com/php-casbin/php-casbin)                                   |
 | production-ready                                                                       | production-ready                                                                    | production-ready                                                                            | production-ready                                                                         |
 
-| [![python](https://casbin.org/img/langs/python.png)](https://github.com/casbin/pycasbin) | [![dotnet](https://casbin.org/img/langs/dotnet.png)](https://github.com/casbin-net/Casbin.NET) | [![delphi](https://casbin.org/img/langs/delphi.png)](https://github.com/casbin4d/Casbin4D) | [![rust](https://casbin.org/img/langs/rust.png)](https://github.com/Devolutions/casbin-rs) |
+| [![python](https://casbin.org/img/langs/python.png)](https://github.com/casbin/pycasbin) | [![dotnet](https://casbin.org/img/langs/dotnet.png)](https://github.com/casbin/Casbin.NET) | [![delphi](https://casbin.org/img/langs/delphi.png)](https://github.com/casbin4d/Casbin4D) | [![rust](https://casbin.org/img/langs/rust.png)](https://github.com/Devolutions/casbin-rs) |
 | ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| [PyCasbin](https://github.com/casbin/pycasbin)                                           | [Casbin.NET](https://github.com/casbin-net/Casbin.NET)                                         | [Casbin4D](https://github.com/casbin4d/Casbin4D)                                           | [Casbin-RS](https://github.com/Devolutions/casbin-rs)                                      |
+| [PyCasbin](https://github.com/casbin/pycasbin)                                           | [Casbin.NET](https://github.com/casbin/Casbin.NET)                                         | [Casbin4D](https://github.com/casbin4d/Casbin4D)                                           | [Casbin-RS](https://github.com/Devolutions/casbin-rs)                                      |
 | production-ready                                                                         | production-ready                                                                               | experimental                                                                               | WIP                                                                                        |
 
 ## Table of contents
