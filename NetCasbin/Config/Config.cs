@@ -96,7 +96,7 @@ namespace NetCasbin.Config
                         break;
                     }
                 }
-                catch (IOException e)
+                catch (IOException)
                 {
                     throw new Exception("IO error occurred");
                 }
