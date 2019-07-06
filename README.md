@@ -2,7 +2,6 @@
 
 [![Build Status](https://travis-ci.org/casbin/Casbin.NET.svg?branch=master)](https://travis-ci.org/casbin/Casbin.NET)
 [![Build status](https://ci.appveyor.com/api/projects/status/s9ykk2x2uf288xe6?svg=true)](https://ci.appveyor.com/project/hsluoyz/casbin-net)
-[![Coverage Status](https://coveralls.io/repos/github/casbin/Casbin.NET/badge.svg)](https://coveralls.io/github/casbin/Casbin.NET)
 [![Nuget](https://img.shields.io/nuget/v/Casbin.NET.svg)](https://www.nuget.org/packages/Casbin.NET/)
 [![Release](https://img.shields.io/github/release/casbin/Casbin.NET.svg)](https://github.com/casbin/Casbin.NET/releases/latest)
 [![Nuget](https://img.shields.io/nuget/dt/Casbin.NET.svg)](https://www.nuget.org/packages/Casbin.NET/)
