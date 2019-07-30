@@ -27,6 +27,8 @@ namespace NetCasbin
         protected IRoleManager rm;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
+        private Interpreter _interpreter;
+        private Lambda _parsedExpression = null;
 
         protected void Initialize()
         {
@@ -37,6 +39,7 @@ namespace NetCasbin
             _enabled = true;
             autoSave = true;
             autoBuildRoleLinks = true;
+            InitializeInterpreter();
         }
 
         /// <summary>
@@ -89,6 +92,7 @@ namespace NetCasbin
             model = NewModel();
             model.LoadModel(this.modelPath);
             fm = FunctionMap.LoadFunctionMap();
+            InitializeInterpreter();
         }
 
         /// <summary>
@@ -105,6 +109,7 @@ namespace NetCasbin
         {
             this.model = model;
             fm = FunctionMap.LoadFunctionMap();
+            InitializeInterpreter();
         }
 
         /// <summary>
@@ -271,32 +276,10 @@ namespace NetCasbin
             {
                 return true;
             }
-
-            Dictionary<String, AbstractFunction> functions = new Dictionary<string, AbstractFunction>();
-            foreach (var entry in fm.FunctionDict)
-            {
-                String key = entry.Key;
-                var function = entry.Value;
-
-                functions.Add(key, function);
-            }
-            if (model.Model.ContainsKey("g"))
-            {
-                foreach (var entry in model.Model["g"])
-                {
-                    String key = entry.Key;
-                    Assertion ast = entry.Value;
-                    IRoleManager rm = ast.RM;
-                    functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
-                }
-            }
+            InitializeInterpreter();
 
             String expString = model.Model["m"]["m"].Value;
-            var interpreter = new Interpreter();
-            foreach (var func in functions)
-            {
-                interpreter.SetFunction(func.Key, func.Value);
-            }
+            var ps = model.Model["r"]["r"].Tokens.Concat(model.Model["p"]["p"].Tokens).Select(x => new Parameter(x, typeof(object))).ToArray();
 
             Effect.Effect[] policyEffects;
             float[] matcherResults;
@@ -321,11 +304,14 @@ namespace NetCasbin
                         String token = model.Model["p"]["p"].Tokens[j];
                         parameters.Add(token, pvals[j]);
                     }
-                    foreach (var item in parameters)
+
+                    //result = _interpreter.Eval(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray()); 
+                    if (_parsedExpression == null)
                     {
-                        interpreter.SetVariable(item.Key, item.Value);
+                        _parsedExpression = _interpreter.Parse(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
                     }
-                    result = interpreter.Eval(expString);
+
+                    result = _parsedExpression.Invoke(parameters.Select(x => x.Value).ToArray());
                     if (result is Boolean)
                     {
                         if (!((Boolean)result))
@@ -394,12 +380,13 @@ namespace NetCasbin
                     parameters.Add(token, "");
                 }
 
-                foreach (var item in parameters)
+                if (_parsedExpression == null)
                 {
-                    interpreter.SetVariable(item.Key, item.Value);
+                    _parsedExpression = _interpreter.Parse(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
                 }
 
-                result = interpreter.Eval(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
+                result = _parsedExpression.Invoke(parameters.Select(x => x.Value).ToArray());
+                //result = _interpreter.Eval(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
 
                 if ((Boolean)result)
                 {
@@ -412,6 +399,35 @@ namespace NetCasbin
             }
             result = eft.MergeEffects(model.Model["e"]["e"].Value, policyEffects, matcherResults);
             return (Boolean)result;
+        }
+
+
+        private void InitializeInterpreter()
+        {
+            Dictionary<String, AbstractFunction> functions = new Dictionary<string, AbstractFunction>();
+            foreach (var entry in fm.FunctionDict)
+            {
+                String key = entry.Key;
+                var function = entry.Value;
+                functions.Add(key, function);
+            }
+
+            if (model.Model.ContainsKey("g"))
+            {
+                foreach (var entry in model.Model["g"])
+                {
+                    String key = entry.Key;
+                    Assertion ast = entry.Value;
+                    IRoleManager rm = ast.RM;
+                    functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
+                }
+            }
+            _interpreter = new Interpreter();
+            foreach (var func in functions)
+            {
+                _interpreter.SetFunction(func.Key, func.Value);
+            }
+            _parsedExpression = null;
         }
     }
 }

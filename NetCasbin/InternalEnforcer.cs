@@ -29,8 +29,9 @@ namespace NetCasbin
                 {
                     adapter.AddPolicy(sec, ptype, rule);
                 }
-                catch (NotImplementedException)
+                catch (NotImplementedException e)
                 {
+
                 }
                 catch (Exception e)
                 {
@@ -67,9 +68,8 @@ namespace NetCasbin
                 {
                     adapter.RemovePolicy(sec, ptype, rule);
                 }
-                catch (NotImplementedException)
-                {
-                }
+                catch (NotImplementedException e)
+                { }
                 catch (Exception e)
                 {
                     throw e;
@@ -106,9 +106,8 @@ namespace NetCasbin
                 {
                     adapter.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
                 }
-                catch (NotImplementedException)
-                {
-                }
+                catch (NotImplementedException e)
+                { }
                 catch (Exception e)
                 {
                     throw e;

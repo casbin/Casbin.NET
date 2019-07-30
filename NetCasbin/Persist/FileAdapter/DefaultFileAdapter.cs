@@ -25,7 +25,7 @@ namespace NetCasbin.Persist.FileAdapter
             {
                 _byteArrayInputStream = new StreamReader(inputStream);
             }
-            catch (IOException)
+            catch (IOException e)
             {
                 throw new Exception("File adapter init error");
             }

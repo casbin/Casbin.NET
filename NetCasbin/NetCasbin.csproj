@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-	<DebugType>full</DebugType>
     <Description>Casbin ported to dotnet core</Description>
     <Authors>Casbin, Zhikui H</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
@@ -12,13 +11,11 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>## v1.1.1 - 2019-06-29
-1. Fix:the user parameter are not being used in HasPermissionForUser();
-2. Call model.HasPolicy(...) to determine if the same policy already exists;
-</PackageReleaseNotes>
-    <Version>1.1.1</Version>
+    <PackageReleaseNotes>use the parsedExpression to optimize the Enforce(params Object [] rvals) method.</PackageReleaseNotes>
+    <Version>1.2.0</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
+    <AssemblyVersion>1.2.0.0</AssemblyVersion>
   </PropertyGroup>
 
   <ItemGroup>
