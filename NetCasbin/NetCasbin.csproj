@@ -13,14 +13,15 @@
     <Copyright>Apache License 2.0</Copyright>
     <PackageReleaseNotes>support for the .net framework 4.5
 the assembly is signed</PackageReleaseNotes>
-    <Version>1.2.1</Version>
+    <Version>1.2.2</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <AssemblyVersion>1.2.2.0</AssemblyVersion>
     <SignAssembly>true</SignAssembly>
     <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile>casbin.pfx</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <FileVersion>1.2.2.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
