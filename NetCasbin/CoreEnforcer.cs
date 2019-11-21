@@ -126,7 +126,7 @@ namespace NetCasbin
         public void SetWatcher(IWatcher watcher)
         {
             this.watcher = watcher;
-            //watcher.setUpdateCallback(this::loadPolicy);
+            watcher?.SetUpdateCallback(this.LoadPolicy);
         }
 
         /// <summary>
@@ -218,10 +218,7 @@ namespace NetCasbin
             }
 
             adapter.SavePolicy(model);
-            if (watcher != null)
-            {
-                watcher.Update();
-            }
+            watcher?.Update();
         }
 
         /// <summary>
