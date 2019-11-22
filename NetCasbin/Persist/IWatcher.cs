@@ -1,8 +1,10 @@
-﻿namespace NetCasbin.Persist
+﻿using System;
+
+namespace NetCasbin.Persist
 {
     public interface IWatcher
     {
-        void SetUpdateCallback();
+        void SetUpdateCallback(Action callback);
 
         void Update();
     }
