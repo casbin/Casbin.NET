@@ -15,7 +15,7 @@
     <Version>1.2.5</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.5</AssemblyVersion>
+    <AssemblyVersion>1.2.5.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
