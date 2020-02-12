@@ -12,7 +12,7 @@
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
     <PackageReleaseNotes>removed target platform lock-in.</PackageReleaseNotes>
-    <Version>1.2.5</Version>
+    <Version>1.2.5.0</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
     <AssemblyVersion>1.2.5.0</AssemblyVersion>
@@ -20,7 +20,7 @@
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.2.5</FileVersion>
+    <FileVersion>1.2.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
