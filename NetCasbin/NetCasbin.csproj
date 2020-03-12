@@ -11,20 +11,16 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>support for the watchers. the version is not  strongly-named assembly.</PackageReleaseNotes>
-    <Version>1.2.4</Version>
+    <PackageReleaseNotes>removed target platform lock-in.</PackageReleaseNotes>
+    <Version>1.2.5.0</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.4</AssemblyVersion>
+    <AssemblyVersion>1.2.5.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.2.4</FileVersion>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Release|netstandard2.0|AnyCPU'">
-    <PlatformTarget>x64</PlatformTarget>
+    <FileVersion>1.2.5.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
