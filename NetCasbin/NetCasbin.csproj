@@ -11,7 +11,7 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>support for the watchers. the version is not  strongly-named assemblies.</PackageReleaseNotes>
+    <PackageReleaseNotes>support for the watchers. the version is not  strongly-named assembly.</PackageReleaseNotes>
     <Version>1.2.4</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>

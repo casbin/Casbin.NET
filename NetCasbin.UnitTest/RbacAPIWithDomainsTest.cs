@@ -12,6 +12,7 @@ namespace NetCasbin.Test
         {
             Enforcer e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
 
+
             TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
             TestGetRolesInDomain(e, "bob", "domain1", AsList());
             TestGetRolesInDomain(e, "admin", "domain1", AsList());

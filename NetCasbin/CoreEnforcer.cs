@@ -27,19 +27,16 @@ namespace NetCasbin
         protected IRoleManager rm;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
-        private Interpreter _interpreter;
-        private Lambda _parsedExpression = null;
+        protected readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
 
         protected void Initialize()
         {
             rm = new DefaultRoleManager(10);
             eft = new DefaultEffector();
             watcher = null;
-
             _enabled = true;
             autoSave = true;
             autoBuildRoleLinks = true;
-            InitializeInterpreter();
         }
 
         /// <summary>
@@ -57,7 +54,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static Model.Model NewModel(String text)
+        public static Model.Model NewModel(string text)
         {
             Model.Model m = new Model.Model();
             m.LoadModelFromText(text);
@@ -70,14 +67,13 @@ namespace NetCasbin
         /// <param name="modelPath">the path of the model file.</param>
         /// <param name="unused">unused parameter, just for differentiating with  NewModel(String text).</param>
         /// <returns>the model.</returns>
-        public static Model.Model NewModel(String modelPath, String unused)
+        public static Model.Model NewModel(string modelPath, string unused)
         {
             Model.Model m = new Model.Model();
             if (!string.IsNullOrEmpty(modelPath))
             {
                 m.LoadModel(modelPath);
             }
-
             return m;
         }
 
@@ -90,9 +86,8 @@ namespace NetCasbin
         public void LoadModel()
         {
             model = NewModel();
-            model.LoadModel(this.modelPath);
+            model.LoadModel(modelPath);
             fm = FunctionMap.LoadFunctionMap();
-            InitializeInterpreter();
         }
 
         /// <summary>
@@ -109,7 +104,6 @@ namespace NetCasbin
         {
             this.model = model;
             fm = FunctionMap.LoadFunctionMap();
-            InitializeInterpreter();
         }
 
         /// <summary>
@@ -175,20 +169,15 @@ namespace NetCasbin
         /// <returns></returns>
         public bool LoadFilteredPolicy(Filter filter)
         {
-            this.model.ClearPolicy();
-
-            if (this.IsFiltered())
-            {
-                (this.adapter as IFilteredAdapter).LoadFilteredPolicy(this.model, filter);
-            }
-            else
+            model.ClearPolicy();
+            if (!IsFiltered())
             {
                 throw new Exception("filtered policies are not supported by this adapter");
             }
-
-            if (this.autoBuildRoleLinks)
+            (adapter as IFilteredAdapter).LoadFilteredPolicy(model, filter);
+            if (autoBuildRoleLinks)
             {
-                this.BuildRoleLinks();
+                BuildRoleLinks();
             }
             return true;
         }
@@ -197,11 +186,11 @@ namespace NetCasbin
         ///  returns true if the loaded policy has been filtered.
         /// </summary>
         /// <returns>if the loaded policy has been filtered.</returns>
-        public Boolean IsFiltered()
+        public bool IsFiltered()
         {
-            if ((this.adapter is IFilteredAdapter))
+            if (adapter is IFilteredAdapter)
             {
-                return (this.adapter as IFilteredAdapter).IsFiltered;
+                return (adapter as IFilteredAdapter).IsFiltered;
             }
             return false;
         }
@@ -216,7 +205,6 @@ namespace NetCasbin
             {
                 throw new Exception("cannot save a filtered policy");
             }
-
             adapter.SavePolicy(model);
             watcher?.Update();
         }
@@ -226,9 +214,9 @@ namespace NetCasbin
         /// all access will be allowed by the enforce() function.
         /// </summary>
         /// <param name="enable"></param>
-        public void EnableEnforce(Boolean enable)
+        public void EnableEnforce(bool enable)
         {
-            this._enabled = enable;
+            _enabled = enable;
         }
 
         /// <summary>
@@ -236,7 +224,7 @@ namespace NetCasbin
         ///   adapter when it is added or removed.
         /// </summary>
         /// <param name="autoSave"></param>
-        public void EnableAutoSave(Boolean autoSave)
+        public void EnableAutoSave(bool autoSave)
         {
             this.autoSave = autoSave;
         }
@@ -246,7 +234,7 @@ namespace NetCasbin
         ///   to the adapter when it is added or removed.
         /// </summary>
         /// <param name="autoBuildRoleLinks">whether to automatically build the role links.</param>
-        public void EnableAutoBuildRoleLinks(Boolean autoBuildRoleLinks)
+        public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks)
         {
             this.autoBuildRoleLinks = autoBuildRoleLinks;
         }
@@ -267,51 +255,49 @@ namespace NetCasbin
         /// <param name="rvals">the request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>whether to allow the request.</returns>
-        public Boolean Enforce(params Object[] rvals)
+        public bool Enforce(params object[] rvals)
         {
             if (!_enabled)
             {
                 return true;
             }
-            InitializeInterpreter();
 
-            String expString = model.Model["m"]["m"].Value;
-            var ps = model.Model["r"]["r"].Tokens.Concat(model.Model["p"]["p"].Tokens).Select(x => new Parameter(x, typeof(object))).ToArray();
-
+            string effect = model.Model["e"]["e"].Value;
+            var rTokens = model.Model["r"]["r"]?.Tokens;
+            var rTokensLen = rTokens?.Count();
+            int policyLen = model.Model["p"]["p"].Policy.Count;
             Effect.Effect[] policyEffects;
             float[] matcherResults;
-            int policyLen;
             object result = null;
-            if ((policyLen = model.Model["p"]["p"].Policy.Count) != 0)
+
+            string expString = model.Model["m"]["m"].Value;
+            Lambda expression = null;
+            if (matcherMap.ContainsKey(expString))
+            {
+                expression = matcherMap[expString];
+            }
+            else
+            {
+                expression = GetAndInitializeExpression(rvals);
+                matcherMap[expString] = expression;
+            }
+
+            if (policyLen != 0)
             {
                 policyEffects = new Effect.Effect[policyLen];
                 matcherResults = new float[policyLen];
-
-                for (int i = 0; i < model.Model["p"]["p"].Policy.Count; i++)
+                for (int i = 0; i < policyLen; i++)
                 {
-                    List<String> pvals = model.Model["p"]["p"].Policy[i];
-                    Dictionary<String, Object> parameters = new Dictionary<string, object>();
-                    for (int j = 0; j < model.Model["r"]["r"].Tokens.Length; j++)
+                    List<string> pvals = model.Model["p"]["p"].Policy[i];
+                    if (rTokensLen != rvals.Length)
                     {
-                        String token = model.Model["r"]["r"].Tokens[j];
-                        parameters.Add(token, rvals[j]);
+                        throw new Exception($"invalid request size: expected {rTokensLen}, got {rvals.Length}, rvals: ${rvals}");
                     }
-                    for (int j = 0; j < model.Model["p"]["p"].Tokens.Length; j++)
+                    var parameters = GetParameters(rvals, pvals);
+                    result = expression.Invoke(parameters);
+                    if (result is bool)
                     {
-                        String token = model.Model["p"]["p"].Tokens[j];
-                        parameters.Add(token, pvals[j]);
-                    }
-
-                    //result = _interpreter.Eval(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray()); 
-                    if (_parsedExpression == null)
-                    {
-                        _parsedExpression = _interpreter.Parse(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
-                    }
-
-                    result = _parsedExpression.Invoke(parameters.Select(x => x.Value).ToArray());
-                    if (result is Boolean)
-                    {
-                        if (!((Boolean)result))
+                        if (!(bool)result)
                         {
                             policyEffects[i] = Effect.Effect.Indeterminate;
                             continue;
@@ -333,20 +319,21 @@ namespace NetCasbin
                     {
                         throw new Exception("matcher result should be bool, int or float");
                     }
-                    if (parameters.ContainsKey("p_eft"))
+
+                    if (parameters.Any(x => x.Name == "p_eft"))
                     {
-                        String eft = (String)parameters["p_eft"];
-                        if (eft.Equals("allow"))
+                        string policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
+                        switch (policyEft)
                         {
-                            policyEffects[i] = Effect.Effect.Allow;
-                        }
-                        else if (eft.Equals("deny"))
-                        {
-                            policyEffects[i] = Effect.Effect.Deny;
-                        }
-                        else
-                        {
-                            policyEffects[i] = Effect.Effect.Indeterminate;
+                            case "allow":
+                                policyEffects[i] = Effect.Effect.Allow;
+                                break;
+                            case "deny":
+                                policyEffects[i] = Effect.Effect.Deny;
+                                break;
+                            default:
+                                policyEffects[i] = Effect.Effect.Indeterminate;
+                                break;
                         }
                     }
                     else
@@ -354,7 +341,7 @@ namespace NetCasbin
                         policyEffects[i] = Effect.Effect.Allow;
                     }
 
-                    if (model.Model["e"]["e"].Value.Equals("priority(p_eft) || deny"))
+                    if (effect.Equals("priority(p_eft) || deny"))
                     {
                         break;
                     }
@@ -364,28 +351,8 @@ namespace NetCasbin
             {
                 policyEffects = new Effect.Effect[1];
                 matcherResults = new float[1];
-
-                Dictionary<String, Object> parameters = new Dictionary<string, Object>();
-                for (int j = 0; j < model.Model["r"]["r"].Tokens.Length; j++)
-                {
-                    String token = model.Model["r"]["r"].Tokens[j];
-                    parameters.Add(token, rvals[j]);
-                }
-                for (int j = 0; j < model.Model["p"]["p"].Tokens.Length; j++)
-                {
-                    String token = model.Model["p"]["p"].Tokens[j];
-                    parameters.Add(token, "");
-                }
-
-                if (_parsedExpression == null)
-                {
-                    _parsedExpression = _interpreter.Parse(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
-                }
-
-                result = _parsedExpression.Invoke(parameters.Select(x => x.Value).ToArray());
-                //result = _interpreter.Eval(expString, parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray());
-
-                if ((Boolean)result)
+                result = expression.Invoke(GetParameters(rvals));
+                if ((bool)result)
                 {
                     policyEffects[0] = Effect.Effect.Allow;
                 }
@@ -394,17 +361,32 @@ namespace NetCasbin
                     policyEffects[0] = Effect.Effect.Indeterminate;
                 }
             }
-            result = eft.MergeEffects(model.Model["e"]["e"].Value, policyEffects, matcherResults);
-            return (Boolean)result;
+            result = eft.MergeEffects(effect, policyEffects, matcherResults);
+            return (bool)result;
         }
 
-
-        private void InitializeInterpreter()
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="rvals"></param>
+        private Lambda GetAndInitializeExpression(object[] rvals)
         {
-            Dictionary<String, AbstractFunction> functions = new Dictionary<string, AbstractFunction>();
+            string expString = model.Model["m"]["m"].Value;
+            var parameters = GetParameters(rvals);
+            var interpreter = GetAndInitializeInterpreter();
+            var parsedExpression = interpreter.Parse(expString, parameters);
+            return parsedExpression;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private Interpreter GetAndInitializeInterpreter()
+        {
+            Dictionary<string, AbstractFunction> functions = new Dictionary<string, AbstractFunction>();
             foreach (var entry in fm.FunctionDict)
             {
-                String key = entry.Key;
+                string key = entry.Key;
                 var function = entry.Value;
                 functions.Add(key, function);
             }
@@ -413,18 +395,45 @@ namespace NetCasbin
             {
                 foreach (var entry in model.Model["g"])
                 {
-                    String key = entry.Key;
+                    string key = entry.Key;
                     Assertion ast = entry.Value;
                     IRoleManager rm = ast.RM;
                     functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
                 }
             }
-            _interpreter = new Interpreter();
+
+            var interpreter = new Interpreter();
             foreach (var func in functions)
             {
-                _interpreter.SetFunction(func.Key, func.Value);
+                interpreter.SetFunction(func.Key, func.Value);
             }
-            _parsedExpression = null;
+            return interpreter;
+        }
+
+        private Parameter[] GetParameters(object[] rvals, IEnumerable<string> pvals = null)
+        {
+            var rTokens = model.Model["r"]["r"]?.Tokens;
+            var rTokensLen = rTokens?.Count();
+            Dictionary<string, object> parameters = new Dictionary<string, object>();
+            for (int i = 0; i < rTokensLen; i++)
+            {
+                string token = rTokens[i];
+                parameters.Add(token, rvals[i]);
+            }
+            for (int i = 0, length = model.Model["p"]["p"].Tokens.Length; i < length; i++)
+            {
+                string token = model.Model["p"]["p"].Tokens[i];
+                if (pvals == null)
+                {
+                    parameters.Add(token, "");
+                }
+                else
+                {
+                    parameters.Add(token, pvals.ElementAt(i));
+                }
+            }
+            var result = parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray();
+            return result;
         }
     }
 }
