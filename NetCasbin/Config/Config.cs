@@ -51,6 +51,7 @@ namespace NetCasbin.Config
         /// <returns></returns>
         private bool AddConfig(string section, string option, string value)
         {
+            
             if (string.IsNullOrEmpty(section))
             {
                 section = DEFAULT_SECTION;

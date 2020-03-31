@@ -42,13 +42,11 @@ namespace NetCasbin
             }
         }
 
-        public Enforcer(Model.Model m) :
-            this(m, null)
+        public Enforcer(Model.Model m) : this(m, null)
         {
         }
 
-        public Enforcer(String modelPath) :
-            this(modelPath, "")
+        public Enforcer(String modelPath) : this(modelPath, "")
         {
         }
 

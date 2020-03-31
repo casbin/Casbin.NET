@@ -119,7 +119,6 @@ namespace NetCasbin.Model
             LoadSection(cfg, "p");
             LoadSection(cfg, "e");
             LoadSection(cfg, "m");
-
             LoadSection(cfg, "g");
         }
 

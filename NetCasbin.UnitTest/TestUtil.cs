@@ -8,7 +8,6 @@ namespace NetCasbin.Test
 {
     public  class TestUtil
     {
-
         internal List<T> AsList<T>(params T[] values)
         {
             return values.ToList();
