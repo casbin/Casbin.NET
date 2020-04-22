@@ -120,7 +120,10 @@ namespace NetCasbin.Persist.FileAdapter
 
             List<string> policy = new List<string>();
             policy.AddRange(GetModelPolicy(model, "p"));
-            policy.AddRange(GetModelPolicy(model, "g"));
+            if (model.Model.ContainsKey("g"))
+            {
+                policy.AddRange(GetModelPolicy(model, "g"));
+            }
             return policy;
         }
 

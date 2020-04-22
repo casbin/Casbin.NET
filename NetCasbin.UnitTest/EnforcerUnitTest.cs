@@ -211,6 +211,15 @@ namespace NetCasbin.Test
             e.SavePolicy();
         }
 
+
+        [Fact]
+        public void TestSavePolicyWithoutBasicModel()
+        {
+            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+
+            e.SavePolicy();
+        }
+
         [Fact]
         public void TestClearPolicy()
         {
