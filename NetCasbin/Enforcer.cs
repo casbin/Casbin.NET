@@ -66,6 +66,14 @@ namespace NetCasbin
             return model.Model["g"]["g"].RM.GetUsers(name);
         }
 
+        public List<string> GetUsersForRoles(string[] names)
+        {
+            List<string> userIds = new List<string>();
+            foreach (var name in names)
+                userIds.AddRange(model.Model["g"]["g"].RM.GetUsers(name));
+            return userIds;
+        }
+
         public Boolean HasRoleForUser(String name, String role)
         {
             List<String> roles = GetRolesForUser(name);

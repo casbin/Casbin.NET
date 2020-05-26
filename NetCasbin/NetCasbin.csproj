@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <Description>Casbin ported to dotnet core</Description>
     <Authors>Casbin, Zhikui H</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
@@ -11,16 +11,16 @@
     <PackageIconUrl>https://casbin.org/img/casbin.svg</PackageIconUrl>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <PackageReleaseNotes>removed target platform lock-in.</PackageReleaseNotes>
-    <Version>1.2.5</Version>
+    <PackageReleaseNotes>support .net 4.5 and netstandard2.0</PackageReleaseNotes>
+    <Version>1.2.6</Version>
     <PackageId>Casbin.NET</PackageId>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.5.0</AssemblyVersion>
+    <AssemblyVersion>1.2.6.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.2.5.0</FileVersion>
+    <FileVersion>1.2.6.0</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>

@@ -21,7 +21,7 @@ namespace NetCasbin
             if (!ruleAdded)
             {
                 return false;
-            }
+            } 
 
             if (adapter != null && autoSave)
             {
