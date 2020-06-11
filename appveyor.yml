@@ -1,10 +1,10 @@
 version: '{build}'
-image: Visual Studio 2017
+image: Visual Studio 2019
 skip_tags: true
 pull_requests:
   do_not_increment_build_number: true
 dotnet_csproj:
-  patch: true
+  patch: false
   file: '**\*.csproj'
   version: '{version}'
   package_version: '{version}'
@@ -27,7 +27,12 @@ test_script:
     ..\..\..\..\packages\OpenCover.4.7.922\tools\OpenCover.Console.exe -target:dotnet.exe "-targetargs:""..\..\..\..\packages\xunit.runner.console.2.3.1\tools\netcoreapp2.0\xunit.console.dll"" "".\NetCasbin.UnitTest.dll"" -noshadow -appveyor" -filter:"+[NetCasbin]*  -[NetCasbin.UnitTest]*" -register:user -oldStyle -output:..\..\..\..\opencoverCoverage.xml
     
     cd ..\..\..\..\ 
-    
-    $coveralls = ".\tools\csmacnz.coveralls.exe"
 
-    & $coveralls --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_JOB_ID
+    if(($env:APPVEYOR_PULL_REQUEST_NUMBER -eq $null) -or ($env:APPVEYOR_PULL_REQUEST_HEAD_REPO_NAME -eq $env:APPVEYOR_REPO_NAME)) 
+    {
+        .\tools\csmacnz.coveralls.exe --opencover -i opencoverCoverage.xml --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_JOB_ID
+    }
+    else
+    {
+        "Current at a pull request from other repo."
+    }
