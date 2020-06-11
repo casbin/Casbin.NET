@@ -44,7 +44,7 @@ namespace NetCasbin.Rbac
         /// <param name="name2">the second role.</param>
         /// <param name="domain"> the domain the roles belong to.</param>
         /// <returns>whether name1 inherits name2 (name1 has role name2).</returns>
-        Boolean HasLink(String name1, String name2, params string[] domain);
+        bool HasLink(string name1, string name2, params string[] domain);
 
         /// <summary>
         /// getRoles gets the roles that a user inherits. domain is a prefix to the roles.
@@ -52,8 +52,8 @@ namespace NetCasbin.Rbac
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        List<String> GetRoles(String name, params string[] domain);
+        List<string> GetRoles(string name, params string[] domain);
 
-        List<string> GetUsers(String name, params string[] domain);
+        List<string> GetUsers(string name, params string[] domain);
     }
 }

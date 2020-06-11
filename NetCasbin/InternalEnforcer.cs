@@ -15,9 +15,9 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected Boolean AddPolicy(String sec, String ptype, List<String> rule)
+        protected bool AddPolicy(string sec, string ptype, List<string> rule)
         {
-            Boolean ruleAdded = model.AddPolicy(sec, ptype, rule);
+            var ruleAdded = model.AddPolicy(sec, ptype, rule);
             if (!ruleAdded)
             {
                 return false;
@@ -54,9 +54,9 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected Boolean RemovePolicy(String sec, String ptype, List<String> rule)
+        protected bool RemovePolicy(string sec, string ptype, List<string> rule)
         {
-            Boolean ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            var ruleRemoved = model.RemovePolicy(sec, ptype, rule);
             if (!ruleRemoved)
             {
                 return false;
@@ -92,9 +92,9 @@ namespace NetCasbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected Boolean RemoveFilteredPolicy(String sec, String ptype, int fieldIndex, params string[] fieldValues)
+        protected bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            Boolean ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            var ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
             if (!ruleRemoved)
             {
                 return false;

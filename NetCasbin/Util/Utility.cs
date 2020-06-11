@@ -9,7 +9,7 @@ namespace NetCasbin.Util
     {
         public static string ReplaceFirst(this string text, string search, string replace)
         {
-            int pos = text.IndexOf(search);
+            var pos = text.IndexOf(search);
             if (pos < 0)
             {
                 return text;
@@ -22,9 +22,9 @@ namespace NetCasbin.Util
         /// </summary>
         /// <param name="s">a line in the model.</param>
         /// <returns>the line without comments.</returns>
-        public static String RemoveComments(String s)
+        public static string RemoveComments(string s)
         {
-            int pos = s.IndexOf("#");
+            var pos = s.IndexOf("#");
             if (pos == -1)
             {
                 return s;
@@ -44,15 +44,15 @@ namespace NetCasbin.Util
             {
                 s = s.ReplaceFirst(@".", "_");
             }
-            String regex = "(\\|| |=|\\)|\\(|&|<|>|,|\\+|-|!|\\*|\\/)(r|p)\\.";
-            Regex p = new Regex(regex);
+            var regex = "(\\|| |=|\\)|\\(|&|<|>|,|\\+|-|!|\\*|\\/)(r|p)\\.";
+            var p = new Regex(regex);
             var matches = p.Matches(s);
-            StringBuilder sb = new StringBuilder(s);
+            var sb = new StringBuilder(s);
 
             for (int i = 0, j = matches.Count; i < j; i++)
             {
                 var match = matches[i];
-                string replace = match.Groups[0].Value.Replace(".", "_");
+                var replace = match.Groups[0].Value.Replace(".", "_");
                 if (replace.Trim().Length > 0)
                 {
                     sb.Replace(match.Value, replace, match.Index, match.Length);
@@ -68,10 +68,10 @@ namespace NetCasbin.Util
         /// <returns>the string joined by the array elements.</returns>
         public static string ArrayToString(string[] v)
         {
-            return String.Join(", ", v);
+            return string.Join(", ", v);
         }
 
-        public static Boolean ArrayEquals(List<String> a, List<String> b)
+        public static bool ArrayEquals(List<string> a, List<string> b)
         {
             if (a == null)
             {
@@ -86,7 +86,7 @@ namespace NetCasbin.Util
                 return false;
             }
 
-            for (int i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Count; i++)
             {
                 if (!a[i].Equals(b[i]))
                 {
@@ -96,7 +96,7 @@ namespace NetCasbin.Util
             return true;
         }
 
-        public static Boolean Array2DEquals(List<List<String>> a, List<List<String>> b)
+        public static bool Array2DEquals(List<List<string>> a, List<List<string>> b)
         {
             if (a == null)
             {
@@ -111,7 +111,7 @@ namespace NetCasbin.Util
                 return false;
             }
 
-            for (int i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Count; i++)
             {
                 if (!ArrayEquals(a[i], b[i]))
                 {
@@ -121,19 +121,19 @@ namespace NetCasbin.Util
             return true;
         }
 
-        public static Boolean ArrayRemoveDuplicates(List<String> s)
+        public static bool ArrayRemoveDuplicates(List<string> s)
         {
             return true;
         }
 
-        public static String ArrayToString(List<String> s)
+        public static string ArrayToString(List<string> s)
         {
-            return String.Join(", ", s);
+            return string.Join(", ", s);
         }
 
-        public static String ParamsToString(String[] s)
+        public static string ParamsToString(string[] s)
         {
-            return String.Join(", ", s);
+            return string.Join(", ", s);
         }
 
         /// <summary>
@@ -142,7 +142,7 @@ namespace NetCasbin.Util
         /// <param name="a">the first set.</param>
         /// <param name="b">the second set.</param>
         /// <returns>whether a equals to b.</returns>
-        public static Boolean SetEquals(List<String> a, List<String> b)
+        public static bool SetEquals(List<string> a, List<string> b)
         {
             if (a == null)
             {
@@ -160,7 +160,7 @@ namespace NetCasbin.Util
             a.Sort();
             b.Sort();
 
-            for (int i = 0; i < a.Count; i++)
+            for (var i = 0; i < a.Count; i++)
             {
                 if (!a[i].Equals(b[i]))
                 {

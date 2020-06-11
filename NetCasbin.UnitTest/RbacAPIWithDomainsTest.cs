@@ -10,7 +10,7 @@ namespace NetCasbin.Test
         [Fact]
         public void Test_RoleAPIWithDomains()
         {
-            Enforcer e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
+            var e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
 
 
             TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));

@@ -11,7 +11,7 @@ namespace NetCasbin.Persist.FileAdapter
     public class DefaultFileAdapter : IAdapter
     {
         protected readonly string filePath;
-        private readonly Boolean _readOnly = false;
+        private readonly bool _readOnly = false;
         private readonly StreamReader _byteArrayInputStream;
 
         public DefaultFileAdapter(string filePath)
@@ -87,12 +87,12 @@ namespace NetCasbin.Persist.FileAdapter
 
         private List<string> GetModelPolicy(Model.Model model, string ptype)
         {
-            List<string> policy = new List<string>();
+            var policy = new List<string>();
             model.Model[ptype].ToList().ForEach(item =>
             {
                 var k = item.Key;
                 var v = item.Value;
-                List<string> p = v.Policy.Select(x => $"{k}, {Utility.ArrayToString(x)}").ToList();
+                var p = v.Policy.Select(x => $"{k}, {Utility.ArrayToString(x)}").ToList();
                 policy.AddRange(p);
             });
             return policy;
@@ -118,7 +118,7 @@ namespace NetCasbin.Persist.FileAdapter
                 throw new Exception("invalid file path, file path cannot be empty");
             }
 
-            List<string> policy = new List<string>();
+            var policy = new List<string>();
             policy.AddRange(GetModelPolicy(model, "p"));
             if (model.Model.ContainsKey("g"))
             {

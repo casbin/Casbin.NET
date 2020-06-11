@@ -7,7 +7,7 @@ namespace NetCasbin.Rbac
     public class DefaultRoleManager : IRoleManager
     {
         private const string DOMAIN_ERROR = "error: domain should be 1 parameter";
-        private readonly Dictionary<String, Role> _allRoles;
+        private readonly Dictionary<string, Role> _allRoles;
         private readonly int _maxHierarchyLevel;
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace NetCasbin.Rbac
             _maxHierarchyLevel = maxHierarchyLevel;
         }
 
-        private Boolean HasRole(String name)
+        private bool HasRole(string name)
         {
             return _allRoles.ContainsKey(name);
         }
@@ -38,8 +38,8 @@ namespace NetCasbin.Rbac
                 throw new ArgumentException(DOMAIN_ERROR);
             }
 
-            Role role1 = CreateRole(name1);
-            Role role2 = CreateRole(name2);
+            var role1 = CreateRole(name1);
+            var role2 = CreateRole(name2);
             role1.AddRole(role2);
         }
 
@@ -60,13 +60,13 @@ namespace NetCasbin.Rbac
                 throw new ArgumentException(DOMAIN_ERROR);
             }
 
-            if (!this.HasRole(name1) || !this.HasRole(name2))
+            if (!HasRole(name1) || !HasRole(name2))
             {
                 return;
             }
 
-            Role role1 = CreateRole(name1);
-            Role role2 = CreateRole(name2);
+            var role1 = CreateRole(name1);
+            var role2 = CreateRole(name2);
             role1.DeleteRole(role2);
         }
 
@@ -117,11 +117,11 @@ namespace NetCasbin.Rbac
                 return false;
             }
 
-            Role role1 = CreateRole(name1);
+            var role1 = CreateRole(name1);
             return role1.HasRole(name2, _maxHierarchyLevel);
         }
 
-        public virtual List<String> GetUsers(String name, params string[] domain)
+        public virtual List<string> GetUsers(string name, params string[] domain)
         {
             if (domain.Length == 1)
             {
@@ -131,7 +131,7 @@ namespace NetCasbin.Rbac
             {
                 throw new Exception("error: domain should be 1 parameter");
             }
-            if (!this.HasRole(name))
+            if (!HasRole(name))
             {
                 //return [];
             }
@@ -145,7 +145,7 @@ namespace NetCasbin.Rbac
         }
 
 
-        private Role CreateRole(String name)
+        private Role CreateRole(string name)
         {
             if (HasRole(name))
             {
@@ -153,7 +153,7 @@ namespace NetCasbin.Rbac
             }
             else
             {
-                Role role = new Role(name);
+                var role = new Role(name);
                 _allRoles[name] = role;
                 return role;
             }

@@ -5,7 +5,7 @@ namespace NetCasbin.Util
 {
     public static class FunctionUtility
     {
-        public static String GetStringValue(Dictionary<string, object> env, string argName)
+        public static string GetStringValue(Dictionary<string, object> env, string argName)
         {
             //var indexAccessMethod = typeof(Dictionary<string, object>).GetMethod("get_Item", BindingFlags.Instance | BindingFlags.Public);
 

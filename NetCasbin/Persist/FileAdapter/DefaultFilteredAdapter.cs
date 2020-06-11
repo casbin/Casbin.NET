@@ -9,7 +9,7 @@ namespace NetCasbin.Persist.FileAdapter
     {
         private bool _filtered;
 
-        public Boolean IsFiltered => _filtered;
+        public bool IsFiltered => _filtered;
         public DefaultFilteredAdapter(string filePath) : base(filePath)
         {
         }
@@ -22,7 +22,7 @@ namespace NetCasbin.Persist.FileAdapter
         {
             if (filter == null)
             {
-                this.LoadPolicy(model);
+                LoadPolicy(model);
                 return;
             }
 
@@ -31,8 +31,8 @@ namespace NetCasbin.Persist.FileAdapter
                 throw new Exception("invalid file path, file path cannot be empty");
             }
 
-            this.LoadFilteredPolicyFile(model, filter, Helper.LoadPolicyLine);
-            this._filtered = true;
+            LoadFilteredPolicyFile(model, filter, Helper.LoadPolicyLine);
+            _filtered = true;
         }
 
         private void LoadFilteredPolicyFile(Model.Model model, Filter filter, Action<string, Model.Model> handler)
@@ -49,7 +49,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        private static Boolean FilterLine(string line, Filter filter)
+        private static bool FilterLine(string line, Filter filter)
         {
             if (filter == null)
             {

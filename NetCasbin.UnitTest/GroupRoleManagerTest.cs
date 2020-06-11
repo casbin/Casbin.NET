@@ -8,7 +8,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestGroupRoleManager()
         {
-            Enforcer e = new Enforcer("examples/group_with_domain_model.conf", "examples/group_with_domain_policy.csv");
+            var e = new Enforcer("examples/group_with_domain_model.conf", "examples/group_with_domain_policy.csv");
             e.SetRoleManager(new GroupRoleManager(10));
             e.BuildRoleLinks();
 

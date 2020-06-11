@@ -34,7 +34,7 @@ namespace NetCasbin.Rbac
         /// <param name="name2"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public override Boolean HasLink(String name1, String name2, params string[] domain)
+        public override bool HasLink(string name1, string name2, params string[] domain)
         {
             if (base.HasLink(name1, name2, domain))
             {
