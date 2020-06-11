@@ -11,7 +11,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -19,7 +19,7 @@ namespace NetCasbin.Test
 
             IAdapter a = new DefaultFileAdapter("examples/keymatch_policy.csv");
 
-            Enforcer e = new Enforcer(m, a);
+            var e = new Enforcer(m, a);
 
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
@@ -72,7 +72,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestKeyMatchModelInMemoryDeny()
         {
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "!some(where (p.eft == deny))");
@@ -80,7 +80,7 @@ namespace NetCasbin.Test
 
             IAdapter a = new DefaultFileAdapter("examples/keymatch_policy.csv");
 
-            Enforcer e = new Enforcer(m, a);
+            var e = new Enforcer(m, a);
 
             TestEnforce(e, "alice", "/alice_data/resource2", "POST", true);
         }
@@ -88,14 +88,14 @@ namespace NetCasbin.Test
         [Fact]
         public void TestRBACModelInMemoryIndeterminate()
         {
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
 
-            Enforcer e = new Enforcer(m);
+            var e = new Enforcer(m);
 
             e.AddPermissionForUser("alice", "data1", "invalid");
 
@@ -105,14 +105,14 @@ namespace NetCasbin.Test
         [Fact]
         public void TestRBACModelInMemory()
         {
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
 
-            Enforcer e = new Enforcer(m);
+            var e = new Enforcer(m);
 
             e.AddPermissionForUser("alice", "data1", "read");
             e.AddPermissionForUser("bob", "data2", "write");
@@ -133,7 +133,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestRBACModelInMemory2()
         {
-            String text =
+            var text =
                 "[request_definition]\n"
                 + "r = sub, obj, act\n"
                 + "\n"
@@ -149,9 +149,9 @@ namespace NetCasbin.Test
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            Model.Model m = CoreEnforcer.NewModel(text);
+            var m = CoreEnforcer.NewModel(text);
 
-            Enforcer e = new Enforcer(m);
+            var e = new Enforcer(m);
 
             e.AddPermissionForUser("alice", "data1", "read");
             e.AddPermissionForUser("bob", "data2", "write");
@@ -172,14 +172,14 @@ namespace NetCasbin.Test
         [Fact]
         public void TestNotUsedRBACModelInMemory()
         {
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
 
-            Enforcer e = new Enforcer(m);
+            var e = new Enforcer(m);
 
             e.AddPermissionForUser("alice", "data1", "read");
             e.AddPermissionForUser("bob", "data2", "write");
@@ -197,7 +197,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestReloadPolicy()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             e.LoadPolicy();
             TestGetPolicy(e, AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
@@ -206,7 +206,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestSavePolicy()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             e.SavePolicy();
         }
@@ -215,7 +215,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestSavePolicyWithoutBasicModel()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
             e.SavePolicy();
         }
@@ -223,7 +223,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestClearPolicy()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             e.ClearPolicy();
         }
@@ -231,7 +231,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestEnableEnforce()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
             e.EnableEnforce(false);
             TestEnforce(e, "alice", "data1", "read", true);
@@ -257,7 +257,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestEnableLog()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv", true);
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv", true);
             // The log is enabled by default, so the above is the same with:
             // Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
@@ -284,7 +284,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestEnableAutoSave()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
             e.EnableAutoSave(false);
             // Because AutoSave is disabled, the policy change only affects the policy in Casbin enforcer,
@@ -324,7 +324,7 @@ namespace NetCasbin.Test
         public void TestInitWithAdapter()
         {
             IAdapter adapter = new DefaultFileAdapter("examples/basic_policy.csv");
-            Enforcer e = new Enforcer("examples/basic_model.conf", adapter);
+            var e = new Enforcer("examples/basic_model.conf", adapter);
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -339,7 +339,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestRoleLinks()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf");
+            var e = new Enforcer("examples/rbac_model.conf");
             e.EnableAutoBuildRoleLinks(false);
             e.BuildRoleLinks();
             e.Enforce("user501", "data9", "read");
@@ -348,8 +348,8 @@ namespace NetCasbin.Test
         [Fact]
         public void TestGetAndSetModel()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
-            Enforcer e2 = new Enforcer("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e2 = new Enforcer("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
 
             TestEnforce(e, "root", "data1", "read", false);
 
@@ -361,13 +361,13 @@ namespace NetCasbin.Test
         [Fact]
         public void TestGetAndSetAdapterInMem()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
-            Enforcer e2 = new Enforcer("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e2 = new Enforcer("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
 
-            IAdapter a2 = e2.GetAdapter();
+            var a2 = e2.GetAdapter();
             e.SetAdapter(a2);
             e.LoadPolicy();
 
@@ -378,7 +378,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestSetAdapterFromFile()
         {
-            Enforcer e = new Enforcer("examples/basic_model.conf");
+            var e = new Enforcer("examples/basic_model.conf");
 
             TestEnforce(e, "alice", "data1", "read", false);
 
@@ -392,9 +392,9 @@ namespace NetCasbin.Test
         [Fact]
         public void TestInitEmpty()
         {
-            Enforcer e = new Enforcer();
+            var e = new Enforcer();
 
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -412,9 +412,9 @@ namespace NetCasbin.Test
         [Fact]
         public void TestInitEmptyByInputStream()
         {
-            Enforcer e = new Enforcer();
+            var e = new Enforcer();
 
-            Model.Model m = CoreEnforcer.NewModel();
+            var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");

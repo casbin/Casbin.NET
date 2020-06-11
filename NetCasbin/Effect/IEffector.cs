@@ -14,6 +14,6 @@ namespace NetCasbin.Effect
         /// <param name="effects">the effects of all matched rules.</param>
         /// <param name="results">the matcher results of all matched rules.</param>
         /// <returns>the final effect.</returns>
-        Boolean MergeEffects(String expr, Effect[] effects, float[] results);
+        bool MergeEffects(string expr, Effect[] effects, float[] results);
     }
 }

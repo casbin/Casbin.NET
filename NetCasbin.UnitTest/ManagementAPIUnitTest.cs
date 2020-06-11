@@ -10,7 +10,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestGetPolicyAPI()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             TestGetPolicy(e, AsList(
                     AsList("alice", "data1", "read"),
@@ -52,7 +52,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestModifyPolicyAPI()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             TestGetPolicy(e, AsList(
                     AsList("alice", "data1", "read"),
@@ -66,7 +66,7 @@ namespace NetCasbin.Test
             e.AddPolicy("eve", "data3", "read");
             e.AddPolicy("eve", "data3", "read");
 
-            List<String> namedPolicy = AsList("eve", "data3", "read");
+            var namedPolicy = AsList("eve", "data3", "read");
             e.RemoveNamedPolicy("p", namedPolicy);
             e.AddNamedPolicy("p", namedPolicy);
 
@@ -83,7 +83,7 @@ namespace NetCasbin.Test
         [Fact]
         public void TestModifyGroupingPolicyAPI()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
@@ -94,7 +94,7 @@ namespace NetCasbin.Test
             e.AddGroupingPolicy("bob", "data1_admin");
             e.AddGroupingPolicy("eve", "data3_admin");
 
-            List<String> namedGroupingPolicy = AsList("alice", "data2_admin");
+            var namedGroupingPolicy = AsList("alice", "data2_admin");
             TestGetRoles(e, "alice", AsList());
             e.AddNamedGroupingPolicy("g", namedGroupingPolicy);
             TestGetRoles(e, "alice", AsList("data2_admin"));

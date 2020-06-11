@@ -12,7 +12,7 @@ namespace NetCasbin.Util
         /// <returns></returns>
         public static IPAddress GetNetworkMask(int networkPrefixLength)
         {
-            byte[] bytes = new byte[4];
+            var bytes = new byte[4];
             for (var i = 0; i < networkPrefixLength; i++)
             {
                 var index = i / 8;

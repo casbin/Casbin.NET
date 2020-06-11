@@ -8,13 +8,13 @@ namespace NetCasbin.Model
 {
     public class Policy
     {
-        public Dictionary<String, Dictionary<String, Assertion>> Model { set; get; }
+        public Dictionary<string, Dictionary<string, Assertion>> Model { set; get; }
 
         public void BuildRoleLinks(IRoleManager rm)
         {
             if (Model.ContainsKey("g"))
             {
-                foreach (Assertion ast in Model["g"].Values)
+                foreach (var ast in Model["g"].Values)
                 {
                     ast.BuildRoleLinks(rm);
                 }
@@ -27,7 +27,7 @@ namespace NetCasbin.Model
             {
                 foreach (var ast in Model["p"].Values)
                 {
-                    ast.Policy = new List<List<String>>();
+                    ast.Policy = new List<List<string>>();
                 }
             }
 
@@ -35,26 +35,26 @@ namespace NetCasbin.Model
             {
                 foreach (var ast in Model["p"].Values)
                 {
-                    ast.Policy = new List<List<String>>();
+                    ast.Policy = new List<List<string>>();
                 }
             }
         }
 
-        public List<List<String>> GetPolicy(String sec, String ptype)
+        public List<List<string>> GetPolicy(string sec, string ptype)
         {
             return Model[sec][ptype].Policy;
         }
 
-        public List<List<String>> GetFilteredPolicy(String sec, String ptype, int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            List<List<String>> res = new List<List<string>>();
+            var res = new List<List<string>>();
 
-            foreach (List<String> rule in Model[sec][ptype].Policy)
+            foreach (var rule in Model[sec][ptype].Policy)
             {
-                Boolean matched = true;
-                for (int i = 0; i < fieldValues.Length; i++)
+                var matched = true;
+                for (var i = 0; i < fieldValues.Length; i++)
                 {
-                    String fieldValue = fieldValues[i];
+                    var fieldValue = fieldValues[i];
                     if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
                     {
                         matched = false;
@@ -71,12 +71,12 @@ namespace NetCasbin.Model
             return res;
         }
 
-        public Boolean HasPolicy(String sec, String ptype, List<String> rule)
+        public bool HasPolicy(string sec, string ptype, List<string> rule)
         {
             return Model[sec][ptype]!=null && Model[sec][ptype].Policy.Any(x => Utility.ArrayEquals(rule, x));
         }
 
-        public Boolean AddPolicy(String sec, String ptype, List<String> rule)
+        public bool AddPolicy(string sec, string ptype, List<string> rule)
         {
             if (!HasPolicy(sec, ptype, rule))
             {
@@ -86,11 +86,11 @@ namespace NetCasbin.Model
             return false;
         }
 
-        public Boolean RemovePolicy(String sec, String ptype, List<String> rule)
+        public bool RemovePolicy(string sec, string ptype, List<string> rule)
         {
-            for (int i = 0; i < Model[sec][ptype].Policy.Count; i++)
+            for (var i = 0; i < Model[sec][ptype].Policy.Count; i++)
             {
-                List<String> r = Model[sec][ptype].Policy[i];
+                var r = Model[sec][ptype].Policy[i];
                 if (Utility.ArrayEquals(rule, r))
                 {
                     Model[sec][ptype].Policy.RemoveAt(i);
@@ -100,17 +100,17 @@ namespace NetCasbin.Model
             return false;
         }
 
-        public Boolean RemoveFilteredPolicy(String sec, String ptype, int fieldIndex, params string[] fieldValues)
+        public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            List<List<String>> tmp = new List<List<string>>();
-            Boolean res = false;
+            var tmp = new List<List<string>>();
+            var res = false;
 
-            foreach (List<String> rule in Model[sec][ptype].Policy)
+            foreach (var rule in Model[sec][ptype].Policy)
             {
-                Boolean matched = true;
-                for (int i = 0; i < fieldValues.Length; i++)
+                var matched = true;
+                for (var i = 0; i < fieldValues.Length; i++)
                 {
-                    String fieldValue = fieldValues[i];
+                    var fieldValue = fieldValues[i];
                     if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
                     {
                         matched = false;
@@ -132,11 +132,11 @@ namespace NetCasbin.Model
             return res;
         }
 
-        public List<String> GetValuesForFieldInPolicy(String sec, String ptype, int fieldIndex)
+        public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
         {
-            List<String> values = new List<string>();
+            var values = new List<string>();
 
-            foreach (List<String> rule in Model[sec][ptype].Policy)
+            foreach (var rule in Model[sec][ptype].Policy)
             {
                 values.Add(rule[fieldIndex]);
             }

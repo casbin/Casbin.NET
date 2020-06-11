@@ -17,19 +17,19 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(String modelPath, String policyFile) : this(modelPath, new DefaultFileAdapter(policyFile))
+        public Enforcer(string modelPath, string policyFile) : this(modelPath, new DefaultFileAdapter(policyFile))
         {
         }
 
-        public Enforcer(String modelPath, IAdapter adapter) : this(NewModel(modelPath, ""), adapter)
+        public Enforcer(string modelPath, IAdapter adapter) : this(NewModel(modelPath, ""), adapter)
         {
-            base.modelPath = modelPath;
+            this.modelPath = modelPath;
         }
 
         public Enforcer(Model.Model m, IAdapter adapter)
         {
             this.adapter = adapter;
-            this.watcher = null;
+            watcher = null;
 
             model = m;
             fm = FunctionMap.LoadFunctionMap();
@@ -47,39 +47,39 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(String modelPath) :
+        public Enforcer(string modelPath) :
             this(modelPath, "")
         {
         }
 
-        public Enforcer(String modelPath, String policyFile, Boolean enableLog) : this(modelPath, new DefaultFileAdapter(policyFile))
+        public Enforcer(string modelPath, string policyFile, bool enableLog) : this(modelPath, new DefaultFileAdapter(policyFile))
         {
         }
 
-        public List<String> GetRolesForUser(String name)
+        public List<string> GetRolesForUser(string name)
         {
             return model.Model["g"]["g"].RM.GetRoles(name);
         }
 
-        public List<String> GetUsersForRole(String name)
+        public List<string> GetUsersForRole(string name)
         {
             return model.Model["g"]["g"].RM.GetUsers(name);
         }
 
         public List<string> GetUsersForRoles(string[] names)
         {
-            List<string> userIds = new List<string>();
+            var userIds = new List<string>();
             foreach (var name in names)
                 userIds.AddRange(model.Model["g"]["g"].RM.GetUsers(name));
             return userIds;
         }
 
-        public Boolean HasRoleForUser(String name, String role)
+        public bool HasRoleForUser(string name, string role)
         {
-            List<String> roles = GetRolesForUser(name);
+            var roles = GetRolesForUser(name);
 
-            Boolean hasRole = false;
-            foreach (String r in roles)
+            var hasRole = false;
+            foreach (var r in roles)
             {
                 if (r.Equals(role))
                 {
@@ -91,17 +91,17 @@ namespace NetCasbin
             return hasRole;
         }
 
-        public Boolean AddRoleForUser(String user, String role)
+        public bool AddRoleForUser(string user, string role)
         {
             return AddGroupingPolicy(user, role);
         }
 
-        public Boolean DeleteRoleForUser(String user, String role)
+        public bool DeleteRoleForUser(string user, string role)
         {
             return RemoveGroupingPolicy(user, role);
         }
 
-        public Boolean DeleteRolesForUser(String user)
+        public bool DeleteRolesForUser(string user)
         {
             return RemoveFilteredGroupingPolicy(0, user);
         }
@@ -111,7 +111,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user"></param>
         /// <returns> Returns false if the user does not exist (aka not affected).</returns>
-        public Boolean DeleteUser(String user)
+        public bool DeleteUser(string user)
         {
             return RemoveFilteredGroupingPolicy(0, user);
         }
@@ -120,7 +120,7 @@ namespace NetCasbin
         /// DeleteRole deletes a role.
         /// </summary>
         /// <param name="role"></param>
-        public void DeleteRole(String role)
+        public void DeleteRole(string role)
         {
             RemoveFilteredGroupingPolicy(1, role);
             RemoveFilteredPolicy(0, role);
@@ -131,14 +131,14 @@ namespace NetCasbin
         /// </summary>
         /// <param name="permission"></param>
         /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public Boolean DeletePermission(params string[] permission)
+        public bool DeletePermission(params string[] permission)
         {
             return RemoveFilteredPolicy(1, permission);
         }
 
-        public Boolean DeletePermission(List<String> permission)
+        public bool DeletePermission(List<string> permission)
         {
-            return DeletePermission(permission.ToArray() ?? new String[0]);
+            return DeletePermission(permission.ToArray() ?? new string[0]);
         }
 
         /// <summary>
@@ -147,9 +147,9 @@ namespace NetCasbin
         /// <param name="user">user or role </param>
         /// <param name="permission"></param>
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public Boolean AddPermissionForUser(String user, params string[] permission)
+        public bool AddPermissionForUser(string user, params string[] permission)
         {
-            List<String> parameters = new List<string>
+            var parameters = new List<string>
             {
                 user
             };
@@ -157,9 +157,9 @@ namespace NetCasbin
             return AddPolicy(parameters);
         }
 
-        public Boolean AddPermissionForUser(String user, List<String> permission)
+        public bool AddPermissionForUser(string user, List<string> permission)
         {
-            return AddPermissionForUser(user, permission.ToArray() ?? new String[0]);
+            return AddPermissionForUser(user, permission.ToArray() ?? new string[0]);
         }
 
         /// <summary>
@@ -168,9 +168,9 @@ namespace NetCasbin
         /// <param name="user">user or role </param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public Boolean DeletePermissionForUser(String user, params string[] permission)
+        public bool DeletePermissionForUser(string user, params string[] permission)
         {
-            List<String> parameters = new List<string>
+            var parameters = new List<string>
             {
                 user
             };
@@ -184,9 +184,9 @@ namespace NetCasbin
         /// <param name="user">user or role </param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Boolean DeletePermissionForUser(String user, List<String> permission)
+        public bool DeletePermissionForUser(string user, List<string> permission)
         {
-            return DeletePermissionForUser(user, permission.ToArray() ?? new String[0]);
+            return DeletePermissionForUser(user, permission.ToArray() ?? new string[0]);
         }
 
         /// <summary>
@@ -194,7 +194,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user">user or role </param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Boolean DeletePermissionsForUser(String user)
+        public bool DeletePermissionsForUser(string user)
         {
             return RemoveFilteredPolicy(0, user);
         }
@@ -204,7 +204,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user">user or role </param>
         /// <returns></returns>
-        public List<List<String>> GetPermissionsForUser(String user)
+        public List<List<string>> GetPermissionsForUser(string user)
         {
             return GetFilteredPolicy(0, user);
         }
@@ -215,9 +215,9 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public Boolean HasPermissionForUser(String user, params string[] permission)
+        public bool HasPermissionForUser(string user, params string[] permission)
         {
-            List<String> parameters = new List<string>
+            var parameters = new List<string>
             {
                 user
             };
@@ -231,27 +231,27 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public Boolean HasPermissionForUser(String user, List<String> permission)
+        public bool HasPermissionForUser(string user, List<string> permission)
         {
-            return HasPermissionForUser(user, permission.ToArray() ?? new String[0]);
+            return HasPermissionForUser(user, permission.ToArray() ?? new string[0]);
         }
 
-        public List<String> GetRolesForUserInDomain(String name, String domain)
+        public List<string> GetRolesForUserInDomain(string name, string domain)
         {
             return model.Model["g"]["g"].RM.GetRoles(name, domain);
         }
 
-        public List<List<String>> GetPermissionsForUserInDomain(String user, String domain)
+        public List<List<string>> GetPermissionsForUserInDomain(string user, string domain)
         {
             return GetFilteredPolicy(0, user, domain);
         }
 
-        public Boolean AddRoleForUserInDomain(String user, String role, String domain)
+        public bool AddRoleForUserInDomain(string user, string role, string domain)
         {
             return AddGroupingPolicy(user, role, domain);
         }
 
-        public Boolean DeleteRoleForUserInDomain(String user, String role, String domain)
+        public bool DeleteRoleForUserInDomain(string user, string role, string domain)
         {
             return RemoveGroupingPolicy(user, role, domain);
         }
@@ -263,12 +263,12 @@ namespace NetCasbin
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<String> GetImplicitRolesForUser(String name, params string[] domain)
+        public List<string> GetImplicitRolesForUser(string name, params string[] domain)
         {
-            List<String> roles = this.rm.GetRoles(name, domain);
-            List<String> res = new List<string>();
+            var roles = rm.GetRoles(name, domain);
+            var res = new List<string>();
             res.AddRange(roles);
-            res.AddRange(roles.SelectMany(x => this.GetImplicitRolesForUser(x, domain)));
+            res.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
             return res;
         }
         /// <summary>
@@ -283,17 +283,17 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user"></param>
         /// <returns></returns>
-        public List<List<String>> GetImplicitPermissionsForUser(String user)
+        public List<List<string>> GetImplicitPermissionsForUser(string user)
         {
-            List<String> roles = new List<string>
+            var roles = new List<string>
             {
                 user
             };
-            roles.AddRange(this.GetImplicitRolesForUser(user));
-            List<List<String>> res = new List<List<string>>();
-            foreach (String n in roles)
+            roles.AddRange(GetImplicitRolesForUser(user));
+            var res = new List<List<string>>();
+            foreach (var n in roles)
             {
-                res.AddRange(this.GetPermissionsForUser(n));
+                res.AddRange(GetPermissionsForUser(n));
             }
             return res;
         }

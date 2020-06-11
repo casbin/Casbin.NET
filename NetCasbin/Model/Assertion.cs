@@ -22,7 +22,7 @@ namespace NetCasbin.Model
 
         public IRoleManager RM => _rm;
 
-        public List<List<String>> Policy
+        public List<List<string>> Policy
         {
             set => _policy = value;
             get => _policy;
@@ -30,14 +30,14 @@ namespace NetCasbin.Model
 
         public Assertion()
         {
-            _policy = new List<List<String>>();
-            this._rm = new DefaultRoleManager(0);
+            _policy = new List<List<string>>();
+            _rm = new DefaultRoleManager(0);
         }
 
         public void BuildRoleLinks(IRoleManager rm)
         {
             _rm = rm;
-            int count =  Value.ToCharArray().Count(x => x == '_');
+            var count =  Value.ToCharArray().Count(x => x == '_');
             foreach (var rule in _policy)
             {
                 if (count < 2)

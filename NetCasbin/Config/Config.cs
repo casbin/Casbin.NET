@@ -6,16 +6,16 @@ namespace NetCasbin.Config
 {
     public class Config
     {
-        private static readonly String DEFAULT_SECTION = "default";
-        private static readonly String DEFAULT_COMMENT = "#";
-        private static readonly String DEFAULT_COMMENT_SEM = ";";
+        private static readonly string DEFAULT_SECTION = "default";
+        private static readonly string DEFAULT_COMMENT = "#";
+        private static readonly string DEFAULT_COMMENT_SEM = ";";
 
         // Section:key=value
-        private readonly IDictionary<String, IDictionary<String, String>> _data;
+        private readonly IDictionary<string, IDictionary<string, string>> _data;
 
         private Config()
         {
-            _data = new Dictionary<String, IDictionary<String, String>>();
+            _data = new Dictionary<string, IDictionary<string, string>>();
         }
 
         /// <summary>
@@ -23,9 +23,9 @@ namespace NetCasbin.Config
         /// </summary>
         /// <param name="configFilePath">the path of the model file.</param>
         /// <returns>the constructor of Config.</returns>
-        public static Config NewConfig(String configFilePath)
+        public static Config NewConfig(string configFilePath)
         {
-            Config c = new Config();
+            var c = new Config();
             c.Parse(configFilePath);
             return c;
         }
@@ -35,9 +35,9 @@ namespace NetCasbin.Config
         /// </summary>
         /// <param name="text">the model text.</param>
         /// <returns> the constructor of Config.</returns>
-        public static Config NewConfigFromText(String text)
+        public static Config NewConfigFromText(string text)
         {
-            Config c = new Config();
+            var c = new Config();
             c.ParseBuffer(new StringReader(text));
             return c;
         }
@@ -58,17 +58,17 @@ namespace NetCasbin.Config
 
             if (!_data.ContainsKey(section))
             {
-                _data.Add(section, new Dictionary<String, String>());
+                _data.Add(section, new Dictionary<string, string>());
             }
 
-            Boolean ok = _data[section].ContainsKey(option);
+            var ok = _data[section].ContainsKey(option);
             _data[section].Add(option, value);
             return !ok;
         }
 
-        private void Parse(String configFilePath)
+        private void Parse(string configFilePath)
         {
-            using (StreamReader sr = new StreamReader(configFilePath))
+            using (var sr = new StreamReader(configFilePath))
             {
                 ParseBuffer(sr);
             }
@@ -76,9 +76,9 @@ namespace NetCasbin.Config
 
         private void ParseBuffer(TextReader reader)
         {
-            String section = "";
-            int lineNum = 0;
-            String line;
+            var section = "";
+            var lineNum = 0;
+            string line;
             while (true)
             {
                 lineNum++;
@@ -117,42 +117,42 @@ namespace NetCasbin.Config
                 }
                 else
                 {
-                    String[] optionVal = line.Split("=".ToCharArray(), 2);
+                    var optionVal = line.Split("=".ToCharArray(), 2);
                     if (optionVal.Length != 2)
                     {
                         throw new Exception(
-                                String.Format("parse the content error : line {0} , {1} = ? ", lineNum, optionVal[0]));
+                                string.Format("parse the content error : line {0} , {1} = ? ", lineNum, optionVal[0]));
                     }
-                    String option = optionVal[0].Trim();
-                    String value = optionVal[1].Trim();
+                    var option = optionVal[0].Trim();
+                    var value = optionVal[1].Trim();
                     AddConfig(section, option, value);
                 }
             }
         }
 
-        public Boolean GetBool(String key)
+        public bool GetBool(string key)
         {
-            return Boolean.Parse(Get(key));
+            return bool.Parse(Get(key));
         }
 
-        public int GetInt(String key)
+        public int GetInt(string key)
         {
             return int.Parse(Get(key));
         }
 
-        public float GetFloat(String key)
+        public float GetFloat(string key)
         {
             return float.Parse(Get(key));
         }
 
-        public String GetString(String key)
+        public string GetString(string key)
         {
             return Get(key);
         }
 
-        public String[] GetStrings(String key)
+        public string[] GetStrings(string key)
         {
-            String v = Get(key);
+            var v = Get(key);
             if (string.IsNullOrEmpty(v))
             {
                 return null;
@@ -160,18 +160,18 @@ namespace NetCasbin.Config
             return v.Split(',');
         }
 
-        public void Set(String key, String value)
+        public void Set(string key, string value)
         {
 
-            if (String.IsNullOrEmpty(key))
+            if (string.IsNullOrEmpty(key))
             {
                 throw new Exception("key is empty");
             }
 
-            String section = "";
-            String option;
+            var section = "";
+            string option;
 
-            String[] keys = key.ToLower().Split(new String[] { "::" }, StringSplitOptions.None);
+            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
             if (keys.Length >= 2)
             {
                 section = keys[0];
@@ -184,12 +184,12 @@ namespace NetCasbin.Config
             AddConfig(section, option, value);
         }
 
-        public String Get(String key)
+        public string Get(string key)
         {
-            String section;
-            String option;
+            string section;
+            string option;
 
-            String[] keys = key.ToLower().Split(new String[] { "::" }, StringSplitOptions.None);
+            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
             if (keys.Length >= 2)
             {
                 section = keys[0];
@@ -201,7 +201,7 @@ namespace NetCasbin.Config
                 option = keys[0];
             }
 
-            Boolean ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
+            var ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
             if (ok)
             {
                 return _data[section][option];

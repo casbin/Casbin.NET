@@ -10,14 +10,14 @@ namespace NetCasbin.Model
 
         public IDictionary<string, AbstractFunction> FunctionDict => _fm;
 
-        public void AddFunction(String name, AbstractFunction function)
+        public void AddFunction(string name, AbstractFunction function)
         {
             _fm.Add(name, function);
         }
 
         public static FunctionMap LoadFunctionMap()
         {
-            FunctionMap fm = new FunctionMap();
+            var fm = new FunctionMap();
             fm._fm = new Dictionary<string, AbstractFunction>();
             fm.AddFunction("keyMatch", new KeyMatchFunc());
             fm.AddFunction("keyMatch2", new KeyMatch2Func());

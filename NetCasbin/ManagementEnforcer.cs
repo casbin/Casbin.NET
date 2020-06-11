@@ -17,7 +17,7 @@ namespace NetCasbin
         ///  0-index elements of "p" policy rules. So make sure your subject
         ///  is the 0-index element, like (sub, obj, act). Duplicates are removed.
         /// </returns>
-        public List<String> GetAllSubjects()
+        public List<string> GetAllSubjects()
         {
             return GetAllNamedSubjects("p");
         }
@@ -30,7 +30,7 @@ namespace NetCasbin
         ///         collects the 0-index elements of the policy rules.So make sure
         ///         your subject is the 0-index element, like (sub, obj, act).
         //          Duplicates are removed.</returns>
-        public List<String> GetAllNamedSubjects(String ptype)
+        public List<string> GetAllNamedSubjects(string ptype)
         {
             return model.GetValuesForFieldInPolicy("p", ptype, 0);
         }
@@ -43,7 +43,7 @@ namespace NetCasbin
         /// 1-index elements of "p" policy rules.So make sure your object
         /// is the 1-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllObjects()
+        public List<string> GetAllObjects()
         {
             return GetAllNamedObjects("p");
         }
@@ -56,7 +56,7 @@ namespace NetCasbin
         /// collects the 1-index elements of the policy rules.So make sure
         /// your object is the 1-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllNamedObjects(String ptype)
+        public List<string> GetAllNamedObjects(string ptype)
         {
             return model.GetValuesForFieldInPolicy("p", ptype, 1);
         }
@@ -69,7 +69,7 @@ namespace NetCasbin
         /// the 2-index elements of "p" policy rules.So make sure your action
         /// is the 2-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllActions()
+        public List<string> GetAllActions()
         {
             return GetAllNamedActions("p");
         }
@@ -83,7 +83,7 @@ namespace NetCasbin
         /// collects the 2-index elements of the policy rules.So make sure
         /// your action is the 2-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllNamedActions(String ptype)
+        public List<string> GetAllNamedActions(string ptype)
         {
             return model.GetValuesForFieldInPolicy("p", ptype, 2);
         }
@@ -96,7 +96,7 @@ namespace NetCasbin
         /// the 1-index elements of "g" policy rules. So make sure your
         /// role is the 1-index element, like (sub, role).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllRoles()
+        public List<string> GetAllRoles()
         {
             return GetAllNamedRoles("g");
         }
@@ -110,7 +110,7 @@ namespace NetCasbin
         /// collects the 0-index elements of the policy rules.So make
         /// sure your subject is the 0-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
-        public List<String> GetAllNamedRoles(String ptype)
+        public List<string> GetAllNamedRoles(string ptype)
         {
             return model.GetValuesForFieldInPolicy("g", ptype, 1);
         }
@@ -119,7 +119,7 @@ namespace NetCasbin
         /// gets all the authorization rules in the policy.
         /// </summary>
         /// <returns> all the "p" policy rules.</returns>
-        public List<List<String>> GetPolicy()
+        public List<List<string>> GetPolicy()
         {
             return GetNamedPolicy("p");
         }
@@ -131,7 +131,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to  match this field.</param>
         /// <returns>the filtered "p" policy rules.</returns>
-        public List<List<String>> GetFilteredPolicy(int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
             return GetFilteredNamedPolicy("p", fieldIndex, fieldValues);
         }
@@ -141,7 +141,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <returns>the "p" policy rules of the specified ptype.</returns>
-        public List<List<String>> GetNamedPolicy(String ptype)
+        public List<List<string>> GetNamedPolicy(string ptype)
         {
             return model.GetPolicy("p", ptype);
         }
@@ -153,7 +153,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to  match this field.</param>
         /// <returns>the filtered "p" policy rules of the specified ptype.</returns>
-        public List<List<String>> GetFilteredNamedPolicy(String ptype, int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
             return model.GetFilteredPolicy("p", ptype, fieldIndex, fieldValues);
         }
@@ -162,7 +162,7 @@ namespace NetCasbin
         /// gets all the role inheritance rules in the policy.
         /// </summary>
         /// <returns>all the "g" policy rules.</returns>
-        public List<List<String>> GetGroupingPolicy()
+        public List<List<string>> GetGroupingPolicy()
         {
             return GetNamedGroupingPolicy("g");
         }
@@ -173,7 +173,7 @@ namespace NetCasbin
         /// <param name="fieldIndex"> the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>the filtered "g" policy rules.</returns>
-        public List<List<String>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
             return GetFilteredNamedGroupingPolicy("g", fieldIndex, fieldValues);
         }
@@ -183,7 +183,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
         /// <returns>the "g" policy rules of the specified ptype.</returns>
-        public List<List<String>> GetNamedGroupingPolicy(String ptype)
+        public List<List<string>> GetNamedGroupingPolicy(string ptype)
         {
             return model.GetPolicy("g", ptype);
         }
@@ -195,7 +195,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>the filtered "g" policy rules of the specified ptype.</returns>
-        public List<List<String>> GetFilteredNamedGroupingPolicy(String ptype, int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
             return model.GetFilteredPolicy("g", ptype, fieldIndex, fieldValues);
         }
@@ -205,7 +205,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="paramList">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasPolicy(List<String> paramList)
+        public bool HasPolicy(List<string> paramList)
         {
             return HasNamedPolicy("p", paramList);
         }
@@ -215,7 +215,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasPolicy(params string[] parmaters)
+        public bool HasPolicy(params string[] parmaters)
         {
             return HasPolicy(parmaters.ToList());
         }
@@ -226,7 +226,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="paramList">the "p" policy rule.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasNamedPolicy(String ptype, List<String> paramList)
+        public bool HasNamedPolicy(string ptype, List<string> paramList)
         {
             return model.HasPolicy("p", ptype, paramList);
         }
@@ -237,7 +237,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasNamedPolicy(String ptype, params string[] parmaters)
+        public bool HasNamedPolicy(string ptype, params string[] parmaters)
         {
             return HasNamedPolicy(ptype, parmaters.ToList());
         }
@@ -249,7 +249,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddPolicy(List<String> parmaters)
+        public bool AddPolicy(List<string> parmaters)
         {
             return AddNamedPolicy("p", parmaters);
         }
@@ -261,7 +261,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddPolicy(params string[] parmaters)
+        public bool AddPolicy(params string[] parmaters)
         {
             return AddPolicy(parmaters.ToList());
         }
@@ -274,7 +274,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddNamedPolicy(String ptype, List<String> parmaters)
+        public bool AddNamedPolicy(string ptype, List<string> parmaters)
         {
             return AddPolicy("p", ptype, parmaters);
         }
@@ -287,7 +287,7 @@ namespace NetCasbin
         /// <param name="ptype"> the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddNamedPolicy(String ptype, params string[] parmaters)
+        public bool AddNamedPolicy(string ptype, params string[] parmaters)
         {
             return AddNamedPolicy(ptype, parmaters.ToList());
         }
@@ -297,7 +297,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemovePolicy(List<String> parmaters)
+        public bool RemovePolicy(List<string> parmaters)
         {
             return RemoveNamedPolicy("p", parmaters);
         }
@@ -308,7 +308,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemovePolicy(params string[] parmaters)
+        public bool RemovePolicy(params string[] parmaters)
         {
             return RemovePolicy(parmaters.ToList());
         }
@@ -319,7 +319,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues"> the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
+        public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
             return RemoveFilteredNamedPolicy("p", fieldIndex, fieldValues);
         }
@@ -330,7 +330,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveNamedPolicy(String ptype, List<String> parmaters)
+        public bool RemoveNamedPolicy(string ptype, List<string> parmaters)
         {
             return RemovePolicy("p", ptype, parmaters);
         }
@@ -341,7 +341,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveNamedPolicy(String ptype, params string[] parmaters)
+        public bool RemoveNamedPolicy(string ptype, params string[] parmaters)
         {
             return RemoveNamedPolicy(ptype, parmaters.ToList());
         }
@@ -353,7 +353,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to  match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveFilteredNamedPolicy(String ptype, int fieldIndex, params string[] fieldValues)
+        public bool RemoveFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
             return RemoveFilteredPolicy("p", ptype, fieldIndex, fieldValues);
         }
@@ -363,7 +363,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters"> the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasGroupingPolicy(List<String> parmaters)
+        public bool HasGroupingPolicy(List<string> parmaters)
         {
             return HasNamedGroupingPolicy("g", parmaters);
         }
@@ -373,7 +373,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters"> the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasGroupingPolicy(params string[] parmaters)
+        public bool HasGroupingPolicy(params string[] parmaters)
         {
             return HasGroupingPolicy(parmaters.ToList());
         }
@@ -385,7 +385,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parmaters"> the "g" policy rule.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasNamedGroupingPolicy(String ptype, List<String> parmaters)
+        public bool HasNamedGroupingPolicy(string ptype, List<string> parmaters)
         {
             return model.HasPolicy("g", ptype, parmaters);
         }
@@ -397,7 +397,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parmaters"> the "g" policy rule.</param>
         /// <returns>whether the rule exists.</returns>
-        public Boolean HasNamedGroupingPolicy(String ptype, params string[] parmaters)
+        public bool HasNamedGroupingPolicy(string ptype, params string[] parmaters)
         {
             return HasNamedGroupingPolicy(ptype, parmaters.ToList());
         }
@@ -409,7 +409,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddGroupingPolicy(List<String> parmaters)
+        public bool AddGroupingPolicy(List<string> parmaters)
         {
             return AddNamedGroupingPolicy("g", parmaters);
         }
@@ -421,7 +421,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddGroupingPolicy(params string[] parmaters)
+        public bool AddGroupingPolicy(params string[] parmaters)
         {
             return AddGroupingPolicy(parmaters.ToList());
         }
@@ -434,9 +434,9 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parmaters">the "g" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddNamedGroupingPolicy(String ptype, List<String> parmaters)
+        public bool AddNamedGroupingPolicy(string ptype, List<string> parmaters)
         {
-            Boolean ruleAdded = AddPolicy("g", ptype, parmaters);
+            var ruleAdded = AddPolicy("g", ptype, parmaters);
 
             if (autoBuildRoleLinks)
             {
@@ -453,7 +453,7 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parmaters">the "g" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean AddNamedGroupingPolicy(String ptype, params string[] parmaters)
+        public bool AddNamedGroupingPolicy(string ptype, params string[] parmaters)
         {
             return AddNamedGroupingPolicy(ptype, parmaters.ToList());
         }
@@ -463,7 +463,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveGroupingPolicy(List<String> parmaters)
+        public bool RemoveGroupingPolicy(List<string> parmaters)
         {
             return RemoveNamedGroupingPolicy("g", parmaters);
         }
@@ -473,7 +473,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveGroupingPolicy(params string[] parmaters)
+        public bool RemoveGroupingPolicy(params string[] parmaters)
         {
             return RemoveGroupingPolicy(parmaters.ToList());
         }
@@ -485,7 +485,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
+        public bool RemoveFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
             return RemoveFilteredNamedGroupingPolicy("g", fieldIndex, fieldValues);
         }
@@ -497,9 +497,9 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveNamedGroupingPolicy(String ptype, List<String> parmaters)
+        public bool RemoveNamedGroupingPolicy(string ptype, List<string> parmaters)
         {
-            Boolean ruleRemoved = RemovePolicy("g", ptype, parmaters);
+            var ruleRemoved = RemovePolicy("g", ptype, parmaters);
 
             if (autoBuildRoleLinks)
             {
@@ -515,7 +515,7 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveNamedGroupingPolicy(String ptype, params string[] parmaters)
+        public bool RemoveNamedGroupingPolicy(string ptype, params string[] parmaters)
         {
             return RemoveNamedGroupingPolicy(ptype, parmaters.ToList());
         }
@@ -527,9 +527,9 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public Boolean RemoveFilteredNamedGroupingPolicy(String ptype, int fieldIndex, params string[] fieldValues)
+        public bool RemoveFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            Boolean ruleRemoved = RemoveFilteredPolicy("g", ptype, fieldIndex, fieldValues);
+            var ruleRemoved = RemoveFilteredPolicy("g", ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
@@ -543,7 +543,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="name">the name of the new function.</param>
         /// <param name="function">the function.</param>
-        public void AddFunction(String name, AbstractFunction function)
+        public void AddFunction(string name, AbstractFunction function)
         {
             fm.AddFunction(name, function);
         }
