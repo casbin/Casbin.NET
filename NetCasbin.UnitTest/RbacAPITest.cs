@@ -12,7 +12,7 @@ namespace NetCasbin.Test
         [Fact]
         public void Test_RoleAPI()
         {
-            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
             TestGetRoles(e, "data2_admin", AsList());

@@ -45,7 +45,7 @@ namespace NetCasbin
         /// <returns></returns>
         public static Model.Model NewModel()
         {
-            Model.Model m = new Model.Model();
+            var m = new Model.Model();
             return m;
         }
 
@@ -56,7 +56,7 @@ namespace NetCasbin
         /// <returns></returns>
         public static Model.Model NewModel(string text)
         {
-            Model.Model m = new Model.Model();
+            var m = new Model.Model();
             m.LoadModelFromText(text);
             return m;
         }
@@ -69,7 +69,7 @@ namespace NetCasbin
         /// <returns>the model.</returns>
         public static Model.Model NewModel(string modelPath, string unused)
         {
-            Model.Model m = new Model.Model();
+            var m = new Model.Model();
             if (!string.IsNullOrEmpty(modelPath))
             {
                 m.LoadModel(modelPath);
@@ -120,7 +120,7 @@ namespace NetCasbin
         public void SetWatcher(IWatcher watcher)
         {
             this.watcher = watcher;
-            watcher?.SetUpdateCallback(this.LoadPolicy);
+            watcher?.SetUpdateCallback(LoadPolicy);
         }
 
         /// <summary>
@@ -262,15 +262,15 @@ namespace NetCasbin
                 return true;
             }
 
-            string effect = model.Model["e"]["e"].Value;
+            var effect = model.Model["e"]["e"].Value;
             var rTokens = model.Model["r"]["r"]?.Tokens;
             var rTokensLen = rTokens?.Count();
-            int policyLen = model.Model["p"]["p"].Policy.Count;
+            var policyLen = model.Model["p"]["p"].Policy.Count;
             Effect.Effect[] policyEffects;
             float[] matcherResults;
             object result = null;
 
-            string expString = model.Model["m"]["m"].Value;
+            var expString = model.Model["m"]["m"].Value;
             Lambda expression = null;
             if (matcherMap.ContainsKey(expString))
             {
@@ -286,9 +286,9 @@ namespace NetCasbin
             {
                 policyEffects = new Effect.Effect[policyLen];
                 matcherResults = new float[policyLen];
-                for (int i = 0; i < policyLen; i++)
+                for (var i = 0; i < policyLen; i++)
                 {
-                    List<string> pvals = model.Model["p"]["p"].Policy[i];
+                    var pvals = model.Model["p"]["p"].Policy[i];
                     if (rTokensLen != rvals.Length)
                     {
                         throw new Exception($"invalid request size: expected {rTokensLen}, got {rvals.Length}, rvals: ${rvals}");
@@ -322,7 +322,7 @@ namespace NetCasbin
 
                     if (parameters.Any(x => x.Name == "p_eft"))
                     {
-                        string policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
+                        var policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
                         switch (policyEft)
                         {
                             case "allow":
@@ -371,7 +371,7 @@ namespace NetCasbin
         /// <param name="rvals"></param>
         private Lambda GetAndInitializeExpression(object[] rvals)
         {
-            string expString = model.Model["m"]["m"].Value;
+            var expString = model.Model["m"]["m"].Value;
             var parameters = GetParameters(rvals);
             var interpreter = GetAndInitializeInterpreter();
             var parsedExpression = interpreter.Parse(expString, parameters);
@@ -383,10 +383,10 @@ namespace NetCasbin
         /// </summary>
         private Interpreter GetAndInitializeInterpreter()
         {
-            Dictionary<string, AbstractFunction> functions = new Dictionary<string, AbstractFunction>();
+            var functions = new Dictionary<string, AbstractFunction>();
             foreach (var entry in fm.FunctionDict)
             {
-                string key = entry.Key;
+                var key = entry.Key;
                 var function = entry.Value;
                 functions.Add(key, function);
             }
@@ -395,9 +395,9 @@ namespace NetCasbin
             {
                 foreach (var entry in model.Model["g"])
                 {
-                    string key = entry.Key;
-                    Assertion ast = entry.Value;
-                    IRoleManager rm = ast.RM;
+                    var key = entry.Key;
+                    var ast = entry.Value;
+                    var rm = ast.RM;
                     functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
                 }
             }
@@ -414,15 +414,15 @@ namespace NetCasbin
         {
             var rTokens = model.Model["r"]["r"]?.Tokens;
             var rTokensLen = rTokens?.Count();
-            Dictionary<string, object> parameters = new Dictionary<string, object>();
-            for (int i = 0; i < rTokensLen; i++)
+            var parameters = new Dictionary<string, object>();
+            for (var i = 0; i < rTokensLen; i++)
             {
-                string token = rTokens[i];
+                var token = rTokens[i];
                 parameters.Add(token, rvals[i]);
             }
             for (int i = 0, length = model.Model["p"]["p"].Tokens.Length; i < length; i++)
             {
-                string token = model.Model["p"]["p"].Tokens[i];
+                var token = model.Model["p"]["p"].Tokens[i];
                 if (pvals == null)
                 {
                     parameters.Add(token, "");

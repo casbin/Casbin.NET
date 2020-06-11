@@ -17,9 +17,9 @@ namespace NetCasbin.Util
         /// <param name="key1">the first argument.</param>
         /// <param name="key2">the second argument.</param>
         /// <returns>whether key1 matches key2.</returns>
-        public static Boolean KeyMatch(string key1, string key2)
+        public static bool KeyMatch(string key1, string key2)
         {
-            int i = key2.IndexOf('*');
+            var i = key2.IndexOf('*');
 
             if (i == -1)
             {
@@ -45,7 +45,7 @@ namespace NetCasbin.Util
         {
             key2 = key2.Replace("/*", "/.*");
 
-            Regex regex = new Regex("(.*):[^/]+(.*)");
+            var regex = new Regex("(.*):[^/]+(.*)");
 
             while (true)
             {
@@ -71,7 +71,7 @@ namespace NetCasbin.Util
         {
             key2 = key2.Replace("/*", "/.*");
 
-            Regex regex = new Regex("(.*)\\{[^/]+\\}(.*)");
+            var regex = new Regex("(.*)\\{[^/]+\\}(.*)");
             while (true)
             {
                 if (!key2.Contains("/{"))
@@ -94,8 +94,8 @@ namespace NetCasbin.Util
         /// <returns>whether ip1 matches ip2.</returns>
         public static bool IPMatch(string ip1, string ip2)
         {
-            string rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
-            Regex rgx = new Regex(rgxString);
+            var rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
+            var rgx = new Regex(rgxString);
             if (!rgx.IsMatch(ip1))
             {
                 throw new Exception("invalid argument: ip1 in IPMatch() function is not an IP address.");
@@ -106,10 +106,10 @@ namespace NetCasbin.Util
             }
 
             var ip1Splits = ip1.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-            IPAddress address1 = IPAddress.Parse(ip1Splits[0]);
+            var address1 = IPAddress.Parse(ip1Splits[0]);
 
             var ip2Splits = ip2.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-            IPAddress address2 = IPAddress.Parse(ip2Splits[0]);
+            var address2 = IPAddress.Parse(ip2Splits[0]);
             if (ip2Splits.Length == 2)
             {
                 var maskLength = int.Parse(ip2Splits[1]);
@@ -130,7 +130,7 @@ namespace NetCasbin.Util
         /// <param name="key1">the first argument.</param>
         /// <param name="key2">the second argument.</param>
         /// <returns>whether key1 matches key2.</returns>
-        public static Boolean RegexMatch(String key1, String key2)
+        public static bool RegexMatch(string key1, string key2)
         {
             return Regex.Match(key1, key2).Success;
         }
@@ -154,7 +154,7 @@ namespace NetCasbin.Util
                 else
                 {
                     bool res;
-                    if (!String.IsNullOrEmpty(domain))
+                    if (!string.IsNullOrEmpty(domain))
                     {
                         res = rm.HasLink(arg1, arg2, domain);
                         return res;

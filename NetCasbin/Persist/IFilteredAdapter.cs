@@ -6,6 +6,6 @@ namespace NetCasbin.Persist
     {
         void LoadFilteredPolicy(Model.Model model, Filter filter);
 
-        Boolean IsFiltered { get; }
+        bool IsFiltered { get; }
     }
 }

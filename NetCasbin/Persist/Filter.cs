@@ -7,6 +7,6 @@ namespace NetCasbin.Persist
     {
         public IEnumerable<string> G { set; get; }
 
-        public IEnumerable<String> P { set; get; }
+        public IEnumerable<string> P { set; get; }
     }
 }

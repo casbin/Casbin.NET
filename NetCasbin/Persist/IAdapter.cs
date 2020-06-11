@@ -14,12 +14,12 @@ namespace NetCasbin.Persist
 
         Task SavePolicyAsync(Model.Model model);
 
-        void AddPolicy(String sec, String ptype, IList<String> rule);
+        void AddPolicy(string sec, string ptype, IList<string> rule);
 
-        Task AddPolicyAsync(String sec, String ptype, IList<String> rule);
+        Task AddPolicyAsync(string sec, string ptype, IList<string> rule);
 
-        void RemovePolicy(String sec, String ptype, IList<String> rule);
+        void RemovePolicy(string sec, string ptype, IList<string> rule);
 
-        void RemoveFilteredPolicy(String sec, String ptype, int fieldIndex, params string[] fieldValues);
+        void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues);
     }
 }

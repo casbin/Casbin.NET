@@ -14,7 +14,7 @@ namespace NetCasbin.Rbac
 
         public Role(string name)
         {
-            this._name = name;
+            _name = name;
         }
 
         public string Name
@@ -25,25 +25,25 @@ namespace NetCasbin.Rbac
 
         public void AddRole(Role role)
         {
-            if (this._roles.ContainsKey(role.Name))
+            if (_roles.ContainsKey(role.Name))
             {
                 return;
             }
 
-            this._roles.Add(role.Name, role);
+            _roles.Add(role.Name, role);
         }
 
         public void DeleteRole(Role role)
         {
-            if (this._roles.ContainsKey(role._name))
+            if (_roles.ContainsKey(role._name))
             {
-                this._roles.Remove(role.Name);
+                _roles.Remove(role.Name);
             }
         }
 
         public bool HasRole(string roleName, int hierarchyLevel)
         {
-            if (this._name == roleName)
+            if (_name == roleName)
             {
                 return true;
             }
@@ -53,7 +53,7 @@ namespace NetCasbin.Rbac
                 return false;
             }
 
-            foreach (Role role in this._roles.Values)
+            foreach (var role in _roles.Values)
             {
                 if (role.HasRole(roleName, hierarchyLevel - 1))
                 {
@@ -66,17 +66,17 @@ namespace NetCasbin.Rbac
 
         public bool HasDirectRole(string roleName)
         {
-            return this._roles.ContainsKey(roleName);
+            return _roles.ContainsKey(roleName);
         }
 
         public List<string> GetRoles()
         {
-            return this._roles.Select(x => x.Key).ToList();
+            return _roles.Select(x => x.Key).ToList();
         }
 
         public override string ToString()
         {
-            return $"{_name}{string.Join(",", this._roles)}";
+            return $"{_name}{string.Join(",", _roles)}";
         }
     }
 }

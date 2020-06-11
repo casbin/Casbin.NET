@@ -6,7 +6,7 @@ namespace NetCasbin.Model
 {
     public class Model : Policy
     {
-        private static readonly IDictionary<string, string> sectionNameMap = new Dictionary<string, string>() {
+        private static readonly IDictionary<string, string> SectionNameMap = new Dictionary<string, string>() {
             { "r", "request_definition"},
             { "p", "policy_definition"},
             { "g", "role_definition"},
@@ -16,14 +16,14 @@ namespace NetCasbin.Model
 
         public Model()
         {
-            Model = new Dictionary<String, Dictionary<String, Assertion>>();
+            Model = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
-        private Boolean LoadAssertion(Config.Config cfg, String sec, String key)
+        private bool LoadAssertion(Config.Config cfg, string sec, string key)
         {
-            var secName = sectionNameMap[sec];
-            String value = cfg.GetString($"{secName}::{key}");
-            return this.AddDef(sec, key, value);
+            var secName = SectionNameMap[sec];
+            var value = cfg.GetString($"{secName}::{key}");
+            return AddDef(sec, key, value);
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace NetCasbin.Model
         /// <returns>succeeds or not.</returns>
         public bool AddDef(string sec, string key, string value)
         {
-            Assertion ast = new Assertion
+            var ast = new Assertion
             {
                 Key = key,
                 Value = value
@@ -49,7 +49,7 @@ namespace NetCasbin.Model
             if (sec.Equals("r") || sec.Equals("p"))
             {
                 var tokens = ast.Value.Split(new string[] { ", " }, StringSplitOptions.None);
-                for (int i = 0; i < tokens.Length; i++)
+                for (var i = 0; i < tokens.Length; i++)
                 {
                     tokens[i] = $"{key}_{tokens[i]}";
                 }
@@ -62,7 +62,7 @@ namespace NetCasbin.Model
 
             if (!Model.ContainsKey(sec))
             {
-                var assertionMap = new Dictionary<String, Assertion>
+                var assertionMap = new Dictionary<string, Assertion>
                 {
                     [key] = ast
                 };
@@ -75,7 +75,7 @@ namespace NetCasbin.Model
             return true;
         }
 
-        private String GetKeySuffix(int i)
+        private string GetKeySuffix(int i)
         {
             if (i == 1)
             {
@@ -84,9 +84,9 @@ namespace NetCasbin.Model
             return i.ToString();
         }
 
-        private void LoadSection(Config.Config cfg, String sec)
+        private void LoadSection(Config.Config cfg, string sec)
         {
-            int i = 1;
+            var i = 1;
             while (true)
             {
                 if (!LoadAssertion(cfg, sec, sec + GetKeySuffix(i)))
@@ -100,9 +100,9 @@ namespace NetCasbin.Model
             }
         }
 
-        public void LoadModel(String path)
+        public void LoadModel(string path)
         {
-            Config.Config cfg = Config.Config.NewConfig(path);
+            var cfg = Config.Config.NewConfig(path);
 
             LoadSection(cfg, "r");
             LoadSection(cfg, "p");
@@ -111,9 +111,9 @@ namespace NetCasbin.Model
             LoadSection(cfg, "g");
         }
 
-        public void LoadModelFromText(String text)
+        public void LoadModelFromText(string text)
         {
-            Config.Config cfg = Config.Config.NewConfigFromText(text);
+            var cfg = Config.Config.NewConfigFromText(text);
 
             LoadSection(cfg, "r");
             LoadSection(cfg, "p");

@@ -16,12 +16,12 @@ namespace NetCasbin.Effect
         /// <returns></returns>
         public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
-            bool result = false;
+            var result = false;
             if (expr.Equals("some(where (p_eft == allow))"))
             {
                 foreach (var eft in effects)
                 {
-                    if (eft == NetCasbin.Effect.Effect.Allow)
+                    if (eft == Effect.Allow)
                     {
                         result = true;
                         break;
@@ -34,7 +34,7 @@ namespace NetCasbin.Effect
 
                 foreach (var eft in effects)
                 {
-                    if (eft == NetCasbin.Effect.Effect.Deny)
+                    if (eft == Effect.Deny)
                     {
                         result = false;
                         break;
@@ -46,11 +46,11 @@ namespace NetCasbin.Effect
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft == NetCasbin.Effect.Effect.Allow)
+                    if (eft == Effect.Allow)
                     {
                         result = true;
                     }
-                    else if (eft == NetCasbin.Effect.Effect.Deny)
+                    else if (eft == Effect.Deny)
                     {
                         result = false;
                         break;
@@ -62,9 +62,9 @@ namespace NetCasbin.Effect
                 result = false;
                 foreach (var eft in effects)
                 {
-                    if (eft != NetCasbin.Effect.Effect.Indeterminate)
+                    if (eft != Effect.Indeterminate)
                     {
-                        if (eft == NetCasbin.Effect.Effect.Allow)
+                        if (eft == Effect.Allow)
                         {
                             result = true;
                         }

@@ -7,7 +7,7 @@ namespace NetCasbin.Persist
     {
         public delegate void LoadPolicyLineHandler<T, U>(T t, U u);
 
-        public static void LoadPolicyLine(String line, Model.Model model)
+        public static void LoadPolicyLine(string line, Model.Model model)
         {
             if (string.IsNullOrEmpty(line))
             {
@@ -19,10 +19,10 @@ namespace NetCasbin.Persist
                 return;
             }
 
-            string[] tokens = line.Split(',').Select(x => x.Trim()).ToArray();
+            var tokens = line.Split(',').Select(x => x.Trim()).ToArray();
 
-            string key = tokens[0];
-            string sec = key.Substring(0, 1);
+            var key = tokens[0];
+            var sec = key.Substring(0, 1);
 
             if (model.Model.ContainsKey(sec))
             {
