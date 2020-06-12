@@ -98,7 +98,7 @@ namespace NetCasbin.Config
                 }
                 catch (IOException e)
                 {
-                    throw new Exception("IO error occurred");
+                    throw new IOException("IO error occurred", e);
                 }
 
                 line = line.Trim();
