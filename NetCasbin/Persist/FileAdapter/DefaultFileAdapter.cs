@@ -28,7 +28,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
             catch (IOException e)
             {
-                throw new Exception("File adapter init error");
+                throw new IOException("File adapter init error", e);
             }
         }
 
