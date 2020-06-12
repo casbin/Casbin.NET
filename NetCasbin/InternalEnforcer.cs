@@ -17,34 +17,33 @@ namespace NetCasbin
         /// <returns></returns>
         protected bool AddPolicy(string sec, string ptype, List<string> rule)
         {
-            var ruleAdded = model.AddPolicy(sec, ptype, rule);
-            if (!ruleAdded)
+            if (model.HasPolicy(sec, ptype, rule))
             {
                 return false;
-            } 
+            }
 
             if (adapter != null && autoSave)
             {
+                bool adapterAdded;
                 try
                 {
                     adapter.AddPolicy(sec, ptype, rule);
+                    adapterAdded = true;
                 }
-                catch (NotImplementedException e)
-                {
-
-                }
-                catch (Exception e)
-                {
-                    throw e;
-                }
-
-                if (watcher != null)
+                catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    watcher.Update();
+                    adapterAdded = false;
+                }
+
+                if (adapterAdded)
+                {
+                    watcher?.Update();
                 }
             }
-            return true;
+
+            var ruleAdded = model.AddPolicy(sec, ptype, rule);
+            return ruleAdded;
         }
 
         /// <summary>
@@ -56,32 +55,28 @@ namespace NetCasbin
         /// <returns></returns>
         protected bool RemovePolicy(string sec, string ptype, List<string> rule)
         {
-            var ruleRemoved = model.RemovePolicy(sec, ptype, rule);
-            if (!ruleRemoved)
-            {
-                return false;
-            }
-
             if (adapter != null && autoSave)
             {
+                bool adapterRemoved;
                 try
                 {
                     adapter.RemovePolicy(sec, ptype, rule);
+                    adapterRemoved = true;
                 }
-                catch (NotImplementedException e)
-                { }
-                catch (Exception e)
-                {
-                    throw e;
-                }
-
-                if (watcher != null)
+                catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    watcher.Update();
+                    adapterRemoved = false;
+                }
+
+                if (adapterRemoved)
+                {
+                    watcher?.Update();
                 }
             }
-            return true;
+
+            var ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            return ruleRemoved;
         }
 
         /// <summary>
@@ -94,32 +89,28 @@ namespace NetCasbin
         /// <returns></returns>
         protected bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
-            if (!ruleRemoved)
-            {
-                return false;
-            }
-
             if (adapter != null && autoSave)
             {
+                bool adapterRemoved;
                 try
                 {
                     adapter.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+                    adapterRemoved = true;
                 }
-                catch (NotImplementedException e)
-                { }
-                catch (Exception e)
-                {
-                    throw e;
-                }
-
-                if (watcher != null)
+                catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    watcher.Update();
+                    adapterRemoved = false;
+                }
+
+                if (adapterRemoved)
+                {
+                    watcher?.Update();
                 }
             }
-            return true;
+
+            var ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            return ruleRemoved;
         }
     }
 }
