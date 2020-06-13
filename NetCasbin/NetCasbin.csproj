@@ -8,21 +8,21 @@
     <RepositoryType>GIT</RepositoryType>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <Version>1.2.6</Version>
+    <Version>1.2.7</Version>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.6.0</AssemblyVersion>
+    <AssemblyVersion>1.2.7.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.2.6.0</FileVersion>
+    <FileVersion>1.2.7.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Casbin.NET</PackageId>
     <PackageIcon>casbin.png</PackageIcon>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageReleaseNotes>support .net 4.5 and netstandard2.0</PackageReleaseNotes>
+    <PackageReleaseNotes>Change update policy workflow；</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/casbin-net/Casbin.NET</PackageProjectUrl>
   </PropertyGroup>
 
