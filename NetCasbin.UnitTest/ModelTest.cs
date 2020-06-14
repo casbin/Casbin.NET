@@ -1,14 +1,14 @@
-﻿using NetCasbin.Rbac;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using NetCasbin.Rbac;
 using Xunit;
 
-namespace NetCasbin.Test
+namespace NetCasbin.UnitTest
 {
     public class ModelTest : TestUtil
     {
         [Fact]
-        public void Test_BasicModel()
+        public void TestBasicModel()
         {
             var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
 
@@ -23,7 +23,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_BasicModelNoPolicy()
+        public void TestBasicModelNoPolicy()
         {
             var e = new Enforcer("examples/basic_model.conf");
 
@@ -38,7 +38,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_BasicModelWithRoot()
+        public void TestBasicModelWithRoot()
         {
             var e = new Enforcer("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
 
@@ -57,7 +57,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_BasicModelWithRootNoPolicy()
+        public void TestBasicModelWithRootNoPolicy()
         {
             var e = new Enforcer("examples/basic_with_root_model.conf");
 
@@ -76,7 +76,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_BasicModelWithoutUsers()
+        public void TestBasicModelWithoutUsers()
         {
             var e = new Enforcer("examples/basic_without_users_model.conf", "examples/basic_without_users_policy.csv");
 
@@ -87,7 +87,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_BasicModelWithoutResources()
+        public void TestBasicModelWithoutResources()
         {
             var e = new Enforcer("examples/basic_without_resources_model.conf", "examples/basic_without_resources_policy.csv");
 
@@ -98,7 +98,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModel()
+        public void TestRBACModel()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -113,7 +113,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithResourceRoles()
+        public void TestRBACModelWithResourceRoles()
         {
             var e = new Enforcer("examples/rbac_with_resource_roles_model.conf", "examples/rbac_with_resource_roles_policy.csv");
 
@@ -128,7 +128,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithDomains()
+        public void TestRBACModelWithDomains()
         {
             var e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
 
@@ -143,7 +143,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithDomainsAtRuntime()
+        public void TestRBACModelWithDomainsAtRuntime()
         {
             var e = new Enforcer("examples/rbac_with_domains_model.conf");
 
@@ -190,7 +190,54 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithDeny()
+        public async Task TestRBACModelWithDomainsAtRuntimeAsync()
+        {
+            var e = new Enforcer("examples/rbac_with_domains_model.conf");
+
+            await e.AddPolicyAsync("admin", "domain1", "data1", "read");
+            await e.AddPolicyAsync("admin", "domain1", "data1", "write");
+            await e.AddPolicyAsync("admin", "domain2", "data2", "read");
+            await e.AddPolicyAsync("admin", "domain2", "data2", "write");
+
+            await e.AddGroupingPolicyAsync("alice", "admin", "domain1");
+            await e.AddGroupingPolicyAsync("bob", "admin", "domain2");
+
+            TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
+            TestDomainEnforce(e, "alice", "domain1", "data1", "write", true);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+
+            // Remove all policy rules related to domain1 and data1.
+            await e.RemoveFilteredPolicyAsync(1, "domain1", "data1");
+
+            TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
+            TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+
+            // Remove the specified policy rule.
+            await e.RemovePolicyAsync("admin", "domain2", "data2", "read");
+
+            TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
+            TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
+            TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
+            TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "read", false);
+            TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        }
+
+        [Fact]
+        public void TestRBACModelWithDeny()
         {
             var e = new Enforcer("examples/rbac_with_deny_model.conf", "examples/rbac_with_deny_policy.csv");
 
@@ -205,7 +252,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithOnlyDeny()
+        public void TestRBACModelWithOnlyDeny()
         {
             var e = new Enforcer("examples/rbac_with_not_deny_model.conf", "examples/rbac_with_deny_policy.csv");
 
@@ -213,7 +260,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithCustomData()
+        public void TestRBACModelWithCustomData()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -247,7 +294,41 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RBACModelWithCustomRoleManager()
+        public async Task TestRBACModelWithCustomDataAsync()
+        {
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+
+            // You can add custom data to a grouping policy, Casbin will ignore it. It is only meaningful to the caller.
+            // This feature can be used to store information like whether "bob" is an end user (so no subject will inherit "bob")
+            // For Casbin, it is equivalent to: e.addGroupingPolicy("bob", "data2_admin")
+            await e.AddGroupingPolicyAsync("bob", "data2_admin", "custom_data");
+
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", true);
+            TestEnforce(e, "bob", "data2", "write", true);
+
+            // You should also take the custom data as a parameter when deleting a grouping policy.
+            // e.removeGroupingPolicy("bob", "data2_admin") won't work.
+            // Or you can remove it by using removeFilteredGroupingPolicy().
+            await e.RemoveGroupingPolicyAsync("bob", "data2_admin", "custom_data");
+
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
+        }
+
+        [Fact]
+        public void TestRBACModelWithCustomRoleManager()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
             e.SetRoleManager(new CustomRoleManager());
@@ -265,7 +346,25 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_ABACModel()
+        public async Task TestRBACModelWithCustomRoleManagerAsync()
+        {
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            e.SetRoleManager(new CustomRoleManager());
+            e.LoadModel();
+            await e.LoadPolicyAsync();
+
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
+        }
+
+        [Fact]
+        public void TestABACModel()
         {
             var e = new Enforcer("examples/abac_model.conf");
 
@@ -283,7 +382,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_KeyMatchModel()
+        public void TestKeyMatchModel()
         {
             var e = new Enforcer("examples/keymatch_model.conf", "examples/keymatch_policy.csv");
 
@@ -311,7 +410,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_PriorityModelIndeterminate()
+        public void TestPriorityModelIndeterminate()
         {
             var e = new Enforcer("examples/priority_model.conf", "examples/priority_indeterminate_policy.csv");
 
@@ -319,7 +418,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_PriorityModel()
+        public void TestPriorityModel()
         {
             var e = new Enforcer("examples/priority_model.conf", "examples/priority_policy.csv");
 
@@ -334,7 +433,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_KeyMatch2Model()
+        public void TestKeyMatch2Model()
         {
             var e = new Enforcer("examples/keymatch2_model.conf", "examples/keymatch2_policy.csv");
 
@@ -345,11 +444,19 @@ namespace NetCasbin.Test
         }
 
 
-        public class CustomRoleManager : IRoleManager {
+        public class CustomRoleManager : IRoleManager
+        {
+            public void Clear()
+            {
+            }
 
-            public void Clear() { }
-            public void AddLink(string name1, string name2, params string[] domain) { }
-            public void DeleteLink(string name1, string name2, params string[] domain) { }
+            public void AddLink(string name1, string name2, params string[] domain)
+            {
+            }
+
+            public void DeleteLink(string name1, string name2, params string[] domain)
+            {
+            }
 
             public bool HasLink(string name1, string name2, params string[] domain)
             {
@@ -368,8 +475,8 @@ namespace NetCasbin.Test
                 return false;
             }
 
-            public List<string> GetRoles(string name, params string[] domain) { return null; }
-            public List<string> GetUsers(string name, params string[] domain) { return null; }
+            public List<string> GetRoles(string name, params string[] domain) => null;
+            public List<string> GetUsers(string name, params string[] domain) => null;
         }
 
         public class TestResource
@@ -385,8 +492,6 @@ namespace NetCasbin.Test
                 this.name = name;
                 this.owner = owner;
             }
-
         }
-
     }
 }

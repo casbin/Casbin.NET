@@ -1,12 +1,12 @@
 using NetCasbin.Util;
 using Xunit;
 
-namespace NetCasbin.Test
+namespace NetCasbin.UnitTest
 {
     public class UtilsTest
     {
         [Fact]
-        public void Test_EscapeAssertion()
+        public void TestEscapeAssertion()
         {
             Assert.Equal("r_attr.value == p_attr", Utility.EscapeAssertion("r.attr.value == p.attr"));
             Assert.Equal("r_attp.value || p_attr", Utility.EscapeAssertion("r.attp.value || p.attr"));
@@ -24,7 +24,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void Test_RemoveComments()
+        public void TestRemoveComments()
         {
             Assert.Equal("r.act == p.act", Utility.RemoveComments("r.act == p.act # comments"));
             Assert.Equal("r.act == p.act", Utility.RemoveComments("r.act == p.act#comments"));

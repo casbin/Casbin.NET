@@ -1,14 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using Xunit;
 
-namespace NetCasbin.Test
+namespace NetCasbin.UnitTest
 {
-    public class ManagementAPIUnitTest : TestUtil
+    public class ManagementApiUnitTest : TestUtil
     {
         [Fact]
-        public void TestGetPolicyAPI()
+        public void TestGetPolicyApi()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -50,7 +49,7 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void TestModifyPolicyAPI()
+        public void TestModifyPolicy()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -81,7 +80,38 @@ namespace NetCasbin.Test
         }
 
         [Fact]
-        public void TestModifyGroupingPolicyAPI()
+        public async Task TestModifyPolicyAsync()
+        {
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+
+            TestGetPolicy(e, AsList(
+                AsList("alice", "data1", "read"),
+                AsList("bob", "data2", "write"),
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write")));
+
+            await e.RemovePolicyAsync("alice", "data1", "read");
+            await e.RemovePolicyAsync("bob", "data2", "write");
+            await e.RemovePolicyAsync("alice", "data1", "read");
+            await e.AddPolicyAsync("eve", "data3", "read");
+            await e.AddPolicyAsync("eve", "data3", "read");
+
+            var namedPolicy = AsList("eve", "data3", "read");
+            await e.RemoveNamedPolicyAsync("p", namedPolicy);
+            await e.AddNamedPolicyAsync("p", namedPolicy);
+
+            TestGetPolicy(e, AsList(
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write"),
+                AsList("eve", "data3", "read")));
+
+            await e.RemoveFilteredPolicyAsync(1, "data2");
+
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
+        }
+
+        [Fact]
+        public void TestModifyGroupingPolicy()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
@@ -110,6 +140,47 @@ namespace NetCasbin.Test
             TestGetUsers(e, "data3_admin", AsList("eve"));
 
             e.RemoveFilteredGroupingPolicy(0, "bob");
+
+            TestGetRoles(e, "alice", AsList());
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "eve", AsList("data3_admin"));
+            TestGetRoles(e, "non_exist", AsList());
+
+            TestGetUsers(e, "data1_admin", AsList());
+            TestGetUsers(e, "data2_admin", AsList());
+            TestGetUsers(e, "data3_admin", AsList("eve"));
+        }
+
+        [Fact]
+        public async Task TestModifyGroupingPolicyAsync()
+        {
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+
+            TestGetRoles(e, "alice", AsList("data2_admin"));
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "eve", AsList());
+            TestGetRoles(e, "non_exist", AsList());
+
+            await e.RemoveGroupingPolicyAsync("alice", "data2_admin");
+            await e.AddGroupingPolicyAsync("bob", "data1_admin");
+            await e.AddGroupingPolicyAsync("eve", "data3_admin");
+
+            var namedGroupingPolicy = AsList("alice", "data2_admin");
+            TestGetRoles(e, "alice", AsList());
+            await e.AddNamedGroupingPolicyAsync("g", namedGroupingPolicy);
+            TestGetRoles(e, "alice", AsList("data2_admin"));
+            await e.RemoveNamedGroupingPolicyAsync("g", namedGroupingPolicy);
+
+            TestGetRoles(e, "alice", AsList());
+            TestGetRoles(e, "bob", AsList("data1_admin"));
+            TestGetRoles(e, "eve", AsList("data3_admin"));
+            TestGetRoles(e, "non_exist", AsList());
+
+            TestGetUsers(e, "data1_admin", AsList("bob"));
+            TestGetUsers(e, "data2_admin", AsList());
+            TestGetUsers(e, "data3_admin", AsList("eve"));
+
+            await e.RemoveFilteredGroupingPolicyAsync(0, "bob");
 
             TestGetRoles(e, "alice", AsList());
             TestGetRoles(e, "bob", AsList());
