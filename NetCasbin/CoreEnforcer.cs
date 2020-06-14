@@ -118,9 +118,14 @@ namespace NetCasbin
             this.adapter = adapter;
         }
 
-        public void SetWatcher(IWatcher watcher)
+        public void SetWatcher(IWatcher watcher, bool useAsync = true)
         {
             this.watcher = watcher;
+            if (useAsync)
+            {
+                watcher?.SetUpdateCallback(LoadPolicyAsync);
+                return;
+            }
             watcher?.SetUpdateCallback(LoadPolicy);
         }
 
