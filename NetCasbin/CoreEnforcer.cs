@@ -7,6 +7,7 @@ using NetCasbin.Util;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NetCasbin
 {
@@ -163,6 +164,24 @@ namespace NetCasbin
         }
 
         /// <summary>
+        ///  reloads the policy from file/database.
+        /// </summary>
+        public async Task LoadPolicyAsync()
+        {
+            if (adapter is null)
+            {
+                return;
+            }
+
+            model.ClearPolicy();
+            await adapter.LoadPolicyAsync(model);
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+        }
+
+        /// <summary>
         ///  reloads a filtered policy from file/database.
         /// </summary>
         /// <param name="filter">he filter used to specify which type of policy should be loaded.</param>
@@ -175,6 +194,31 @@ namespace NetCasbin
                 throw new Exception("filtered policies are not supported by this adapter");
             }
             (adapter as IFilteredAdapter).LoadFilteredPolicy(model, filter);
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+            return true;
+        }
+
+        /// <summary>
+        ///  reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="filter">he filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public async Task<bool> LoadFilteredPolicyAsync(Filter filter)
+        {
+            model.ClearPolicy();
+            if (!IsFiltered())
+            {
+                throw new Exception("filtered policies are not supported by this adapter");
+            }
+
+            if (adapter is IFilteredAdapter filteredAdapter)
+            {
+                await filteredAdapter.LoadFilteredPolicyAsync(model, filter);
+            }
+
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -207,6 +251,23 @@ namespace NetCasbin
             }
             adapter.SavePolicy(model);
             watcher?.Update();
+        }
+
+        /// <summary>
+        /// saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public async Task SavePolicyAsync()
+        {
+            if (IsFiltered())
+            {
+                throw new Exception("cannot save a filtered policy");
+            }
+            await adapter.SavePolicyAsync(model);
+            if (!(watcher is null))
+            {
+                await watcher?.UpdateAsync();
+            }
         }
 
         /// <summary>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NetCasbin
 {
@@ -249,6 +250,30 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
+        public bool AddPolicy(params string[] parmaters)
+        {
+            return AddPolicy(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// addPolicy adds an authorization rule to the current policy. If the rule
+        /// already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> AddPolicyAsync(params string[] parmaters)
+        {
+            return AddPolicyAsync(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// addPolicy adds an authorization rule to the current policy. If the rule
+        /// already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
         public bool AddPolicy(List<string> parmaters)
         {
             return AddNamedPolicy("p", parmaters);
@@ -261,9 +286,35 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "p" policy rule, ptype "p" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public bool AddPolicy(params string[] parmaters)
+        public Task<bool> AddPolicyAsync(List<string> parmaters)
         {
-            return AddPolicy(parmaters.ToList());
+            return AddNamedPolicyAsync("p", parmaters);
+        }
+
+        /// <summary>
+        /// AddNamedPolicy adds an authorization rule to the current named policy.If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// added.Otherwise the function returns true by adding the new rule.
+        /// </summary>>
+        /// <param name="ptype"> the policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="parmaters">the "p" policy rule.</param>
+        /// <returns>succeeds or not.</returns>
+        public bool AddNamedPolicy(string ptype, params string[] parmaters)
+        {
+            return AddNamedPolicy(ptype, parmaters.ToList());
+        }
+
+        /// <summary>
+        /// AddNamedPolicy adds an authorization rule to the current named policy.If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// added.Otherwise the function returns true by adding the new rule.
+        /// </summary>>
+        /// <param name="ptype"> the policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="parmaters">the "p" policy rule.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> AddNamedPolicyAsync(string ptype, params string[] parmaters)
+        {
+            return AddNamedPolicyAsync(ptype, parmaters.ToList());
         }
 
         /// <summary>
@@ -283,25 +334,14 @@ namespace NetCasbin
         /// AddNamedPolicy adds an authorization rule to the current named policy.If the
         /// rule already exists, the function returns false and the rule will not be
         /// added.Otherwise the function returns true by adding the new rule.
-        /// </summary>>
-        /// <param name="ptype"> the policy type, can be "p", "p2", "p3", ..</param>
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public bool AddNamedPolicy(string ptype, params string[] parmaters)
+        public Task<bool> AddNamedPolicyAsync(string ptype, List<string> parmaters)
         {
-            return AddNamedPolicy(ptype, parmaters.ToList());
+            return AddPolicyAsync("p", ptype, parmaters);
         }
-
-        /// <summary>
-        /// removes an authorization rule from the current policy.
-        /// </summary>
-        /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
-        /// <returns>succeeds or not.</returns>
-        public bool RemovePolicy(List<string> parmaters)
-        {
-            return RemoveNamedPolicy("p", parmaters);
-        }
-
 
         /// <summary>
         /// removes an authorization rule from the current policy.
@@ -314,6 +354,36 @@ namespace NetCasbin
         }
 
         /// <summary>
+        /// removes an authorization rule from the current policy.
+        /// </summary>
+        /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemovePolicyAsync(params string[] parmaters)
+        {
+            return RemovePolicyAsync(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// removes an authorization rule from the current policy.
+        /// </summary>
+        /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public bool RemovePolicy(List<string> parmaters)
+        {
+            return RemoveNamedPolicy("p", parmaters);
+        }
+
+        /// <summary>
+        /// removes an authorization rule from the current policy.
+        /// </summary>
+        /// <param name="parmaters">he "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemovePolicyAsync(List<string> parmaters)
+        {
+            return RemoveNamedPolicyAsync("p", parmaters);
+        }
+
+        /// <summary>
         /// removes an authorization rule from the current policy, field filters can be specified.
         /// </summary>
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
@@ -322,6 +392,39 @@ namespace NetCasbin
         public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
             return RemoveFilteredNamedPolicy("p", fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        /// removes an authorization rule from the current policy, field filters can be specified.
+        /// </summary>
+        /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
+        /// <param name="fieldValues"> the field values to be matched, value "" means not to match this field.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemoveFilteredPolicyAsync(int fieldIndex, params string[] fieldValues)
+        {
+            return RemoveFilteredNamedPolicyAsync("p", fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        /// removes an authorization rule from the current named policy.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="parmaters">the "p" policy rule.</param>
+        /// <returns>succeeds or not.</returns>
+        public bool RemoveNamedPolicy(string ptype, params string[] parmaters)
+        {
+            return RemoveNamedPolicy(ptype, parmaters.ToList());
+        }
+
+        /// <summary>
+        /// removes an authorization rule from the current named policy.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="parmaters">the "p" policy rule.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemoveNamedPolicyAsync(string ptype, params string[] parmaters)
+        {
+            return RemoveNamedPolicyAsync(ptype, parmaters.ToList());
         }
 
         /// <summary>
@@ -341,9 +444,9 @@ namespace NetCasbin
         /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parmaters">the "p" policy rule.</param>
         /// <returns>succeeds or not.</returns>
-        public bool RemoveNamedPolicy(string ptype, params string[] parmaters)
+        public Task<bool> RemoveNamedPolicyAsync(string ptype, List<string> parmaters)
         {
-            return RemoveNamedPolicy(ptype, parmaters.ToList());
+            return RemovePolicyAsync("p", ptype, parmaters);
         }
 
         /// <summary>
@@ -356,6 +459,18 @@ namespace NetCasbin
         public bool RemoveFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
             return RemoveFilteredPolicy("p", ptype, fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        ///  removes an authorization rule from the current named policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">the field values to be matched, value "" means not to  match this field.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemoveFilteredNamedPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
+        {
+            return RemoveFilteredPolicyAsync("p", ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -409,6 +524,30 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
+        public bool AddGroupingPolicy(params string[] parmaters)
+        {
+            return AddGroupingPolicy(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// adds a role inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> AddGroupingPolicyAsync(params string[] parmaters)
+        {
+            return AddGroupingPolicyAsync(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// adds a role inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
         public bool AddGroupingPolicy(List<string> parmaters)
         {
             return AddNamedGroupingPolicy("g", parmaters);
@@ -421,9 +560,9 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public bool AddGroupingPolicy(params string[] parmaters)
+        public Task<bool> AddGroupingPolicyAsync(List<string> parmaters)
         {
-            return AddGroupingPolicy(parmaters.ToList());
+            return AddNamedGroupingPolicyAsync("g", parmaters);
         }
 
         /// <summary>
@@ -442,6 +581,27 @@ namespace NetCasbin
             {
                 BuildRoleLinks();
             }
+
+            return ruleAdded;
+        }
+
+        /// <summary>
+        /// adds a named role inheritance rule to the current 
+        /// policy. If the rule already exists, the function returns false and the rule
+        /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parmaters">the "g" policy rule.</param>
+        /// <returns>succeeds or not.</returns>
+        public async Task<bool> AddNamedGroupingPolicyAsync(string ptype, List<string> parmaters)
+        {
+            var ruleAdded = await AddPolicyAsync("g", ptype, parmaters);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
             return ruleAdded;
         }
 
@@ -463,6 +623,26 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
+        public bool RemoveGroupingPolicy(params string[] parmaters)
+        {
+            return RemoveGroupingPolicy(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current policy.
+        /// </summary>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemoveGroupingPolicyAsync(params string[] parmaters)
+        {
+            return RemoveGroupingPolicyAsync(parmaters.ToList());
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current policy.
+        /// </summary>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
         public bool RemoveGroupingPolicy(List<string> parmaters)
         {
             return RemoveNamedGroupingPolicy("g", parmaters);
@@ -473,9 +653,71 @@ namespace NetCasbin
         /// </summary>
         /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>succeeds or not.</returns>
-        public bool RemoveGroupingPolicy(params string[] parmaters)
+        public Task<bool> RemoveGroupingPolicyAsync(List<string> parmaters)
         {
-            return RemoveGroupingPolicy(parmaters.ToList());
+            return RemoveNamedGroupingPolicyAsync("g", parmaters);
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public bool RemoveNamedGroupingPolicy(string ptype, params string[] parmaters)
+        {
+            return RemoveNamedGroupingPolicy(ptype, parmaters.ToList());
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, params string[] parmaters)
+        {
+            return RemoveNamedGroupingPolicyAsync(ptype, parmaters.ToList());
+        }
+
+                /// <summary>
+        /// removes a role inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public bool RemoveNamedGroupingPolicy(string ptype, List<string> parmaters)
+        {
+            var ruleRemoved = RemovePolicy("g", ptype, parmaters);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return ruleRemoved;
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parmaters">the "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>succeeds or not.</returns>
+        public async Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, List<string> parmaters)
+        {
+            var ruleRemoved = await RemovePolicyAsync("g", ptype, parmaters);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return ruleRemoved;
         }
 
         /// <summary>
@@ -497,27 +739,9 @@ namespace NetCasbin
         /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
         /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
         /// <returns>succeeds or not.</returns>
-        public bool RemoveNamedGroupingPolicy(string ptype, List<string> parmaters)
+        public Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = RemovePolicy("g", ptype, parmaters);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-            return ruleRemoved;
-        }
-
-        /// <summary>
-        /// removes a role inheritance rule from the current 
-        /// policy, field filters can be specified.
-        /// </summary>
-        /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
-        /// <returns>succeeds or not.</returns>
-        public bool RemoveNamedGroupingPolicy(string ptype, params string[] parmaters)
-        {
-            return RemoveNamedGroupingPolicy(ptype, parmaters.ToList());
+            return RemoveFilteredNamedGroupingPolicyAsync("g", fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -535,6 +759,26 @@ namespace NetCasbin
             {
                 BuildRoleLinks();
             }
+
+            return ruleRemoved;
+        }
+
+        /// <summary>
+        /// removes a role inheritance rule from the current named policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype"> the policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="fieldIndex">the policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">the field values to be matched, value "" means not to match this field.</param>
+        /// <returns>succeeds or not.</returns>
+        public async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
+        {
+            var ruleRemoved = await RemoveFilteredPolicyAsync("g", ptype, fieldIndex, fieldValues);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
             return ruleRemoved;
         }
 
