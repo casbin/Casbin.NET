@@ -11,7 +11,7 @@ namespace NetCasbin.Persist.FileAdapter
     public class DefaultFileAdapter : IAdapter
     {
         protected readonly string filePath;
-        private readonly bool _readOnly = false;
+        private readonly bool _readOnly;
         private readonly StreamReader _byteArrayInputStream;
 
         public DefaultFileAdapter(string filePath)
@@ -34,9 +34,10 @@ namespace NetCasbin.Persist.FileAdapter
 
         public void LoadPolicy(Model.Model model)
         {
-            if (filePath != null && !"".Equals(filePath))
+            if (!string.IsNullOrWhiteSpace(filePath))
             {
-                using (var sr = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                using (var sr = new StreamReader(new FileStream(
+                    filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     LoadPolicyData(model, Helper.LoadPolicyLine, sr);
                 }
@@ -48,26 +49,58 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        public Task LoadPolicyAsync(Model.Model model)
+        public async Task LoadPolicyAsync(Model.Model model)
         {
-            throw new NotImplementedException();
+            if (!string.IsNullOrWhiteSpace(filePath))
+            {
+                using (var sr = new StreamReader(new FileStream(
+                    filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                {
+                    await LoadPolicyDataAsync(model, Helper.LoadPolicyLine, sr);
+                }
+            }
+
+            if (_byteArrayInputStream != null)
+            {
+                await LoadPolicyDataAsync(model, Helper.LoadPolicyLine, _byteArrayInputStream);
+            }
         }
 
         public void SavePolicy(Model.Model model)
         {
-            var policy = ConvertToPolicy(model);
+            if (_byteArrayInputStream != null && _readOnly)
+            {
+                throw new Exception("Policy file can not write, because use inputStream is readOnly");
+            }
+
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("Invalid file path, file path cannot be empty");
+            }
+
+            var policy = ConvertToPolicyStrings(model);
             SavePolicyFile(string.Join("\n", policy));
         }
 
         public async Task SavePolicyAsync(Model.Model model)
         {
-            var policy = ConvertToPolicy(model);
+            if (_byteArrayInputStream != null && _readOnly)
+            {
+                throw new Exception("Policy file can not write, because use inputStream is readOnly");
+            }
+
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                throw new ArgumentException("Invalid file path, file path cannot be empty");
+            }
+
+            var policy = ConvertToPolicyStrings(model);
             await SavePolicyFileAsync(string.Join("\n", policy));
         }
 
         public void AddPolicy(string sec, string ptype, IList<string> rule)
         {
-            throw new NotImplementedException("not implemented");
+            throw new NotImplementedException();
         }
 
         public Task AddPolicyAsync(string sec, string ptype, IList<string> rule)
@@ -77,12 +110,22 @@ namespace NetCasbin.Persist.FileAdapter
 
         public void RemovePolicy(string sec, string ptype, IList<string> rule)
         {
-            throw new NotImplementedException("not implemented");
+            throw new NotImplementedException();
+        }
+
+        public Task RemovePolicyAsync(string sec, string ptype, IList<string> rule)
+        {
+            throw new NotImplementedException();
         }
 
         public void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            throw new NotImplementedException("not implemented");
+            throw new NotImplementedException();
+        }
+
+        public Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        {
+            throw new NotImplementedException();
         }
 
         private List<string> GetModelPolicy(Model.Model model, string ptype)
@@ -107,17 +150,17 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        private IList<string> ConvertToPolicy(Model.Model model)
+        private async Task LoadPolicyDataAsync(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
         {
-            if (_byteArrayInputStream != null && _readOnly)
+            while (!inputStream.EndOfStream)
             {
-                throw new Exception("Policy file can not write, because use inputStream is readOnly");
+                var line = await inputStream.ReadLineAsync();
+                handler(line, model);
             }
-            if (filePath == null || "".Equals(filePath))
-            {
-                throw new Exception("invalid file path, file path cannot be empty");
-            }
+        }
 
+        private IList<string> ConvertToPolicyStrings(Model.Model model)
+        {
             var policy = new List<string>();
             policy.AddRange(GetModelPolicy(model, "p"));
             if (model.Model.ContainsKey("g"))
@@ -137,12 +180,8 @@ namespace NetCasbin.Persist.FileAdapter
             text = text ?? "";
             var content = Encoding.UTF8.GetBytes(text);
             using (var fs = new FileStream(
-                   path: filePath,
-                   mode: FileMode.Create,
-                   access: FileAccess.Write,
-                   share: FileShare.None,
-                   bufferSize: 4096,
-                   useAsync: true))
+                   filePath, FileMode.Create, FileAccess.Write,
+                   FileShare.None, bufferSize: 4096, useAsync: true))
             {
                 await fs.WriteAsync(content, 0, content.Length);
             }
