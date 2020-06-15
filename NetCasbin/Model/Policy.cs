@@ -1,6 +1,5 @@
 ﻿using NetCasbin.Rbac;
 using NetCasbin.Util;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -14,10 +13,19 @@ namespace NetCasbin.Model
         {
             if (Model.ContainsKey("g"))
             {
-                foreach (var ast in Model["g"].Values)
+                foreach (Assertion ast in Model["g"].Values)
                 {
                     ast.BuildRoleLinks(rm);
                 }
+            }
+        }
+
+        public void RefreshPolicyStringSet()
+        {
+            foreach (Assertion ast in Model.Values
+                .SelectMany(pair => pair.Values))
+            {
+                ast.RefreshPolicyStringSet();
             }
         }
 
@@ -25,17 +33,19 @@ namespace NetCasbin.Model
         {
             if (Model.ContainsKey("p"))
             {
-                foreach (var ast in Model["p"].Values)
+                foreach (Assertion ast in Model["p"].Values)
                 {
                     ast.Policy = new List<List<string>>();
+                    ast.RefreshPolicyStringSet();
                 }
             }
 
             if (Model.ContainsKey("g"))
             {
-                foreach (var ast in Model["p"].Values)
+                foreach (Assertion ast in Model["p"].Values)
                 {
                     ast.Policy = new List<List<string>>();
+                    ast.RefreshPolicyStringSet();
                 }
             }
         }
@@ -73,29 +83,37 @@ namespace NetCasbin.Model
 
         public bool HasPolicy(string sec, string ptype, List<string> rule)
         {
-            return Model[sec][ptype]!=null && Model[sec][ptype].Policy.Any(x => Utility.ArrayEquals(rule, x));
+            return Model[sec][ptype] != null && Model[sec][ptype].PolicyStringSet.Contains(Utility.ArrayToString(rule));
         }
 
         public bool AddPolicy(string sec, string ptype, List<string> rule)
         {
-            if (!HasPolicy(sec, ptype, rule))
+            if (HasPolicy(sec, ptype, rule))
             {
-                Model[sec][ptype].Policy.Add(rule);
-                return true;
+                return false;
             }
-            return false;
+
+            Assertion assertion = Model[sec][ptype];
+            assertion.Policy.Add(rule);
+            assertion.PolicyStringSet.Add(Utility.ArrayToString(rule));
+            return true;
         }
 
         public bool RemovePolicy(string sec, string ptype, List<string> rule)
         {
-            for (var i = 0; i < Model[sec][ptype].Policy.Count; i++)
+            if (!HasPolicy(sec, ptype, rule))
             {
-                var r = Model[sec][ptype].Policy[i];
-                if (Utility.ArrayEquals(rule, r))
-                {
-                    Model[sec][ptype].Policy.RemoveAt(i);
-                    return true;
-                }
+                return true;
+            }
+
+            Assertion assertion = Model[sec][ptype];
+            for (var i = 0; i < assertion.Policy.Count; i++)
+            {
+                var r = assertion.Policy[i];
+                if (!Utility.ArrayEquals(rule, r)) continue;
+                assertion.Policy.RemoveAt(i);
+                assertion.PolicyStringSet.Remove(Utility.ArrayToString(rule));
+                return true;
             }
             return false;
         }
@@ -105,7 +123,8 @@ namespace NetCasbin.Model
             var tmp = new List<List<string>>();
             var res = false;
 
-            foreach (var rule in Model[sec][ptype].Policy)
+            Assertion assertion = Model[sec][ptype];
+            foreach (var rule in assertion.Policy)
             {
                 var matched = true;
                 for (var i = 0; i < fieldValues.Length; i++)
@@ -128,18 +147,16 @@ namespace NetCasbin.Model
                 }
             }
 
-            Model[sec][ptype].Policy = tmp;
+            assertion.Policy = tmp;
+            assertion.RefreshPolicyStringSet();
             return res;
         }
 
         public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
         {
-            var values = new List<string>();
-
-            foreach (var rule in Model[sec][ptype].Policy)
-            {
-                values.Add(rule[fieldIndex]);
-            }
+            var values = Model[sec][ptype].Policy
+                .Select(rule => rule[fieldIndex])
+                .ToList();
 
             Utility.ArrayRemoveDuplicates(values);
             return values;

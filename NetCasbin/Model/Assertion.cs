@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetCasbin.Util;
 
 namespace NetCasbin.Model
 {
@@ -16,29 +17,33 @@ namespace NetCasbin.Model
 
         public string[] Tokens { set; get; }
 
-        private List<List<string>> _policy;
+        public IRoleManager RoleManager { get; private set; }
 
-        private IRoleManager _rm;
+        public List<List<string>> Policy { set; get; }
 
-        public IRoleManager RM => _rm;
-
-        public List<List<string>> Policy
-        {
-            set => _policy = value;
-            get => _policy;
-        }
+        internal HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {
-            _policy = new List<List<string>>();
-            _rm = new DefaultRoleManager(0);
+            Policy = new List<List<string>>();
+            PolicyStringSet = new HashSet<string>();
+            RoleManager = new DefaultRoleManager(0);
         }
 
-        public void BuildRoleLinks(IRoleManager rm)
+        public void RefreshPolicyStringSet()
         {
-            _rm = rm;
+            PolicyStringSet.Clear();
+            foreach (var rule in Policy)
+            {
+                PolicyStringSet.Add(Utility.ArrayToString(rule));
+            }
+        }
+
+        public void BuildRoleLinks(IRoleManager roleManager)
+        {
+            RoleManager = roleManager;
             var count =  Value.ToCharArray().Count(x => x == '_');
-            foreach (var rule in _policy)
+            foreach (var rule in Policy)
             {
                 if (count < 2)
                 {
@@ -51,18 +56,17 @@ namespace NetCasbin.Model
 
                 if (count == 2)
                 {
-                    rm.AddLink(rule[0], rule[1]);
+                    roleManager.AddLink(rule[0], rule[1]);
                 }
                 else if (count == 3)
                 {
-                    rm.AddLink(rule[0], rule[1], rule[2]);
+                    roleManager.AddLink(rule[0], rule[1], rule[2]);
                 }
                 else if (count == 4)
                 {
-                    rm.AddLink(rule[0], rule[1], rule[2], rule[3]);
+                    roleManager.AddLink(rule[0], rule[1], rule[2], rule[3]);
                 }
             }
-
         }
     }
 }
