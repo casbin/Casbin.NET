@@ -4,6 +4,7 @@ using NetCasbin.Persist.FileAdapter;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace NetCasbin
 {
@@ -92,14 +93,29 @@ namespace NetCasbin
             return AddGroupingPolicy(user, role);
         }
 
+        public Task<bool> AddRoleForUserAsync(string user, string role)
+        {
+            return AddGroupingPolicyAsync(user, role);
+        }
+
         public bool DeleteRoleForUser(string user, string role)
         {
             return RemoveGroupingPolicy(user, role);
         }
 
+        public Task<bool> DeleteRoleForUserAsync(string user, string role)
+        {
+            return RemoveGroupingPolicyAsync(user, role);
+        }
+
         public bool DeleteRolesForUser(string user)
         {
             return RemoveFilteredGroupingPolicy(0, user);
+        }
+
+        public Task<bool> DeleteRolesForUserAsync(string user)
+        {
+            return RemoveFilteredGroupingPolicyAsync(0, user);
         }
 
         /// <summary>
@@ -113,6 +129,16 @@ namespace NetCasbin
         }
 
         /// <summary>
+        /// DeleteUser deletes a user
+        /// </summary>
+        /// <param name="user"></param>
+        /// <returns> Returns false if the user does not exist (aka not affected).</returns>
+        public Task<bool> DeleteUserAsync(string user)
+        {
+            return RemoveFilteredGroupingPolicyAsync(0, user);
+        }
+
+        /// <summary>
         /// DeleteRole deletes a role.
         /// </summary>
         /// <param name="role"></param>
@@ -120,6 +146,26 @@ namespace NetCasbin
         {
             RemoveFilteredGroupingPolicy(1, role);
             RemoveFilteredPolicy(0, role);
+        }
+
+        /// <summary>
+        /// DeleteRole deletes a role.
+        /// </summary>
+        /// <param name="role"></param>
+        public async Task DeleteRoleAsync(string role)
+        {
+            await RemoveFilteredGroupingPolicyAsync(1, role);
+            await RemoveFilteredPolicyAsync(0, role);
+        }
+
+        public bool DeletePermission(List<string> permission)
+        {
+            return DeletePermission(permission.ToArray());
+        }
+        
+        public Task<bool> DeletePermissionAsync(List<string> permission)
+        {
+            return DeletePermissionAsync(permission.ToArray());
         }
 
         /// <summary>
@@ -132,9 +178,24 @@ namespace NetCasbin
             return RemoveFilteredPolicy(1, permission);
         }
 
-        public bool DeletePermission(List<string> permission)
+        /// <summary>
+        /// DeletePermission deletes a permission. 
+        /// </summary>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
+        public Task<bool> DeletePermissionAsync(params string[] permission)
         {
-            return DeletePermission(permission.ToArray() ?? new string[0]);
+            return RemoveFilteredPolicyAsync(1, permission);
+        }
+
+        public bool AddPermissionForUser(string user, List<string> permission)
+        {
+            return AddPermissionForUser(user, permission.ToArray() ?? new string[0]);
+        }
+
+        public Task<bool> AddPermissionForUserAsync(string user, List<string> permission)
+        {
+            return AddPermissionForUserAsync(user, permission.ToArray() ?? new string[0]);
         }
 
         /// <summary>
@@ -152,10 +213,43 @@ namespace NetCasbin
             parameters.AddRange(permission);
             return AddPolicy(parameters);
         }
-
-        public bool AddPermissionForUser(string user, List<string> permission)
+        
+        /// <summary>
+        /// AddPermissionForUser adds a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
+        public Task<bool> AddPermissionForUserAsync(string user, params string[] permission)
         {
-            return AddPermissionForUser(user, permission.ToArray() ?? new string[0]);
+            var parameters = new List<string>
+            {
+                user
+            };
+            parameters.AddRange(permission);
+            return AddPolicyAsync(parameters);
+        }
+
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public bool DeletePermissionForUser(string user, List<string> permission)
+        {
+            return DeletePermissionForUser(user, permission.ToArray() ?? new string[0]);
+        }
+
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public Task<bool> DeletePermissionForUserAsync(string user, List<string> permission)
+        {
+            return DeletePermissionForUserAsync(user, permission.ToArray() ?? new string[0]);
         }
 
         /// <summary>
@@ -179,10 +273,15 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user">user or role </param>
         /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public bool DeletePermissionForUser(string user, List<string> permission)
+        /// <returns></returns>
+        public Task<bool> DeletePermissionForUserAsync(string user, params string[] permission)
         {
-            return DeletePermissionForUser(user, permission.ToArray() ?? new string[0]);
+            var parameters = new List<string>
+            {
+                user
+            };
+            parameters.AddRange(permission);
+            return RemovePolicyAsync(parameters);
         }
 
         /// <summary>
@@ -193,6 +292,16 @@ namespace NetCasbin
         public bool DeletePermissionsForUser(string user)
         {
             return RemoveFilteredPolicy(0, user);
+        }
+
+        /// <summary>
+        /// DeletePermissionsForUser deletes permissions for a user or role. 
+        /// </summary>
+        /// <param name="user">user or role </param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public Task<bool> DeletePermissionsForUserAsync(string user)
+        {
+            return RemoveFilteredPolicyAsync(0, user);
         }
 
         /// <summary>
@@ -247,9 +356,19 @@ namespace NetCasbin
             return AddGroupingPolicy(user, role, domain);
         }
 
+        public Task<bool> AddRoleForUserInDomainAsync(string user, string role, string domain)
+        {
+            return AddGroupingPolicyAsync(user, role, domain);
+        }
+
         public bool DeleteRoleForUserInDomain(string user, string role, string domain)
         {
             return RemoveGroupingPolicy(user, role, domain);
+        }
+
+        public Task<bool> DeleteRoleForUserInDomainAsync(string user, string role, string domain)
+        {
+            return RemoveGroupingPolicyAsync(user, role, domain);
         }
 
         /// <summary>
