@@ -154,8 +154,13 @@ namespace NetCasbin
         /// </summary>
         public void LoadPolicy()
         {
+            if (adapter is null)
+            {
+                return;
+            }
             model.ClearPolicy();
             adapter.LoadPolicy(model);
+            model.RefreshPolicyStringSet();
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -174,7 +179,7 @@ namespace NetCasbin
             {
                 throw new Exception("filtered policies are not supported by this adapter");
             }
-            (adapter as IFilteredAdapter).LoadFilteredPolicy(model, filter);
+            (adapter as IFilteredAdapter)?.LoadFilteredPolicy(model, filter);
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -188,9 +193,9 @@ namespace NetCasbin
         /// <returns>if the loaded policy has been filtered.</returns>
         public bool IsFiltered()
         {
-            if (adapter is IFilteredAdapter)
+            if (adapter is IFilteredAdapter filteredAdapter)
             {
-                return (adapter as IFilteredAdapter).IsFiltered;
+                return filteredAdapter.IsFiltered;
             }
             return false;
         }
@@ -397,7 +402,7 @@ namespace NetCasbin
                 {
                     var key = entry.Key;
                     var ast = entry.Value;
-                    var rm = ast.RM;
+                    var rm = ast.RoleManager;
                     functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
                 }
             }

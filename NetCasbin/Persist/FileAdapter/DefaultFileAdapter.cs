@@ -1,10 +1,11 @@
-﻿using NetCasbin.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NetCasbin.Model;
+using NetCasbin.Util;
 
 namespace NetCasbin.Persist.FileAdapter
 {
@@ -85,20 +86,19 @@ namespace NetCasbin.Persist.FileAdapter
             throw new NotImplementedException("not implemented");
         }
 
-        private List<string> GetModelPolicy(Model.Model model, string ptype)
+        private static IEnumerable<string> GetModelPolicy(Model.Model model, string ptype)
         {
             var policy = new List<string>();
-            model.Model[ptype].ToList().ForEach(item =>
+            foreach (var pair in model.Model[ptype])
             {
-                var k = item.Key;
-                var v = item.Value;
-                var p = v.Policy.Select(x => $"{k}, {Utility.ArrayToString(x)}").ToList();
-                policy.AddRange(p);
-            });
+                var key = pair.Key;
+                Assertion value = pair.Value;
+                policy.AddRange(value.Policy.Select(p => $"{key}, {Utility.ArrayToString(p)}"));
+            }
             return policy;
         }
 
-        private void LoadPolicyData(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
+        private static void LoadPolicyData(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {
@@ -107,7 +107,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        private IList<string> ConvertToPolicy(Model.Model model)
+        private IEnumerable<string> ConvertToPolicy(Model.Model model)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {

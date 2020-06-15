@@ -35,11 +35,7 @@ namespace NetCasbin
             fm = FunctionMap.LoadFunctionMap();
 
             Initialize();
-
-            if (this.adapter != null)
-            {
-                LoadPolicy();
-            }
+            LoadPolicy();
         }
 
         public Enforcer(Model.Model m) :
@@ -58,19 +54,19 @@ namespace NetCasbin
 
         public List<string> GetRolesForUser(string name)
         {
-            return model.Model["g"]["g"].RM.GetRoles(name);
+            return model.Model["g"]["g"].RoleManager.GetRoles(name);
         }
 
         public List<string> GetUsersForRole(string name)
         {
-            return model.Model["g"]["g"].RM.GetUsers(name);
+            return model.Model["g"]["g"].RoleManager.GetUsers(name);
         }
 
         public List<string> GetUsersForRoles(string[] names)
         {
             var userIds = new List<string>();
             foreach (var name in names)
-                userIds.AddRange(model.Model["g"]["g"].RM.GetUsers(name));
+                userIds.AddRange(model.Model["g"]["g"].RoleManager.GetUsers(name));
             return userIds;
         }
 
@@ -238,7 +234,7 @@ namespace NetCasbin
 
         public List<string> GetRolesForUserInDomain(string name, string domain)
         {
-            return model.Model["g"]["g"].RM.GetRoles(name, domain);
+            return model.Model["g"]["g"].RoleManager.GetRoles(name, domain);
         }
 
         public List<List<string>> GetPermissionsForUserInDomain(string user, string domain)
