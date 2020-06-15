@@ -61,14 +61,9 @@ namespace NetCasbin.Util
             return sb.ToString();
         }
 
-        /// <summary>
-        /// arrayToString gets a printable string for a string array.
-        /// </summary>
-        /// <param name="v">the array.</param>
-        /// <returns>the string joined by the array elements.</returns>
-        public static string ArrayToString(string[] v)
+        public static string RuleToString(IEnumerable<string> rule)
         {
-            return string.Join(", ", v);
+            return string.Join(", ", rule);
         }
 
         public static bool ArrayEquals(List<string> a, List<string> b)
@@ -124,16 +119,6 @@ namespace NetCasbin.Util
         public static bool ArrayRemoveDuplicates(List<string> s)
         {
             return true;
-        }
-
-        public static string ArrayToString(List<string> s)
-        {
-            return string.Join(", ", s);
-        }
-
-        public static string ParamsToString(string[] s)
-        {
-            return string.Join(", ", s);
         }
 
         /// <summary>

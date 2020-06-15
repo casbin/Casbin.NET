@@ -21,7 +21,7 @@ namespace NetCasbin.Model
 
         public List<List<string>> Policy { set; get; }
 
-        internal HashSet<string> PolicyStringSet { get; }
+        private HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {
@@ -35,7 +35,7 @@ namespace NetCasbin.Model
             PolicyStringSet.Clear();
             foreach (var rule in Policy)
             {
-                PolicyStringSet.Add(Utility.ArrayToString(rule));
+                PolicyStringSet.Add(Utility.RuleToString(rule));
             }
         }
 
@@ -67,6 +67,40 @@ namespace NetCasbin.Model
                     roleManager.AddLink(rule[0], rule[1], rule[2], rule[3]);
                 }
             }
+        }
+
+        internal bool Contains(IEnumerable<string> rule)
+        {
+            return PolicyStringSet.Contains(Utility.RuleToString(rule));
+        }
+
+        internal bool AddPolicy(List<string> rule)
+        {
+            Policy.Add(rule);
+            PolicyStringSet.Add(Utility.RuleToString(rule));
+            return true;
+        }
+
+        internal bool RemovePolicy(List<string> rule)
+        {
+            for (var i = 0; i < Policy.Count; i++)
+            {
+                var ruleInPolicy = Policy[i];
+                if (!Utility.ArrayEquals(rule, ruleInPolicy))
+                {
+                    continue;
+                }
+                Policy.RemoveAt(i);
+                PolicyStringSet.Remove(Utility.RuleToString(rule));
+                return true;
+            }
+            return false;
+        }
+
+        internal void ClearPolicy()
+        {
+            Policy.Clear();
+            PolicyStringSet.Clear();
         }
     }
 }

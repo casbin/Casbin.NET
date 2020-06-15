@@ -14,11 +14,6 @@ namespace NetCasbin.Model
             { "m", "matchers"},
         };
 
-        public Model()
-        {
-            Model = new Dictionary<string, Dictionary<string, Assertion>>();
-        }
-
         private bool LoadAssertion(Config.Config cfg, string sec, string key)
         {
             var secName = SectionNameMap[sec];
