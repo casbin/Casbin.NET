@@ -136,7 +136,7 @@ namespace NetCasbin.Persist.FileAdapter
             {
                 var key = pair.Key;
                 Assertion value = pair.Value;
-                policy.AddRange(value.Policy.Select(p => $"{key}, {Utility.ArrayToString(p)}"));
+                policy.AddRange(value.Policy.Select(p => $"{key}, {Utility.RuleToString(p)}"));
             }
             return policy;
         }

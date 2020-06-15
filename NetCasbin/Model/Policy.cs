@@ -7,25 +7,30 @@ namespace NetCasbin.Model
 {
     public class Policy
     {
-        public Dictionary<string, Dictionary<string, Assertion>> Model { set; get; }
+        public Dictionary<string, Dictionary<string, Assertion>> Model { get; }
+
+        protected Policy()
+        {
+            Model = new Dictionary<string, Dictionary<string, Assertion>>();
+        }
 
         public void BuildRoleLinks(IRoleManager rm)
         {
             if (Model.ContainsKey("g"))
             {
-                foreach (Assertion ast in Model["g"].Values)
+                foreach (Assertion assertion in Model["g"].Values)
                 {
-                    ast.BuildRoleLinks(rm);
+                    assertion.BuildRoleLinks(rm);
                 }
             }
         }
 
         public void RefreshPolicyStringSet()
         {
-            foreach (Assertion ast in Model.Values
+            foreach (Assertion assertion in Model.Values
                 .SelectMany(pair => pair.Values))
             {
-                ast.RefreshPolicyStringSet();
+                assertion.RefreshPolicyStringSet();
             }
         }
 
@@ -33,19 +38,17 @@ namespace NetCasbin.Model
         {
             if (Model.ContainsKey("p"))
             {
-                foreach (Assertion ast in Model["p"].Values)
+                foreach (Assertion assertion in Model["p"].Values)
                 {
-                    ast.Policy = new List<List<string>>();
-                    ast.RefreshPolicyStringSet();
+                    assertion.ClearPolicy();
                 }
             }
 
             if (Model.ContainsKey("g"))
             {
-                foreach (Assertion ast in Model["p"].Values)
+                foreach (Assertion assertion in Model["p"].Values)
                 {
-                    ast.Policy = new List<List<string>>();
-                    ast.RefreshPolicyStringSet();
+                    assertion.ClearPolicy();
                 }
             }
         }
@@ -83,7 +86,7 @@ namespace NetCasbin.Model
 
         public bool HasPolicy(string sec, string ptype, List<string> rule)
         {
-            return Model[sec][ptype] != null && Model[sec][ptype].PolicyStringSet.Contains(Utility.ArrayToString(rule));
+            return Model[sec][ptype] != null && Model[sec][ptype].Contains(rule);
         }
 
         public bool AddPolicy(string sec, string ptype, List<string> rule)
@@ -94,9 +97,7 @@ namespace NetCasbin.Model
             }
 
             Assertion assertion = Model[sec][ptype];
-            assertion.Policy.Add(rule);
-            assertion.PolicyStringSet.Add(Utility.ArrayToString(rule));
-            return true;
+            return assertion.AddPolicy(rule);
         }
 
         public bool RemovePolicy(string sec, string ptype, List<string> rule)
@@ -107,15 +108,7 @@ namespace NetCasbin.Model
             }
 
             Assertion assertion = Model[sec][ptype];
-            for (var i = 0; i < assertion.Policy.Count; i++)
-            {
-                var r = assertion.Policy[i];
-                if (!Utility.ArrayEquals(rule, r)) continue;
-                assertion.Policy.RemoveAt(i);
-                assertion.PolicyStringSet.Remove(Utility.ArrayToString(rule));
-                return true;
-            }
-            return false;
+            return assertion.RemovePolicy(rule);
         }
 
         public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
