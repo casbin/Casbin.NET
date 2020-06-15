@@ -25,9 +25,9 @@ namespace NetCasbin.Model
         ///
         /// </summary>
         /// <param name="sec">"p" or "g"</param>
-        /// <param name="key">the policy type, "p", "p2", .. or "g", "g2", ..</param>
-        /// <param name="value">the policy rule, separated by ", ".</param>
-        /// <returns>succeeds or not.</returns>
+        /// <param name="key">The policy type, "p", "p2", .. or "g", "g2", ..</param>
+        /// <param name="value">The policy rule, separated by ", ".</param>
+        /// <returns>Succeeds or not.</returns>
         public bool AddDef(string sec, string key, string value)
         {
             var ast = new Assertion

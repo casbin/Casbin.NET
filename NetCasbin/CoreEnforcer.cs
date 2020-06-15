@@ -16,24 +16,24 @@ namespace NetCasbin
     /// </summary>
     public class CoreEnforcer
     {
-        private IEffector eft;
+        private IEffector _effector;
         private bool _enabled;
 
         protected string modelPath;
         protected Model.Model model;
-        protected FunctionMap fm;
+        protected FunctionMap functionMap;
 
         protected IAdapter adapter;
         protected IWatcher watcher;
-        protected IRoleManager rm;
+        protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
         protected readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
 
         protected void Initialize()
         {
-            rm = new DefaultRoleManager(10);
-            eft = new DefaultEffector();
+            roleManager = new DefaultRoleManager(10);
+            _effector = new DefaultEffector();
             watcher = null;
             _enabled = true;
             autoSave = true;
@@ -41,83 +41,91 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// creates a model.
+        /// Creates a model.
         /// </summary>
         /// <returns></returns>
         public static Model.Model NewModel()
         {
-            var m = new Model.Model();
-            return m;
+            var model = new Model.Model();
+            return model;
         }
 
         /// <summary>
-        ///  creates a model.
+        /// Creates a model.
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
         public static Model.Model NewModel(string text)
         {
-            var m = new Model.Model();
-            m.LoadModelFromText(text);
-            return m;
+            var model = new Model.Model();
+            model.LoadModelFromText(text);
+            return model;
         }
 
         /// <summary>
-        ///  creates a model.
+        /// Creates a model.
         /// </summary>
-        /// <param name="modelPath">the path of the model file.</param>
-        /// <param name="unused">unused parameter, just for differentiating with  NewModel(String text).</param>
-        /// <returns>the model.</returns>
+        /// <param name="modelPath">The path of the model file.</param>
+        /// <param name="unused">Unused parameter, just for differentiating with  NewModel(String text).</param>
+        /// <returns></returns>
         public static Model.Model NewModel(string modelPath, string unused)
         {
-            var m = new Model.Model();
+            var model = new Model.Model();
             if (!string.IsNullOrEmpty(modelPath))
             {
-                m.LoadModel(modelPath);
+                model.LoadModel(modelPath);
             }
-            return m;
+            return model;
         }
 
         /// <summary>
         /// LoadModel reloads the model from the model CONF file. Because the policy is
-        /// attached to a model, so the policy is invalidated and needs to be reloaded by
-        /// calling LoadPolicy().
+        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
         /// calling LoadPolicy().
         /// </summary>
         public void LoadModel()
         {
             model = NewModel();
             model.LoadModel(modelPath);
-            fm = FunctionMap.LoadFunctionMap();
+            functionMap = FunctionMap.LoadFunctionMap();
         }
 
         /// <summary>
-        /// gets the current model.
+        /// Gets the current model.
         /// </summary>
-        /// <returns>the model of the enforcer.</returns>
+        /// <returns>The model of the enforcer.</returns>
         public Model.Model GetModel() => model;
 
         /// <summary>
-        /// sets the current model.
+        /// Sets the current model.
         /// </summary>
-        /// <param name="model"> the model.</param>
+        /// <param name="model"></param>
         public void SetModel(Model.Model model)
         {
             this.model = model;
-            fm = FunctionMap.LoadFunctionMap();
+            functionMap = FunctionMap.LoadFunctionMap();
         }
 
         /// <summary>
-        /// gets the current adapter.
+        /// Gets the current adapter.
         /// </summary>
         /// <returns></returns>
         public IAdapter GetAdapter() => adapter;
 
+        /// <summary>
+        /// Sets an adapter.
+        /// </summary>
+        /// <param name="adapter"></param>
         public void SetAdapter(IAdapter adapter)
         {
             this.adapter = adapter;
         }
 
+        /// <summary>
+        /// Sets an watcher.
+        /// </summary>
+        /// <param name="watcher"></param>
+        /// <param name="useAsync">Whether use async update callback.</param>
         public void SetWatcher(IWatcher watcher, bool useAsync = true)
         {
             this.watcher = watcher;
@@ -130,25 +138,25 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// SetRoleManager sets the current role manager.
+        /// Sets the current role manager.
         /// </summary>
-        /// <param name="rm"></param>
-        public void SetRoleManager(IRoleManager rm)
+        /// <param name="roleManager"></param>
+        public void SetRoleManager(IRoleManager roleManager)
         {
-            this.rm = rm;
+            this.roleManager = roleManager;
         }
 
         /// <summary>
-        ///  sets the current effector.
+        /// Sets the current effector.
         /// </summary>
-        /// <param name="eft"></param>
-        public void SetEffector(IEffector eft)
+        /// <param name="effector"></param>
+        public void SetEffector(IEffector effector)
         {
-            this.eft = eft;
+            _effector = effector;
         }
 
         /// <summary>
-        ///  clears all policy.
+        /// Clears all policy.
         /// </summary>
         public void ClearPolicy()
         {
@@ -156,7 +164,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  reloads the policy from file/database.
+        /// Reloads the policy from file/database.
         /// </summary>
         public void LoadPolicy()
         {
@@ -164,6 +172,7 @@ namespace NetCasbin
             {
                 return;
             }
+
             model.ClearPolicy();
             adapter.LoadPolicy(model);
             model.RefreshPolicyStringSet();
@@ -174,7 +183,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  reloads the policy from file/database.
+        /// Reloads the policy from file/database.
         /// </summary>
         public async Task LoadPolicyAsync()
         {
@@ -192,9 +201,9 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  reloads a filtered policy from file/database.
+        /// Reloads a filtered policy from file/database.
         /// </summary>
-        /// <param name="filter">he filter used to specify which type of policy should be loaded.</param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
         /// <returns></returns>
         public bool LoadFilteredPolicy(Filter filter)
         {
@@ -212,9 +221,9 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  reloads a filtered policy from file/database.
+        /// Reloads a filtered policy from file/database.
         /// </summary>
-        /// <param name="filter">he filter used to specify which type of policy should be loaded.</param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
         /// <returns></returns>
         public async Task<bool> LoadFilteredPolicyAsync(Filter filter)
         {
@@ -237,7 +246,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  returns true if the loaded policy has been filtered.
+        /// Returns true if the loaded policy has been filtered.
         /// </summary>
         /// <returns>if the loaded policy has been filtered.</returns>
         public bool IsFiltered()
@@ -250,7 +259,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// saves the current policy (usually after changed with Casbin API)
+        /// Saves the current policy (usually after changed with Casbin API)
         /// back to file/database.
         /// </summary>
         public void SavePolicy()
@@ -264,7 +273,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// saves the current policy (usually after changed with Casbin API)
+        /// Saves the current policy (usually after changed with Casbin API)
         /// back to file/database.
         /// </summary>
         public async Task SavePolicyAsync()
@@ -281,7 +290,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// enableEnforce changes the enforcing state of Casbin, when Casbin is disabled,
+        /// Changes the enforcing state of Casbin, when Casbin is disabled,
         /// all access will be allowed by the enforce() function.
         /// </summary>
         /// <param name="enable"></param>
@@ -291,8 +300,8 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  enableAutoSave controls whether to save a policy rule automatically to the
-        ///   adapter when it is added or removed.
+        /// Controls whether to save a policy rule automatically to the
+        /// adapter when it is added or removed.
         /// </summary>
         /// <param name="autoSave"></param>
         public void EnableAutoSave(bool autoSave)
@@ -301,31 +310,31 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  controls whether to save a policy rule automatically
-        ///   to the adapter when it is added or removed.
+        /// Controls whether to save a policy rule automatically
+        /// to the adapter when it is added or removed.
         /// </summary>
-        /// <param name="autoBuildRoleLinks">whether to automatically build the role links.</param>
+        /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
         public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks)
         {
             this.autoBuildRoleLinks = autoBuildRoleLinks;
         }
 
         /// <summary>
-        /// BuildRoleLinks manually rebuild the role inheritance relations.
+        /// Manually rebuilds the role inheritance relations.
         /// </summary>
         public void BuildRoleLinks()
         {
-            rm.Clear();
-            model.BuildRoleLinks(rm);
+            roleManager.Clear();
+            model.BuildRoleLinks(roleManager);
         }
 
         /// <summary>
-        /// enforce decides whether a "subject" can access a "object" with the operation
+        /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="rvals">the request needs to be mediated, usually an array of strings, 
+        /// <param name="rvals">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
-        /// <returns>whether to allow the request.</returns>
+        /// <returns>Whether to allow the request.</returns>
         public bool Enforce(params object[] rvals)
         {
             if (!_enabled)
@@ -432,14 +441,10 @@ namespace NetCasbin
                     policyEffects[0] = Effect.Effect.Indeterminate;
                 }
             }
-            result = eft.MergeEffects(effect, policyEffects, matcherResults);
+            result = _effector.MergeEffects(effect, policyEffects, matcherResults);
             return (bool)result;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="rvals"></param>
         private Lambda GetAndInitializeExpression(object[] rvals)
         {
             var expString = model.Model["m"]["m"].Value;
@@ -449,13 +454,10 @@ namespace NetCasbin
             return parsedExpression;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
         private Interpreter GetAndInitializeInterpreter()
         {
             var functions = new Dictionary<string, AbstractFunction>();
-            foreach (var entry in fm.FunctionDict)
+            foreach (var entry in functionMap.FunctionDict)
             {
                 var key = entry.Key;
                 var function = entry.Value;

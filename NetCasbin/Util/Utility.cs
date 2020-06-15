@@ -18,10 +18,10 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        /// removeComments removes the comments starting with # in the text.
+        /// Removes the comments starting with # in the text.
         /// </summary>
         /// <param name="s">a line in the model.</param>
-        /// <returns>the line without comments.</returns>
+        /// <returns>The line without comments.</returns>
         public static string RemoveComments(string s)
         {
             var pos = s.IndexOf("#");
@@ -35,8 +35,8 @@ namespace NetCasbin.Util
         /// <summary>
         /// escapeAssertion escapes the dots in the assertion, because the expression evaluation doesn't support such variable names.
         /// </summary>
-        /// <param name="s">the value of the matcher and effect assertions.</param>
-        /// <returns>the escaped value.</returns>
+        /// <param name="s">The value of the matcher and effect assertions.</param>
+        /// <returns>The escaped value.</returns>
         public static string EscapeAssertion(string s)
         {
             // 替换第一个点
@@ -124,9 +124,9 @@ namespace NetCasbin.Util
         /// <summary>
         /// SetEquals determines whether two string sets are identical.
         /// </summary>
-        /// <param name="a">the first set.</param>
-        /// <param name="b">the second set.</param>
-        /// <returns>whether a equals to b.</returns>
+        /// <param name="a">The first set.</param>
+        /// <param name="b">The second set.</param>
+        /// <returns>Whether a equals to b.</returns>
         public static bool SetEquals(List<string> a, List<string> b)
         {
             if (a == null)

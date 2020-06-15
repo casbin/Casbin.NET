@@ -8,15 +8,14 @@ namespace NetCasbin.Util
     public static class BuiltInFunctions
     { 
         /// <summary>
-        ///  determines whether key1 matches the pattern of key2 (similar to 
-        ///  RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*"
-        ///  
+        /// Determines whether key1 matches the pattern of key2 (similar to 
+        /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*"
         /// key1是否匹配key2（类似RESTful路径），key2能包含*
         /// 例如："/foo/bar"匹配"/foo/*"
         /// </summary>
-        /// <param name="key1">the first argument.</param>
-        /// <param name="key2">the second argument.</param>
-        /// <returns>whether key1 matches key2.</returns>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
         public static bool KeyMatch(string key1, string key2)
         {
             var i = key2.IndexOf('*');
@@ -34,13 +33,13 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        /// keyMatch2 determines whether key1 matches the pattern of key2 (similar to
+        /// Determines whether key1 matches the pattern of key2 (similar to
         /// RESTful path), key2 can contain a*. For example, "/foo/bar" matches
         /// "/foo/*", "/resource1" matches "/:resource"
         /// </summary>
-        /// <param name="key1">the first argument.</param>
-        /// <param name="key2">the second argument.</param>
-        /// <returns>whether key1 matches key2.</returns>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
         public static bool KeyMatch2(string key1, string key2)
         {
             key2 = key2.Replace("/*", "/.*");
@@ -60,13 +59,13 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        ///  keyMatch3 determines whether key1 matches the pattern of key2 (similar to
-        ///  RESTful path), key2 can contain a *. For example, "/foo/bar" matches
+        /// Determines whether key1 matches the pattern of key2 (similar to
+        /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches
         ///  "/foo/*", "/resource1" matches "/{resource}"
         /// </summary>
-        /// <param name="key1">the first argument.</param>
-        /// <param name="key2">the second argument.</param>
-        /// <returns>whether key1 matches key2.</returns>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
         public static bool KeyMatch3(string key1, string key2)
         {
             key2 = key2.Replace("/*", "/.*");
@@ -85,13 +84,13 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        ///  ipMatch determines whether IP address ip1 matches the pattern of IP address
+        ///  Determines whether IP address ip1 matches the pattern of IP address
         ///  ip2, ip2 can be an IP address or a CIDR pattern. For example, "192.168.2.123"
         ///  matches "192.168.2.0/24"
         /// </summary>
-        /// <param name="ip1"> the first argument.</param>
-        /// <param name="ip2"> the second argument.</param>
-        /// <returns>whether ip1 matches ip2.</returns>
+        /// <param name="ip1">The first argument.</param>
+        /// <param name="ip2">The second argument.</param>
+        /// <returns>Whether ip1 matches ip2.</returns>
         public static bool IPMatch(string ip1, string ip2)
         {
             var rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
@@ -124,12 +123,12 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        /// determines whether key1 matches the pattern of key2 in regular
+        /// Determines whether key1 matches the pattern of key2 in regular
         /// expression.
         /// </summary>
-        /// <param name="key1">the first argument.</param>
-        /// <param name="key2">the second argument.</param>
-        /// <returns>whether key1 matches key2.</returns>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
         public static bool RegexMatch(string key1, string key2)
         {
             return Regex.Match(key1, key2).Success;
@@ -140,9 +139,9 @@ namespace NetCasbin.Util
         /// <summary>
         /// GenerateGFunction is the factory method of the g(_, _) function.
         /// </summary>
-        /// <param name="name">the name of the g(_, _) function, can be "g", "g2", ..</param>
-        /// <param name="rm"> the role manager used by the function.</param>
-        /// <returns>the function.</returns>
+        /// <param name="name">The name of the g(_, _) function, can be "g", "g2", ..</param>
+        /// <param name="rm">The role manager used by the function.</param>
+        /// <returns>The function.</returns>
         internal static AbstractFunction GenerateGFunction(string name, IRoleManager rm)
         {
             bool Call(string arg1, string arg2, string domain = null)
