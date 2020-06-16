@@ -10,7 +10,7 @@ namespace NetCasbin
     public class InternalEnforcer : CoreEnforcer
     {
         /// <summary>
-        /// adds a rule to the current policy.
+        /// Adds a rule to the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
@@ -48,7 +48,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// adds a rule to the current policy.
+        /// Adds a rule to the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
@@ -89,7 +89,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// removes a rule from the current policy.
+        /// Removes a rule from the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
@@ -122,7 +122,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// removes a rule from the current policy.
+        /// Removes a rule from the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
@@ -158,7 +158,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  removes rules based on field filters from the current policy.
+        /// Removes rules based on field filters from the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
@@ -192,7 +192,7 @@ namespace NetCasbin
         }
 
         /// <summary>
-        ///  removes rules based on field filters from the current policy.
+        /// Removes rules based on field filters from the current policy.
         /// </summary>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>

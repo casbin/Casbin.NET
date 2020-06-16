@@ -21,13 +21,13 @@ namespace NetCasbin.Rbac
         /// GroupRoleManager is the constructor for creating an instance of the 
         /// GroupRoleManager implementation.
         /// </summary>
-        /// <param name="maxHierarchyLevel">the maximized allowed RBAC hierarchy level.</param>
+        /// <param name="maxHierarchyLevel">The maximized allowed RBAC hierarchy level.</param>
         public GroupRoleManager(int maxHierarchyLevel) : base(maxHierarchyLevel)
         {
         }
 
         /// <summary>
-        /// hasLink determines whether role: name1 inherits role: name2. 
+        /// Determines whether role: name1 inherits role: name2. 
         /// domain is a prefix to the roles.
         /// </summary>
         /// <param name="name1"></param>
