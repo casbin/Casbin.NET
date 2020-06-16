@@ -9,9 +9,7 @@ namespace NetCasbin.Util
     { 
         /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to 
-        /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*"
-        /// key1是否匹配key2（类似RESTful路径），key2能包含*
-        /// 例如："/foo/bar"匹配"/foo/*"
+        /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
         /// </summary>
         /// <param name="key1">The first argument.</param>
         /// <param name="key2">The second argument.</param>
