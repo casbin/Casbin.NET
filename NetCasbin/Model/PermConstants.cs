@@ -12,9 +12,9 @@
         public const string RoleType2 = "g2";
         public const string RoleType3 = "g3";
 
-        public const string DefaultGroupingPolicyType = "g";
-        public const string GroupingPolicyType2 = "g2";
-        public const string GroupingPolicyType3 = "g3";
+        public const string DefaultGroupingPolicyType = DefaultRoleType;
+        public const string GroupingPolicyType2 = RoleType2;
+        public const string GroupingPolicyType3 = RoleType3;
 
         public const string DefaultMatcherType = "m";
         public const string DefaultPolicyEffeftType = "e";
@@ -46,10 +46,10 @@
 
         public static class PolicyEffeft
         {
-            public const string AllowOverride = "some(where (p.eft == allow))";
-            public const string DenyOverride = "!some(where (p.eft == deny))";
-            public const string AllowAndDeny = "some(where (p.eft == allow)) && !some(where (p.eft == deny))";
-            public const string Priority = "priority(p.eft) || deny";
+            public const string AllowOverride = "some(where (p_eft == allow))";
+            public const string DenyOverride = "!some(where (p_eft == deny))";
+            public const string AllowAndDeny = "some(where (p_eft == allow)) && !some(where (p_eft == deny))";
+            public const string Priority = "priority(p_eft) || deny";
         }
     }
 }

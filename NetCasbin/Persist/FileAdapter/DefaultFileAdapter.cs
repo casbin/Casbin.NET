@@ -162,10 +162,10 @@ namespace NetCasbin.Persist.FileAdapter
         private IList<string> ConvertToPolicyStrings(Model.Model model)
         {
             var policy = new List<string>();
-            policy.AddRange(GetModelPolicy(model, "p"));
-            if (model.Model.ContainsKey("g"))
+            policy.AddRange(GetModelPolicy(model, PermConstants.DefautPolicyType));
+            if (model.Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                policy.AddRange(GetModelPolicy(model, "g"));
+                policy.AddRange(GetModelPolicy(model, PermConstants.Section.RoleSection));
             }
             return policy;
         }
@@ -177,7 +177,7 @@ namespace NetCasbin.Persist.FileAdapter
 
         private async Task SavePolicyFileAsync(string text)
         {
-            text = text ?? "";
+            text = text ?? string.Empty;
             var content = Encoding.UTF8.GetBytes(text);
             using (var fs = new FileStream(
                    filePath, FileMode.Create, FileAccess.Write,

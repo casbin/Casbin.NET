@@ -16,9 +16,9 @@ namespace NetCasbin.Model
 
         public void BuildRoleLinks(IRoleManager rm)
         {
-            if (Model.ContainsKey("g"))
+            if (Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (Assertion assertion in Model["g"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
                 {
                     assertion.BuildRoleLinks(rm);
                 }
@@ -36,17 +36,17 @@ namespace NetCasbin.Model
 
         public void ClearPolicy()
         {
-            if (Model.ContainsKey("p"))
+            if (Model.ContainsKey(PermConstants.Section.PolicySection))
             {
-                foreach (Assertion assertion in Model["p"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.PolicySection].Values)
                 {
                     assertion.ClearPolicy();
                 }
             }
 
-            if (Model.ContainsKey("g"))
+            if (Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (Assertion assertion in Model["p"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
                 {
                     assertion.ClearPolicy();
                 }

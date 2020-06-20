@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Model;
+using System;
 
 namespace NetCasbin.Effect
 {
@@ -17,7 +18,7 @@ namespace NetCasbin.Effect
         public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
             var result = false;
-            if (expr.Equals("some(where (p_eft == allow))"))
+            if (expr.Equals(PermConstants.PolicyEffeft.AllowOverride))
             {
                 foreach (var eft in effects)
                 {
@@ -28,7 +29,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals("!some(where (p_eft == deny))"))
+            else if (expr.Equals(PermConstants.PolicyEffeft.DenyOverride))
             {
                 result = true;
 
@@ -41,7 +42,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals("some(where (p_eft == allow)) && !some(where (p_eft == deny))"))
+            else if (expr.Equals(PermConstants.PolicyEffeft.AllowAndDeny))
             {
                 result = false;
                 foreach (var eft in effects)
@@ -57,7 +58,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals("priority(p_eft) || deny"))
+            else if (expr.Equals(PermConstants.PolicyEffeft.Priority))
             {
                 result = false;
                 foreach (var eft in effects)
