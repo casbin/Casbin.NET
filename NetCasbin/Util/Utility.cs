@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -40,7 +41,7 @@ namespace NetCasbin.Util
         public static string EscapeAssertion(string s)
         {
             // 替换第一个点
-            if (s.StartsWith("r") || s.StartsWith("p"))
+            if (s.StartsWith(PermConstants.DefautRequestType) || s.StartsWith(PermConstants.DefautPolicyType))
             {
                 s = s.ReplaceFirst(@".", "_");
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Model;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -96,10 +97,10 @@ namespace NetCasbin.Persist.FileAdapter
             IEnumerable<string> filterSlice = new List<string>();
             switch (p[0].Trim())
             {
-                case "p":
+                case PermConstants.DefautPolicyType:
                     filterSlice = filter.P;
                     break;
-                case "g":
+                case PermConstants.DefaultGroupingPolicyType:
                     filterSlice = filter.G;
                     break;
             }

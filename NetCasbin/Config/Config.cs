@@ -76,7 +76,7 @@ namespace NetCasbin.Config
 
         private void ParseBuffer(TextReader reader)
         {
-            var section = "";
+            var section = string.Empty;
             var lineNum = 0;
             string line;
             while (true)
@@ -168,7 +168,7 @@ namespace NetCasbin.Config
                 throw new Exception("key is empty");
             }
 
-            var section = "";
+            var section = string.Empty;
             string option;
 
             var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
@@ -208,7 +208,7 @@ namespace NetCasbin.Config
             }
             else
             {
-                return "";
+                return string.Empty;
             }
         }
     }

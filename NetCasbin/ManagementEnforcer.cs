@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Model;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -20,7 +21,7 @@ namespace NetCasbin
         /// </returns>
         public List<string> GetAllSubjects()
         {
-            return GetAllNamedSubjects("p");
+            return GetAllNamedSubjects(PermConstants.Section.PolicySection);
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllNamedSubjects(string ptype)
         {
-            return model.GetValuesForFieldInPolicy("p", ptype, 0);
+            return model.GetValuesForFieldInPolicy(PermConstants.Section.PolicySection, ptype, 0);
         }
 
         /// <summary>
@@ -47,7 +48,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllObjects()
         {
-            return GetAllNamedObjects("p");
+            return GetAllNamedObjects(PermConstants.Section.PolicySection);
         }
 
         /// <summary>
@@ -61,7 +62,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllNamedObjects(string ptype)
         {
-            return model.GetValuesForFieldInPolicy("p", ptype, 1);
+            return model.GetValuesForFieldInPolicy(PermConstants.DefautPolicyType, ptype, 1);
         }
 
         /// <summary>
@@ -74,7 +75,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllActions()
         {
-            return GetAllNamedActions("p");
+            return GetAllNamedActions(PermConstants.Section.PolicySection);
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllNamedActions(string ptype)
         {
-            return model.GetValuesForFieldInPolicy("p", ptype, 2);
+            return model.GetValuesForFieldInPolicy(PermConstants.Section.PolicySection, ptype, 2);
         }
 
         /// <summary>
@@ -101,7 +102,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllRoles()
         {
-            return GetAllNamedRoles("g");
+            return GetAllNamedRoles(PermConstants.Section.RoleSection);
         }
 
         /// <summary>
@@ -115,7 +116,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllNamedRoles(string ptype)
         {
-            return model.GetValuesForFieldInPolicy("g", ptype, 1);
+            return model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
         }
 
         /// <summary>
@@ -124,7 +125,7 @@ namespace NetCasbin
         /// <returns> all the "p" policy rules.</returns>
         public List<List<string>> GetPolicy()
         {
-            return GetNamedPolicy("p");
+            return GetNamedPolicy(PermConstants.Section.PolicySection);
         }
 
         /// <summary>
@@ -135,7 +136,7 @@ namespace NetCasbin
         /// <returns>The filtered "p" policy rules.</returns>
         public List<List<string>> GetFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return GetFilteredNamedPolicy("p", fieldIndex, fieldValues);
+            return GetFilteredNamedPolicy(PermConstants.Section.PolicySection, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -145,7 +146,7 @@ namespace NetCasbin
         /// <returns>The "p" policy rules of the specified ptype.</returns>
         public List<List<string>> GetNamedPolicy(string ptype)
         {
-            return model.GetPolicy("p", ptype);
+            return model.GetPolicy(PermConstants.Section.PolicySection, ptype);
         }
 
         /// <summary>
@@ -157,7 +158,7 @@ namespace NetCasbin
         /// <returns>The filtered "p" policy rules of the specified ptype.</returns>
         public List<List<string>> GetFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return model.GetFilteredPolicy("p", ptype, fieldIndex, fieldValues);
+            return model.GetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -166,7 +167,7 @@ namespace NetCasbin
         /// <returns>all the "g" policy rules.</returns>
         public List<List<string>> GetGroupingPolicy()
         {
-            return GetNamedGroupingPolicy("g");
+            return GetNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType);
         }
 
         /// <summary>
@@ -177,7 +178,7 @@ namespace NetCasbin
         /// <returns>The filtered "g" policy rules.</returns>
         public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return GetFilteredNamedGroupingPolicy("g", fieldIndex, fieldValues);
+            return GetFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -187,7 +188,7 @@ namespace NetCasbin
         /// <returns>The "g" policy rules of the specified ptype.</returns>
         public List<List<string>> GetNamedGroupingPolicy(string ptype)
         {
-            return model.GetPolicy("g", ptype);
+            return model.GetPolicy(PermConstants.Section.RoleSection, ptype);
         }
 
         /// <summary>
@@ -199,7 +200,7 @@ namespace NetCasbin
         /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
         public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return model.GetFilteredPolicy("g", ptype, fieldIndex, fieldValues);
+            return model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -209,7 +210,7 @@ namespace NetCasbin
         /// <returns>Whether the rule exists.</returns>
         public bool HasPolicy(List<string> paramList)
         {
-            return HasNamedPolicy("p", paramList);
+            return HasNamedPolicy(PermConstants.DefautPolicyType, paramList);
         }
 
         /// <summary>
@@ -230,7 +231,7 @@ namespace NetCasbin
         /// <returns>Whether the rule exists.</returns>
         public bool HasNamedPolicy(string ptype, List<string> paramList)
         {
-            return model.HasPolicy("p", ptype, paramList);
+            return model.HasPolicy(PermConstants.Section.PolicySection, ptype, paramList);
         }
 
         /// <summary>
@@ -277,7 +278,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddPolicy(List<string> parameters)
         {
-            return AddNamedPolicy("p", parameters);
+            return AddNamedPolicy(PermConstants.DefautPolicyType, parameters);
         }
 
         /// <summary>
@@ -289,7 +290,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> AddPolicyAsync(List<string> parameters)
         {
-            return AddNamedPolicyAsync("p", parameters);
+            return AddNamedPolicyAsync(PermConstants.DefautPolicyType, parameters);
         }
 
         /// <summary>
@@ -328,7 +329,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedPolicy(string ptype, List<string> parameters)
         {
-            return AddPolicy("p", ptype, parameters);
+            return AddPolicy(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -341,7 +342,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> AddNamedPolicyAsync(string ptype, List<string> parameters)
         {
-            return AddPolicyAsync("p", ptype, parameters);
+            return AddPolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -371,7 +372,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemovePolicy(List<string> parameters)
         {
-            return RemoveNamedPolicy("p", parameters);
+            return RemoveNamedPolicy(PermConstants.Section.PolicySection, parameters);
         }
 
         /// <summary>
@@ -381,7 +382,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemovePolicyAsync(List<string> parameters)
         {
-            return RemoveNamedPolicyAsync("p", parameters);
+            return RemoveNamedPolicyAsync(PermConstants.DefautPolicyType, parameters);
         }
 
         /// <summary>
@@ -392,7 +393,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedPolicy("p", fieldIndex, fieldValues);
+            return RemoveFilteredNamedPolicy(PermConstants.DefautPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -403,7 +404,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveFilteredPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedPolicyAsync("p", fieldIndex, fieldValues);
+            return RemoveFilteredNamedPolicyAsync(PermConstants.DefautPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -436,7 +437,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedPolicy(string ptype, List<string> parameters)
         {
-            return RemovePolicy("p", ptype, parameters);
+            return RemovePolicy(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -447,7 +448,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveNamedPolicyAsync(string ptype, List<string> parameters)
         {
-            return RemovePolicyAsync("p", ptype, parameters);
+            return RemovePolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -459,7 +460,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredPolicy("p", ptype, fieldIndex, fieldValues);
+            return RemoveFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -471,7 +472,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveFilteredNamedPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredPolicyAsync("p", ptype, fieldIndex, fieldValues);
+            return RemoveFilteredPolicyAsync(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -481,7 +482,7 @@ namespace NetCasbin
         /// <returns>Whether the rule exists.</returns>
         public bool HasGroupingPolicy(List<string> parameters)
         {
-            return HasNamedGroupingPolicy("g", parameters);
+            return HasNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, parameters);
         }
 
         /// <summary>
@@ -503,7 +504,7 @@ namespace NetCasbin
         /// <returns>Whether the rule exists.</returns>
         public bool HasNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            return model.HasPolicy("g", ptype, parameters);
+            return model.HasPolicy(PermConstants.Section.RoleSection, ptype, parameters);
         }
 
         /// <summary>
@@ -551,7 +552,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddGroupingPolicy(List<string> parameters)
         {
-            return AddNamedGroupingPolicy("g", parameters);
+            return AddNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, parameters);
         }
 
         /// <summary>
@@ -563,7 +564,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> AddGroupingPolicyAsync(List<string> parameters)
         {
-            return AddNamedGroupingPolicyAsync("g", parameters);
+            return AddNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, parameters);
         }
 
         /// <summary>
@@ -576,7 +577,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            var ruleAdded = AddPolicy("g", ptype, parameters);
+            var ruleAdded = AddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -596,7 +597,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> AddNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            var ruleAdded = await AddPolicyAsync("g", ptype, parameters);
+            var ruleAdded = await AddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -646,7 +647,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveGroupingPolicy(List<string> parameters)
         {
-            return RemoveNamedGroupingPolicy("g", parameters);
+            return RemoveNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, parameters);
         }
 
         /// <summary>
@@ -656,7 +657,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveGroupingPolicyAsync(List<string> parameters)
         {
-            return RemoveNamedGroupingPolicyAsync("g", parameters);
+            return RemoveNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, parameters);
         }
 
         /// <summary>
@@ -692,7 +693,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            var ruleRemoved = RemovePolicy("g", ptype, parameters);
+            var ruleRemoved = RemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -711,7 +712,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            var ruleRemoved = await RemovePolicyAsync("g", ptype, parameters);
+            var ruleRemoved = await RemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -730,7 +731,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicy("g", fieldIndex, fieldValues);
+            return RemoveFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -742,7 +743,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicyAsync("g", fieldIndex, fieldValues);
+            return RemoveFilteredNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -754,7 +755,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = RemoveFilteredPolicy("g", ptype, fieldIndex, fieldValues);
+            var ruleRemoved = RemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
@@ -773,7 +774,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = await RemoveFilteredPolicyAsync("g", ptype, fieldIndex, fieldValues);
+            var ruleRemoved = await RemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {

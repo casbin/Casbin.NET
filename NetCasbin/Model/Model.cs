@@ -7,11 +7,11 @@ namespace NetCasbin.Model
     public class Model : Policy
     {
         private static readonly IDictionary<string, string> SectionNameMap = new Dictionary<string, string>() {
-            { "r", "request_definition"},
-            { "p", "policy_definition"},
-            { "g", "role_definition"},
-            { "e", "policy_effect"},
-            { "m", "matchers"},
+            { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
+            { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName},
+            { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName},
+            { PermConstants.Section.PolicyEffeftSection, PermConstants.Section.PolicyEffeftSectionName},
+            { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
         private bool LoadAssertion(Config.Config cfg, string sec, string key)
@@ -41,7 +41,7 @@ namespace NetCasbin.Model
                 return false;
             }
 
-            if (sec.Equals("r") || sec.Equals("p"))
+            if (sec.Equals(PermConstants.Section.RequestSection) || sec.Equals(PermConstants.Section.PolicySection))
             {
                 var tokens = ast.Value.Split(new string[] { ", " }, StringSplitOptions.None);
                 for (var i = 0; i < tokens.Length; i++)
@@ -74,7 +74,7 @@ namespace NetCasbin.Model
         {
             if (i == 1)
             {
-                return "";
+                return string.Empty;
             }
             return i.ToString();
         }
@@ -99,24 +99,22 @@ namespace NetCasbin.Model
         {
             var cfg = Config.Config.NewConfig(path);
 
-            LoadSection(cfg, "r");
-            LoadSection(cfg, "p");
-            LoadSection(cfg, "e");
-            LoadSection(cfg, "m");
-            LoadSection(cfg, "g");
+            LoadSection(cfg, PermConstants.Section.RequestSection);
+            LoadSection(cfg, PermConstants.Section.PolicySection);
+            LoadSection(cfg, PermConstants.Section.RoleSection);
+            LoadSection(cfg, PermConstants.Section.PolicyEffeftSection);
+            LoadSection(cfg, PermConstants.Section.MatcherSection);
         }
 
         public void LoadModelFromText(string text)
         {
             var cfg = Config.Config.NewConfigFromText(text);
 
-            LoadSection(cfg, "r");
-            LoadSection(cfg, "p");
-            LoadSection(cfg, "e");
-            LoadSection(cfg, "m");
-
-            LoadSection(cfg, "g");
+            LoadSection(cfg, PermConstants.Section.RequestSection);
+            LoadSection(cfg, PermConstants.Section.PolicySection);
+            LoadSection(cfg, PermConstants.Section.RoleSection);
+            LoadSection(cfg, PermConstants.Section.PolicyEffeftSection);
+            LoadSection(cfg, PermConstants.Section.MatcherSection);
         }
-
     }
 }

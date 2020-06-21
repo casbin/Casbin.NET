@@ -342,15 +342,15 @@ namespace NetCasbin
                 return true;
             }
 
-            var effect = model.Model["e"]["e"].Value;
-            var rTokens = model.Model["r"]["r"]?.Tokens;
+            var effect = model.Model[PermConstants.Section.PolicyEffeftSection][PermConstants.DefaultPolicyEffeftType].Value;
+            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
-            var policyLen = model.Model["p"]["p"].Policy.Count;
+            var policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy.Count;
             Effect.Effect[] policyEffects;
             float[] matcherResults;
             object result = null;
 
-            var expString = model.Model["m"]["m"].Value;
+            var expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
             Lambda expression = null;
             if (matcherMap.ContainsKey(expString))
             {
@@ -368,7 +368,7 @@ namespace NetCasbin
                 matcherResults = new float[policyLen];
                 for (var i = 0; i < policyLen; i++)
                 {
-                    var pvals = model.Model["p"]["p"].Policy[i];
+                    var pvals = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy[i];
                     if (rTokensLen != rvals.Length)
                     {
                         throw new Exception($"invalid request size: expected {rTokensLen}, got {rvals.Length}, rvals: ${rvals}");
@@ -421,7 +421,7 @@ namespace NetCasbin
                         policyEffects[i] = Effect.Effect.Allow;
                     }
 
-                    if (effect.Equals("priority(p_eft) || deny"))
+                    if (effect.Equals(PermConstants.PolicyEffeft.Priority))
                     {
                         break;
                     }
@@ -447,7 +447,7 @@ namespace NetCasbin
 
         private Lambda GetAndInitializeExpression(object[] rvals)
         {
-            var expString = model.Model["m"]["m"].Value;
+            var expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
             var parameters = GetParameters(rvals);
             var interpreter = GetAndInitializeInterpreter();
             var parsedExpression = interpreter.Parse(expString, parameters);
@@ -464,9 +464,9 @@ namespace NetCasbin
                 functions.Add(key, function);
             }
 
-            if (model.Model.ContainsKey("g"))
+            if (model.Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (var entry in model.Model["g"])
+                foreach (var entry in model.Model[PermConstants.Section.RoleSection])
                 {
                     var key = entry.Key;
                     var ast = entry.Value;
@@ -485,7 +485,7 @@ namespace NetCasbin
 
         private Parameter[] GetParameters(object[] rvals, IEnumerable<string> pvals = null)
         {
-            var rTokens = model.Model["r"]["r"]?.Tokens;
+            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
             var parameters = new Dictionary<string, object>();
             for (var i = 0; i < rTokensLen; i++)
@@ -493,12 +493,16 @@ namespace NetCasbin
                 var token = rTokens[i];
                 parameters.Add(token, rvals[i]);
             }
-            for (int i = 0, length = model.Model["p"]["p"].Tokens.Length; i < length; i++)
+            for (int i = 0, 
+                length = model.Model[PermConstants.Section.PolicySection]
+                                    [PermConstants.DefautPolicyType]
+                                    .Tokens.Length; 
+                i < length; i++)
             {
-                var token = model.Model["p"]["p"].Tokens[i];
+                var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Tokens[i];
                 if (pvals == null)
                 {
-                    parameters.Add(token, "");
+                    parameters.Add(token, string.Empty);
                 }
                 else
                 {

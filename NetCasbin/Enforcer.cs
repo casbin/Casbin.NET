@@ -13,7 +13,7 @@ namespace NetCasbin
     public class Enforcer : ManagementEnforcer
     {
 
-        public Enforcer() : this("", "")
+        public Enforcer() : this(string.Empty, string.Empty)
         {
         }
 
@@ -21,7 +21,7 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter) : this(NewModel(modelPath, ""), adapter)
+        public Enforcer(string modelPath, IAdapter adapter) : this(NewModel(modelPath, string.Empty), adapter)
         {
             this.modelPath = modelPath;
         }
@@ -44,7 +44,7 @@ namespace NetCasbin
         }
 
         public Enforcer(string modelPath) :
-            this(modelPath, "")
+            this(modelPath, string.Empty)
         {
         }
 
@@ -59,7 +59,7 @@ namespace NetCasbin
         /// <returns></returns>
         public List<string> GetRolesForUser(string name)
         {
-            return model.Model["g"]["g"].RoleManager.GetRoles(name);
+            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name);
         }
 
         /// <summary>
@@ -69,7 +69,7 @@ namespace NetCasbin
         /// <returns></returns>
         public List<string> GetUsersForRole(string name)
         {
-            return model.Model["g"]["g"].RoleManager.GetUsers(name);
+            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetUsers(name);
         }
 
         /// <summary>
@@ -81,7 +81,7 @@ namespace NetCasbin
         {
             var userIds = new List<string>();
             foreach (var name in names)
-                userIds.AddRange(model.Model["g"]["g"].RoleManager.GetUsers(name));
+                userIds.AddRange(model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetUsers(name));
             return userIds;
         }
 
@@ -425,7 +425,7 @@ namespace NetCasbin
         /// <returns></returns>
         public List<string> GetRolesForUserInDomain(string name, string domain)
         {
-            return model.Model["g"]["g"].RoleManager.GetRoles(name, domain);
+            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
         }
 
         /// <summary>
