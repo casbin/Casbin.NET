@@ -26,7 +26,7 @@ namespace NetCasbin
             this.modelPath = modelPath;
         }
 
-        public Enforcer(Model.Model model, IAdapter adapter)
+        public Enforcer(Model.Model model, IAdapter adapter = null)
         {
             this.adapter = adapter;
             watcher = null;
@@ -36,11 +36,6 @@ namespace NetCasbin
 
             Initialize();
             LoadPolicy();
-        }
-
-        public Enforcer(Model.Model m) :
-            this(m, null)
-        {
         }
 
         public Enforcer(string modelPath) :
