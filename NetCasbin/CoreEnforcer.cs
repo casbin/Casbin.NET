@@ -28,7 +28,7 @@ namespace NetCasbin
         protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
-        protected readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
+        private readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
 
         protected void Initialize()
         {
