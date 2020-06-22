@@ -28,7 +28,7 @@ namespace NetCasbin
         protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
-        private readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
+        private readonly Dictionary<string, Lambda> _matcherMap = new Dictionary<string, Lambda>();
 
         protected void Initialize()
         {
@@ -352,14 +352,14 @@ namespace NetCasbin
 
             var expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
             Lambda expression = null;
-            if (matcherMap.ContainsKey(expString))
+            if (_matcherMap.ContainsKey(expString))
             {
-                expression = matcherMap[expString];
+                expression = _matcherMap[expString];
             }
             else
             {
                 expression = GetAndInitializeExpression(rvals);
-                matcherMap[expString] = expression;
+                _matcherMap[expString] = expression;
             }
 
             if (policyLen != 0)

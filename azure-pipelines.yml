@@ -9,11 +9,11 @@ variables:
   buildConfiguration: 'Release'
 
 stages:
-- stage: BuildAndPack
-  displayName: Build and test
+- stage: Windows
+  displayName: Build test and pack
   jobs:  
   - job: Build
-    displayName: Build and test
+    displayName: Build test and pack
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -23,13 +23,13 @@ stages:
             packageType: 'sdk'
             version: '3.1.x'
 
-      - task: gitversion/setup@0
+      - task: GitVersion/setup@0
         displayName: Install git version
         inputs:
           versionSpec: '5.x'
           includePrerelease: false
 
-      - task: gitversion/execute@0
+      - task: GitVersion/execute@0
         displayName: Complete version
         inputs:
           targetPath: '.'
@@ -38,7 +38,7 @@ stages:
         displayName: Build projects
         inputs:
           command: 'build'
-          arguments: '-c $(buildConfiguration)'
+          arguments: '-c $(buildConfiguration) -p:FileVersion=$(GitVersion.AssemblySemFileVer)'
           versioningScheme: byEnvVar
           versionEnvVar: 'GitVersion.SemVer'
 
@@ -46,15 +46,14 @@ stages:
         displayName: Test projects
         inputs:
           command: 'test'
+          nobuild: true
           arguments: '-c $(buildConfiguration)'
 
       - task: DotNetCoreCLI@2
         displayName: Pack packages
         inputs:
           command: 'pack'
-          packagesToPack: '**/*.csproj'
-          configuration: '$(buildConfiguration)'
-          nobuild: true
+          arguments: '-c $(buildConfiguration)'
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'GitVersion.NuGetVersionV2'
 
@@ -64,6 +63,3 @@ stages:
             PathtoPublish: '$(Build.ArtifactStagingDirectory)'
             ArtifactName: 'drop-azure-ci'
             publishLocation: 'Container'
-
-
-
