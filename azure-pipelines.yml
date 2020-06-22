@@ -1,34 +1,69 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
-
 trigger:
 - master
-
-pool:
-  vmImage: 'windows-latest'
+- develop
+- release
 
 variables:
   solution: '**/*.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
-steps:
-- task: NuGetToolInstaller@1
+stages:
+- stage: BuildAndPack
+  displayName: Build and test
+  jobs:  
+  - job: Build
+    displayName: Build and test
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+      - task : UseDotNet@2
+        displayName: Use dotnet sdk 3.1.x
+        inputs:
+            packageType: 'sdk'
+            version: '3.1.x'
 
-- task: NuGetCommand@2
-  inputs:
-    restoreSolution: '$(solution)'
+      - task: gitversion/setup@0
+        displayName: Install git version
+        inputs:
+          versionSpec: '5.x'
+          includePrerelease: false
 
-- task: VSBuild@1
-  inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+      - task: gitversion/execute@0
+        displayName: Complete version
+        inputs:
+          targetPath: '.'
 
-- task: VSTest@2
-  inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+      - task: DotNetCoreCLI@2
+        displayName: Build projects
+        inputs:
+          command: 'build'
+          arguments: '-c $(buildConfiguration)'
+          versioningScheme: byEnvVar
+          versionEnvVar: 'GitVersion.SemVer'
+
+      - task: DotNetCoreCLI@2
+        displayName: Test projects
+        inputs:
+          command: 'test'
+          arguments: '-c $(buildConfiguration)'
+
+      - task: DotNetCoreCLI@2
+        displayName: Pack packages
+        inputs:
+          command: 'pack'
+          packagesToPack: '**/*.csproj'
+          configuration: '$(buildConfiguration)'
+          nobuild: true
+          versioningScheme: 'byEnvVar'
+          versionEnvVar: 'GitVersion.NuGetVersionV2'
+
+      - task: PublishBuildArtifacts@1
+        displayName: Push packages to drop
+        inputs:
+            PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+            ArtifactName: 'drop-azure-ci'
+            publishLocation: 'Container'
+
+
+
