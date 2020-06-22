@@ -3,19 +3,16 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <Description>Casbin ported to dotnet core</Description>
-    <Authors>Casbin, Zhikui H</Authors>
+    <Authors>Casbin</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
     <RepositoryType>GIT</RepositoryType>
-    <Company>Zhikui H</Company>
+    <Company>Casbin</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <Version>1.2.6</Version>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.2.6.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.2.6.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>

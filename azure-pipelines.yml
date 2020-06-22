@@ -4,8 +4,6 @@ trigger:
 - release
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 stages:
@@ -38,24 +36,23 @@ stages:
         displayName: Build projects
         inputs:
           command: 'build'
-          arguments: '-c $(buildConfiguration) -p:FileVersion=$(GitVersion.AssemblySemFileVer)'
-          versioningScheme: byEnvVar
-          versionEnvVar: 'GitVersion.SemVer'
+          arguments: '-c $(buildConfiguration) /p:Version=$(GitVersion.AssemblySemVer) /p:FileVersion=$(GitVersion.AssemblySemFileVer)'
 
       - task: DotNetCoreCLI@2
         displayName: Test projects
         inputs:
           command: 'test'
-          nobuild: true
-          arguments: '-c $(buildConfiguration)'
+          arguments: '-c $(buildConfiguration) --no-build'
 
       - task: DotNetCoreCLI@2
         displayName: Pack packages
         inputs:
           command: 'pack'
-          arguments: '-c $(buildConfiguration)'
+          packagesToPack: '**/*.csproj'
+          nobuild: true
           versioningScheme: 'byEnvVar'
           versionEnvVar: 'GitVersion.NuGetVersionV2'
+          verbosityPack: 'Minimal'
 
       - task: PublishBuildArtifacts@1
         displayName: Push packages to drop
