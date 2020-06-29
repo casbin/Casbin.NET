@@ -38,7 +38,7 @@ namespace NetCasbin.Persist.FileAdapter
             if (!string.IsNullOrWhiteSpace(filePath))
             {
                 using (var sr = new StreamReader(new FileStream(
-                    filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
                     LoadPolicyData(model, Helper.LoadPolicyLine, sr);
                 }
