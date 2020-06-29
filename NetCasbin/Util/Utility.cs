@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NetCasbin.Model;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -18,10 +19,10 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        /// removeComments removes the comments starting with # in the text.
+        /// Removes the comments starting with # in the text.
         /// </summary>
         /// <param name="s">a line in the model.</param>
-        /// <returns>the line without comments.</returns>
+        /// <returns>The line without comments.</returns>
         public static string RemoveComments(string s)
         {
             var pos = s.IndexOf("#");
@@ -35,12 +36,12 @@ namespace NetCasbin.Util
         /// <summary>
         /// escapeAssertion escapes the dots in the assertion, because the expression evaluation doesn't support such variable names.
         /// </summary>
-        /// <param name="s">the value of the matcher and effect assertions.</param>
-        /// <returns>the escaped value.</returns>
+        /// <param name="s">The value of the matcher and effect assertions.</param>
+        /// <returns>The escaped value.</returns>
         public static string EscapeAssertion(string s)
         {
             // 替换第一个点
-            if (s.StartsWith("r") || s.StartsWith("p"))
+            if (s.StartsWith(PermConstants.DefautRequestType) || s.StartsWith(PermConstants.DefautPolicyType))
             {
                 s = s.ReplaceFirst(@".", "_");
             }
@@ -61,14 +62,9 @@ namespace NetCasbin.Util
             return sb.ToString();
         }
 
-        /// <summary>
-        /// arrayToString gets a printable string for a string array.
-        /// </summary>
-        /// <param name="v">the array.</param>
-        /// <returns>the string joined by the array elements.</returns>
-        public static string ArrayToString(string[] v)
+        public static string RuleToString(IEnumerable<string> rule)
         {
-            return string.Join(", ", v);
+            return string.Join(", ", rule);
         }
 
         public static bool ArrayEquals(List<string> a, List<string> b)
@@ -126,22 +122,12 @@ namespace NetCasbin.Util
             return true;
         }
 
-        public static string ArrayToString(List<string> s)
-        {
-            return string.Join(", ", s);
-        }
-
-        public static string ParamsToString(string[] s)
-        {
-            return string.Join(", ", s);
-        }
-
         /// <summary>
         /// SetEquals determines whether two string sets are identical.
         /// </summary>
-        /// <param name="a">the first set.</param>
-        /// <param name="b">the second set.</param>
-        /// <returns>whether a equals to b.</returns>
+        /// <param name="a">The first set.</param>
+        /// <param name="b">The second set.</param>
+        /// <returns>Whether a equals to b.</returns>
         public static bool SetEquals(List<string> a, List<string> b)
         {
             if (a == null)

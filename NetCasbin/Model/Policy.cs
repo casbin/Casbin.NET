@@ -1,6 +1,5 @@
 ﻿using NetCasbin.Rbac;
 using NetCasbin.Util;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,34 +7,48 @@ namespace NetCasbin.Model
 {
     public class Policy
     {
-        public Dictionary<string, Dictionary<string, Assertion>> Model { set; get; }
+        public Dictionary<string, Dictionary<string, Assertion>> Model { get; }
+
+        protected Policy()
+        {
+            Model = new Dictionary<string, Dictionary<string, Assertion>>();
+        }
 
         public void BuildRoleLinks(IRoleManager rm)
         {
-            if (Model.ContainsKey("g"))
+            if (Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (var ast in Model["g"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
                 {
-                    ast.BuildRoleLinks(rm);
+                    assertion.BuildRoleLinks(rm);
                 }
+            }
+        }
+
+        public void RefreshPolicyStringSet()
+        {
+            foreach (Assertion assertion in Model.Values
+                .SelectMany(pair => pair.Values))
+            {
+                assertion.RefreshPolicyStringSet();
             }
         }
 
         public void ClearPolicy()
         {
-            if (Model.ContainsKey("p"))
+            if (Model.ContainsKey(PermConstants.Section.PolicySection))
             {
-                foreach (var ast in Model["p"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.PolicySection].Values)
                 {
-                    ast.Policy = new List<List<string>>();
+                    assertion.ClearPolicy();
                 }
             }
 
-            if (Model.ContainsKey("g"))
+            if (Model.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (var ast in Model["p"].Values)
+                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
                 {
-                    ast.Policy = new List<List<string>>();
+                    assertion.ClearPolicy();
                 }
             }
         }
@@ -73,31 +86,29 @@ namespace NetCasbin.Model
 
         public bool HasPolicy(string sec, string ptype, List<string> rule)
         {
-            return Model[sec][ptype]!=null && Model[sec][ptype].Policy.Any(x => Utility.ArrayEquals(rule, x));
+            return Model[sec][ptype] != null && Model[sec][ptype].Contains(rule);
         }
 
         public bool AddPolicy(string sec, string ptype, List<string> rule)
         {
-            if (!HasPolicy(sec, ptype, rule))
+            if (HasPolicy(sec, ptype, rule))
             {
-                Model[sec][ptype].Policy.Add(rule);
-                return true;
+                return false;
             }
-            return false;
+
+            Assertion assertion = Model[sec][ptype];
+            return assertion.AddPolicy(rule);
         }
 
         public bool RemovePolicy(string sec, string ptype, List<string> rule)
         {
-            for (var i = 0; i < Model[sec][ptype].Policy.Count; i++)
+            if (!HasPolicy(sec, ptype, rule))
             {
-                var r = Model[sec][ptype].Policy[i];
-                if (Utility.ArrayEquals(rule, r))
-                {
-                    Model[sec][ptype].Policy.RemoveAt(i);
-                    return true;
-                }
+                return true;
             }
-            return false;
+
+            Assertion assertion = Model[sec][ptype];
+            return assertion.RemovePolicy(rule);
         }
 
         public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
@@ -105,7 +116,8 @@ namespace NetCasbin.Model
             var tmp = new List<List<string>>();
             var res = false;
 
-            foreach (var rule in Model[sec][ptype].Policy)
+            Assertion assertion = Model[sec][ptype];
+            foreach (var rule in assertion.Policy)
             {
                 var matched = true;
                 for (var i = 0; i < fieldValues.Length; i++)
@@ -128,18 +140,16 @@ namespace NetCasbin.Model
                 }
             }
 
-            Model[sec][ptype].Policy = tmp;
+            assertion.Policy = tmp;
+            assertion.RefreshPolicyStringSet();
             return res;
         }
 
         public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
         {
-            var values = new List<string>();
-
-            foreach (var rule in Model[sec][ptype].Policy)
-            {
-                values.Add(rule[fieldIndex]);
-            }
+            var values = Model[sec][ptype].Policy
+                .Select(rule => rule[fieldIndex])
+                .ToList();
 
             Utility.ArrayRemoveDuplicates(values);
             return values;

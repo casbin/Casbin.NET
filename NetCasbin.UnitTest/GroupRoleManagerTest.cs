@@ -1,7 +1,7 @@
 ﻿using NetCasbin.Rbac;
 using Xunit;
 
-namespace NetCasbin.Test
+namespace NetCasbin.UnitTest
 {
     public class GroupRoleManagerTest:TestUtil
     {

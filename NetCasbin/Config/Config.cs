@@ -19,10 +19,10 @@ namespace NetCasbin.Config
         }
 
         /// <summary>
-        /// newConfig create an empty configuration representation from file.
+        /// Creates an empty configuration representation from file.
         /// </summary>
-        /// <param name="configFilePath">the path of the model file.</param>
-        /// <returns>the constructor of Config.</returns>
+        /// <param name="configFilePath">The path of the model file.</param>
+        /// <returns>The constructor of Config.</returns>
         public static Config NewConfig(string configFilePath)
         {
             var c = new Config();
@@ -31,10 +31,10 @@ namespace NetCasbin.Config
         }
 
         /// <summary>
-        /// newConfigFromText create an empty configuration representation from text.
+        /// Creates an empty configuration representation from text.
         /// </summary>
-        /// <param name="text">the model text.</param>
-        /// <returns> the constructor of Config.</returns>
+        /// <param name="text">The model text.</param>
+        /// <returns>The constructor of Config.</returns>
         public static Config NewConfigFromText(string text)
         {
             var c = new Config();
@@ -43,7 +43,7 @@ namespace NetCasbin.Config
         }
 
         /// <summary>
-        /// addConfig adds a new section->key:value to the configuration.
+        /// Adds a new section->key:value to the configuration.
         /// </summary>
         /// <param name="section"></param>
         /// <param name="option"></param>
@@ -76,7 +76,7 @@ namespace NetCasbin.Config
 
         private void ParseBuffer(TextReader reader)
         {
-            var section = "";
+            var section = string.Empty;
             var lineNum = 0;
             string line;
             while (true)
@@ -168,7 +168,7 @@ namespace NetCasbin.Config
                 throw new Exception("key is empty");
             }
 
-            var section = "";
+            var section = string.Empty;
             string option;
 
             var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
@@ -208,7 +208,7 @@ namespace NetCasbin.Config
             }
             else
             {
-                return "";
+                return string.Empty;
             }
         }
     }

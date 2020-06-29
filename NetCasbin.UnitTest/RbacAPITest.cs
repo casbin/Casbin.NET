@@ -1,16 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Threading.Tasks;
 using Xunit;
 
-namespace NetCasbin.Test
+namespace NetCasbin.UnitTest
 {
-    public class RbacAPITest : TestUtil
+    public class RbacApiTest : TestUtil
     {
-
         [Fact]
-        public void Test_RoleAPI()
+        public void TestRoleApi()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
             TestGetRoles(e, "alice", AsList("data2_admin"));
@@ -69,7 +65,68 @@ namespace NetCasbin.Test
             TestEnforce(e, "bob", "data1", "write", false);
             TestEnforce(e, "bob", "data2", "read", false);
             TestEnforce(e, "bob", "data2", "write", true);
+        }
 
+        [Fact]
+        public async Task TestRoleApiAsync()
+        {
+            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            TestGetRoles(e, "alice", AsList("data2_admin"));
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "data2_admin", AsList());
+            TestGetRoles(e, "non_exist", AsList());
+
+            TestHasRole(e, "alice", "data1_admin", false);
+            TestHasRole(e, "alice", "data2_admin", true);
+
+            await e.AddRoleForUserAsync("alice", "data1_admin");
+
+            TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin"));
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "data2_admin", AsList());
+
+            await e.DeleteRoleForUserAsync("alice", "data1_admin");
+
+            TestGetRoles(e, "alice", AsList("data2_admin"));
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "data2_admin", AsList());
+
+            await e.DeleteRolesForUserAsync("alice");
+
+            TestGetRoles(e, "alice", AsList());
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "data2_admin", AsList());
+
+            await e.AddRoleForUserAsync("alice", "data1_admin");
+            await e.DeleteUserAsync("alice");
+
+            TestGetRoles(e, "alice", AsList());
+            TestGetRoles(e, "bob", AsList());
+            TestGetRoles(e, "data2_admin", AsList());
+
+            await e.AddRoleForUserAsync("alice", "data2_admin");
+
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+
+            TestEnforce(e, "alice", "data2", "read", true);
+            TestEnforce(e, "alice", "data2", "write", true);
+
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
+
+            await e.DeleteRoleAsync("data2_admin");
+
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "write", false);
+            TestEnforce(e, "alice", "data2", "read", false);
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data1", "read", false);
+            TestEnforce(e, "bob", "data1", "write", false);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
         }
     }
 }

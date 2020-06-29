@@ -20,6 +20,10 @@ namespace NetCasbin.Persist
 
         void RemovePolicy(string sec, string ptype, IList<string> rule);
 
+        Task RemovePolicyAsync(string sec, string ptype, IList<string> rule);
+
         void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues);
+
+        Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues);
     }
 }
