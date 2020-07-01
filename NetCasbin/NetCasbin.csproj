@@ -30,6 +30,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="casbin.snk" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
   </ItemGroup>
 

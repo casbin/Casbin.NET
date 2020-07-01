@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
-using Xunit;
 using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
+using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
@@ -240,7 +240,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRbacModelInMemory2()
         {
-            var text =
+            string text =
                 "[request_definition]\n"
                 + "r = sub, obj, act\n"
                 + "\n"
@@ -279,7 +279,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRbacModelInMemory2Async()
         {
-            var text =
+            string text =
                 "[request_definition]\n"
                 + "r = sub, obj, act\n"
                 + "\n"

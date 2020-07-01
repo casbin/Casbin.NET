@@ -1,5 +1,5 @@
-﻿using NetCasbin.Model;
-using System;
+﻿using System;
+using NetCasbin.Model;
 
 namespace NetCasbin.Effect
 {
@@ -17,7 +17,7 @@ namespace NetCasbin.Effect
         /// <returns></returns>
         public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
-            var result = false;
+            bool result = false;
             if (expr.Equals(PermConstants.PolicyEffeft.AllowOverride))
             {
                 foreach (var eft in effects)

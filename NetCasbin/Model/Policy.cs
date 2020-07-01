@@ -1,7 +1,7 @@
-﻿using NetCasbin.Rbac;
-using NetCasbin.Util;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using NetCasbin.Rbac;
+using NetCasbin.Util;
 
 namespace NetCasbin.Model
 {
@@ -64,10 +64,10 @@ namespace NetCasbin.Model
 
             foreach (var rule in Model[sec][ptype].Policy)
             {
-                var matched = true;
-                for (var i = 0; i < fieldValues.Length; i++)
+                bool matched = true;
+                for (int i = 0; i < fieldValues.Length; i++)
                 {
-                    var fieldValue = fieldValues[i];
+                    string fieldValue = fieldValues[i];
                     if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
                     {
                         matched = false;
@@ -114,15 +114,15 @@ namespace NetCasbin.Model
         public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
             var tmp = new List<List<string>>();
-            var res = false;
+            bool res = false;
 
             Assertion assertion = Model[sec][ptype];
             foreach (var rule in assertion.Policy)
             {
-                var matched = true;
-                for (var i = 0; i < fieldValues.Length; i++)
+                bool matched = true;
+                for (int i = 0; i < fieldValues.Length; i++)
                 {
-                    var fieldValue = fieldValues[i];
+                    string fieldValue = fieldValues[i];
                     if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
                     {
                         matched = false;

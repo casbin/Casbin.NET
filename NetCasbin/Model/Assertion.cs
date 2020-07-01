@@ -1,13 +1,14 @@
-﻿using NetCasbin.Rbac;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using NetCasbin.Rbac;
 using NetCasbin.Util;
 
 namespace NetCasbin.Model
 {
     /// <summary>
-    /// 断言
+    /// Represents an expression in a section of the model.
+    /// For example: r = sub, obj, act
     /// </summary>
     public class Assertion
     {
@@ -42,7 +43,7 @@ namespace NetCasbin.Model
         public void BuildRoleLinks(IRoleManager roleManager)
         {
             RoleManager = roleManager;
-            var count =  Value.ToCharArray().Count(x => x == '_');
+            int count = Value.ToCharArray().Count(x => x == '_');
             foreach (var rule in Policy)
             {
                 if (count < 2)
@@ -83,7 +84,7 @@ namespace NetCasbin.Model
 
         internal bool RemovePolicy(List<string> rule)
         {
-            for (var i = 0; i < Policy.Count; i++)
+            for (int i = 0; i < Policy.Count; i++)
             {
                 var ruleInPolicy = Policy[i];
                 if (!Utility.ArrayEquals(rule, ruleInPolicy))

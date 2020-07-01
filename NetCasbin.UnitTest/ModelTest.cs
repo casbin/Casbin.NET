@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Xunit;
 using NetCasbin.Rbac;
 using NetCasbin.UnitTest.Fixtures;
+using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
@@ -49,7 +49,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithRoot()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
                 _testModelFixture._basicWithRootModelText,
                 _testModelFixture._basicPolicyText));
 
@@ -271,7 +271,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRBACModelWithOnlyDeny()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
                 _testModelFixture._rbacWithNotDenyModelText,
                 _testModelFixture._rbacWithDenyPolicyText));
             e.BuildRoleLinks();
@@ -355,7 +355,7 @@ namespace NetCasbin.UnitTest
             var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
             e.SetRoleManager(new CustomRoleManager());
             e.BuildRoleLinks();
-            
+
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
             TestEnforce(e, "alice", "data2", "read", true);
@@ -415,7 +415,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestPriorityModelIndeterminate()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
                 _testModelFixture._priorityModelText,
                 _testModelFixture._priorityIndeterminatePolicyText));
             e.BuildRoleLinks();

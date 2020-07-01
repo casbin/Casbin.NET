@@ -90,7 +90,7 @@ namespace NetCasbin.UnitTest.Fixtures
             return CoreEnforcer.NewModel(modelText.Value);
         }
 
-        public Model.Model GetNewTestModel(Lazy<string> modelText, Lazy<string> policyText)
+        public static Model.Model GetNewTestModel(Lazy<string> modelText, Lazy<string> policyText)
         {
             var model = CoreEnforcer.NewModel(modelText.Value);
             return LoadModelFromMemory(model, policyText.Value);
@@ -107,7 +107,7 @@ namespace NetCasbin.UnitTest.Fixtures
             model.RefreshPolicyStringSet();
             return model;
         }
-        
+
         private static Lazy<string> LazyReadTestFile(string fileName)
         {
             return new Lazy<string>(() => File.ReadAllText(Path.Combine("examples", fileName)));

@@ -6,9 +6,9 @@ namespace NetCasbin.Config
 {
     public class Config
     {
-        private static readonly string DEFAULT_SECTION = "default";
-        private static readonly string DEFAULT_COMMENT = "#";
-        private static readonly string DEFAULT_COMMENT_SEM = ";";
+        private static readonly string _defaultSection = "default";
+        private static readonly string _defaultComment = "#";
+        private static readonly string _defaultCommentSem = ";";
 
         // Section:key=value
         private readonly IDictionary<string, IDictionary<string, string>> _data;
@@ -53,7 +53,7 @@ namespace NetCasbin.Config
         {
             if (string.IsNullOrEmpty(section))
             {
-                section = DEFAULT_SECTION;
+                section = _defaultSection;
             }
 
             if (!_data.ContainsKey(section))
@@ -61,7 +61,7 @@ namespace NetCasbin.Config
                 _data.Add(section, new Dictionary<string, string>());
             }
 
-            var ok = _data[section].ContainsKey(option);
+            bool ok = _data[section].ContainsKey(option);
             _data[section].Add(option, value);
             return !ok;
         }
@@ -76,8 +76,8 @@ namespace NetCasbin.Config
 
         private void ParseBuffer(TextReader reader)
         {
-            var section = string.Empty;
-            var lineNum = 0;
+            string section = string.Empty;
+            int lineNum = 0;
             string line;
             while (true)
             {
@@ -103,11 +103,11 @@ namespace NetCasbin.Config
 
                 line = line.Trim();
 
-                if (line.StartsWith(DEFAULT_COMMENT))
+                if (line.StartsWith(_defaultComment))
                 {
                     continue;
                 }
-                else if (line.StartsWith(DEFAULT_COMMENT_SEM))
+                else if (line.StartsWith(_defaultCommentSem))
                 {
                     continue;
                 }
@@ -123,8 +123,8 @@ namespace NetCasbin.Config
                         throw new Exception(
                                 string.Format("parse the content error : line {0} , {1} = ? ", lineNum, optionVal[0]));
                     }
-                    var option = optionVal[0].Trim();
-                    var value = optionVal[1].Trim();
+                    string option = optionVal[0].Trim();
+                    string value = optionVal[1].Trim();
                     AddConfig(section, option, value);
                 }
             }
@@ -152,7 +152,7 @@ namespace NetCasbin.Config
 
         public string[] GetStrings(string key)
         {
-            var v = Get(key);
+            string v = Get(key);
             if (string.IsNullOrEmpty(v))
             {
                 return null;
@@ -168,7 +168,7 @@ namespace NetCasbin.Config
                 throw new Exception("key is empty");
             }
 
-            var section = string.Empty;
+            string section = string.Empty;
             string option;
 
             var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
@@ -197,11 +197,11 @@ namespace NetCasbin.Config
             }
             else
             {
-                section = DEFAULT_SECTION;
+                section = _defaultSection;
                 option = keys[0];
             }
 
-            var ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
+            bool ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
             if (ok)
             {
                 return _data[section][option];

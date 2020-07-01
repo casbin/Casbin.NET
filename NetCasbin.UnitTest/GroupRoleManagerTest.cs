@@ -1,5 +1,5 @@
-﻿using Xunit;
-using NetCasbin.Rbac;
+﻿using NetCasbin.Rbac;
+using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest

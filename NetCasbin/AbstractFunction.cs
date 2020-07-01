@@ -5,13 +5,11 @@ namespace NetCasbin
 {
     public abstract class AbstractFunction
     {
-        private readonly string _name;
+        public string Name { get; }
 
-        public string Name => _name;
-
-        public AbstractFunction(string name)
+        protected AbstractFunction(string name)
         {
-            _name = name;
+            Name = name;
         }
 
         public ParameterInfo[] InputParameters => GetFunc().Method.GetParameters();

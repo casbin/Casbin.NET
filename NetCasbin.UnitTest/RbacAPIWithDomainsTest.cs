@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
-using Xunit;
 using NetCasbin.UnitTest.Fixtures;
+using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
