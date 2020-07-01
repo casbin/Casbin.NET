@@ -1,14 +1,24 @@
 ﻿using System.Threading.Tasks;
 using Xunit;
+using NetCasbin.UnitTest.Fixtures;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class RbacApiWithDomainsTest : TestUtil
+    public class RbacApiWithDomainsTest : IClassFixture<TestModelFixture>
     {
+        private readonly TestModelFixture _testModelFixture;
+
+        public RbacApiWithDomainsTest(TestModelFixture testModelFixture)
+        {
+            _testModelFixture = testModelFixture;
+        }
+
         [Fact]
         public void TestRoleApiWithDomains()
         {
-            var e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            e.BuildRoleLinks();
 
             TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
             TestGetRolesInDomain(e, "bob", "domain1", AsList());
@@ -37,7 +47,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRoleApiWithDomainsAsync()
         {
-            var e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            e.BuildRoleLinks();
 
             TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
             TestGetRolesInDomain(e, "bob", "domain1", AsList());

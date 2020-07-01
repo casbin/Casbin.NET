@@ -1,12 +1,13 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using Xunit;
 using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
-using Xunit;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class EnforcerUnitTest : TestUtil
+    public class EnforcerUnitTest
     {
         [Fact]
         public void TestKeyMatchModelInMemory()
@@ -147,7 +148,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelInMemoryIndeterminate()
+        public void TestRbacModelInMemoryIndeterminate()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -164,7 +165,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelInMemoryIndeterminateAsync()
+        public async Task TestRbacModelInMemoryIndeterminateAsync()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -181,7 +182,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelInMemory()
+        public void TestRbacModelInMemory()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -209,7 +210,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelInMemoryAsync()
+        public async Task TestRbacModelInMemoryAsync()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -237,7 +238,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelInMemory2()
+        public void TestRbacModelInMemory2()
         {
             var text =
                 "[request_definition]\n"
@@ -276,7 +277,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelInMemory2Async()
+        public async Task TestRbacModelInMemory2Async()
         {
             var text =
                 "[request_definition]\n"
@@ -315,7 +316,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestNotUsedRBACModelInMemory()
+        public void TestNotUsedRbacModelInMemory()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -340,7 +341,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestNotUsedRBACModelInMemoryAsync()
+        public async Task TestNotUsedRbacModelInMemoryAsync()
         {
             var m = CoreEnforcer.NewModel();
             m.AddDef("r", "r", "sub, obj, act");
@@ -463,7 +464,6 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "bob", "data1", "write", false);
             TestEnforce(e, "bob", "data2", "read", false);
             TestEnforce(e, "bob", "data2", "write", true);
-
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);

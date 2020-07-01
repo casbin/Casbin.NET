@@ -1,15 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Xunit;
+using NetCasbin.UnitTest.Fixtures;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class ManagementApiUnitTest : TestUtil
+    public class ManagementApiUnitTest : IClassFixture<TestModelFixture>
     {
+        private readonly TestModelFixture _testModelFixture;
+
+        public ManagementApiUnitTest(TestModelFixture testModelFixture)
+        {
+            _testModelFixture = testModelFixture;
+        }
+
         [Fact]
         public void TestGetPolicyApi()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestGetPolicy(e, AsList(
                     AsList("alice", "data1", "read"),
@@ -51,7 +61,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestModifyPolicy()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestGetPolicy(e, AsList(
                     AsList("alice", "data1", "read"),
@@ -82,7 +93,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestModifyPolicyAsync()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestGetPolicy(e, AsList(
                 AsList("alice", "data1", "read"),
@@ -113,7 +125,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestModifyGroupingPolicy()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
@@ -154,7 +167,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestModifyGroupingPolicyAsync()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
