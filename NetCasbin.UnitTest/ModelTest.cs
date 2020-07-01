@@ -1,16 +1,25 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetCasbin.Rbac;
 using Xunit;
+using NetCasbin.Rbac;
+using NetCasbin.UnitTest.Fixtures;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class ModelTest : TestUtil
+    public class ModelTest : IClassFixture<TestModelFixture>
     {
+        private readonly TestModelFixture _testModelFixture;
+
+        public ModelTest(TestModelFixture testModelFixture)
+        {
+            _testModelFixture = testModelFixture;
+        }
+
         [Fact]
         public void TestBasicModel()
         {
-            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -25,7 +34,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelNoPolicy()
         {
-            var e = new Enforcer("examples/basic_model.conf");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._basicModelText));
 
             TestEnforce(e, "alice", "data1", "read", false);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -40,7 +49,9 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithRoot()
         {
-            var e = new Enforcer("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+                _testModelFixture._basicWithRootModelText,
+                _testModelFixture._basicPolicyText));
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -59,7 +70,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithRootNoPolicy()
         {
-            var e = new Enforcer("examples/basic_with_root_model.conf");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._basicWithRootModelText));
 
             TestEnforce(e, "alice", "data1", "read", false);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -78,7 +89,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithoutUsers()
         {
-            var e = new Enforcer("examples/basic_without_users_model.conf", "examples/basic_without_users_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetBasicWithoutUserTestModel());
 
             TestEnforceWithoutUsers(e, "data1", "read", true);
             TestEnforceWithoutUsers(e, "data1", "write", false);
@@ -89,7 +100,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithoutResources()
         {
-            var e = new Enforcer("examples/basic_without_resources_model.conf", "examples/basic_without_resources_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetBasicWithoutResourceTestModel());
 
             TestEnforceWithoutUsers(e, "alice", "read", true);
             TestEnforceWithoutUsers(e, "alice", "write", false);
@@ -98,9 +109,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModel()
+        public void TestRbacModel()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -113,9 +125,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithResourceRoles()
+        public void TestRbacModelWithResourceRoles()
         {
-            var e = new Enforcer("examples/rbac_with_resource_roles_model.conf", "examples/rbac_with_resource_roles_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacWithResourceRoleTestModel());
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", true);
@@ -128,9 +141,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithDomains()
+        public void TestRbacModelWithDomains()
         {
-            var e = new Enforcer("examples/rbac_with_domains_model.conf", "examples/rbac_with_domains_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            e.BuildRoleLinks();
 
             TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
             TestDomainEnforce(e, "alice", "domain1", "data1", "write", true);
@@ -143,9 +157,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithDomainsAtRuntime()
+        public void TestRbacModelWithDomainsAtRuntime()
         {
-            var e = new Enforcer("examples/rbac_with_domains_model.conf");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+            e.BuildRoleLinks();
 
             e.AddPolicy("admin", "domain1", "data1", "read");
             e.AddPolicy("admin", "domain1", "data1", "write");
@@ -190,9 +205,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelWithDomainsAtRuntimeAsync()
+        public async Task TestRbacModelWithDomainsAtRuntimeAsync()
         {
-            var e = new Enforcer("examples/rbac_with_domains_model.conf");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+            e.BuildRoleLinks();
 
             await e.AddPolicyAsync("admin", "domain1", "data1", "read");
             await e.AddPolicyAsync("admin", "domain1", "data1", "write");
@@ -237,9 +253,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithDeny()
+        public void TestRbacModelWithDeny()
         {
-            var e = new Enforcer("examples/rbac_with_deny_model.conf", "examples/rbac_with_deny_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacWithDenyTestModel());
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -254,15 +271,19 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRBACModelWithOnlyDeny()
         {
-            var e = new Enforcer("examples/rbac_with_not_deny_model.conf", "examples/rbac_with_deny_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithNotDenyModelText,
+                _testModelFixture._rbacWithDenyPolicyText));
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data2", "write", false);
         }
 
         [Fact]
-        public void TestRBACModelWithCustomData()
+        public void TestRbacModelWithCustomData()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             // You can add custom data to a grouping policy, Casbin will ignore it. It is only meaningful to the caller.
             // This feature can be used to store information like whether "bob" is an end user (so no subject will inherit "bob")
@@ -294,9 +315,10 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelWithCustomDataAsync()
+        public async Task TestRbacModelWithCustomDataAsync()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
 
             // You can add custom data to a grouping policy, Casbin will ignore it. It is only meaningful to the caller.
             // This feature can be used to store information like whether "bob" is an end user (so no subject will inherit "bob")
@@ -328,13 +350,12 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithCustomRoleManager()
+        public void TestRbacModelWithCustomRoleManager()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
             e.SetRoleManager(new CustomRoleManager());
-            e.LoadModel();
-            e.LoadPolicy();
-
+            e.BuildRoleLinks();
+            
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
             TestEnforce(e, "alice", "data2", "read", true);
@@ -346,27 +367,9 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public async Task TestRBACModelWithCustomRoleManagerAsync()
+        public void TestAbacModel()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
-            e.SetRoleManager(new CustomRoleManager());
-            e.LoadModel();
-            await e.LoadPolicyAsync();
-
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
-        }
-
-        [Fact]
-        public void TestABACModel()
-        {
-            var e = new Enforcer("examples/abac_model.conf");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._abacModelText));
 
             var data1 = new TestResource("data1", "alice");
             var data2 = new TestResource("data2", "bob");
@@ -384,7 +387,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatchModel()
         {
-            var e = new Enforcer("examples/keymatch_model.conf", "examples/keymatch_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewkeyMatchTestModel());
 
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
@@ -412,7 +415,10 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestPriorityModelIndeterminate()
         {
-            var e = new Enforcer("examples/priority_model.conf", "examples/priority_indeterminate_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewTestModel(
+                _testModelFixture._priorityModelText,
+                _testModelFixture._priorityIndeterminatePolicyText));
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", false);
         }
@@ -420,7 +426,8 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestPriorityModel()
         {
-            var e = new Enforcer("examples/priority_model.conf", "examples/priority_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
+            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -435,7 +442,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatch2Model()
         {
-            var e = new Enforcer("examples/keymatch2_model.conf", "examples/keymatch2_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewkeyMatch2TestModel());
 
             TestEnforce(e, "alice", "/alice_data", "GET", false);
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);

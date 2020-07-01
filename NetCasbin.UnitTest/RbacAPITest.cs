@@ -1,14 +1,25 @@
 ﻿using System.Threading.Tasks;
 using Xunit;
+using NetCasbin.UnitTest.Fixtures;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class RbacApiTest : TestUtil
+    public class RbacApiTest : IClassFixture<TestModelFixture>
     {
+        private readonly TestModelFixture _testModelFixture;
+
+        public RbacApiTest(TestModelFixture testModelFixture)
+        {
+            _testModelFixture = testModelFixture;
+        }
+
         [Fact]
         public void TestRoleApi()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
+
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
             TestGetRoles(e, "data2_admin", AsList());
@@ -70,7 +81,9 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRoleApiAsync()
         {
-            var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
+
             TestGetRoles(e, "alice", AsList("data2_admin"));
             TestGetRoles(e, "bob", AsList());
             TestGetRoles(e, "data2_admin", AsList());

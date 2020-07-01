@@ -3,16 +3,16 @@ using System.Linq;
 using NetCasbin.Util;
 using Xunit;
 
-namespace NetCasbin.UnitTest
+namespace NetCasbin.UnitTest.Util
 {
-    public  class TestUtil
+    public static class TestUtil
     {
-
-        internal List<T> AsList<T>(params T[] values)
+        internal static List<T> AsList<T>(params T[] values)
         {
             return values.ToList();
         }
-        internal List<string> AsList(params string[] values)
+
+        internal static List<string> AsList(params string[] values)
         {
             return values.ToList();
         }

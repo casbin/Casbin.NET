@@ -1,9 +1,10 @@
-﻿using NetCasbin.Rbac;
-using Xunit;
+﻿using Xunit;
+using NetCasbin.Rbac;
+using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class GroupRoleManagerTest:TestUtil
+    public class GroupRoleManagerTest
     {
         [Fact]
         public void TestGroupRoleManager()

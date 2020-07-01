@@ -3,7 +3,7 @@ using Xunit;
 
 namespace NetCasbin.UnitTest
 {
-    public class UtilsTest
+    public class UtilityTest
     {
         [Fact]
         public void TestEscapeAssertion()
