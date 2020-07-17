@@ -387,7 +387,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatchModel()
         {
-            var e = new Enforcer(_testModelFixture.GetNewkeyMatchTestModel());
+            var e = new Enforcer(_testModelFixture.GetNewKeyMatchTestModel());
 
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
@@ -442,7 +442,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatch2Model()
         {
-            var e = new Enforcer(_testModelFixture.GetNewkeyMatch2TestModel());
+            var e = new Enforcer(_testModelFixture.GetNewKeyMatch2TestModel());
 
             TestEnforce(e, "alice", "/alice_data", "GET", false);
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);

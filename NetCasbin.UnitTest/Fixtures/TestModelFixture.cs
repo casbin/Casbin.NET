@@ -50,12 +50,12 @@ namespace NetCasbin.UnitTest.Fixtures
             return GetNewTestModel(_basicWithoutUserModelText, _basicWithoutUserPolicyText);
         }
 
-        public Model.Model GetNewkeyMatchTestModel()
+        public Model.Model GetNewKeyMatchTestModel()
         {
             return GetNewTestModel(_keyMatchModelText, _keyMatchPolicyText);
         }
 
-        public Model.Model GetNewkeyMatch2TestModel()
+        public Model.Model GetNewKeyMatch2TestModel()
         {
             return GetNewTestModel(_keyMatch2ModelText, _keyMatch2PolicyText);
         }

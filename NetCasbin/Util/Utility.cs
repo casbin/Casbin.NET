@@ -41,7 +41,7 @@ namespace NetCasbin.Util
         public static string EscapeAssertion(string s)
         {
             // 替换第一个点
-            if (s.StartsWith(PermConstants.DefautRequestType) || s.StartsWith(PermConstants.DefautPolicyType))
+            if (s.StartsWith(PermConstants.DefaultRequestType) || s.StartsWith(PermConstants.DefaultPolicyType))
             {
                 s = s.ReplaceFirst(@".", "_");
             }

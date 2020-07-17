@@ -342,10 +342,10 @@ namespace NetCasbin
                 return true;
             }
 
-            var effect = model.Model[PermConstants.Section.PolicyEffeftSection][PermConstants.DefaultPolicyEffeftType].Value;
-            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
+            var effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
+            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefaultRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
-            var policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy.Count;
+            var policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
             Effect.Effect[] policyEffects;
             float[] matcherResults;
             object result = null;
@@ -368,7 +368,7 @@ namespace NetCasbin
                 matcherResults = new float[policyLen];
                 for (var i = 0; i < policyLen; i++)
                 {
-                    var pvals = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy[i];
+                    var pvals = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy[i];
                     if (rTokensLen != rvals.Length)
                     {
                         throw new Exception($"invalid request size: expected {rTokensLen}, got {rvals.Length}, rvals: ${rvals}");
@@ -421,7 +421,7 @@ namespace NetCasbin
                         policyEffects[i] = Effect.Effect.Allow;
                     }
 
-                    if (effect.Equals(PermConstants.PolicyEffeft.Priority))
+                    if (effect.Equals(PermConstants.PolicyEffect.Priority))
                     {
                         break;
                     }
@@ -485,7 +485,7 @@ namespace NetCasbin
 
         private Parameter[] GetParameters(object[] rvals, IEnumerable<string> pvals = null)
         {
-            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
+            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefaultRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
             var parameters = new Dictionary<string, object>();
             for (var i = 0; i < rTokensLen; i++)
@@ -495,11 +495,11 @@ namespace NetCasbin
             }
             for (int i = 0, 
                 length = model.Model[PermConstants.Section.PolicySection]
-                                    [PermConstants.DefautPolicyType]
+                                    [PermConstants.DefaultPolicyType]
                                     .Tokens.Length; 
                 i < length; i++)
             {
-                var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Tokens[i];
+                var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Tokens[i];
                 if (pvals == null)
                 {
                     parameters.Add(token, string.Empty);

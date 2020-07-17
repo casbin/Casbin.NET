@@ -162,7 +162,7 @@ namespace NetCasbin.Persist.FileAdapter
         private IList<string> ConvertToPolicyStrings(Model.Model model)
         {
             var policy = new List<string>();
-            policy.AddRange(GetModelPolicy(model, PermConstants.DefautPolicyType));
+            policy.AddRange(GetModelPolicy(model, PermConstants.DefaultPolicyType));
             if (model.Model.ContainsKey(PermConstants.Section.RoleSection))
             {
                 policy.AddRange(GetModelPolicy(model, PermConstants.Section.RoleSection));

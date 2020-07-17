@@ -18,7 +18,7 @@ namespace NetCasbin.Effect
         public bool MergeEffects(string expr, Effect[] effects, float[] results)
         {
             var result = false;
-            if (expr.Equals(PermConstants.PolicyEffeft.AllowOverride))
+            if (expr.Equals(PermConstants.PolicyEffect.AllowOverride))
             {
                 foreach (var eft in effects)
                 {
@@ -29,7 +29,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals(PermConstants.PolicyEffeft.DenyOverride))
+            else if (expr.Equals(PermConstants.PolicyEffect.DenyOverride))
             {
                 result = true;
 
@@ -42,7 +42,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals(PermConstants.PolicyEffeft.AllowAndDeny))
+            else if (expr.Equals(PermConstants.PolicyEffect.AllowAndDeny))
             {
                 result = false;
                 foreach (var eft in effects)
@@ -58,7 +58,7 @@ namespace NetCasbin.Effect
                     }
                 }
             }
-            else if (expr.Equals(PermConstants.PolicyEffeft.Priority))
+            else if (expr.Equals(PermConstants.PolicyEffect.Priority))
             {
                 result = false;
                 foreach (var eft in effects)
