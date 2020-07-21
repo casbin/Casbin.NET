@@ -97,7 +97,7 @@ namespace NetCasbin.Persist.FileAdapter
             IEnumerable<string> filterSlice = new List<string>();
             switch (p[0].Trim())
             {
-                case PermConstants.DefautPolicyType:
+                case PermConstants.DefaultPolicyType:
                     filterSlice = filter.P;
                     break;
                 case PermConstants.DefaultGroupingPolicyType:

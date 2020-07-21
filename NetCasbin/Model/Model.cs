@@ -10,7 +10,7 @@ namespace NetCasbin.Model
             { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
             { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName},
             { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName},
-            { PermConstants.Section.PolicyEffeftSection, PermConstants.Section.PolicyEffeftSectionName},
+            { PermConstants.Section.PolicyEffectSection, PermConstants.Section.PolicyEffectSectionName},
             { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
@@ -102,7 +102,7 @@ namespace NetCasbin.Model
             LoadSection(cfg, PermConstants.Section.RequestSection);
             LoadSection(cfg, PermConstants.Section.PolicySection);
             LoadSection(cfg, PermConstants.Section.RoleSection);
-            LoadSection(cfg, PermConstants.Section.PolicyEffeftSection);
+            LoadSection(cfg, PermConstants.Section.PolicyEffectSection);
             LoadSection(cfg, PermConstants.Section.MatcherSection);
         }
 
@@ -113,7 +113,7 @@ namespace NetCasbin.Model
             LoadSection(cfg, PermConstants.Section.RequestSection);
             LoadSection(cfg, PermConstants.Section.PolicySection);
             LoadSection(cfg, PermConstants.Section.RoleSection);
-            LoadSection(cfg, PermConstants.Section.PolicyEffeftSection);
+            LoadSection(cfg, PermConstants.Section.PolicyEffectSection);
             LoadSection(cfg, PermConstants.Section.MatcherSection);
         }
     }

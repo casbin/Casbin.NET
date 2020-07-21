@@ -62,7 +62,7 @@ namespace NetCasbin
         /// Duplicates are removed.</returns>
         public List<string> GetAllNamedObjects(string ptype)
         {
-            return model.GetValuesForFieldInPolicy(PermConstants.DefautPolicyType, ptype, 1);
+            return model.GetValuesForFieldInPolicy(PermConstants.DefaultPolicyType, ptype, 1);
         }
 
         /// <summary>
@@ -210,7 +210,7 @@ namespace NetCasbin
         /// <returns>Whether the rule exists.</returns>
         public bool HasPolicy(List<string> paramList)
         {
-            return HasNamedPolicy(PermConstants.DefautPolicyType, paramList);
+            return HasNamedPolicy(PermConstants.DefaultPolicyType, paramList);
         }
 
         /// <summary>
@@ -278,7 +278,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddPolicy(List<string> parameters)
         {
-            return AddNamedPolicy(PermConstants.DefautPolicyType, parameters);
+            return AddNamedPolicy(PermConstants.DefaultPolicyType, parameters);
         }
 
         /// <summary>
@@ -290,7 +290,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> AddPolicyAsync(List<string> parameters)
         {
-            return AddNamedPolicyAsync(PermConstants.DefautPolicyType, parameters);
+            return AddNamedPolicyAsync(PermConstants.DefaultPolicyType, parameters);
         }
 
         /// <summary>
@@ -382,7 +382,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemovePolicyAsync(List<string> parameters)
         {
-            return RemoveNamedPolicyAsync(PermConstants.DefautPolicyType, parameters);
+            return RemoveNamedPolicyAsync(PermConstants.DefaultPolicyType, parameters);
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedPolicy(PermConstants.DefautPolicyType, fieldIndex, fieldValues);
+            return RemoveFilteredNamedPolicy(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -404,7 +404,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveFilteredPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedPolicyAsync(PermConstants.DefautPolicyType, fieldIndex, fieldValues);
+            return RemoveFilteredNamedPolicyAsync(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>

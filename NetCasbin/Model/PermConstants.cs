@@ -1,10 +1,10 @@
 ﻿namespace NetCasbin.Model
 {
-    public class PermConstants
+    public static class PermConstants
     {
-        public const string DefautRequestType = "r";
+        public const string DefaultRequestType = "r";
 
-        public const string DefautPolicyType = "p";
+        public const string DefaultPolicyType = "p";
         public const string PolicyType2 = "p2";
         public const string PolicyType3 = "p2";
 
@@ -17,7 +17,7 @@
         public const string GroupingPolicyType3 = RoleType3;
 
         public const string DefaultMatcherType = "m";
-        public const string DefaultPolicyEffeftType = "e";
+        public const string DefaultPolicyEffectType = "e";
 
         public static class Section
         {
@@ -37,14 +37,14 @@
             public const string RoleSection = "g";
             public const string RoleSectionName = "role_definition";
 
-            public const string PolicyEffeftSection = "e";
-            public const string PolicyEffeftSectionName = "policy_effect";
+            public const string PolicyEffectSection = "e";
+            public const string PolicyEffectSectionName = "policy_effect";
 
             public const string MatcherSection = "m";
             public const string MatcherSectionName = "matchers";
         }
 
-        public static class PolicyEffeft
+        public static class PolicyEffect
         {
             public const string AllowOverride = "some(where (p_eft == allow))";
             public const string DenyOverride = "!some(where (p_eft == deny))";
