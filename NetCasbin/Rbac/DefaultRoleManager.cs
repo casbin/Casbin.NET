@@ -6,7 +6,7 @@ namespace NetCasbin.Rbac
 {
     public class DefaultRoleManager : IRoleManager
     {
-        private const string DOMAIN_ERROR = "error: domain should be 1 parameter";
+        private const string _domainError = "error: domain should be 1 parameter";
         private readonly Dictionary<string, Role> _allRoles;
         private readonly int _maxHierarchyLevel;
 
@@ -35,7 +35,7 @@ namespace NetCasbin.Rbac
             }
             else if (domain.Length > 1)
             {
-                throw new ArgumentException(DOMAIN_ERROR);
+                throw new ArgumentException(_domainError);
             }
 
             var role1 = CreateRole(name1);
@@ -57,7 +57,7 @@ namespace NetCasbin.Rbac
             }
             else if (domain.Length > 1)
             {
-                throw new ArgumentException(DOMAIN_ERROR);
+                throw new ArgumentException(_domainError);
             }
 
             if (!HasRole(name1) || !HasRole(name2))
@@ -104,7 +104,7 @@ namespace NetCasbin.Rbac
             }
             else if (domain.Length > 1)
             {
-                throw new ArgumentException(DOMAIN_ERROR);
+                throw new ArgumentException(_domainError);
             }
 
             if (name1.Equals(name2))

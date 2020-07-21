@@ -1,12 +1,12 @@
-﻿using NetCasbin.Rbac;
-using System;
+﻿using System;
 using System.Net;
 using System.Text.RegularExpressions;
+using NetCasbin.Rbac;
 
 namespace NetCasbin.Util
 {
     public static class BuiltInFunctions
-    { 
+    {
         /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to 
         /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
@@ -16,7 +16,7 @@ namespace NetCasbin.Util
         /// <returns>Whether key1 matches key2.</returns>
         public static bool KeyMatch(string key1, string key2)
         {
-            var i = key2.IndexOf('*');
+            int i = key2.IndexOf('*');
 
             if (i == -1)
             {
@@ -89,9 +89,9 @@ namespace NetCasbin.Util
         /// <param name="ip1">The first argument.</param>
         /// <param name="ip2">The second argument.</param>
         /// <returns>Whether ip1 matches ip2.</returns>
-        public static bool IPMatch(string ip1, string ip2)
+        public static bool IpMatch(string ip1, string ip2)
         {
-            var rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
+            string rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
             var rgx = new Regex(rgxString);
             if (!rgx.IsMatch(ip1))
             {
@@ -109,8 +109,8 @@ namespace NetCasbin.Util
             var address2 = IPAddress.Parse(ip2Splits[0]);
             if (ip2Splits.Length == 2)
             {
-                var maskLength = int.Parse(ip2Splits[1]);
-                var mask = IPAddressExtenstions.GetNetworkMask(maskLength);
+                int maskLength = int.Parse(ip2Splits[1]);
+                var mask = IpAddressExtensions.GetNetworkMask(maskLength);
                 address1 = address1.Mask(mask);
             }
             if (address1.Equals(address2))
@@ -148,18 +148,16 @@ namespace NetCasbin.Util
                 {
                     return arg1.Equals(arg2);
                 }
-                else
-                {
-                    bool res;
-                    if (!string.IsNullOrEmpty(domain))
-                    {
-                        res = rm.HasLink(arg1, arg2, domain);
-                        return res;
-                    }
 
-                    res = rm.HasLink(arg1, arg2);
+                bool res;
+                if (!string.IsNullOrEmpty(domain))
+                {
+                    res = rm.HasLink(arg1, arg2, domain);
                     return res;
                 }
+
+                res = rm.HasLink(arg1, arg2);
+                return res;
             }
             GCall call = Call;
             return new AviatorFunction(name, call);

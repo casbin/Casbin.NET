@@ -2,18 +2,15 @@
 
 namespace NetCasbin.Util.Function
 {
-    public class IPMatchFunc : AbstractFunction
+    public class IpMatchFunc : AbstractFunction
     {
         protected override Delegate GetFunc()
         {
-            Func<string, string, bool> call = (arg1, arg2) =>
-            {
-                return BuiltInFunctions.IPMatch(arg1, arg2);
-            };
+            Func<string, string, bool> call = BuiltInFunctions.IpMatch;
             return call;
         }
 
-        public IPMatchFunc() : base("ipMatch")
+        public IpMatchFunc() : base("ipMatch")
         {
 
         }

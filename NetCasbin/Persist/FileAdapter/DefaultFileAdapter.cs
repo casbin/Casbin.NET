@@ -134,7 +134,7 @@ namespace NetCasbin.Persist.FileAdapter
             var policy = new List<string>();
             foreach (var pair in model.Model[ptype])
             {
-                var key = pair.Key;
+                string key = pair.Key;
                 Assertion value = pair.Value;
                 policy.AddRange(value.Policy.Select(p => $"{key}, {Utility.RuleToString(p)}"));
             }
@@ -145,7 +145,7 @@ namespace NetCasbin.Persist.FileAdapter
         {
             while (!inputStream.EndOfStream)
             {
-                var line = inputStream.ReadLine();
+                string line = inputStream.ReadLine();
                 handler(line, model);
             }
         }
@@ -154,7 +154,7 @@ namespace NetCasbin.Persist.FileAdapter
         {
             while (!inputStream.EndOfStream)
             {
-                var line = await inputStream.ReadLineAsync();
+                string line = await inputStream.ReadLineAsync();
                 handler(line, model);
             }
         }

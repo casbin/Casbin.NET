@@ -1,8 +1,8 @@
-﻿using NetCasbin.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
+using NetCasbin.Model;
 
 namespace NetCasbin.Util
 {
@@ -10,7 +10,7 @@ namespace NetCasbin.Util
     {
         public static string ReplaceFirst(this string text, string search, string replace)
         {
-            var pos = text.IndexOf(search);
+            int pos = text.IndexOf(search, StringComparison.Ordinal);
             if (pos < 0)
             {
                 return text;
@@ -25,7 +25,7 @@ namespace NetCasbin.Util
         /// <returns>The line without comments.</returns>
         public static string RemoveComments(string s)
         {
-            var pos = s.IndexOf("#");
+            int pos = s.IndexOf("#", StringComparison.Ordinal);
             if (pos == -1)
             {
                 return s;
@@ -45,7 +45,7 @@ namespace NetCasbin.Util
             {
                 s = s.ReplaceFirst(@".", "_");
             }
-            var regex = "(\\|| |=|\\)|\\(|&|<|>|,|\\+|-|!|\\*|\\/)(r|p)\\.";
+            const string regex = "(\\|| |=|\\)|\\(|&|<|>|,|\\+|-|!|\\*|\\/)(r|p)\\.";
             var p = new Regex(regex);
             var matches = p.Matches(s);
             var sb = new StringBuilder(s);
@@ -53,7 +53,7 @@ namespace NetCasbin.Util
             for (int i = 0, j = matches.Count; i < j; i++)
             {
                 var match = matches[i];
-                var replace = match.Groups[0].Value.Replace(".", "_");
+                string replace = match.Groups[0].Value.Replace(".", "_");
                 if (replace.Trim().Length > 0)
                 {
                     sb.Replace(match.Value, replace, match.Index, match.Length);
@@ -82,7 +82,7 @@ namespace NetCasbin.Util
                 return false;
             }
 
-            for (var i = 0; i < a.Count; i++)
+            for (int i = 0; i < a.Count; i++)
             {
                 if (!a[i].Equals(b[i]))
                 {
@@ -107,7 +107,7 @@ namespace NetCasbin.Util
                 return false;
             }
 
-            for (var i = 0; i < a.Count; i++)
+            for (int i = 0; i < a.Count; i++)
             {
                 if (!ArrayEquals(a[i], b[i]))
                 {
@@ -146,7 +146,7 @@ namespace NetCasbin.Util
             a.Sort();
             b.Sort();
 
-            for (var i = 0; i < a.Count; i++)
+            for (int i = 0; i < a.Count; i++)
             {
                 if (!a[i].Equals(b[i]))
                 {

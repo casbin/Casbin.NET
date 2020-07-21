@@ -43,7 +43,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleAdded = model.AddPolicy(sec, ptype, rule);
+            bool ruleAdded = model.AddPolicy(sec, ptype, rule);
             return ruleAdded;
         }
 
@@ -84,7 +84,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleAdded = model.AddPolicy(sec, ptype, rule);
+            bool ruleAdded = model.AddPolicy(sec, ptype, rule);
             return ruleAdded;
         }
 
@@ -117,7 +117,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
             return ruleRemoved;
         }
 
@@ -153,7 +153,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
             return ruleRemoved;
         }
 
@@ -187,7 +187,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
             return ruleRemoved;
         }
 
@@ -224,7 +224,7 @@ namespace NetCasbin
                 }
             }
 
-            var ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
             return ruleRemoved;
         }
     }

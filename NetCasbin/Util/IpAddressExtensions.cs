@@ -3,20 +3,20 @@ using System.Net;
 
 namespace NetCasbin.Util
 {
-    public static class IPAddressExtenstions
+    public static class IpAddressExtensions
     {
         /// <summary>
-        /// Get Mask IPAddress
+        /// Gets mask IP address
         /// </summary>
         /// <param name="networkPrefixLength"></param>
         /// <returns></returns>
         public static IPAddress GetNetworkMask(int networkPrefixLength)
         {
             var bytes = new byte[4];
-            for (var i = 0; i < networkPrefixLength; i++)
+            for (int i = 0; i < networkPrefixLength; i++)
             {
-                var index = i / 8;
-                var mod = i % 8;
+                int index = i / 8;
+                int mod = i % 8;
                 if (mod == 0)
                 {
                     bytes[index] = 1;
@@ -40,7 +40,7 @@ namespace NetCasbin.Util
         {
             var addressBytes = address.GetAddressBytes();
             var maskBytes = mask.GetAddressBytes();
-            for (var i = 0; i < 4; i++)
+            for (int i = 0; i < 4; i++)
             {
                 addressBytes[i] = Convert.ToByte(addressBytes[i] & maskBytes[i]);
             }

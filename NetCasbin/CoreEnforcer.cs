@@ -1,13 +1,13 @@
-﻿using DynamicExpresso;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using DynamicExpresso;
 using NetCasbin.Effect;
 using NetCasbin.Model;
 using NetCasbin.Persist;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace NetCasbin
 {
@@ -342,15 +342,15 @@ namespace NetCasbin
                 return true;
             }
 
-            var effect = model.Model[PermConstants.Section.PolicyEffeftSection][PermConstants.DefaultPolicyEffeftType].Value;
+            string effect = model.Model[PermConstants.Section.PolicyEffeftSection][PermConstants.DefaultPolicyEffeftType].Value;
             var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
-            var policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy.Count;
+            int policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy.Count;
             Effect.Effect[] policyEffects;
             float[] matcherResults;
             object result = null;
 
-            var expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+            string expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
             Lambda expression = null;
             if (matcherMap.ContainsKey(expString))
             {
@@ -366,7 +366,7 @@ namespace NetCasbin
             {
                 policyEffects = new Effect.Effect[policyLen];
                 matcherResults = new float[policyLen];
-                for (var i = 0; i < policyLen; i++)
+                for (int i = 0; i < policyLen; i++)
                 {
                     var pvals = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Policy[i];
                     if (rTokensLen != rvals.Length)
@@ -402,7 +402,7 @@ namespace NetCasbin
 
                     if (parameters.Any(x => x.Name == "p_eft"))
                     {
-                        var policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
+                        string policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
                         switch (policyEft)
                         {
                             case "allow":
@@ -447,7 +447,7 @@ namespace NetCasbin
 
         private Lambda GetAndInitializeExpression(object[] rvals)
         {
-            var expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+            string expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
             var parameters = GetParameters(rvals);
             var interpreter = GetAndInitializeInterpreter();
             var parsedExpression = interpreter.Parse(expString, parameters);
@@ -459,7 +459,7 @@ namespace NetCasbin
             var functions = new Dictionary<string, AbstractFunction>();
             foreach (var entry in functionMap.FunctionDict)
             {
-                var key = entry.Key;
+                string key = entry.Key;
                 var function = entry.Value;
                 functions.Add(key, function);
             }
@@ -468,7 +468,7 @@ namespace NetCasbin
             {
                 foreach (var entry in model.Model[PermConstants.Section.RoleSection])
                 {
-                    var key = entry.Key;
+                    string key = entry.Key;
                     var ast = entry.Value;
                     var rm = ast.RoleManager;
                     functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
@@ -488,18 +488,18 @@ namespace NetCasbin
             var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefautRequestType]?.Tokens;
             var rTokensLen = rTokens?.Count();
             var parameters = new Dictionary<string, object>();
-            for (var i = 0; i < rTokensLen; i++)
+            for (int i = 0; i < rTokensLen; i++)
             {
-                var token = rTokens[i];
+                string token = rTokens[i];
                 parameters.Add(token, rvals[i]);
             }
-            for (int i = 0, 
+            for (int i = 0,
                 length = model.Model[PermConstants.Section.PolicySection]
                                     [PermConstants.DefautPolicyType]
-                                    .Tokens.Length; 
+                                    .Tokens.Length;
                 i < length; i++)
             {
-                var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Tokens[i];
+                string token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefautPolicyType].Tokens[i];
                 if (pvals == null)
                 {
                     parameters.Add(token, string.Empty);
