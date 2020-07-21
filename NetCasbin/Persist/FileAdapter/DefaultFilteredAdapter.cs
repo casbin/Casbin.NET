@@ -1,9 +1,9 @@
-﻿using NetCasbin.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using NetCasbin.Model;
 
 namespace NetCasbin.Persist.FileAdapter
 {
@@ -58,7 +58,7 @@ namespace NetCasbin.Persist.FileAdapter
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             while (!reader.EndOfStream)
             {
-                var line = reader.ReadLine()?.Trim();
+                string line = reader.ReadLine()?.Trim();
                 if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
                 {
                     return;
@@ -72,7 +72,7 @@ namespace NetCasbin.Persist.FileAdapter
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             while (!reader.EndOfStream)
             {
-                var line = (await reader.ReadLineAsync())?.Trim();
+                string line = (await reader.ReadLineAsync())?.Trim();
                 if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
                 {
                     return;
@@ -111,18 +111,18 @@ namespace NetCasbin.Persist.FileAdapter
         private static bool FilterWords(string[] line, IEnumerable<string> filter)
         {
             var filterArray = filter.ToArray();
-            var length = filterArray.Length;
+            int length = filterArray.Length;
 
             if (line.Length < length + 1)
             {
                 return true;
             }
 
-            var skipLine = false;
-            for (var i = 0; i < length; i++)
+            bool skipLine = false;
+            for (int i = 0; i < length; i++)
             {
-                var current = filterArray.ElementAt(i).Trim();
-                var next = filterArray.ElementAt(i + 1);
+                string current = filterArray.ElementAt(i).Trim();
+                string next = filterArray.ElementAt(i + 1);
 
                 if (string.IsNullOrEmpty(current) || current == next)
                 {

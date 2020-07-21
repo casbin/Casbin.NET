@@ -1,12 +1,12 @@
-﻿using NetCasbin.Util;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using NetCasbin.Util;
 
 namespace NetCasbin.Model
 {
     public class Model : Policy
     {
-        private static readonly IDictionary<string, string> SectionNameMap = new Dictionary<string, string>() {
+        private static readonly IDictionary<string, string> _sectionNameMap = new Dictionary<string, string>() {
             { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
             { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName},
             { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName},
@@ -16,8 +16,8 @@ namespace NetCasbin.Model
 
         private bool LoadAssertion(Config.Config cfg, string sec, string key)
         {
-            var secName = SectionNameMap[sec];
-            var value = cfg.GetString($"{secName}::{key}");
+            string secName = _sectionNameMap[sec];
+            string value = cfg.GetString($"{secName}::{key}");
             return AddDef(sec, key, value);
         }
 
@@ -44,7 +44,7 @@ namespace NetCasbin.Model
             if (sec.Equals(PermConstants.Section.RequestSection) || sec.Equals(PermConstants.Section.PolicySection))
             {
                 var tokens = ast.Value.Split(new string[] { ", " }, StringSplitOptions.None);
-                for (var i = 0; i < tokens.Length; i++)
+                for (int i = 0; i < tokens.Length; i++)
                 {
                     tokens[i] = $"{key}_{tokens[i]}";
                 }
@@ -81,7 +81,7 @@ namespace NetCasbin.Model
 
         private void LoadSection(Config.Config cfg, string sec)
         {
-            var i = 1;
+            int i = 1;
             while (true)
             {
                 if (!LoadAssertion(cfg, sec, sec + GetKeySuffix(i)))

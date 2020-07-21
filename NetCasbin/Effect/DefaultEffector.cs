@@ -1,5 +1,5 @@
-﻿using NetCasbin.Model;
-using System;
+﻿using System;
+using NetCasbin.Model;
 
 namespace NetCasbin.Effect
 {

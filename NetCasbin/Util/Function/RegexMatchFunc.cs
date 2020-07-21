@@ -6,10 +6,7 @@ namespace NetCasbin.Util.Function
     {
         protected override Delegate GetFunc()
         {
-            Func<string, string, bool> call = (arg1, arg2) =>
-            {
-                return BuiltInFunctions.RegexMatch(arg1, arg2);
-            };
+            Func<string, string, bool> call = BuiltInFunctions.RegexMatch;
             return call;
         }
 

@@ -47,7 +47,7 @@ namespace NetCasbin.Rbac
                 {
                     var groups = base.GetRoles(name1) ?? new List<string>();
 
-                    foreach (var group in groups)
+                    foreach (string group in groups)
                     {
                         if (HasLink(group, name2, domain))
                         {

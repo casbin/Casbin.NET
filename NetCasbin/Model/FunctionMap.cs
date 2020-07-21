@@ -1,28 +1,24 @@
-﻿using NetCasbin.Util.Function;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using NetCasbin.Util.Function;
 
 namespace NetCasbin.Model
 {
     public class FunctionMap
     {
-        private IDictionary<string, AbstractFunction> _fm;
-
-        public IDictionary<string, AbstractFunction> FunctionDict => _fm;
+        public IDictionary<string, AbstractFunction> FunctionDict { get; private set; }
 
         public void AddFunction(string name, AbstractFunction function)
         {
-            _fm.Add(name, function);
+            FunctionDict.Add(name, function);
         }
 
         public static FunctionMap LoadFunctionMap()
         {
-            var fm = new FunctionMap();
-            fm._fm = new Dictionary<string, AbstractFunction>();
+            var fm = new FunctionMap { FunctionDict = new Dictionary<string, AbstractFunction>() };
             fm.AddFunction("keyMatch", new KeyMatchFunc());
             fm.AddFunction("keyMatch2", new KeyMatch2Func());
             fm.AddFunction("regexMatch", new RegexMatchFunc());
-            fm.AddFunction("ipMatch", new IPMatchFunc());
+            fm.AddFunction("ipMatch", new IpMatchFunc());
             return fm;
         }
     }

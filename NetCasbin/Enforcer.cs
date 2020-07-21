@@ -1,9 +1,9 @@
-﻿using NetCasbin.Model;
-using NetCasbin.Persist;
-using NetCasbin.Persist.FileAdapter;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetCasbin.Model;
+using NetCasbin.Persist;
+using NetCasbin.Persist.FileAdapter;
 
 namespace NetCasbin
 {
@@ -80,7 +80,7 @@ namespace NetCasbin
         public List<string> GetUsersForRoles(string[] names)
         {
             var userIds = new List<string>();
-            foreach (var name in names)
+            foreach (string name in names)
                 userIds.AddRange(model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetUsers(name));
             return userIds;
         }
@@ -95,8 +95,8 @@ namespace NetCasbin
         {
             var roles = GetRolesForUser(name);
 
-            var hasRole = false;
-            foreach (var r in roles)
+            bool hasRole = false;
+            foreach (string r in roles)
             {
                 if (r.Equals(role))
                 {
@@ -221,7 +221,7 @@ namespace NetCasbin
         {
             return DeletePermission(permission.ToArray());
         }
-        
+
         /// <summary>
         /// DeletePermission deletes a permission. 
         /// </summary>
@@ -289,7 +289,7 @@ namespace NetCasbin
             parameters.AddRange(permission);
             return AddPolicy(parameters);
         }
-        
+
         /// <summary>
         /// Adds a permission for a user or role.
         /// </summary>
@@ -523,7 +523,7 @@ namespace NetCasbin
             };
             roles.AddRange(GetImplicitRolesForUser(user));
             var res = new List<List<string>>();
-            foreach (var n in roles)
+            foreach (string n in roles)
             {
                 res.AddRange(GetPermissionsForUser(n));
             }

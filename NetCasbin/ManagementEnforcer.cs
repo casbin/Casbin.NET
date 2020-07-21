@@ -1,8 +1,8 @@
-﻿using NetCasbin.Model;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetCasbin.Model;
 
 namespace NetCasbin
 {
@@ -577,7 +577,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            var ruleAdded = AddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleAdded = AddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -597,7 +597,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> AddNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            var ruleAdded = await AddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleAdded = await AddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -684,7 +684,7 @@ namespace NetCasbin
             return RemoveNamedGroupingPolicyAsync(ptype, parameters.ToList());
         }
 
-                /// <summary>
+        /// <summary>
         /// Removes a role inheritance rule from the current 
         /// policy, field filters can be specified.
         /// </summary>
@@ -693,7 +693,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            var ruleRemoved = RemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleRemoved = RemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -712,7 +712,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            var ruleRemoved = await RemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleRemoved = await RemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -755,7 +755,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = RemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = RemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
@@ -774,7 +774,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var ruleRemoved = await RemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = await RemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
