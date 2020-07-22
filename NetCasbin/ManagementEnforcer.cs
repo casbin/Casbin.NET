@@ -9,7 +9,7 @@ namespace NetCasbin
     /// <summary>
     /// ManagementEnforcer = InternalEnforcer + Management API.
     /// </summary>
-    public class ManagementEnforcer : InternalEnforcer
+    public class ManagementEnforcer : InternalEnforcer, IManagementEnforcer
     {
         /// <summary>
         /// Gets the list of subjects that show up in the current policy.

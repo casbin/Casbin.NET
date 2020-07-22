@@ -10,7 +10,7 @@ namespace NetCasbin
     /// <summary>
     /// Enforcer = ManagementEnforcer + RBAC API.
     /// </summary>
-    public class Enforcer : ManagementEnforcer
+    public class Enforcer : ManagementEnforcer, IEnforcer
     {
 
         public Enforcer() : this(string.Empty, string.Empty)

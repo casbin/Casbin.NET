@@ -14,7 +14,7 @@ namespace NetCasbin
     /// <summary>
     /// CoreEnforcer defines the core functionality of an enforcer.
     /// </summary>
-    public class CoreEnforcer
+    public class CoreEnforcer : ICoreEnforcer
     {
         private IEffector _effector;
         private bool _enabled;
