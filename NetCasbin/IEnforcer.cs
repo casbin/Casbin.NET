@@ -1,89 +1,50 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+// Copyright 2019 The casbin Authors. All Rights Reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetCasbin.Model;
-using NetCasbin.Persist;
-using NetCasbin.Persist.FileAdapter;
 
 namespace NetCasbin
 {
+
     /// <summary>
-    /// Enforcer = ManagementEnforcer + RBAC API.
+    /// IEnforcer is the API interface of Enforcer
     /// </summary>
-    public class Enforcer : ManagementEnforcer, IEnforcer
+    public interface IEnforcer : IManagementEnforcer
     {
-
-        public Enforcer() : this(string.Empty, string.Empty)
-        {
-        }
-
-        public Enforcer(string modelPath, string policyFile) : this(modelPath, new DefaultFileAdapter(policyFile))
-        {
-        }
-
-        public Enforcer(string modelPath, IAdapter adapter) : this(NewModel(modelPath, string.Empty), adapter)
-        {
-            this.modelPath = modelPath;
-        }
-
-        public Enforcer(Model.Model model, IAdapter adapter)
-        {
-            this.adapter = adapter;
-            watcher = null;
-
-            this.model = model;
-            functionMap = FunctionMap.LoadFunctionMap();
-
-            Initialize();
-            LoadPolicy();
-        }
-
-        public Enforcer(Model.Model m) :
-            this(m, null)
-        {
-        }
-
-        public Enforcer(string modelPath) :
-            this(modelPath, string.Empty)
-        {
-        }
-
-        public Enforcer(string modelPath, string policyFile, bool enableLog) : this(modelPath, new DefaultFileAdapter(policyFile))
-        {
-        }
 
         /// <summary>
         /// Gets the roles that a user has.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public List<string> GetRolesForUser(string name)
-        {
-            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name);
-        }
+        List<string> GetRolesForUser(string name);
+
 
         /// <summary>
         /// Gets the users that has a role.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        public List<string> GetUsersForRole(string name)
-        {
-            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetUsers(name);
-        }
+        List<string> GetUsersForRole(string name);
 
         /// <summary>
         /// Gets the users that has roles.
         /// </summary>
         /// <param name="names"></param>
         /// <returns></returns>
-        public List<string> GetUsersForRoles(string[] names)
-        {
-            var userIds = new List<string>();
-            foreach (string name in names)
-                userIds.AddRange(model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetUsers(name));
-            return userIds;
-        }
+        List<string> GetUsersForRoles(string[] names);
 
         /// <summary>
         /// Determines whether a user has a role.
@@ -91,22 +52,7 @@ namespace NetCasbin
         /// <param name="name"></param>
         /// <param name="role"></param>
         /// <returns></returns>
-        public bool HasRoleForUser(string name, string role)
-        {
-            var roles = GetRolesForUser(name);
-
-            bool hasRole = false;
-            foreach (string r in roles)
-            {
-                if (r.Equals(role))
-                {
-                    hasRole = true;
-                    break;
-                }
-            }
-
-            return hasRole;
-        }
+        bool HasRoleForUser(string name, string role);
 
         /// <summary>
         /// Adds a role for a user.
@@ -114,10 +60,7 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public bool AddRoleForUser(string user, string role)
-        {
-            return AddGroupingPolicy(user, role);
-        }
+        bool AddRoleForUser(string user, string role);
 
         /// <summary>
         /// Adds a role for a user.
@@ -125,10 +68,7 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public Task<bool> AddRoleForUserAsync(string user, string role)
-        {
-            return AddGroupingPolicyAsync(user, role);
-        }
+        Task<bool> AddRoleForUserAsync(string user, string role);
 
         /// <summary>
         /// Deletes a role for a user.
@@ -136,10 +76,7 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        public bool DeleteRoleForUser(string user, string role)
-        {
-            return RemoveGroupingPolicy(user, role);
-        }
+        bool DeleteRoleForUser(string user, string role);
 
         /// <summary>
         /// Deletes a role for a user.
@@ -147,110 +84,74 @@ namespace NetCasbin
         /// <param name="user"></param>
         /// <param name="role"></param>
         /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        public Task<bool> DeleteRoleForUserAsync(string user, string role)
-        {
-            return RemoveGroupingPolicyAsync(user, role);
-        }
+        Task<bool> DeleteRoleForUserAsync(string user, string role);
 
         /// <summary>
         /// Deletes all roles for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        public bool DeleteRolesForUser(string user)
-        {
-            return RemoveFilteredGroupingPolicy(0, user);
-        }
+        bool DeleteRolesForUser(string user);
 
         /// <summary>
         /// Deletes all roles for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        public Task<bool> DeleteRolesForUserAsync(string user)
-        {
-            return RemoveFilteredGroupingPolicyAsync(0, user);
-        }
+        Task<bool> DeleteRolesForUserAsync(string user);
 
         /// <summary>
         /// DeleteUser deletes a user
         /// </summary>
         /// <param name="user"></param>
         /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        public bool DeleteUser(string user)
-        {
-            return RemoveFilteredGroupingPolicy(0, user);
-        }
+        bool DeleteUser(string user);
 
         /// <summary>
         /// DeleteUser deletes a user
         /// </summary>
         /// <param name="user"></param>
         /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        public Task<bool> DeleteUserAsync(string user)
-        {
-            return RemoveFilteredGroupingPolicyAsync(0, user);
-        }
+        Task<bool> DeleteUserAsync(string user);
+        /// <summary>
+        /// Deletes a role.
+        /// </summary>
+        /// <param name="role"></param>
+        void DeleteRole(string role);
 
         /// <summary>
         /// Deletes a role.
         /// </summary>
         /// <param name="role"></param>
-        public void DeleteRole(string role)
-        {
-            RemoveFilteredGroupingPolicy(1, role);
-            RemoveFilteredPolicy(0, role);
-        }
-
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        public async Task DeleteRoleAsync(string role)
-        {
-            await RemoveFilteredGroupingPolicyAsync(1, role);
-            await RemoveFilteredPolicyAsync(0, role);
-        }
+        Task DeleteRoleAsync(string role);
 
         /// <summary>
         /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="permission"></param>
         /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public bool DeletePermission(List<string> permission)
-        {
-            return DeletePermission(permission.ToArray());
-        }
+        bool DeletePermission(List<string> permission);
 
         /// <summary>
         /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="permission"></param>
         /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public Task<bool> DeletePermissionAsync(List<string> permission)
-        {
-            return DeletePermissionAsync(permission.ToArray());
-        }
+        Task<bool> DeletePermissionAsync(List<string> permission);
 
         /// <summary>
         /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="permission"></param>
         /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public bool DeletePermission(params string[] permission)
-        {
-            return RemoveFilteredPolicy(1, permission);
-        }
+        bool DeletePermission(params string[] permission);
 
         /// <summary>
         /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="permission"></param>
         /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public Task<bool> DeletePermissionAsync(params string[] permission)
-        {
-            return RemoveFilteredPolicyAsync(1, permission);
-        }
+        Task<bool> DeletePermissionAsync(params string[] permission);
 
         /// <summary>
         /// Adds a permission for a user or role.
@@ -258,10 +159,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public bool AddPermissionForUser(string user, List<string> permission)
-        {
-            return AddPermissionForUser(user, permission.ToArray() ?? new string[0]);
-        }
+        bool AddPermissionForUser(string user, List<string> permission);
 
         /// <summary>
         /// Adds multiple permissions for a user or role.
@@ -269,10 +167,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public Task<bool> AddPermissionForUserAsync(string user, List<string> permission)
-        {
-            return AddPermissionForUserAsync(user, permission.ToArray() ?? new string[0]);
-        }
+        Task<bool> AddPermissionForUserAsync(string user, List<string> permission);
 
         /// <summary>
         /// Adds a permission for a user or role.
@@ -280,15 +175,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public bool AddPermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new List<string>
-            {
-                user
-            };
-            parameters.AddRange(permission);
-            return AddPolicy(parameters);
-        }
+        bool AddPermissionForUser(string user, params string[] permission);
 
         /// <summary>
         /// Adds a permission for a user or role.
@@ -296,15 +183,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public Task<bool> AddPermissionForUserAsync(string user, params string[] permission)
-        {
-            var parameters = new List<string>
-            {
-                user
-            };
-            parameters.AddRange(permission);
-            return AddPolicyAsync(parameters);
-        }
+        Task<bool> AddPermissionForUserAsync(string user, params string[] permission);
 
         /// <summary>
         /// DeletePermissionForUser deletes a permission for a user or role.
@@ -312,10 +191,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public bool DeletePermissionForUser(string user, List<string> permission)
-        {
-            return DeletePermissionForUser(user, permission.ToArray() ?? new string[0]);
-        }
+        bool DeletePermissionForUser(string user, List<string> permission);
 
         /// <summary>
         /// DeletePermissionForUser deletes a permission for a user or role.
@@ -323,10 +199,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Task<bool> DeletePermissionForUserAsync(string user, List<string> permission)
-        {
-            return DeletePermissionForUserAsync(user, permission.ToArray() ?? new string[0]);
-        }
+        Task<bool> DeletePermissionForUserAsync(string user, List<string> permission);
 
         /// <summary>
         /// DeletePermissionForUser deletes a permission for a user or role.
@@ -334,15 +207,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool DeletePermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new List<string>
-            {
-                user
-            };
-            parameters.AddRange(permission);
-            return RemovePolicy(parameters);
-        }
+        bool DeletePermissionForUser(string user, params string[] permission);
 
         /// <summary>
         /// DeletePermissionForUser deletes a permission for a user or role.
@@ -350,45 +215,28 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public Task<bool> DeletePermissionForUserAsync(string user, params string[] permission)
-        {
-            var parameters = new List<string>
-            {
-                user
-            };
-            parameters.AddRange(permission);
-            return RemovePolicyAsync(parameters);
-        }
+        Task<bool> DeletePermissionForUserAsync(string user, params string[] permission);
 
         /// <summary>
         /// DeletePermissionsForUser deletes permissions for a user or role. 
         /// </summary>
         /// <param name="user">User or role</param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public bool DeletePermissionsForUser(string user)
-        {
-            return RemoveFilteredPolicy(0, user);
-        }
+        bool DeletePermissionsForUser(string user);
 
         /// <summary>
         /// DeletePermissionsForUser deletes permissions for a user or role. 
         /// </summary>
         /// <param name="user">User or role</param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Task<bool> DeletePermissionsForUserAsync(string user)
-        {
-            return RemoveFilteredPolicyAsync(0, user);
-        }
+        Task<bool> DeletePermissionsForUserAsync(string user);
 
         /// <summary>
         /// Gets permissions for a user or role.
         /// </summary>
         /// <param name="user">User or role</param>
         /// <returns></returns>
-        public List<List<string>> GetPermissionsForUser(string user)
-        {
-            return GetFilteredPolicy(0, user);
-        }
+        List<List<string>> GetPermissionsForUser(string user);
 
         /// <summary>
         /// Determines whether a user has a permission.
@@ -396,15 +244,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool HasPermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new List<string>
-            {
-                user
-            };
-            parameters.AddRange(permission);
-            return HasPolicy(parameters);
-        }
+        bool HasPermissionForUser(string user, params string[] permission);
 
         /// <summary>
         /// Determines whether a user has a permission.
@@ -412,10 +252,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public bool HasPermissionForUser(string user, List<string> permission)
-        {
-            return HasPermissionForUser(user, permission.ToArray() ?? new string[0]);
-        }
+        bool HasPermissionForUser(string user, List<string> permission);
 
         /// <summary>
         /// 
@@ -423,10 +260,7 @@ namespace NetCasbin
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<string> GetRolesForUserInDomain(string name, string domain)
-        {
-            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
-        }
+        List<string> GetRolesForUserInDomain(string name, string domain);
 
         /// <summary>
         /// 
@@ -434,10 +268,7 @@ namespace NetCasbin
         /// <param name="user">User or role</param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<List<string>> GetPermissionsForUserInDomain(string user, string domain)
-        {
-            return GetFilteredPolicy(0, user, domain);
-        }
+        List<List<string>> GetPermissionsForUserInDomain(string user, string domain);
 
         /// <summary>
         /// 
@@ -446,10 +277,7 @@ namespace NetCasbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public bool AddRoleForUserInDomain(string user, string role, string domain)
-        {
-            return AddGroupingPolicy(user, role, domain);
-        }
+        bool AddRoleForUserInDomain(string user, string role, string domain);
 
         /// <summary>
         /// 
@@ -458,10 +286,7 @@ namespace NetCasbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public Task<bool> AddRoleForUserInDomainAsync(string user, string role, string domain)
-        {
-            return AddGroupingPolicyAsync(user, role, domain);
-        }
+        Task<bool> AddRoleForUserInDomainAsync(string user, string role, string domain);
 
         /// <summary>
         /// 
@@ -470,10 +295,7 @@ namespace NetCasbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public bool DeleteRoleForUserInDomain(string user, string role, string domain)
-        {
-            return RemoveGroupingPolicy(user, role, domain);
-        }
+        bool DeleteRoleForUserInDomain(string user, string role, string domain);
 
         /// <summary>
         /// 
@@ -482,10 +304,7 @@ namespace NetCasbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public Task<bool> DeleteRoleForUserInDomainAsync(string user, string role, string domain)
-        {
-            return RemoveGroupingPolicyAsync(user, role, domain);
-        }
+        Task<bool> DeleteRoleForUserInDomainAsync(string user, string role, string domain);
 
         /// <summary>
         /// Gets implicit roles that a user has.
@@ -494,15 +313,7 @@ namespace NetCasbin
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<string> GetImplicitRolesForUser(string name, params string[] domain)
-        {
-            var roles = roleManager.GetRoles(name, domain);
-            var res = new List<string>();
-            res.AddRange(roles);
-            res.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
-            return res;
-        }
-
+        List<string> GetImplicitRolesForUser(string name, params string[] domain);
         /// <summary>
         /// <para>Gets implicit permissions for a user or role.</para>
         /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
@@ -515,19 +326,8 @@ namespace NetCasbin
         /// </summary>
         /// <param name="user">User or role</param>
         /// <returns></returns>
-        public List<List<string>> GetImplicitPermissionsForUser(string user)
-        {
-            var roles = new List<string>
-            {
-                user
-            };
-            roles.AddRange(GetImplicitRolesForUser(user));
-            var res = new List<List<string>>();
-            foreach (string n in roles)
-            {
-                res.AddRange(GetPermissionsForUser(n));
-            }
-            return res;
-        }
+        List<List<string>> GetImplicitPermissionsForUser(string user);
+
     }
+
 }
