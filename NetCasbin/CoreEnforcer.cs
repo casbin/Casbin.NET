@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using DynamicExpresso;
+using NetCasbin.Abstractions;
 using NetCasbin.Effect;
 using NetCasbin.Model;
 using NetCasbin.Persist;
@@ -497,7 +498,7 @@ namespace NetCasbin
             for (int i = 0,
                 length = model.Model[PermConstants.Section.PolicySection]
                                     [PermConstants.DefaultPolicyType]
-                                    .Tokens.Length; 
+                                    .Tokens.Length;
                 i < length; i++)
             {
                 var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Tokens[i];

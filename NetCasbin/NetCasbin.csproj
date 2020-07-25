@@ -1,7 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
     <Description>Casbin ported to dotnet core</Description>
     <Authors>Casbin, Zhikui H</Authors>
     <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
