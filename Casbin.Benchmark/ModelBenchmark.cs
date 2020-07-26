@@ -10,7 +10,8 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("Model")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
+    // Wait to remove other ci
+    //[SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
     [MinColumn, MaxColumn, MedianColumn]
     public class ModelBenchmark
     {
