@@ -19,6 +19,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Casbin.Benchmark", "Casbin.Benchmark\Casbin.Benchmark.csproj", "{1DBC2931-4981-4DB5-A30B-FF6EB8622B04}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{A1792193-9B3F-4134-B3EA-D6915E6F6208}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1792193-9B3F-4134-B3EA-D6915E6F6208}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1792193-9B3F-4134-B3EA-D6915E6F6208}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1DBC2931-4981-4DB5-A30B-FF6EB8622B04}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1DBC2931-4981-4DB5-A30B-FF6EB8622B04}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1DBC2931-4981-4DB5-A30B-FF6EB8622B04}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1DBC2931-4981-4DB5-A30B-FF6EB8622B04}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
