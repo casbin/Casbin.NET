@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NetCasbin.UnitTest.Fixtures;
 using Xunit;
@@ -86,7 +87,12 @@ namespace NetCasbin.UnitTest
                     AsList("eve", "data3", "read")));
 
             e.RemoveFilteredPolicy(1, "data2");
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
 
+            e.RemoveFilteredPolicy(1, Array.Empty<string>());
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
+
+            e.RemoveFilteredPolicy(1, "");
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
         }
 

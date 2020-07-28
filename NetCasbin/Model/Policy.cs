@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
@@ -60,28 +61,32 @@ namespace NetCasbin.Model
 
         public List<List<string>> GetFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var res = new List<List<string>>();
+            if (fieldValues == null)
+            {
+                throw new ArgumentNullException(nameof(fieldValues));
+            }
+
+            if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            {
+                return Model[sec][ptype].Policy;
+            }
+
+            var result = new List<List<string>>();
 
             foreach (var rule in Model[sec][ptype].Policy)
             {
-                bool matched = true;
-                for (int i = 0; i < fieldValues.Length; i++)
-                {
-                    string fieldValue = fieldValues[i];
-                    if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
-                    {
-                        matched = false;
-                        break;
-                    }
-                }
+                bool matched = !fieldValues.Where((fieldValue, i) =>
+                        !string.IsNullOrWhiteSpace(fieldValue) &&
+                        !rule[fieldIndex + i].Equals(fieldValue))
+                    .Any();
 
                 if (matched)
                 {
-                    res.Add(rule);
+                    result.Add(rule);
                 }
             }
 
-            return res;
+            return result;
         }
 
         public bool HasPolicy(string sec, string ptype, List<string> rule)
@@ -113,36 +118,40 @@ namespace NetCasbin.Model
 
         public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            var tmp = new List<List<string>>();
-            bool res = false;
+            if (fieldValues == null)
+            {
+                throw new ArgumentNullException(nameof(fieldValues));
+            }
+
+            if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            {
+                return true;
+            }
+
+            var newPolicy = new List<List<string>>();
+            bool deleted = false;
 
             Assertion assertion = Model[sec][ptype];
             foreach (var rule in assertion.Policy)
             {
-                bool matched = true;
-                for (int i = 0; i < fieldValues.Length; i++)
-                {
-                    string fieldValue = fieldValues[i];
-                    if (!string.IsNullOrEmpty(fieldValue) && !rule[fieldIndex + i].Equals(fieldValue))
-                    {
-                        matched = false;
-                        break;
-                    }
-                }
+                bool matched = !fieldValues.Where((fieldValue, i) =>
+                        !string.IsNullOrWhiteSpace(fieldValue) &&
+                        !rule[fieldIndex + i].Equals(fieldValue))
+                    .Any();
 
                 if (matched)
                 {
-                    res = true;
+                    deleted = true;
                 }
                 else
                 {
-                    tmp.Add(rule);
+                    newPolicy.Add(rule);
                 }
             }
 
-            assertion.Policy = tmp;
+            assertion.Policy = newPolicy;
             assertion.RefreshPolicyStringSet();
-            return res;
+            return deleted;
         }
 
         public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
