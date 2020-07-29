@@ -1,8 +1,9 @@
 ﻿using System;
+using NetCasbin.Abstractions;
 
-namespace NetCasbin
+namespace NetCasbin.Util
 {
-    class AviatorFunction : AbstractFunction
+    internal class AviatorFunction : AbstractFunction
     {
         private readonly Delegate _func;
 
@@ -10,6 +11,7 @@ namespace NetCasbin
         {
             _func = func;
         }
+
         protected override Delegate GetFunc()
         {
             return _func;

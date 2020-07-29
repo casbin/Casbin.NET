@@ -1,4 +1,5 @@
 ﻿using System;
+using NetCasbin.Abstractions;
 
 namespace NetCasbin.Util.Function
 {
