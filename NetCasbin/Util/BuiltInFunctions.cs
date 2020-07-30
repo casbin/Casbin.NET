@@ -1,12 +1,17 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using NetCasbin.Abstractions;
 using NetCasbin.Rbac;
 
 namespace NetCasbin.Util
 {
     public static class BuiltInFunctions
     {
+        private static Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
+
         /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to 
         /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
@@ -79,6 +84,64 @@ namespace NetCasbin.Util
                 key2 = regex.Replace(key2, "$1[^/]+$2");
             }
             return RegexMatch(key1, key2);
+        }
+
+        /// <summary>
+        /// Determines whether key1 matches the pattern of key2 (similar to RESTful path), key2 can contain a *.
+        /// Besides what KeyMatch3 does, KeyMatch4 can also match repeated patterns:
+        /// "/parent/123/child/123" matches "/parent/{id}/child/{id}"
+        /// "/parent/123/child/456" does not match "/parent/{id}/child/{id}"
+        /// </summary>
+        /// But KeyMatch3 will match both.
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
+        public static bool KeyMatch4(string key1, string key2)
+        {
+            key2 = key2.Replace("/*", "/.*");
+            var key2Match = s_keyMatch4Regex.Match(key2);
+
+            var tokens = new List<string>();
+
+            while (key2Match.Success)
+            {
+                key2 = s_keyMatch4Regex.Replace(key2, "([^/]+)");
+                tokens.Add(key2Match.Value.Substring(1, key2Match.Value.Length - 2));
+                key2Match = key2Match.NextMatch();
+            }
+
+            var valueRegex = new Regex($"^{key2}$");
+            var key1Match =  valueRegex.Match(key1);
+
+            if (!key1Match.Success)
+            {
+                return false;
+            }
+
+            int key1GroupMatchCount = key1Match.Groups.Count - 1;
+            if (key1GroupMatchCount != tokens.Count)
+            {
+                throw new ArgumentException("KeyMatch4: number of tokens is not equal to number of values");
+            }
+
+            var group = key1Match.Groups;
+            var valueDictionary = new Dictionary<string, string>();
+
+            for (int i = 0; i < key1GroupMatchCount; i++)
+            {
+                string token = tokens[i];
+                if (!valueDictionary.ContainsKey(token))
+                {
+                    valueDictionary.Add(token, group[i + 1].Value);
+                    continue;
+                }
+                if (valueDictionary[token] != group[i + 1].Value)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         /// <summary>
