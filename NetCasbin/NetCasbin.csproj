@@ -9,24 +9,21 @@
     <RepositoryType>GIT</RepositoryType>
     <Company>Zhikui H</Company>
     <Copyright>Apache License 2.0</Copyright>
-    <Version>1.3.0</Version>
+    <Version>1.3.1</Version>
     <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.3.0.0</AssemblyVersion>
+    <AssemblyVersion>1.3.1.0</AssemblyVersion>
     <SignAssembly>false</SignAssembly>
     <DelaySign>false</DelaySign>
     <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.3.0.0</FileVersion>
+    <FileVersion>1.3.1.0</FileVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Casbin.NET</PackageId>
     <PackageIcon>casbin.png</PackageIcon>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageReleaseNotes>1. Merge the manage policy steps to one
-2. Add useAsync option parameter when setting watcher
-3. Implemente async api at enforcer
-4. Improve performance when using large amount policy</PackageReleaseNotes>
+    <PackageReleaseNotes>1. Add KeyMatch4 function support</PackageReleaseNotes>
     <PackageProjectUrl>https://github.com/casbin-net/Casbin.NET</PackageProjectUrl>
   </PropertyGroup>
 
