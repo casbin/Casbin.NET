@@ -6,13 +6,11 @@ using NetCasbin;
 
 namespace Casbin.Benchmark
 {
-    [MemoryDiagnoser]
     [BenchmarkCategory("Model")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
     // Wait to remove other ci
     //[SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
-    [MinColumn, MaxColumn, MedianColumn]
     public class ModelBenchmark
     {
         private readonly Enforcer _enforcer;

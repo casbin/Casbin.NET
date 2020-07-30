@@ -7,13 +7,11 @@ using static Casbin.Benchmark.TestHelper;
 
 namespace Casbin.Benchmark
 {
-    [MemoryDiagnoser]
     [BenchmarkCategory("Enforcer")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
     // Wait to remove other ci
     //[SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
-    [MinColumn, MaxColumn, MedianColumn]
     public class EnforcerBenchmark
     {
         private Enforcer NowEnforcer { get; set; }
@@ -160,63 +158,72 @@ namespace Casbin.Benchmark
             Console.WriteLine("// Cleaned the enforcer");
         }
 
-        [Benchmark(Description = "ACL, 2 rules (2 users)")]
+        [Benchmark]
+        //[Benchmark(Description = "ACL, 2 rules (2 users)")]
         [BenchmarkCategory("BasicModel")]
         public void BasicModel()
         {
             _ = NowEnforcer.Enforce("alice", "data1", "read");
         }
 
-        [Benchmark(Description = "RBAC, 5 rules (2 users, 1 role)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC, 5 rules (2 users, 1 role)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModel()
         {
             _ = NowEnforcer.Enforce("alice", "data2", "read");
         }
 
-        [Benchmark(Description = "RBAC (small), 1100 rules (1000 users, 100 roles)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC (small), 1100 rules (1000 users, 100 roles)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithSmallScale()
         {
             _ = NowEnforcer.Enforce(NowTestUserName, NowTestDataName, "read");
         }
 
-        [Benchmark(Description = "RBAC (medium), 11000 rules (10000 users, 1000 roles)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC (medium), 11000 rules (10000 users, 1000 roles)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithMediumScale()
         {
             _ = NowEnforcer.Enforce(NowTestUserName, NowTestDataName, "read");
         }
 
-        [Benchmark(Description = "RBAC (large), 110000 rules (100000 users, 10000 roles)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC (large), 110000 rules (100000 users, 10000 roles)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithLargeScale()
         {
             _ = NowEnforcer.Enforce(NowTestUserName, NowTestDataName, "read");
         }
 
-        [Benchmark(Description = "RBAC with resource roles, 6 rules (2 users, 2 roles)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC with resource roles, 6 rules (2 users, 2 roles)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithResourceRoles()
         {
             _ = NowEnforcer.Enforce("alice", "data1", "read");
         }
 
-        [Benchmark(Description = "RBAC with domains/tenants, 6 rules (2 users, 1 role, 2 domains)")]
+        [Benchmark]
+        //[Benchmark(Description = "RBAC with domains/tenants, 6 rules (2 users, 1 role, 2 domains)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithDomains()
         {
             _ = NowEnforcer.Enforce("alice", "domain1", "data1", "read");
         }
 
-        [Benchmark(Description = "Deny-override, 6 rules (2 users, 1 role)")]
+        [Benchmark]
+        //[Benchmark(Description = "Deny-override, 6 rules (2 users, 1 role)")]
         [BenchmarkCategory("RbacModel")]
         public void RbacModelWithDeny()
         {
             _ = NowEnforcer.Enforce("alice", "data1", "read");
         }
 
-        [Benchmark(Description = "ABAC, 0 rule (0 user)")]
+        [Benchmark]
+        //[Benchmark(Description = "ABAC, 0 rule (0 user)")]
         [BenchmarkCategory("AbacModel")]
         public void AbacModel()
         {
@@ -224,14 +231,16 @@ namespace Casbin.Benchmark
             _ = NowEnforcer.Enforce("alice", data1, "read");
         }
 
-        [Benchmark(Description = "RESTful, 5 rules (3 users)")]
+        [Benchmark]
+        //[Benchmark(Description = "RESTful, 5 rules (3 users)")]
         [BenchmarkCategory("KeyMatchModel")]
         public void KeyMatchModel()
         {
             _ = NowEnforcer.Enforce("alice", "/alice_data/resource1", "GET");
         }
 
-        [Benchmark(Description = "Priority, 9 rules (2 users, 2 roles)")]
+        [Benchmark]
+        //[Benchmark(Description = "Priority, 9 rules (2 users, 2 roles)")]
         [BenchmarkCategory("PriorityModel")]
         public void PriorityModel()
         {
