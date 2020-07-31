@@ -1,10 +1,9 @@
-name: Github actions
+name: Github actions (Release)
 
 on:
   push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
+    tags:
+      - '*'
 
 jobs:
   benchmark:
@@ -26,12 +25,15 @@ jobs:
       run: dotnet restore
 
     - name: Build
-      run: dotnet build --configuration Release --no-restore
+      run: dotnet build -c Release --no-restore
 
     - name: Test
       run: dotnet test --no-restore --verbosity normal
 
-    - name: Run Benchmark
+    - name: Pack
+      run: dotnet pack -c Release -o publish --no-build
+
+    - name: Push
       run: |
-        cd Casbin.Benchmark
-        dotnet run -c Release -f netcoreapp31 --join --filter **
+        dotnet nuget add source https://nuget.pkg.github.com/casbin/index.json -n github -u casbin -p ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push publish/*.nupkg --source "github" --skip-duplicate
