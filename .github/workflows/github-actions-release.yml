@@ -1,0 +1,39 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  release:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core 2.1.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 2.1
+
+    - name: Setup .NET Core 3.1.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1
+
+    - name: Install dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build -c Release --no-restore
+
+    - name: Test
+      run: dotnet test -c Release --no-restore --no-build --verbosity normal
+
+    - name: Pack
+      run: dotnet pack -c Release -o publish --no-build
+
+    - name: Push
+      run: |
+        dotnet nuget add source https://nuget.pkg.github.com/casbin/index.json -n github -u casbin -p ${{ secrets.GITHUB_TOKEN }}
+        dotnet nuget push publish\*.nupkg --source "github" --skip-duplicate

@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <ServerGarbageCollection>true</ServerGarbageCollection>
     <TargetFrameworks>net48;netcoreapp3.1</TargetFrameworks>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
