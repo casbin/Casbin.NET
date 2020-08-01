@@ -14,12 +14,13 @@ jobs:
     - name: Setup .NET Core 2.1.x
       uses: actions/setup-dotnet@v1
       with:
-        dotnet-version: 2.1
+        dotnet-version: 2.1 
 
     - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install dependencies
       run: dotnet restore
@@ -29,11 +30,10 @@ jobs:
 
     - name: Test
       run: dotnet test -c Release --no-restore --no-build --verbosity normal
-
-    - name: Pack
-      run: dotnet pack -c Release -o publish --no-build
-
-    - name: Push
-      run: |
-        dotnet nuget add source https://nuget.pkg.github.com/casbin/index.json -n github -u casbin -p ${{ secrets.GITHUB_TOKEN }}
-        dotnet nuget push publish\*.nupkg --source "github" --skip-duplicate
+    
+    - name: Publish Casbin.Net
+      uses: brandedoutcast/publish-nuget@v2.5.2
+      with:
+          PROJECT_FILE_PATH: NetCasbin/NetCasbin.csproj
+          NUGET_KEY: ${{secrets.NUGET_API_KEY}}
+          NUGET_SOURCE: https://api.nuget.org
