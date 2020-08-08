@@ -265,6 +265,11 @@ namespace NetCasbin
         /// </summary>
         public void SavePolicy()
         {
+            if (adapter is null)
+            {
+                return;
+            }
+
             if (IsFiltered())
             {
                 throw new Exception("cannot save a filtered policy");

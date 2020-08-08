@@ -7,33 +7,33 @@ namespace NetCasbin.UnitTest.Fixtures
 {
     public class TestModelFixture
     {
-        internal readonly Lazy<string> _abacModelText = LazyReadTestFile("abac_model.conf");
-        internal readonly Lazy<string> _basicModelText = LazyReadTestFile("basic_model.conf");
-        internal readonly Lazy<string> _basicWithRootModelText = LazyReadTestFile("basic_with_root_model.conf");
-        internal readonly Lazy<string> _basicWithoutResourceModelText = LazyReadTestFile("basic_without_resources_model.conf");
-        internal readonly Lazy<string> _basicWithoutUserModelText = LazyReadTestFile("basic_without_users_model.conf");
-        internal readonly Lazy<string> _ipMatchModelText = LazyReadTestFile("ipmatch_model.conf");
-        internal readonly Lazy<string> _keyMatchModelText = LazyReadTestFile("keymatch_model.conf");
-        internal readonly Lazy<string> _keyMatch2ModelText = LazyReadTestFile("keymatch2_model.conf");
-        internal readonly Lazy<string> _priorityModelText = LazyReadTestFile("priority_model.conf");
-        internal readonly Lazy<string> _rbacModelText = LazyReadTestFile("rbac_model.conf");
-        internal readonly Lazy<string> _rbacWithDenyModelText = LazyReadTestFile("rbac_with_deny_model.conf");
-        internal readonly Lazy<string> _rbacWithNotDenyModelText = LazyReadTestFile("rbac_with_not_deny_model.conf");
-        internal readonly Lazy<string> _rbacWithDomainsModelText = LazyReadTestFile("rbac_with_domains_model.conf");
-        internal readonly Lazy<string> _rbacWithResourceRoleModelText = LazyReadTestFile("rbac_with_resource_roles_model.conf");
-
-        internal readonly Lazy<string> _basicPolicyText = LazyReadTestFile("basic_Policy.csv");
-        internal readonly Lazy<string> _basicWithoutResourcePolicyText = LazyReadTestFile("basic_without_resources_Policy.csv");
-        internal readonly Lazy<string> _basicWithoutUserPolicyText = LazyReadTestFile("basic_without_users_Policy.csv");
-        internal readonly Lazy<string> _ipMatchPolicyText = LazyReadTestFile("ipmatch_Policy.csv");
-        internal readonly Lazy<string> _keyMatchPolicyText = LazyReadTestFile("keymatch_Policy.csv");
-        internal readonly Lazy<string> _keyMatch2PolicyText = LazyReadTestFile("keymatch2_Policy.csv");
-        internal readonly Lazy<string> _priorityPolicyText = LazyReadTestFile("priority_Policy.csv");
-        internal readonly Lazy<string> _priorityIndeterminatePolicyText = LazyReadTestFile("priority_indeterminate_policy.csv");
-        internal readonly Lazy<string> _rbacPolicyText = LazyReadTestFile("rbac_Policy.csv");
-        internal readonly Lazy<string> _rbacWithDenyPolicyText = LazyReadTestFile("rbac_with_deny_Policy.csv");
-        internal readonly Lazy<string> _rbacWithDomainsPolicyText = LazyReadTestFile("rbac_with_domains_Policy.csv");
-        internal readonly Lazy<string> _rbacWithResourceRolePolicyText = LazyReadTestFile("rbac_with_resource_roles_Policy.csv");
+        internal readonly string _abacModelText = ReadTestFile("abac_model.conf");
+        internal readonly string _basicModelText = ReadTestFile("basic_model.conf");
+        internal readonly string _basicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
+        internal readonly string _basicWithoutResourceModelText = ReadTestFile("basic_without_resources_model.conf");
+        internal readonly string _basicWithoutUserModelText = ReadTestFile("basic_without_users_model.conf");
+        internal readonly string _ipMatchModelText = ReadTestFile("ipmatch_model.conf");
+        internal readonly string _keyMatchModelText = ReadTestFile("keymatch_model.conf");
+        internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
+        internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
+        internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
+        internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
+        internal readonly string _rbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
+        internal readonly string _rbacWithDomainsModelText = ReadTestFile("rbac_with_domains_model.conf");
+        internal readonly string _rbacWithResourceRoleModelText = ReadTestFile("rbac_with_resource_roles_model.conf");
+                          
+        internal readonly string _basicPolicyText = ReadTestFile("basic_Policy.csv");
+        internal readonly string _basicWithoutResourcePolicyText = ReadTestFile("basic_without_resources_Policy.csv");
+        internal readonly string _basicWithoutUserPolicyText = ReadTestFile("basic_without_users_Policy.csv");
+        internal readonly string _ipMatchPolicyText = ReadTestFile("ipmatch_Policy.csv");
+        internal readonly string _keyMatchPolicyText = ReadTestFile("keymatch_Policy.csv");
+        internal readonly string _keyMatch2PolicyText = ReadTestFile("keymatch2_Policy.csv");
+        internal readonly string _priorityPolicyText = ReadTestFile("priority_Policy.csv");
+        internal readonly string _priorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
+        internal readonly string _rbacPolicyText = ReadTestFile("rbac_Policy.csv");
+        internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_Policy.csv");
+        internal readonly string _rbacWithDomainsPolicyText = ReadTestFile("rbac_with_domains_Policy.csv");
+        internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_Policy.csv");
 
         public Model.Model GetBasicTestModel()
         {
@@ -85,15 +85,20 @@ namespace NetCasbin.UnitTest.Fixtures
             return GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
         }
 
-        public Model.Model GetNewTestModel(Lazy<string> modelText)
+        public Model.Model GetNewTestModel(string modelText)
         {
-            return CoreEnforcer.NewModel(modelText.Value);
+            return CoreEnforcer.NewModel(modelText);
         }
 
-        public static Model.Model GetNewTestModel(Lazy<string> modelText, Lazy<string> policyText)
+        public static Model.Model GetNewTestModel(string modelText, string policyText)
         {
-            var model = CoreEnforcer.NewModel(modelText.Value);
-            return LoadModelFromMemory(model, policyText.Value);
+            var model = CoreEnforcer.NewModel(modelText);
+            return LoadModelFromMemory(model, policyText);
+        }
+
+        public static string GetTestFile(string fileName)
+        {
+            return Path.Combine("examples", fileName);
         }
 
         private static Model.Model LoadModelFromMemory(Model.Model model, string policy)
@@ -108,9 +113,9 @@ namespace NetCasbin.UnitTest.Fixtures
             return model;
         }
 
-        private static Lazy<string> LazyReadTestFile(string fileName)
+        private static string ReadTestFile(string fileName)
         {
-            return new Lazy<string>(() => File.ReadAllText(Path.Combine("examples", fileName)));
+            return File.ReadAllText(GetTestFile(fileName));
         }
     }
 }
