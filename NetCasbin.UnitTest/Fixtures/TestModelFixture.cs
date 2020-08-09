@@ -85,15 +85,14 @@ namespace NetCasbin.UnitTest.Fixtures
             return GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
         }
 
-        public Model.Model GetNewTestModel(string modelText)
+        public static Model.Model GetNewTestModel(string modelText)
         {
-            return CoreEnforcer.NewModel(modelText);
+            return Model.Model.CreateFromText(modelText);
         }
 
         public static Model.Model GetNewTestModel(string modelText, string policyText)
         {
-            var model = CoreEnforcer.NewModel(modelText);
-            return LoadModelFromMemory(model, policyText);
+            return LoadModelFromMemory(GetNewTestModel(modelText), policyText);
         }
 
         public static string GetTestFile(string fileName)

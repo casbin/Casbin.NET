@@ -2,6 +2,9 @@
 {
     public static class PermConstants
     {
+        public const char PolicySeparatorChar = ',';
+        public const string PolicySeparatorString = ", "; // include a white space
+
         public const string DefaultRequestType = "r";
 
         public const string DefaultPolicyType = "p";

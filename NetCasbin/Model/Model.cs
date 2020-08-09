@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using NetCasbin.Util;
 
 namespace NetCasbin.Model
@@ -14,107 +16,147 @@ namespace NetCasbin.Model
             { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
-        private bool LoadAssertion(Config.Config cfg, string sec, string key)
+        public string FilePath { get; set; }
+
+        /// <summary>
+        /// Creates a model.
+        /// </summary>
+        /// <returns></returns>
+        public static Model Create()
         {
-            string secName = _sectionNameMap[sec];
-            string value = cfg.GetString($"{secName}::{key}");
-            return AddDef(sec, key, value);
+            return new Model();
         }
 
         /// <summary>
-        ///
+        /// Creates a model.
         /// </summary>
-        /// <param name="sec">"p" or "g"</param>
-        /// <param name="key">The policy type, "p", "p2", .. or "g", "g2", ..</param>
-        /// <param name="value">The policy rule, separated by ", ".</param>
-        /// <returns>Succeeds or not.</returns>
-        public bool AddDef(string sec, string key, string value)
+        /// <param name="path">The path of the model file.</param>
+        /// <returns></returns>
+        public static Model Create(string path)
         {
-            var ast = new Assertion
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentException(nameof(path));
+            }
+
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("Can not find the model file.");
+            }
+
+            var model = Create();
+            model.FilePath = path;
+            model.LoadModel(path);
+            return model;
+        }
+
+        /// <summary>
+        /// Creates a model.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static Model CreateFromText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentException(nameof(text));
+            }
+
+            var model = Create();
+            model.LoadModelFromText(text);
+            return model;
+        }
+
+        public void LoadModel(string path)
+        {
+            LoadModel(Config.Config.NewConfig(path));
+        }
+
+        public void LoadModelFromText(string text)
+        {
+            LoadModel(Config.Config.NewConfigFromText(text));
+        }
+
+        public bool AddDef(string section, string key, string value)
+        {
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            var assertion = new Assertion
             {
                 Key = key,
                 Value = value
             };
 
-            if (string.IsNullOrEmpty(ast.Value))
+            if (section.Equals(PermConstants.Section.RequestSection) ||
+                section.Equals(PermConstants.Section.PolicySection))
             {
-                return false;
-            }
+                var tokens = assertion.Value
+                    .Split(PermConstants.PolicySeparatorChar)
+                    .Select(t => t.Trim()).ToArray();
 
-            if (sec.Equals(PermConstants.Section.RequestSection) || sec.Equals(PermConstants.Section.PolicySection))
-            {
-                var tokens = ast.Value.Split(new string[] { ", " }, StringSplitOptions.None);
                 for (int i = 0; i < tokens.Length; i++)
                 {
                     tokens[i] = $"{key}_{tokens[i]}";
                 }
-                ast.Tokens = tokens;
+                assertion.Tokens = tokens;
             }
             else
             {
-                ast.Value = Utility.RemoveComments(Utility.EscapeAssertion(ast.Value));
+                assertion.Value = Utility.RemoveComments(Utility.EscapeAssertion(assertion.Value));
             }
 
-            if (!Model.ContainsKey(sec))
+            if (!Model.ContainsKey(section))
             {
                 var assertionMap = new Dictionary<string, Assertion>
                 {
-                    [key] = ast
+                    [key] = assertion
                 };
-                Model.Add(sec, assertionMap);
+                Model.Add(section, assertionMap);
             }
             else
             {
-                Model[sec].Add(key, ast);
+                Model[section].Add(key, assertion);
             }
+
             return true;
         }
 
-        private string GetKeySuffix(int i)
+        private void LoadModel(Config.Config config)
         {
-            if (i == 1)
-            {
-                return string.Empty;
-            }
-            return i.ToString();
+            LoadSection(config, PermConstants.Section.RequestSection);
+            LoadSection(config, PermConstants.Section.PolicySection);
+            LoadSection(config, PermConstants.Section.RoleSection);
+            LoadSection(config, PermConstants.Section.PolicyEffectSection);
+            LoadSection(config, PermConstants.Section.MatcherSection);
         }
 
-        private void LoadSection(Config.Config cfg, string sec)
+        private void LoadSection(Config.Config config, string sectionName)
         {
             int i = 1;
             while (true)
             {
-                if (!LoadAssertion(cfg, sec, sec + GetKeySuffix(i)))
+                string key = string.Concat(sectionName, GetKeySuffix(i));
+                if (!LoadAssertion(config, sectionName, key))
                 {
                     break;
                 }
-                else
-                {
-                    i++;
-                }
+                i++;
             }
         }
 
-        public void LoadModel(string path)
+        private bool LoadAssertion(Config.Config config, string section, string key)
         {
-            var cfg = Config.Config.NewConfig(path);
-
-            LoadSection(cfg, PermConstants.Section.RequestSection);
-            LoadSection(cfg, PermConstants.Section.PolicySection);
-            LoadSection(cfg, PermConstants.Section.RoleSection);
-            LoadSection(cfg, PermConstants.Section.PolicyEffectSection);
-            LoadSection(cfg, PermConstants.Section.MatcherSection);
+            string sectionName = _sectionNameMap[section];
+            string value = config.GetString($"{sectionName}::{key}");
+            return AddDef(section, key, value);
         }
 
-        public void LoadModelFromText(string text)
+        private static string GetKeySuffix(int i)
         {
-            var cfg = Config.Config.NewConfigFromText(text);
-
-            LoadSection(cfg, PermConstants.Section.RequestSection);
-            LoadSection(cfg, PermConstants.Section.PolicySection);
-            LoadSection(cfg, PermConstants.Section.RoleSection);
-            LoadSection(cfg, PermConstants.Section.PolicyEffectSection);
-            LoadSection(cfg, PermConstants.Section.MatcherSection);
+            return i == 1 ? string.Empty : i.ToString();
         }
     }
 }

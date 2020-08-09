@@ -45,6 +45,7 @@ namespace NetCasbin
         /// Creates a model.
         /// </summary>
         /// <returns></returns>
+        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel()
         {
             var model = new Model.Model();
@@ -56,6 +57,7 @@ namespace NetCasbin
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
+        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel(string text)
         {
             var model = new Model.Model();
@@ -69,6 +71,7 @@ namespace NetCasbin
         /// <param name="modelPath">The path of the model file.</param>
         /// <param name="unused">Unused parameter, just for differentiating with  NewModel(String text).</param>
         /// <returns></returns>
+        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel(string modelPath, string unused)
         {
             var model = new Model.Model();

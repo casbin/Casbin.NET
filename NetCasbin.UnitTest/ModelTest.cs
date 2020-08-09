@@ -34,7 +34,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelNoPolicy()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._basicModelText));
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._basicModelText));
 
             TestEnforce(e, "alice", "data1", "read", false);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -70,7 +70,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestBasicModelWithRootNoPolicy()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._basicWithRootModelText));
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._basicWithRootModelText));
 
             TestEnforce(e, "alice", "data1", "read", false);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -159,7 +159,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRbacModelWithDomainsAtRuntime()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
             e.BuildRoleLinks();
 
             e.AddPolicy("admin", "domain1", "data1", "read");
@@ -207,7 +207,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRbacModelWithDomainsAtRuntimeAsync()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
             e.BuildRoleLinks();
 
             await e.AddPolicyAsync("admin", "domain1", "data1", "read");
@@ -369,7 +369,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestAbacModel()
         {
-            var e = new Enforcer(_testModelFixture.GetNewTestModel(_testModelFixture._abacModelText));
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._abacModelText));
 
             var data1 = new TestResource("data1", "alice");
             var data2 = new TestResource("data2", "bob");
