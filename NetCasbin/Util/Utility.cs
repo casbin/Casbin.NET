@@ -64,7 +64,7 @@ namespace NetCasbin.Util
 
         public static string RuleToString(IEnumerable<string> rule)
         {
-            return string.Join(", ", rule);
+            return string.Join(PermConstants.PolicySeparatorString, rule);
         }
 
         public static bool ArrayEquals(List<string> a, List<string> b)

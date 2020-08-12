@@ -12,7 +12,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -73,7 +73,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestKeyMatchModelInMemoryAsync()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -134,7 +134,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestKeyMatchModelInMemoryDeny()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "!some(where (p.eft == deny))");
@@ -150,7 +150,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRbacModelInMemoryIndeterminate()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -167,7 +167,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRbacModelInMemoryIndeterminateAsync()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -184,7 +184,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestRbacModelInMemory()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -212,7 +212,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestRbacModelInMemoryAsync()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -256,7 +256,7 @@ namespace NetCasbin.UnitTest
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            var m = CoreEnforcer.NewModel(text);
+            var m = Model.Model.CreateFromText(text);
 
             var e = new Enforcer(m);
 
@@ -295,7 +295,7 @@ namespace NetCasbin.UnitTest
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            var m = CoreEnforcer.NewModel(text);
+            var m = Model.Model.CreateFromText(text);
 
             var e = new Enforcer(m);
 
@@ -318,7 +318,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestNotUsedRbacModelInMemory()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -343,7 +343,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestNotUsedRbacModelInMemoryAsync()
         {
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -658,7 +658,7 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer();
 
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -678,7 +678,7 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer();
 
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -698,7 +698,7 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer();
 
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -720,7 +720,7 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer();
 
-            var m = CoreEnforcer.NewModel();
+            var m = Model.Model.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
