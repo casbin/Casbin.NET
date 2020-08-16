@@ -9,7 +9,7 @@
 
         public const string DefaultPolicyType = "p";
         public const string PolicyType2 = "p2";
-        public const string PolicyType3 = "p2";
+        public const string PolicyType3 = "p3";
 
         public const string DefaultRoleType = "g";
         public const string RoleType2 = "g2";
