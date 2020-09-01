@@ -75,15 +75,23 @@ namespace NetCasbin.Model
             return PolicyStringSet.Contains(Utility.RuleToString(rule));
         }
 
-        internal bool AddPolicy(List<string> rule)
+        internal bool TryAddPolicy(List<string> rule)
         {
+            if (Contains(rule))
+            {
+                return false;
+            }
             Policy.Add(rule);
             PolicyStringSet.Add(Utility.RuleToString(rule));
             return true;
         }
 
-        internal bool RemovePolicy(List<string> rule)
+        internal bool TryRemovePolicy(List<string> rule)
         {
+            if (!Contains(rule))
+            {
+                return false;
+            }
             for (int i = 0; i < Policy.Count; i++)
             {
                 var ruleInPolicy = Policy[i];
@@ -93,9 +101,9 @@ namespace NetCasbin.Model
                 }
                 Policy.RemoveAt(i);
                 PolicyStringSet.Remove(Utility.RuleToString(rule));
-                return true;
+                break;
             }
-            return false;
+            return true;
         }
 
         internal void ClearPolicy()

@@ -99,36 +99,6 @@ namespace NetCasbin.Persist.FileAdapter
             await SavePolicyFileAsync(string.Join("\n", policy));
         }
 
-        public void AddPolicy(string sec, string ptype, IList<string> rule)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task AddPolicyAsync(string sec, string ptype, IList<string> rule)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemovePolicy(string sec, string ptype, IList<string> rule)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemovePolicyAsync(string sec, string ptype, IList<string> rule)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
-        {
-            throw new NotImplementedException();
-        }
-
         private static IEnumerable<string> GetModelPolicy(Model.Model model, string ptype)
         {
             var policy = new List<string>();
@@ -186,5 +156,16 @@ namespace NetCasbin.Persist.FileAdapter
                 await fs.WriteAsync(content, 0, content.Length);
             }
         }
+
+        public void AddPolicies(string sec, string ptype, IEnumerable<IList<string>> rules) => throw new NotImplementedException();
+        public Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules) => throw new NotImplementedException();
+        public void RemovePolicies(string sec, string ptype, IEnumerable<IList<string>> rules) => throw new NotImplementedException();
+        public Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules) => throw new NotImplementedException();
+        public void AddPolicy(string sec, string ptype, IList<string> rule) => throw new NotImplementedException();
+        public Task AddPolicyAsync(string sec, string ptype, IList<string> rule) => throw new NotImplementedException();
+        public void RemovePolicy(string sec, string ptype, IList<string> rule) => throw new NotImplementedException();
+        public Task RemovePolicyAsync(string sec, string ptype, IList<string> rule) => throw new NotImplementedException();
+        public void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
+        public Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
     }
 }
