@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NetCasbin.Abstractions;
@@ -12,6 +11,10 @@ namespace NetCasbin
     /// </summary>
     public class ManagementEnforcer : InternalEnforcer, IManagementEnforcer
     {
+        #region "p" (Policy) Management
+
+        #region Get Policy Items (sub, obj, act)
+
         /// <summary>
         /// Gets the list of subjects that show up in the current policy.
         /// </summary>
@@ -93,32 +96,9 @@ namespace NetCasbin
             return model.GetValuesForFieldInPolicy(PermConstants.Section.PolicySection, ptype, 2);
         }
 
-        /// <summary>
-        /// Gets the list of roles that show up in the current policy.
-        /// </summary>
-        /// <returns>
-        /// All the roles in "g" policy rules. It actually collects
-        /// the 1-index elements of "g" policy rules. So make sure your
-        /// role is the 1-index element, like (sub, role).
-        /// Duplicates are removed.</returns>
-        public List<string> GetAllRoles()
-        {
-            return GetAllNamedRoles(PermConstants.Section.RoleSection);
-        }
+        #endregion
 
-        /// <summary>
-        /// Gets the list of roles that show up in the current named policy.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <returns>
-        /// All the subjects in policy rules of the ptype type. It actually
-        /// collects the 0-index elements of the policy rules.So make
-        /// Sure your subject is the 0-index element, like (sub, obj, act).
-        /// Duplicates are removed.</returns>
-        public List<string> GetAllNamedRoles(string ptype)
-        {
-            return model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
-        }
+        #region Get Policy
 
         /// <summary>
         /// Gets all the authorization rules in the policy.
@@ -162,47 +142,9 @@ namespace NetCasbin
             return model.GetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy.
-        /// </summary>
-        /// <returns>all the "g" policy rules.</returns>
-        public List<List<string>> GetGroupingPolicy()
-        {
-            return GetNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType);
-        }
+        #endregion End of "p" (Policy) Management
 
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy, field filters can be specified.
-        /// </summary>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>The filtered "g" policy rules.</returns>
-        public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
-        {
-            return GetFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
-        }
-
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <returns>The "g" policy rules of the specified ptype.</returns>
-        public List<List<string>> GetNamedGroupingPolicy(string ptype)
-        {
-            return model.GetPolicy(PermConstants.Section.RoleSection, ptype);
-        }
-
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy, field filters can be specified.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
-        public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
-        {
-            return model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
-        }
+        #region Has Policy
 
         /// <summary>
         /// Determines whether an authorization rule exists.
@@ -245,6 +187,10 @@ namespace NetCasbin
         {
             return HasNamedPolicy(ptype, parameters.ToList());
         }
+
+        #endregion
+
+        #region Add Policy
 
         /// <summary>
         /// Adds an authorization rule to the current policy. If the rule
@@ -345,6 +291,10 @@ namespace NetCasbin
         {
             return AddPolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
         }
+
+        #endregion
+
+        #region Remove Policy
 
         /// <summary>
         /// Removes an authorization rule from the current policy.
@@ -476,6 +426,45 @@ namespace NetCasbin
             return RemoveFilteredPolicyAsync(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
+        #endregion
+
+        #endregion
+
+        #region "g" (Grouping/Role Policy) Management
+
+        #region Get Grouping/Role Policy Items (role)
+
+        /// <summary>
+        /// Gets the list of roles that show up in the current policy.
+        /// </summary>
+        /// <returns>
+        /// All the roles in "g" policy rules. It actually collects
+        /// the 1-index elements of "g" policy rules. So make sure your
+        /// role is the 1-index element, like (sub, role).
+        /// Duplicates are removed.</returns>
+        public List<string> GetAllRoles()
+        {
+            return GetAllNamedRoles(PermConstants.Section.RoleSection);
+        }
+
+        /// <summary>
+        /// Gets the list of roles that show up in the current named policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <returns>
+        /// All the subjects in policy rules of the ptype type. It actually
+        /// collects the 0-index elements of the policy rules.So make
+        /// Sure your subject is the 0-index element, like (sub, obj, act).
+        /// Duplicates are removed.</returns>
+        public List<string> GetAllNamedRoles(string ptype)
+        {
+            return model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
+        }
+
+        #endregion
+
+        #region Has Grouping/Role Policy
+
         /// <summary>
         /// Determines whether a role inheritance rule exists.
         /// </summary>
@@ -519,6 +508,56 @@ namespace NetCasbin
         {
             return HasNamedGroupingPolicy(ptype, parameters.ToList());
         }
+
+        #endregion
+
+        #region Get Grouping/Role Policy
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy.
+        /// </summary>
+        /// <returns>all the "g" policy rules.</returns>
+        public List<List<string>> GetGroupingPolicy()
+        {
+            return GetNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy, field filters can be specified.
+        /// </summary>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>The filtered "g" policy rules.</returns>
+        public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
+        {
+            return GetFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <returns>The "g" policy rules of the specified ptype.</returns>
+        public List<List<string>> GetNamedGroupingPolicy(string ptype)
+        {
+            return model.GetPolicy(PermConstants.Section.RoleSection, ptype);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
+        public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
+        {
+            return model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+        }
+
+        #endregion
+
+        #region Add Grouping/Role Policy
 
         /// <summary>
         /// Adds a role inheritance rule to the current policy. If the
@@ -620,6 +659,10 @@ namespace NetCasbin
         {
             return AddNamedGroupingPolicy(ptype, parameters.ToList());
         }
+
+        #endregion
+
+        #region Remove Grouping/Role Policy
 
         /// <summary>
         /// Removes a role inheritance rule from the current policy.
@@ -784,6 +827,10 @@ namespace NetCasbin
 
             return ruleRemoved;
         }
+
+        #endregion
+
+        #endregion // End of "g" (Grouping/Role Policy) Management
 
         /// <summary>
         /// Adds a customized function.
