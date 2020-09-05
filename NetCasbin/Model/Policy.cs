@@ -215,7 +215,7 @@ namespace NetCasbin.Model
             bool exist = TryGetExistAssertion(section, policyType, out var assertion);
             if (!exist)
             {
-                throw new ArgumentException($"Can not find the assertion at the ${policyType}");
+                throw new ArgumentException($"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
             }
             return assertion;
         }

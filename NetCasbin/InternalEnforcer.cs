@@ -17,7 +17,7 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected bool AddPolicy(string sec, string ptype, List<string> rule)
+        protected bool InternalAddPolicy(string sec, string ptype, List<string> rule)
         {
             if (model.HasPolicy(sec, ptype, rule))
             {
@@ -55,7 +55,7 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected async Task<bool> AddPolicyAsync(string sec, string ptype, List<string> rule)
+        protected async Task<bool> InternalAddPolicyAsync(string sec, string ptype, List<string> rule)
         {
             if (model.HasPolicy(sec, ptype, rule))
             {
@@ -78,9 +78,9 @@ namespace NetCasbin
 
                 if (adapterAdded)
                 {
-                    if (!(watcher is null))
+                    if (watcher is not null)
                     {
-                        await watcher?.UpdateAsync();
+                        await watcher.UpdateAsync();
                     }
                 }
             }
@@ -96,7 +96,7 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected bool AddPolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        protected bool InternalAddPolicies(string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
@@ -137,7 +137,7 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected async Task<bool> AddPoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
+        protected async Task<bool> InternalAddPoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
@@ -180,8 +180,13 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected bool RemovePolicy(string sec, string ptype, List<string> rule)
+        protected bool InternalRemovePolicy(string sec, string ptype, List<string> rule)
         {
+            if (!model.HasPolicy(sec, ptype, rule))
+            {
+                return true;
+            }
+
             if (adapter != null && autoSave)
             {
                 bool adapterRemoved;
@@ -213,7 +218,7 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected async Task<bool> RemovePolicyAsync(string sec, string ptype, List<string> rule)
+        protected async Task<bool> InternalRemovePolicyAsync(string sec, string ptype, List<string> rule)
         {
             if (adapter != null && autoSave)
             {
@@ -249,13 +254,13 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected bool RemovePolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        protected bool InternalRemovePolicies(string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (model.HasPolicies(sec, ptype, ruleArray))
+            if (!model.HasPolicies(sec, ptype, ruleArray))
             {
-                return false;
+                return true;
             }
 
             if (adapter != null && autoSave)
@@ -289,9 +294,14 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected async Task<bool> RemovePoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
+        protected async Task<bool> InternalRemovePoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
+
+            if (!model.HasPolicies(sec, ptype, ruleArray))
+            {
+                return true;
+            }
 
             if (adapter != null && autoSave)
             {
@@ -328,7 +338,7 @@ namespace NetCasbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        protected bool InternalRemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
             if (adapter != null && autoSave)
             {
@@ -362,7 +372,7 @@ namespace NetCasbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected async Task<bool> RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        protected async Task<bool> InternalRemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
             if (adapter != null && autoSave)
             {
