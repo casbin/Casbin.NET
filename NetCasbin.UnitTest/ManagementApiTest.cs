@@ -7,11 +7,11 @@ using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class ManagementApiUnitTest : IClassFixture<TestModelFixture>
+    public class ManagementApiTest : IClassFixture<TestModelFixture>
     {
         private readonly TestModelFixture _testModelFixture;
 
-        public ManagementApiUnitTest(TestModelFixture testModelFixture)
+        public ManagementApiTest(TestModelFixture testModelFixture)
         {
             _testModelFixture = testModelFixture;
         }
@@ -77,6 +77,34 @@ namespace NetCasbin.UnitTest
             e.AddPolicy("eve", "data3", "read");
             e.AddPolicy("eve", "data3", "read");
 
+            var rules = AsList(
+                AsList("jack", "data4", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("leyo", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("katy", "data4", "write"),
+                AsList("ham", "data4", "write")
+            );
+
+            _ = e.AddPolicies(rules);
+            _ = e.AddPolicies(rules);
+
+            TestGetPolicy(e, AsList(
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write"),
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("leyo", "data4", "read"),
+                AsList("ham", "data4", "write")
+                )
+            );
+
+            _ = e.RemovePolicies(rules);
+            _ = e.RemovePolicies(rules);
+
             var namedPolicy = AsList("eve", "data3", "read");
             e.RemoveNamedPolicy("p", namedPolicy);
             e.AddNamedPolicy("p", namedPolicy);
@@ -113,6 +141,34 @@ namespace NetCasbin.UnitTest
             await e.RemovePolicyAsync("alice", "data1", "read");
             await e.AddPolicyAsync("eve", "data3", "read");
             await e.AddPolicyAsync("eve", "data3", "read");
+            
+            var rules = AsList(
+                AsList("jack", "data4", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("leyo", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("katy", "data4", "write"),
+                AsList("ham", "data4", "write")
+            );
+
+            _ = await e.AddPoliciesAsync(rules);
+            _ = await e.AddPoliciesAsync(rules);
+
+            TestGetPolicy(e, AsList(
+                    AsList("data2_admin", "data2", "read"),
+                    AsList("data2_admin", "data2", "write"),
+                    AsList("eve", "data3", "read"),
+                    AsList("jack", "data4", "read"),
+                    AsList("katy", "data4", "write"),
+                    AsList("leyo", "data4", "read"),
+                    AsList("ham", "data4", "write")
+                )
+            );
+
+            _ = await e.RemovePoliciesAsync(rules);
+            _ = await e.RemovePoliciesAsync(rules);
 
             var namedPolicy = AsList("eve", "data3", "read");
             await e.RemoveNamedPolicyAsync("p", namedPolicy);
@@ -142,6 +198,18 @@ namespace NetCasbin.UnitTest
             e.RemoveGroupingPolicy("alice", "data2_admin");
             e.AddGroupingPolicy("bob", "data1_admin");
             e.AddGroupingPolicy("eve", "data3_admin");
+
+            var groupingRules = AsList(
+                AsList("ham", "data4_admin"),
+                AsList("jack", "data5_admin")
+            );
+
+            _ = e.AddGroupingPolicies(groupingRules);
+            TestGetRoles(e, "ham", AsList("data4_admin"));
+            TestGetRoles(e, "jack", AsList("data5_admin"));
+            _ = e.RemoveGroupingPolicies(groupingRules);
+
+            TestGetRoles(e, "alice", AsList());
 
             var namedGroupingPolicy = AsList("alice", "data2_admin");
             TestGetRoles(e, "alice", AsList());
@@ -185,6 +253,17 @@ namespace NetCasbin.UnitTest
             await e.AddGroupingPolicyAsync("bob", "data1_admin");
             await e.AddGroupingPolicyAsync("eve", "data3_admin");
 
+            var groupingRules = AsList(
+                AsList("ham", "data4_admin"),
+                AsList("jack", "data5_admin")
+            );
+
+            _ = await e.AddGroupingPoliciesAsync(groupingRules);
+            TestGetRoles(e, "ham", AsList("data4_admin"));
+            TestGetRoles(e, "jack", AsList("data5_admin"));
+            _ = await e.RemoveGroupingPoliciesAsync(groupingRules);
+
+            TestGetRoles(e, "alice", AsList());
             var namedGroupingPolicy = AsList("alice", "data2_admin");
             TestGetRoles(e, "alice", AsList());
             await e.AddNamedGroupingPolicyAsync("g", namedGroupingPolicy);
