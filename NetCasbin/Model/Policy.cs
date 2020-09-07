@@ -75,6 +75,8 @@ namespace NetCasbin.Model
 
             foreach (var rule in Model[sec][ptype].Policy)
             {
+                // Matched means all the fieldValue equals rule[fieldIndex + i].
+                // when fieldValue is empty, this field will skip equals check.
                 bool matched = !fieldValues.Where((fieldValue, i) =>
                         !string.IsNullOrWhiteSpace(fieldValue) &&
                         !rule[fieldIndex + i].Equals(fieldValue))
@@ -91,29 +93,71 @@ namespace NetCasbin.Model
 
         public bool HasPolicy(string sec, string ptype, List<string> rule)
         {
-            return Model[sec][ptype] != null && Model[sec][ptype].Contains(rule);
+            var assertion = GetExistAssertion(sec, ptype);
+            return assertion.Contains(rule);
+        }
+
+        public bool HasPolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        {
+            var assertion = GetExistAssertion(sec, ptype);
+            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+            return ruleArray.Length == 0 || ruleArray.Any(assertion.Contains);
         }
 
         public bool AddPolicy(string sec, string ptype, List<string> rule)
         {
-            if (HasPolicy(sec, ptype, rule))
-            {
-                return false;
-            }
-
-            Assertion assertion = Model[sec][ptype];
-            return assertion.AddPolicy(rule);
+            var assertion = GetExistAssertion(sec, ptype);
+            return assertion.TryAddPolicy(rule);
         }
 
-        public bool RemovePolicy(string sec, string ptype, List<string> rule)
+        public bool AddPolicies(string sec, string ptype, IEnumerable<List<string>> rules)
         {
-            if (!HasPolicy(sec, ptype, rule))
+            if (rules is null)
+            {
+                throw new ArgumentNullException(nameof(rules));
+            }
+
+            var assertion = GetExistAssertion(sec, ptype);
+            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+
+            if (ruleArray.Length == 0)
             {
                 return true;
             }
 
-            Assertion assertion = Model[sec][ptype];
-            return assertion.RemovePolicy(rule);
+            foreach (var rule in ruleArray)
+            {
+                assertion.TryAddPolicy(rule);
+            }
+            return true;
+        }
+
+        public bool RemovePolicy(string sec, string ptype, List<string> rule)
+        {
+            var assertion = GetExistAssertion(sec, ptype);
+            return assertion.TryRemovePolicy(rule);
+        }
+
+        public bool RemovePolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        {
+            if (rules is null)
+            {
+                throw new ArgumentNullException(nameof(rules));
+            }
+
+            var assertion = GetExistAssertion(sec, ptype);
+            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+
+            if (ruleArray.Length == 0)
+            {
+                return true;
+            }
+
+            foreach (var rule in ruleArray)
+            {
+                assertion.TryRemovePolicy(rule);
+            }
+            return true;
         }
 
         public bool RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
@@ -134,6 +178,8 @@ namespace NetCasbin.Model
             Assertion assertion = Model[sec][ptype];
             foreach (var rule in assertion.Policy)
             {
+                // Matched means all the fieldValue equals rule[fieldIndex + i].
+                // when fieldValue is empty, this field will skip equals check.
                 bool matched = !fieldValues.Where((fieldValue, i) =>
                         !string.IsNullOrWhiteSpace(fieldValue) &&
                         !rule[fieldIndex + i].Equals(fieldValue))
@@ -162,6 +208,32 @@ namespace NetCasbin.Model
 
             Utility.ArrayRemoveDuplicates(values);
             return values;
+        }
+
+        private Assertion GetExistAssertion(string section, string policyType)
+        {
+            bool exist = TryGetExistAssertion(section, policyType, out var assertion);
+            if (!exist)
+            {
+                throw new ArgumentException($"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
+            }
+            return assertion;
+        }
+
+        private bool TryGetExistAssertion(string section, string policyType, out Assertion returnAssertion)
+        {
+            if (Model[section].TryGetValue(policyType, out var assertion))
+            {
+                if (assertion is null)
+                {
+                    returnAssertion = default;
+                    return false;
+                }
+                returnAssertion = assertion;
+                return true;
+            }
+            returnAssertion = default;
+            return false;
         }
     }
 }

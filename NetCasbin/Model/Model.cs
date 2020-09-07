@@ -36,7 +36,7 @@ namespace NetCasbin.Model
         {
             if (string.IsNullOrEmpty(path))
             {
-                throw new ArgumentException(nameof(path));
+                throw new ArgumentNullException(nameof(path));
             }
 
             if (!File.Exists(path))
@@ -59,7 +59,7 @@ namespace NetCasbin.Model
         {
             if (string.IsNullOrEmpty(text))
             {
-                throw new ArgumentException(nameof(text));
+                throw new ArgumentNullException(nameof(text));
             }
 
             var model = Create();
@@ -133,13 +133,13 @@ namespace NetCasbin.Model
             LoadSection(config, PermConstants.Section.MatcherSection);
         }
 
-        private void LoadSection(Config.Config config, string sectionName)
+        private void LoadSection(Config.Config config, string section)
         {
             int i = 1;
             while (true)
             {
-                string key = string.Concat(sectionName, GetKeySuffix(i));
-                if (!LoadAssertion(config, sectionName, key))
+                string key = string.Concat(section, GetKeySuffix(i));
+                if (!LoadAssertion(config, section, key))
                 {
                     break;
                 }

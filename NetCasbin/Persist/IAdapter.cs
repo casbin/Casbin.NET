@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace NetCasbin.Persist
@@ -18,9 +17,17 @@ namespace NetCasbin.Persist
 
         Task AddPolicyAsync(string sec, string ptype, IList<string> rule);
 
+        void AddPolicies(string sec, string ptype, IEnumerable<IList<string>> rules);
+
+        Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules);
+
         void RemovePolicy(string sec, string ptype, IList<string> rule);
 
         Task RemovePolicyAsync(string sec, string ptype, IList<string> rule);
+
+        void RemovePolicies(string sec, string ptype, IEnumerable<IList<string>> rules);
+
+        Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules);
 
         void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues);
 

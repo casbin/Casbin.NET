@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using NetCasbin.Abstractions;
@@ -12,6 +11,10 @@ namespace NetCasbin
     /// </summary>
     public class ManagementEnforcer : InternalEnforcer, IManagementEnforcer
     {
+        #region "p" (Policy) Management
+
+        #region Get Policy Items (sub, obj, act)
+
         /// <summary>
         /// Gets the list of subjects that show up in the current policy.
         /// </summary>
@@ -93,32 +96,9 @@ namespace NetCasbin
             return model.GetValuesForFieldInPolicy(PermConstants.Section.PolicySection, ptype, 2);
         }
 
-        /// <summary>
-        /// Gets the list of roles that show up in the current policy.
-        /// </summary>
-        /// <returns>
-        /// All the roles in "g" policy rules. It actually collects
-        /// the 1-index elements of "g" policy rules. So make sure your
-        /// role is the 1-index element, like (sub, role).
-        /// Duplicates are removed.</returns>
-        public List<string> GetAllRoles()
-        {
-            return GetAllNamedRoles(PermConstants.Section.RoleSection);
-        }
+        #endregion
 
-        /// <summary>
-        /// Gets the list of roles that show up in the current named policy.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <returns>
-        /// All the subjects in policy rules of the ptype type. It actually
-        /// collects the 0-index elements of the policy rules.So make
-        /// Sure your subject is the 0-index element, like (sub, obj, act).
-        /// Duplicates are removed.</returns>
-        public List<string> GetAllNamedRoles(string ptype)
-        {
-            return model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
-        }
+        #region Get Policy
 
         /// <summary>
         /// Gets all the authorization rules in the policy.
@@ -127,6 +107,16 @@ namespace NetCasbin
         public List<List<string>> GetPolicy()
         {
             return GetNamedPolicy(PermConstants.Section.PolicySection);
+        }
+
+        /// <summary>
+        /// Gets all the authorization rules in the named policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <returns>The "p" policy rules of the specified ptype.</returns>
+        public List<List<string>> GetNamedPolicy(string ptype)
+        {
+            return model.GetPolicy(PermConstants.Section.PolicySection, ptype);
         }
 
         /// <summary>
@@ -141,16 +131,6 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// Gets all the authorization rules in the named policy.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <returns>The "p" policy rules of the specified ptype.</returns>
-        public List<List<string>> GetNamedPolicy(string ptype)
-        {
-            return model.GetPolicy(PermConstants.Section.PolicySection, ptype);
-        }
-
-        /// <summary>
         /// Gets all the authorization rules in the named policy, field filters can be specified.
         /// </summary>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
@@ -162,47 +142,9 @@ namespace NetCasbin
             return model.GetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy.
-        /// </summary>
-        /// <returns>all the "g" policy rules.</returns>
-        public List<List<string>> GetGroupingPolicy()
-        {
-            return GetNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType);
-        }
+        #endregion End of "p" (Policy) Management
 
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy, field filters can be specified.
-        /// </summary>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>The filtered "g" policy rules.</returns>
-        public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
-        {
-            return GetFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
-        }
-
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <returns>The "g" policy rules of the specified ptype.</returns>
-        public List<List<string>> GetNamedGroupingPolicy(string ptype)
-        {
-            return model.GetPolicy(PermConstants.Section.RoleSection, ptype);
-        }
-
-        /// <summary>
-        /// Gets all the role inheritance rules in the policy, field filters can be specified.
-        /// </summary>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
-        public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
-        {
-            return model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
-        }
+        #region Has Policy
 
         /// <summary>
         /// Determines whether an authorization rule exists.
@@ -245,6 +187,10 @@ namespace NetCasbin
         {
             return HasNamedPolicy(ptype, parameters.ToList());
         }
+
+        #endregion
+
+        #region Add Policy
 
         /// <summary>
         /// Adds an authorization rule to the current policy. If the rule
@@ -330,7 +276,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedPolicy(string ptype, List<string> parameters)
         {
-            return AddPolicy(PermConstants.Section.PolicySection, ptype, parameters);
+            return InternalAddPolicy(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -343,8 +289,62 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> AddNamedPolicyAsync(string ptype, List<string> parameters)
         {
-            return AddPolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
+            return InternalAddPolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
         }
+
+        /// <summary>
+        /// Adds authorization rules to the current policy. If the rule
+        /// already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool AddPolicies(IEnumerable<List<string>> rules)
+        {
+            return AddNamedPolicies(PermConstants.DefaultPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Adds authorization rules to the current policy. If the rule
+        /// already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> AddPoliciesAsync(IEnumerable<List<string>> rules)
+        {
+            return AddNamedPoliciesAsync(PermConstants.DefaultPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Adds authorization rules to the current named policy.If the
+        /// rule already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="rules">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool AddNamedPolicies(string ptype, IEnumerable<List<string>> rules)
+        {
+            return InternalAddPolicies(PermConstants.Section.PolicySection, ptype, rules);
+        }
+
+        /// <summary>
+        /// Adds authorization rules to the current named policy.If the
+        /// rule already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="rules">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> AddNamedPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
+        {
+            return InternalAddPoliciesAsync(PermConstants.Section.PolicySection, ptype, rules);
+        }
+
+        #endregion
+
+        #region Remove Policy
 
         /// <summary>
         /// Removes an authorization rule from the current policy.
@@ -387,28 +387,6 @@ namespace NetCasbin
         }
 
         /// <summary>
-        /// Removes an authorization rule from the current policy, field filters can be specified.
-        /// </summary>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>Succeeds or not.</returns>
-        public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
-        {
-            return RemoveFilteredNamedPolicy(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
-        }
-
-        /// <summary>
-        /// Removes an authorization rule from the current policy, field filters can be specified.
-        /// </summary>
-        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
-        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>Succeeds or not.</returns>
-        public Task<bool> RemoveFilteredPolicyAsync(int fieldIndex, params string[] fieldValues)
-        {
-            return RemoveFilteredNamedPolicyAsync(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
-        }
-
-        /// <summary>
         /// Removes an authorization rule from the current named policy.
         /// </summary>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
@@ -438,7 +416,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedPolicy(string ptype, List<string> parameters)
         {
-            return RemovePolicy(PermConstants.Section.PolicySection, ptype, parameters);
+            return InternalRemovePolicy(PermConstants.Section.PolicySection, ptype, parameters);
         }
 
         /// <summary>
@@ -449,8 +427,73 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveNamedPolicyAsync(string ptype, List<string> parameters)
         {
-            return RemovePolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
+            return InternalRemovePolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
         }
+
+        /// <summary>
+        /// Removes authorization rules from the current policy.
+        /// </summary>
+        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool RemovePolicies(IEnumerable<List<string>> rules)
+        {
+            return RemoveNamedPolicies(PermConstants.DefaultPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Removes authorization rules from the current policy.
+        /// </summary>
+        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> RemovePoliciesAsync(IEnumerable<List<string>> rules)
+        {
+            return RemoveNamedPoliciesAsync(PermConstants.DefaultPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Removes authorization rules from the current named policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="rules">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool RemoveNamedPolicies(string ptype, IEnumerable<List<string>> rules)
+        {
+            return InternalRemovePolicies(PermConstants.Section.PolicySection, ptype, rules);
+        }
+
+        /// <summary>
+        /// Removes authorization rules from the current named policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="rules">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> RemoveNamedPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
+        {
+            return InternalRemovePoliciesAsync(PermConstants.Section.PolicySection, ptype, rules);
+        }
+
+        /// <summary>
+        /// Removes an authorization rule from the current policy, field filters can be specified.
+        /// </summary>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool RemoveFilteredPolicy(int fieldIndex, params string[] fieldValues)
+        {
+            return RemoveFilteredNamedPolicy(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        /// Removes an authorization rule from the current policy, field filters can be specified.
+        /// </summary>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> RemoveFilteredPolicyAsync(int fieldIndex, params string[] fieldValues)
+        {
+            return RemoveFilteredNamedPolicyAsync(PermConstants.DefaultPolicyType, fieldIndex, fieldValues);
+        }
+
 
         /// <summary>
         /// Removes an authorization rule from the current named policy, field filters can be specified.
@@ -461,7 +504,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
+            return InternalRemoveFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -473,8 +516,47 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public Task<bool> RemoveFilteredNamedPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredPolicyAsync(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
+            return InternalRemoveFilteredPolicyAsync(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
+
+        #endregion
+
+        #endregion // End of "p" (Policy) Management
+
+        #region "g" (Grouping/Role Policy) Management
+
+        #region Get Grouping/Role Policy Items (role)
+
+        /// <summary>
+        /// Gets the list of roles that show up in the current policy.
+        /// </summary>
+        /// <returns>
+        /// All the roles in "g" policy rules. It actually collects
+        /// the 1-index elements of "g" policy rules. So make sure your
+        /// role is the 1-index element, like (sub, role).
+        /// Duplicates are removed.</returns>
+        public List<string> GetAllRoles()
+        {
+            return GetAllNamedRoles(PermConstants.Section.RoleSection);
+        }
+
+        /// <summary>
+        /// Gets the list of roles that show up in the current named policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <returns>
+        /// All the subjects in policy rules of the ptype type. It actually
+        /// collects the 0-index elements of the policy rules.So make
+        /// Sure your subject is the 0-index element, like (sub, obj, act).
+        /// Duplicates are removed.</returns>
+        public List<string> GetAllNamedRoles(string ptype)
+        {
+            return model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
+        }
+
+        #endregion
+
+        #region Has Grouping/Role Policy
 
         /// <summary>
         /// Determines whether a role inheritance rule exists.
@@ -519,6 +601,56 @@ namespace NetCasbin
         {
             return HasNamedGroupingPolicy(ptype, parameters.ToList());
         }
+
+        #endregion
+
+        #region Get Grouping/Role Policy
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy.
+        /// </summary>
+        /// <returns>all the "g" policy rules.</returns>
+        public List<List<string>> GetGroupingPolicy()
+        {
+            return GetNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy, field filters can be specified.
+        /// </summary>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>The filtered "g" policy rules.</returns>
+        public List<List<string>> GetFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
+        {
+            return GetFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <returns>The "g" policy rules of the specified ptype.</returns>
+        public List<List<string>> GetNamedGroupingPolicy(string ptype)
+        {
+            return model.GetPolicy(PermConstants.Section.RoleSection, ptype);
+        }
+
+        /// <summary>
+        /// Gets all the role inheritance rules in the policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
+        /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
+        /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
+        public List<List<string>> GetFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
+        {
+            return model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+        }
+
+        #endregion
+
+        #region Add Grouping/Role Policy
 
         /// <summary>
         /// Adds a role inheritance rule to the current policy. If the
@@ -578,7 +710,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            bool ruleAdded = AddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleAdded = InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -598,7 +730,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> AddNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            bool ruleAdded = await AddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleAdded = await InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -620,6 +752,74 @@ namespace NetCasbin
         {
             return AddNamedGroupingPolicy(ptype, parameters.ToList());
         }
+
+        /// <summary>
+        /// Adds roles inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// Added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool AddGroupingPolicies(IEnumerable<List<string>> rules)
+        {
+            return AddNamedGroupingPolicies(PermConstants.DefaultGroupingPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Adds roles inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// Added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> AddGroupingPoliciesAsync(IEnumerable<List<string>> rules)
+        {
+            return AddNamedGroupingPoliciesAsync(PermConstants.DefaultGroupingPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Adds named roles inheritance rule to the current 
+        /// policy. If the rule already exists, the function returns false and the rule
+        /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="rules">The "g" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool AddNamedGroupingPolicies(string ptype, IEnumerable<List<string>> rules)
+        {
+            bool ruleAdded = InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return ruleAdded;
+        }
+
+        /// <summary>
+        /// Adds named roles inheritance rule to the current 
+        /// policy. If the rule already exists, the function returns false and the rule
+        /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="rules">The "g" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public async Task<bool> AddNamedGroupingPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
+        {
+            bool ruleAdded = await InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return ruleAdded;
+        }
+
+        #endregion
+
+        #region Remove Grouping/Role Policy
 
         /// <summary>
         /// Removes a role inheritance rule from the current policy.
@@ -694,7 +894,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            bool ruleRemoved = RemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleRemoved = InternalRemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -713,7 +913,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            bool ruleRemoved = await RemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            bool ruleRemoved = await InternalRemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
             if (autoBuildRoleLinks)
             {
@@ -721,6 +921,65 @@ namespace NetCasbin
             }
 
             return ruleRemoved;
+        }
+
+        /// <summary>
+        /// Removes roles inheritance rule from the current policy.
+        /// </summary>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool RemoveGroupingPolicies(IEnumerable<List<string>> rules)
+        {
+            return RemoveNamedGroupingPolicies(PermConstants.DefaultGroupingPolicyType, rules);
+
+        }
+
+        /// <summary>
+        /// Removes roles inheritance rule from the current policy.
+        /// </summary>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> RemoveGroupingPoliciesAsync(IEnumerable<List<string>> rules)
+        {
+            return RemoveNamedGroupingPoliciesAsync(PermConstants.DefaultGroupingPolicyType, rules);
+        }
+
+        /// <summary>
+        /// Removes roles inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public bool RemoveNamedGroupingPolicies(string ptype, IEnumerable<List<string>> rules)
+        {
+            bool rulesRemoved = InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return rulesRemoved;
+        }
+
+        /// <summary>
+        /// Removes roles inheritance rule from the current 
+        /// policy, field filters can be specified.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public async Task<bool> RemoveNamedGroupingPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
+        {
+            bool rulesRemoved = await InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return rulesRemoved;
         }
 
         /// <summary>
@@ -732,7 +991,14 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+            bool rulesRemoved = RemoveFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return rulesRemoved;
         }
 
         /// <summary>
@@ -742,9 +1008,16 @@ namespace NetCasbin
         /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
         /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
         /// <returns>Succeeds or not.</returns>
-        public Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
+        public async Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+            bool rulesRemoved = await RemoveFilteredNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
+
+            if (autoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+
+            return rulesRemoved;
         }
 
         /// <summary>
@@ -756,7 +1029,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            bool ruleRemoved = RemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
@@ -775,7 +1048,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            bool ruleRemoved = await RemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = await InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
 
             if (autoBuildRoleLinks)
             {
@@ -784,6 +1057,9 @@ namespace NetCasbin
 
             return ruleRemoved;
         }
+        #endregion
+
+        #endregion // End of "g" (Grouping/Role Policy) Management
 
         /// <summary>
         /// Adds a customized function.
