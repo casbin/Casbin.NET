@@ -369,7 +369,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestAbacModel()
         {
-            var e = new Enforcer(TestModelFixture.GetNewTestModel(_testModelFixture._abacModelText));
+            var e = new Enforcer(_testModelFixture.GetNewAbacModel());
 
             var data1 = new TestResource("data1", "alice");
             var data2 = new TestResource("data2", "bob");
@@ -382,6 +382,30 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "bob", data1, "write", false);
             TestEnforce(e, "bob", data2, "read", true);
             TestEnforce(e, "bob", data2, "write", true);
+        }
+
+        [Fact]
+        public void TestAbacWithEvalModel()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewAbacWithEvalModel());
+            var subject1 = new TestSubject("alice", 16);
+            var subject2 = new TestSubject("alice", 20);
+            var subject3 = new TestSubject("alice", 65);
+
+            TestEnforce(e, subject1, "/data1", "read", false);
+            TestEnforce(e, subject1, "/data2", "read", false);
+            TestEnforce(e, subject1, "/data1", "write", false);
+            TestEnforce(e, subject1, "/data2", "write", true);
+
+            TestEnforce(e, subject2, "/data1", "read", true);
+            TestEnforce(e, subject2, "/data2", "read", false);
+            TestEnforce(e, subject2, "/data1", "write", false);
+            TestEnforce(e, subject2, "/data2", "write", true);
+
+            TestEnforce(e, subject3, "/data1", "read", true);
+            TestEnforce(e, subject3, "/data2", "read", false);
+            TestEnforce(e, subject3, "/data1", "write", false);
+            TestEnforce(e, subject3, "/data2", "write", false);
         }
 
         [Fact]
@@ -488,17 +512,28 @@ namespace NetCasbin.UnitTest
 
         public class TestResource
         {
-#pragma warning disable IDE1006 // 命名样式
-            public string name { set; get; }
-
-            public string owner { set; get; }
-#pragma warning restore IDE1006 // 命名样式
-
             public TestResource(string name, string owner)
             {
-                this.name = name;
-                this.owner = owner;
+                Name = name;
+                Owner = owner;
             }
+
+            public string Name { get; }
+
+            public string Owner { get; }
+        }
+
+        public class TestSubject
+        {
+            public TestSubject(string name, int age)
+            {
+                Name = name;
+                Age = age;
+            }
+
+            public string Name { get; }
+
+            public int Age { get; }
         }
     }
 }

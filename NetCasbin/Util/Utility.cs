@@ -160,5 +160,54 @@ namespace NetCasbin.Util
         {
             throw new NotImplementedException();
         }
+
+        private static readonly Regex s_evalRegex = new Regex(@"\beval\((?<rule>[^)]*)\)");
+
+
+        /// <summary>
+        /// Determines whether matcher contains eval function
+        /// </summary>
+        /// <param name="expressString"></param>
+        /// <returns></returns>
+        internal static bool HasEval(string expressString)
+        {
+            return s_evalRegex.IsMatch(expressString);
+        }
+
+        /// <summary>
+        /// Tries get rule names of eval function
+        /// </summary>
+        /// <param name="expressString"></param>
+        /// <param name="evalRuleNames"></param>
+        /// <returns></returns>
+        internal static bool TryGetEvalRuleNames(string expressString, out IEnumerable<string> evalRuleNames)
+        {
+            var match = s_evalRegex.Match(expressString);
+            var group = match.Groups;
+            int subMatchCount = group.Count - 1;
+            if (subMatchCount > 0)
+            {
+                var rules = new string[subMatchCount];
+                for (int i = 0; i < subMatchCount; i++)
+                {
+                    rules[i] = group[i + 1].Value;
+                }
+                evalRuleNames = rules;
+                return true;
+            }
+            evalRuleNames = null;
+            return false;
+        }
+
+        /// <summary>
+        /// Replace eval function with the value of its eval rule
+        /// </summary>
+        /// <param name="expressStringWithEvalRule"></param>
+        /// <param name="rule"></param>
+        /// <returns></returns>
+        internal static string ReplaceEval(string expressStringWithEvalRule, string rule)
+        {
+            return s_evalRegex.Replace(expressStringWithEvalRule, $"({rule})");
+        }
     }
 }

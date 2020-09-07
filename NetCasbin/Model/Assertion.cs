@@ -16,7 +16,9 @@ namespace NetCasbin.Model
 
         public string Value { set; get; }
 
-        public string[] Tokens { set; get; }
+        public IDictionary<string, int> Tokens { set; get; }
+
+        public int TokenCount { set; get; }
 
         public IRoleManager RoleManager { get; private set; }
 

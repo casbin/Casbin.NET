@@ -8,6 +8,7 @@ namespace NetCasbin.UnitTest.Fixtures
     public class TestModelFixture
     {
         internal readonly string _abacModelText = ReadTestFile("abac_model.conf");
+        internal readonly string _abacWithEvalModelText = ReadTestFile("abac_rule_model.conf");
         internal readonly string _basicModelText = ReadTestFile("basic_model.conf");
         internal readonly string _basicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
         internal readonly string _basicWithoutResourceModelText = ReadTestFile("basic_without_resources_model.conf");
@@ -21,7 +22,8 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _rbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
         internal readonly string _rbacWithDomainsModelText = ReadTestFile("rbac_with_domains_model.conf");
         internal readonly string _rbacWithResourceRoleModelText = ReadTestFile("rbac_with_resource_roles_model.conf");
-                          
+
+        internal readonly string _abacWithEvalPolicyText = ReadTestFile("abac_rule_policy.csv");
         internal readonly string _basicPolicyText = ReadTestFile("basic_Policy.csv");
         internal readonly string _basicWithoutResourcePolicyText = ReadTestFile("basic_without_resources_Policy.csv");
         internal readonly string _basicWithoutUserPolicyText = ReadTestFile("basic_without_users_Policy.csv");
@@ -34,6 +36,16 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_Policy.csv");
         internal readonly string _rbacWithDomainsPolicyText = ReadTestFile("rbac_with_domains_Policy.csv");
         internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_Policy.csv");
+
+        public Model.Model GetNewAbacModel()
+        {
+            return GetNewTestModel(_abacModelText);
+        }
+
+        public Model.Model GetNewAbacWithEvalModel()
+        {
+            return GetNewTestModel(_abacWithEvalModelText, _abacWithEvalPolicyText);
+        }
 
         public Model.Model GetBasicTestModel()
         {
@@ -105,7 +117,7 @@ namespace NetCasbin.UnitTest.Fixtures
             model.ClearPolicy();
             using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(policy)))
             {
-                var fileAdapter = new DefaultFileAdapter(ms);
+                DefaultFileAdapter fileAdapter = new DefaultFileAdapter(ms);
                 fileAdapter.LoadPolicy(model);
             }
             model.RefreshPolicyStringSet();

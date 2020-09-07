@@ -31,10 +31,7 @@ namespace NetCasbin
         {
             this.adapter = adapter;
             watcher = null;
-
-            this.model = model;
-            functionMap = FunctionMap.LoadFunctionMap();
-
+            SetModel(model);
             Initialize();
             LoadPolicy();
         }
