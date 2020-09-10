@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using NetCasbin.Abstractions;
@@ -10,29 +9,36 @@ namespace NetCasbin.Util
 {
     public static class BuiltInFunctions
     {
-        private static Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
+        private static readonly Regex s_keyMatch2Regex = new Regex(@":[^/]+");
+        private static readonly Regex s_keyMatch3Regex = new Regex(@"\{[^/]+\}");
+        private static readonly Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
 
         /// <summary>
-        /// Determines whether key1 matches the pattern of key2 (similar to 
-        /// RESTful path), key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
+        /// Determines whether key1 matches the pattern of key2 (similar to RESTful path),
+        /// key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
         /// </summary>
         /// <param name="key1">The first argument.</param>
         /// <param name="key2">The second argument.</param>
         /// <returns>Whether key1 matches key2.</returns>
         public static bool KeyMatch(string key1, string key2)
         {
-            int i = key2.IndexOf('*');
+            int index = key2.IndexOf('*');
 
-            if (i == -1)
+            if (index is 0)
+            {
+                return true;
+            }
+
+            if (index < 0)
             {
                 return key1.Equals(key2);
             }
 
-            if (key1.Length > i)
-            {
-                return key1.Substring(0, i).Equals(key2.Substring(0, i));
-            }
-            return key1.Equals(key2.Substring(0, i));
+            key2 = key2.Substring(0, index);
+
+            return index < key1.Length
+                ? key1.Substring(0, index).Equals(key2)
+                : key1.Equals(key2);
         }
 
         /// <summary>
@@ -46,19 +52,8 @@ namespace NetCasbin.Util
         public static bool KeyMatch2(string key1, string key2)
         {
             key2 = key2.Replace("/*", "/.*");
-
-            var regex = new Regex("(.*):[^/]+(.*)");
-
-            while (true)
-            {
-                if (!key2.Contains("/:"))
-                {
-                    break;
-                }
-
-                key2 = regex.Replace(key2, "$1[^/]+$2");
-            }
-            return RegexMatch(key1, key2);
+            key2 = s_keyMatch2Regex.Replace(key2, "[^/]+");
+            return RegexMatch(key1, $"^{key2}$");
         }
 
         /// <summary>
@@ -72,18 +67,8 @@ namespace NetCasbin.Util
         public static bool KeyMatch3(string key1, string key2)
         {
             key2 = key2.Replace("/*", "/.*");
-
-            var regex = new Regex("(.*)\\{[^/]+\\}(.*)");
-            while (true)
-            {
-                if (!key2.Contains("/{"))
-                {
-                    break;
-                }
-
-                key2 = regex.Replace(key2, "$1[^/]+$2");
-            }
-            return RegexMatch(key1, key2);
+            key2 = s_keyMatch3Regex.Replace(key2, "[^/]+");
+            return RegexMatch(key1, $"^{key2}$");
         }
 
         /// <summary>
@@ -168,6 +153,7 @@ namespace NetCasbin.Util
 
             var ip2Splits = ip2.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
             var address2 = IPAddress.Parse(ip2Splits[0]);
+
             if (ip2Splits.Length == 2)
             {
                 int maskLength = int.Parse(ip2Splits[1]);

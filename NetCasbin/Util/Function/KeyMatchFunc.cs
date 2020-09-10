@@ -3,17 +3,17 @@ using NetCasbin.Abstractions;
 
 namespace NetCasbin.Util.Function
 {
-    public sealed class KeyMatchFunc : AbstractFunction
+    public class KeyMatchFunc : AbstractFunction
     {
+        public KeyMatchFunc() : base("keyMatch")
+        {
+
+        }
+
         protected override Delegate GetFunc()
         {
             Func<string, string, bool> call = BuiltInFunctions.KeyMatch;
             return call;
-        }
-
-        public KeyMatchFunc() : base("keyMatch")
-        {
-
         }
     }
 }
