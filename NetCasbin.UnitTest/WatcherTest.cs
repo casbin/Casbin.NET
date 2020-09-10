@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
-using System.Threading;
 using System.Threading.Tasks;
 using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
@@ -10,7 +7,8 @@ using Xunit;
 
 namespace NetCasbin.UnitTest
 {
-    public class WatcherTest : IClassFixture<TestModelFixture>
+    [Collection("Model collection")]
+    public class WatcherTest
     {
         private readonly TestModelFixture _testModelFixture;
 
