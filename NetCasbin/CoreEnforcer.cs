@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using DynamicExpresso;
 using NetCasbin.Abstractions;
 using NetCasbin.Effect;
+using NetCasbin.Evaluation;
 using NetCasbin.Model;
 using NetCasbin.Persist;
 using NetCasbin.Rbac;
@@ -22,14 +22,13 @@ namespace NetCasbin
 
         protected string modelPath;
         protected Model.Model model;
-        protected FunctionMap functionMap;
 
         protected IAdapter adapter;
         protected IWatcher watcher;
         protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
-        protected readonly Dictionary<string, Lambda> matcherMap = new Dictionary<string, Lambda>();
+        protected IExpressionProvider ExpressionProvider { get; private set;}
 
         protected void Initialize()
         {
@@ -91,7 +90,6 @@ namespace NetCasbin
         {
             model = NewModel();
             model.LoadModel(modelPath);
-            functionMap = FunctionMap.LoadFunctionMap();
         }
 
         /// <summary>
@@ -107,7 +105,7 @@ namespace NetCasbin
         public void SetModel(Model.Model model)
         {
             this.model = model;
-            functionMap = FunctionMap.LoadFunctionMap();
+            ExpressionProvider = new ExpressionProvider(model);
         }
 
         /// <summary>
@@ -341,90 +339,90 @@ namespace NetCasbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="rvals">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public bool Enforce(params object[] rvals)
+        public bool Enforce(params object[] requestValues)
         {
             if (!_enabled)
             {
                 return true;
             }
 
-            var effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
-            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefaultRequestType]?.Tokens;
-            var rTokensLen = rTokens?.Count();
-            var policyLen = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
+            string effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
+            int policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
+            string expressionString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+
+            int requestTokenCount = ExpressionProvider.RequestAssertion.TokenCount;
+            int policyTokenCount = ExpressionProvider.PolicyAssertion.TokenCount;
+
+            bool hasEval = Utility.HasEval(expressionString);
+
+            Lambda expression = null;
+            if (!hasEval)
+            {
+                expression = ExpressionProvider.GetExpression(expressionString, requestValues);
+            }
 
             Effect.Effect[] policyEffects;
-            float[] matcherResults;
-            object result = null;
+            float[] matchResults;
 
-            string expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
-            Lambda expression = null;
-            if (matcherMap.ContainsKey(expString))
+            if (policyCount != 0)
             {
-                expression = matcherMap[expString];
-            }
-            else
-            {
-                expression = GetAndInitializeExpression(rvals);
-                matcherMap[expString] = expression;
-            }
-
-            if (policyLen != 0)
-            {
-                policyEffects = new Effect.Effect[policyLen];
-                matcherResults = new float[policyLen];
-                for (int i = 0; i < policyLen; i++)
+                if (requestTokenCount != requestValues.Length)
                 {
-                    var pvals = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy[i];
-                    if (rTokensLen != rvals.Length)
+                    throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Length}.");
+                }
+
+                policyEffects = new Effect.Effect[policyCount];
+                matchResults = new float[policyCount];
+                for (int i = 0; i < policyCount; i++)
+                {
+                    IReadOnlyList<string> policyValues = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy[i];
+
+                    if (policyTokenCount != policyValues.Count)
                     {
-                        throw new Exception($"invalid request size: expected {rTokensLen}, got {rvals.Length}, rvals: ${rvals}");
-                    }
-                    var parameters = GetParameters(rvals, pvals);
-                    result = expression.Invoke(parameters);
-                    if (result is bool)
-                    {
-                        if (!(bool)result)
-                        {
-                            policyEffects[i] = Effect.Effect.Indeterminate;
-                            continue;
-                        }
-                    }
-                    else if (result is float)
-                    {
-                        if ((float)result == 0)
-                        {
-                            policyEffects[i] = Effect.Effect.Indeterminate;
-                            continue;
-                        }
-                        else
-                        {
-                            matcherResults[i] = (float)result;
-                        }
-                    }
-                    else
-                    {
-                        throw new Exception("matcher result should be bool, int or float");
+                        throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyCount}.");
                     }
 
-                    if (parameters.Any(x => x.Name == "p_eft"))
+                    if (hasEval)
                     {
-                        string policyEft = parameters.FirstOrDefault(x => x.Name == "p_eft")?.Value as string;
-                        switch (policyEft)
+                        string expressionStringWithRule = RewriteEval(expressionString, ExpressionProvider.PolicyAssertion.Tokens, policyValues);
+                        expression = ExpressionProvider.GetExpression(expressionStringWithRule, requestValues);
+                    }
+
+                    IDictionary<string, Parameter> parameters = ExpressionProvider.GetParameters(requestValues, policyValues);
+                    object result = expression.Invoke(parameters.Values);
+                    switch (result)
+                    {
+                        case bool boolResult:
                         {
-                            case "allow":
-                                policyEffects[i] = Effect.Effect.Allow;
-                                break;
-                            case "deny":
-                                policyEffects[i] = Effect.Effect.Deny;
-                                break;
-                            default:
+                            if (!boolResult)
+                            {
                                 policyEffects[i] = Effect.Effect.Indeterminate;
-                                break;
+                                continue;
+                            }
+                            break;
                         }
+                        case float floatResult when floatResult == 0:
+                            policyEffects[i] = Effect.Effect.Indeterminate;
+                            continue;
+                        case float floatResult:
+                            matchResults[i] = floatResult;
+                            break;
+                        default:
+                            throw new ArgumentException("Matcher result should be bool, int or float.");
+                    }
+
+                    if (parameters.TryGetValue("p_eft", out Parameter parameter))
+                    {
+                        string policyEffect = parameter.Value as string;
+                        policyEffects[i] = policyEffect switch
+                        {
+                            "allow" => Effect.Effect.Allow,
+                            "deny" => Effect.Effect.Deny,
+                            _ => Effect.Effect.Indeterminate
+                        };
                     }
                     else
                     {
@@ -439,10 +437,16 @@ namespace NetCasbin
             }
             else
             {
+                if (hasEval)
+                {
+                    throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                }
+
                 policyEffects = new Effect.Effect[1];
-                matcherResults = new float[1];
-                result = expression.Invoke(GetParameters(rvals));
-                if ((bool)result)
+                matchResults = new float[1];
+                IDictionary<string, Parameter> parameters = ExpressionProvider.GetParameters(requestValues);
+                bool result = (bool) expression.Invoke(parameters.Values);
+                if (result)
                 {
                     policyEffects[0] = Effect.Effect.Allow;
                 }
@@ -451,76 +455,36 @@ namespace NetCasbin
                     policyEffects[0] = Effect.Effect.Indeterminate;
                 }
             }
-            result = _effector.MergeEffects(effect, policyEffects, matcherResults);
-            return (bool)result;
+
+            bool finalResult = _effector.MergeEffects(effect, policyEffects, matchResults);
+            return finalResult;
         }
 
-        private Lambda GetAndInitializeExpression(object[] rvals)
+        private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
         {
-            string expString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
-            var parameters = GetParameters(rvals);
-            var interpreter = GetAndInitializeInterpreter();
-            var parsedExpression = interpreter.Parse(expString, parameters);
-            return parsedExpression;
-        }
-
-        private Interpreter GetAndInitializeInterpreter()
-        {
-            var functions = new Dictionary<string, AbstractFunction>();
-            foreach (var entry in functionMap.FunctionDict)
+            if (!Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames))
             {
-                string key = entry.Key;
-                var function = entry.Value;
-                functions.Add(key, function);
+                return expressionString;
             }
 
-            if (model.Model.ContainsKey(PermConstants.Section.RoleSection))
+            foreach (string ruleName in ruleNames)
             {
-                foreach (var entry in model.Model[PermConstants.Section.RoleSection])
+                if (!policyTokens.ContainsKey(ruleName))
                 {
-                    string key = entry.Key;
-                    var ast = entry.Value;
-                    var rm = ast.RoleManager;
-                    functions.Add(key, BuiltInFunctions.GenerateGFunction(key, rm));
+                    throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
-            }
-
-            var interpreter = new Interpreter();
-            foreach (var func in functions)
-            {
-                interpreter.SetFunction(func.Key, func.Value);
-            }
-            return interpreter;
-        }
-
-        private Parameter[] GetParameters(object[] rvals, IEnumerable<string> pvals = null)
-        {
-            var rTokens = model.Model[PermConstants.Section.RequestSection][PermConstants.DefaultRequestType]?.Tokens;
-            var rTokensLen = rTokens?.Count();
-            var parameters = new Dictionary<string, object>();
-            for (int i = 0; i < rTokensLen; i++)
-            {
-                string token = rTokens[i];
-                parameters.Add(token, rvals[i]);
-            }
-            for (int i = 0,
-                length = model.Model[PermConstants.Section.PolicySection]
-                                    [PermConstants.DefaultPolicyType]
-                                    .Tokens.Length;
-                i < length; i++)
-            {
-                var token = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Tokens[i];
-                if (pvals == null)
+                string rule = Utility.EscapeAssertion(policyValues[policyTokens[ruleName]]);
+                if (rule.Contains(">") || rule.Contains("<") || rule.Contains("="))
                 {
-                    parameters.Add(token, string.Empty);
+                    expressionString = Utility.ReplaceEval(expressionString, rule);
                 }
                 else
                 {
-                    parameters.Add(token, pvals.ElementAt(i));
+                    expressionString = Utility.ReplaceEval(expressionString, "false");
                 }
             }
-            var result = parameters.Select(x => new Parameter(x.Key, x.Value)).ToArray();
-            return result;
+
+            return expressionString;
         }
     }
 }

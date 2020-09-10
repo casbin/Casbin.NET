@@ -97,11 +97,15 @@ namespace NetCasbin.Model
                     .Split(PermConstants.PolicySeparatorChar)
                     .Select(t => t.Trim()).ToArray();
 
-                for (int i = 0; i < tokens.Length; i++)
+                if (tokens.Length != 0)
                 {
-                    tokens[i] = $"{key}_{tokens[i]}";
+                    assertion.Tokens = new Dictionary<string, int>();
+                    assertion.TokenCount = tokens.Length;
+                    for (int i = 0; i < tokens.Length; i++)
+                    {
+                        assertion.Tokens.Add($"{key}_{tokens[i]}", i);
+                    }
                 }
-                assertion.Tokens = tokens;
             }
             else
             {
