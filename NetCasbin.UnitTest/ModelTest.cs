@@ -7,7 +7,8 @@ using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class ModelTest : IClassFixture<TestModelFixture>
+    [Collection("Model collection")]
+    public class ModelTest
     {
         private readonly TestModelFixture _testModelFixture;
 

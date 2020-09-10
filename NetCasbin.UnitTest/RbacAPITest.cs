@@ -5,7 +5,8 @@ using static NetCasbin.UnitTest.Util.TestUtil;
 
 namespace NetCasbin.UnitTest
 {
-    public class RbacApiTest : IClassFixture<TestModelFixture>
+    [Collection("Model collection")]
+    public class RbacApiTest
     {
         private readonly TestModelFixture _testModelFixture;
 

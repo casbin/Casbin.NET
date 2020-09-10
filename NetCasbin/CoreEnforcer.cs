@@ -28,6 +28,7 @@ namespace NetCasbin
         protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
+        protected bool autoNotifyWatcher;
         protected IExpressionProvider ExpressionProvider { get; private set;}
 
         protected void Initialize()
@@ -35,9 +36,11 @@ namespace NetCasbin
             roleManager = new DefaultRoleManager(10);
             _effector = new DefaultEffector();
             watcher = null;
+
             _enabled = true;
             autoSave = true;
             autoBuildRoleLinks = true;
+            autoNotifyWatcher = true;
         }
 
         /// <summary>
@@ -324,6 +327,16 @@ namespace NetCasbin
         public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks)
         {
             this.autoBuildRoleLinks = autoBuildRoleLinks;
+        }
+
+        /// <summary>
+        /// Controls whether to save a policy rule automatically
+        /// notify the Watcher when it is added or removed.
+        /// </summary>
+        /// <param name="autoNotifyWatcher">Whether to automatically notify watcher.</param>
+        public void EnableAutoNotifyWatcher(bool autoNotifyWatcher)
+        {
+            this.autoNotifyWatcher = autoNotifyWatcher;
         }
 
         /// <summary>
