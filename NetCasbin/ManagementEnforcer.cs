@@ -710,14 +710,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            bool ruleAdded = InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleAdded;
+            return InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters); ;
         }
 
         /// <summary>
@@ -730,14 +723,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> AddNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            bool ruleAdded = await InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleAdded;
+            return await InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);;
         }
 
         /// <summary>
@@ -787,14 +773,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool AddNamedGroupingPolicies(string ptype, IEnumerable<List<string>> rules)
         {
-            bool ruleAdded = InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleAdded;
+            return InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);;
         }
 
         /// <summary>
@@ -807,14 +786,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> AddNamedGroupingPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
         {
-            bool ruleAdded = await InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleAdded;
+            return await InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);;
         }
 
         #endregion
@@ -894,14 +866,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedGroupingPolicy(string ptype, List<string> parameters)
         {
-            bool ruleRemoved = InternalRemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleRemoved;
+            return InternalRemovePolicy(PermConstants.Section.RoleSection, ptype, parameters); ;
         }
 
         /// <summary>
@@ -913,14 +878,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveNamedGroupingPolicyAsync(string ptype, List<string> parameters)
         {
-            bool ruleRemoved = await InternalRemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleRemoved;
+            return await InternalRemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters); ;
         }
 
         /// <summary>
@@ -953,14 +911,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveNamedGroupingPolicies(string ptype, IEnumerable<List<string>> rules)
         {
-            bool rulesRemoved = InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return rulesRemoved;
+            return InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules); ;
         }
 
         /// <summary>
@@ -972,14 +923,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveNamedGroupingPoliciesAsync(string ptype, IEnumerable<List<string>> rules)
         {
-            bool rulesRemoved = await InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return rulesRemoved;
+            return await InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules); ;
         }
 
         /// <summary>
@@ -991,14 +935,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredGroupingPolicy(int fieldIndex, params string[] fieldValues)
         {
-            bool rulesRemoved = RemoveFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return rulesRemoved;
+            return RemoveFilteredNamedGroupingPolicy(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues); ;
         }
 
         /// <summary>
@@ -1008,16 +945,9 @@ namespace NetCasbin
         /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
         /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
         /// <returns>Succeeds or not.</returns>
-        public async Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
+        public Task<bool> RemoveFilteredGroupingPolicyAsync(int fieldIndex, params string[] fieldValues)
         {
-            bool rulesRemoved = await RemoveFilteredNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return rulesRemoved;
+            return RemoveFilteredNamedGroupingPolicyAsync(PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues); ;
         }
 
         /// <summary>
@@ -1029,14 +959,7 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public bool RemoveFilteredNamedGroupingPolicy(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            bool ruleRemoved = InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleRemoved;
+            return InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues); ;
         }
 
         /// <summary>
@@ -1048,15 +971,9 @@ namespace NetCasbin
         /// <returns>Succeeds or not.</returns>
         public async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(string ptype, int fieldIndex, params string[] fieldValues)
         {
-            bool ruleRemoved = await InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
-
-            if (autoBuildRoleLinks)
-            {
-                BuildRoleLinks();
-            }
-
-            return ruleRemoved;
+            return await InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues); ;
         }
+
         #endregion
 
         #endregion // End of "g" (Grouping/Role Policy) Management

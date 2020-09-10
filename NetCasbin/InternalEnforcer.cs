@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using NetCasbin.Model;
 
 namespace NetCasbin
 {
@@ -24,28 +25,27 @@ namespace NetCasbin
                 return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterAdded;
                 try
                 {
                     adapter.AddPolicy(sec, ptype, rule);
-                    adapterAdded = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterAdded = false;
-                }
-
-                if (adapterAdded)
-                {
-                    watcher?.Update();
                 }
             }
 
             bool ruleAdded = model.AddPolicy(sec, ptype, rule);
-            return ruleAdded;
+
+            if (ruleAdded is false)
+            {
+                return false;
+            }
+
+            NoticePolicyChanged(sec);
+            return true;
         }
 
         /// <summary>
@@ -62,31 +62,27 @@ namespace NetCasbin
                 return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterAdded;
                 try
                 {
                     await adapter.AddPolicyAsync(sec, ptype, rule);
-                    adapterAdded = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterAdded = false;
-                }
-
-                if (adapterAdded)
-                {
-                    if (watcher is not null)
-                    {
-                        await watcher.UpdateAsync();
-                    }
                 }
             }
 
             bool ruleAdded = model.AddPolicy(sec, ptype, rule);
-            return ruleAdded;
+
+            if (ruleAdded is false)
+            {
+                return false;
+            }
+
+            await NoticePolicyChangedAsync(sec);
+            return true;
         }
 
         /// <summary>
@@ -105,28 +101,27 @@ namespace NetCasbin
                 return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterAdded;
                 try
                 {
                     adapter.AddPolicies(sec, ptype, ruleArray);
-                    adapterAdded = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterAdded = false;
-                }
-
-                if (adapterAdded)
-                {
-                    watcher?.Update();
                 }
             }
 
             bool ruleAdded = model.AddPolicies(sec, ptype, ruleArray);
-            return ruleAdded;
+
+            if (ruleAdded is false)
+            {
+                return false;
+            }
+
+            NoticePolicyChanged(sec);
+            return true;
         }
 
                 
@@ -146,31 +141,27 @@ namespace NetCasbin
                 return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterAdded;
                 try
                 {
                     await adapter.AddPoliciesAsync(sec, ptype, ruleArray);
-                    adapterAdded = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterAdded = false;
-                }
-
-                if (adapterAdded)
-                {
-                    if (watcher is not null)
-                    {
-                        await watcher.UpdateAsync();
-                    }
                 }
             }
 
             bool ruleAdded = model.AddPolicies(sec, ptype, ruleArray);
-            return ruleAdded;
+
+            if (ruleAdded is false)
+            {
+                return false;
+            }
+
+            await NoticePolicyChangedAsync(sec);
+            return true;
         }
 
         /// <summary>
@@ -182,33 +173,32 @@ namespace NetCasbin
         /// <returns></returns>
         protected bool InternalRemovePolicy(string sec, string ptype, List<string> rule)
         {
-            if (!model.HasPolicy(sec, ptype, rule))
+            if (model.HasPolicy(sec, ptype, rule) is false)
             {
-                return true;
+                return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterRemoved;
                 try
                 {
                     adapter.RemovePolicy(sec, ptype, rule);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    watcher?.Update();
                 }
             }
 
             bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            NoticePolicyChanged(sec);
+            return true;
         }
 
         /// <summary>
@@ -220,31 +210,32 @@ namespace NetCasbin
         /// <returns></returns>
         protected async Task<bool> InternalRemovePolicyAsync(string sec, string ptype, List<string> rule)
         {
-            if (adapter != null && autoSave)
+            if (model.HasPolicy(sec, ptype, rule) is false)
             {
-                bool adapterRemoved;
+                return false;
+            }
+
+            if (adapter is not null && autoSave)
+            {
                 try
                 {
                     await adapter.RemovePolicyAsync(sec, ptype, rule);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    if (watcher is not null)
-                    {
-                        await watcher.UpdateAsync();
-                    }
                 }
             }
 
             bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            await NoticePolicyChangedAsync(sec);
+            return true;
         }
 
         /// <summary>
@@ -258,33 +249,32 @@ namespace NetCasbin
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (!model.HasPolicies(sec, ptype, ruleArray))
+            if (model.HasPolicies(sec, ptype, ruleArray) is false)
             {
-                return true;
+                return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterRemoved;
                 try
                 {
                     adapter.RemovePolicies(sec, ptype, ruleArray);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    watcher?.Update();
                 }
             }
 
             bool ruleRemoved = model.RemovePolicies(sec, ptype, ruleArray);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            NoticePolicyChanged(sec);
+            return true;
         }
 
         /// <summary>
@@ -298,36 +288,32 @@ namespace NetCasbin
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (!model.HasPolicies(sec, ptype, ruleArray))
+            if (model.HasPolicies(sec, ptype, ruleArray) is false)
             {
-                return true;
+                return false;
             }
 
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterRemoved;
                 try
                 {
                     await adapter.RemovePoliciesAsync(sec, ptype, ruleArray);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    if (watcher is not null)
-                    {
-                        await watcher.UpdateAsync();
-                    }
                 }
             }
 
             bool ruleRemoved = model.RemovePolicies(sec, ptype, ruleArray);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            await NoticePolicyChangedAsync(sec);
+            return true;
         }
 
         /// <summary>
@@ -340,28 +326,27 @@ namespace NetCasbin
         /// <returns></returns>
         protected bool InternalRemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterRemoved;
                 try
                 {
                     adapter.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    watcher?.Update();
                 }
             }
 
             bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            NoticePolicyChanged(sec);
+            return true;
         }
 
         /// <summary>
@@ -374,31 +359,53 @@ namespace NetCasbin
         /// <returns></returns>
         protected async Task<bool> InternalRemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            if (adapter != null && autoSave)
+            if (adapter is not null && autoSave)
             {
-                bool adapterRemoved;
                 try
                 {
                     await adapter.RemoveFilteredPolicyAsync(sec, ptype, fieldIndex, fieldValues);
-                    adapterRemoved = true;
                 }
                 catch (NotImplementedException)
                 {
                     // error intentionally ignored
-                    adapterRemoved = false;
-                }
-
-                if (adapterRemoved)
-                {
-                    if (watcher is not null)
-                    {
-                        await watcher.UpdateAsync();
-                    }
                 }
             }
 
             bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
-            return ruleRemoved;
+
+            if (ruleRemoved is false)
+            {
+                return false;
+            }
+
+            await NoticePolicyChangedAsync(sec);
+            return true;
+        }
+
+        private void NoticePolicyChanged(string section)
+        {
+            if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
+            {
+                BuildRoleLinks();
+            }
+
+            if (autoNotifyWatcher)
+            {
+                watcher?.Update();
+            }
+        }
+
+        private async Task NoticePolicyChangedAsync(string section)
+        {
+            if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
+            {
+                BuildRoleLinks();
+            }
+
+            if (autoNotifyWatcher && watcher is not null)
+            {
+                await watcher.UpdateAsync();
+            }
         }
     }
 }
