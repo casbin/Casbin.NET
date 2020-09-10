@@ -6,6 +6,25 @@ namespace NetCasbin.UnitTest
 {
     public class BuiltInFunctionTest
     {
+        public static IEnumerable<object[]> ipMatchTestData = new[]
+        {
+            new object[] {"192.168.2.123", "192.168.2.0/24", true},
+            new object[] {"192.168.2.123", "192.168.3.0/24", false},
+            new object[] {"192.168.2.123", "192.168.2.0/16", true},
+            new object[] {"192.168.2.123", "192.168.2.123", true},
+            new object[] {"192.168.2.123", "192.168.2.123/32", true},
+            new object[] {"10.0.0.11", "10.0.0.0/8", true},
+            new object[] {"11.0.0.123", "10.0.0.0/8", false}
+        };
+
+        [Theory]
+        [MemberData(nameof(ipMatchTestData))]
+        public void TestIPMatch(string key1, string key2, bool exceptResult)
+        {
+            Assert.Equal(exceptResult,
+                BuiltInFunctions.IPMatch(key1, key2));
+        }
+
         public static IEnumerable<object[]> regexMatchTestData = new[]
         {
             new object[] {"/topic/create", "/topic/create", true},

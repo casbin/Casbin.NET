@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using NetCasbin.Abstractions;
 using NetCasbin.Rbac;
@@ -113,7 +114,7 @@ namespace NetCasbin.Util
             for (int i = 0; i < key1GroupMatchCount; i++)
             {
                 string token = tokens[i];
-                if (!valueDictionary.ContainsKey(token))
+                if (valueDictionary.ContainsKey(token) is false)
                 {
                     valueDictionary.Add(token, group[i + 1].Value);
                     continue;
@@ -128,43 +129,61 @@ namespace NetCasbin.Util
         }
 
         /// <summary>
-        ///  Determines whether IP address ip1 matches the pattern of IP address
-        ///  ip2, ip2 can be an IP address or a CIDR pattern. For example, "192.168.2.123"
-        ///  matches "192.168.2.0/24"
+        /// Determines whether IP address ip1 matches the pattern of IP address ip2,
+        /// ip2 can be an IP address or a CIDR pattern. For example, "192.168.2.123"
+        /// matches "192.168.2.0/24"
         /// </summary>
         /// <param name="ip1">The first argument.</param>
         /// <param name="ip2">The second argument.</param>
         /// <returns>Whether ip1 matches ip2.</returns>
-        public static bool IpMatch(string ip1, string ip2)
+        public static bool IPMatch(string ip1, string ip2)
         {
-            string rgxString = @"^((?:(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d)))\.){3}(?:25[0-5]|2[0-4]\d|((1\d{2})|([1-9]?\d))))?\/?\d{0,2}(?<!33)$";
-            var rgx = new Regex(rgxString);
-            if (!rgx.IsMatch(ip1))
+            if (IPAddress.TryParse(ip1, out var ip1Address) is false)
             {
-                throw new Exception("invalid argument: ip1 in IPMatch() function is not an IP address.");
-            }
-            if (!rgx.IsMatch(ip2))
-            {
-                throw new Exception("invalid argument: ip2 in IPMatch() function is not an IP address.");
+                throw new ArgumentException($"The argument {nameof(ip1)} is not an IP address.");
             }
 
-            var ip1Splits = ip1.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-            var address1 = IPAddress.Parse(ip1Splits[0]);
-
-            var ip2Splits = ip2.Split(new string[] { "/" }, StringSplitOptions.RemoveEmptyEntries);
-            var address2 = IPAddress.Parse(ip2Splits[0]);
-
-            if (ip2Splits.Length == 2)
+            var ip2Span = ip2.AsSpan();
+            int index = ip2Span.IndexOf('/');
+            IPAddress ip2Address;
+            if (index < 0)
             {
-                int maskLength = int.Parse(ip2Splits[1]);
-                var mask = IpAddressExtensions.GetNetworkMask(maskLength);
-                address1 = address1.Mask(mask);
+                if (IPAddress.TryParse(ip2, out ip2Address) is false)
+                {
+                    throw new ArgumentException($"The argument {nameof(ip2)} is not an IP address.");
+                }
+
+                return ip1Address.Equals(ip2Address);
             }
-            if (address1.Equals(address2))
+
+            if(IPAddress.TryParse(ip2Span.Slice(0, index).ToString(), out ip2Address) is false)
             {
-                return true;
+                throw new ArgumentException($"The argument {nameof(ip2)} is not an IP address.");
             }
-            return false;
+
+            if (ip1Address.AddressFamily != ip2Address.AddressFamily)
+            {
+                return false;
+            }
+
+            if (int.TryParse(ip2Span.Slice(index + 1).ToString(), out int cidrMask) is false)
+            {
+                throw new ArgumentException($"The argument {nameof(ip2)} has invalid CIDR mask.");
+            }
+
+            const int ipv4Length = 4;
+            const int ipv6Length = 16;
+            // If IPv4 and cidrMask = 24, (ipv4Length * 8 - cidrMask) = 8,
+            // -1 = 0xFFFFFFFF, (-1 << (ipv4Length * 8 - cidrMask)) = 0xFFFFFF00
+            // IPAddress.NetworkToHostOrder(-1 << (ipv4Length * 8 - cidrMask)) = 0x00FFFFFF
+            long cidrMaskNetWorkOrder = ip1Address.AddressFamily switch
+            {
+                AddressFamily.InterNetwork => IPAddress.NetworkToHostOrder(-1 << (ipv4Length * 8 - cidrMask)),
+                AddressFamily.InterNetworkV6 => IPAddress.NetworkToHostOrder((long) -1 << (ipv6Length * 8 - cidrMask)),
+                _ => throw new NotSupportedException("Unable support other address family.")
+            };
+
+            return (ip1Address.Address & cidrMaskNetWorkOrder) == (ip2Address.Address & cidrMaskNetWorkOrder);
         }
 
         /// <summary>
