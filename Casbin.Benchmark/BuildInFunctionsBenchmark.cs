@@ -23,7 +23,21 @@ namespace Casbin.Benchmark
         [ArgumentsSource(nameof(KeyMatch4TestData))]
         public void KeyMatch4(string key1, string key2)
         {
-            _ = BuiltInFunctions.KeyMatch4(key2, key2);
+            _ = BuiltInFunctions.KeyMatch4(key1, key2);
+        }
+
+        public IEnumerable<object[]> IPMatchTestData() => new[]
+        {
+            new object[] {"192.168.2.123", "192.168.2.123"},
+            new object[] {"192.168.2.123", "192.168.2.0/24"}
+        };
+
+        [Benchmark]
+        [BenchmarkCategory(nameof(IPMatch))]
+        [ArgumentsSource(nameof(IPMatchTestData))]
+        public void IPMatch(string key1, string key2)
+        {
+            _ = BuiltInFunctions.IPMatch(key1, key2);
         }
     }
 }

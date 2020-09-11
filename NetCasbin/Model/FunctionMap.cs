@@ -25,7 +25,7 @@ namespace NetCasbin.Model
             map.AddFunction("keyMatch3", new KeyMatch3Func());
             map.AddFunction("keyMatch4", new KeyMatch4Func());
             map.AddFunction("regexMatch", new RegexMatchFunc());
-            map.AddFunction("ipMatch", new IpMatchFunc());
+            map.AddFunction("ipMatch", new IPMatchFunc());
             return map;
         }
     }
