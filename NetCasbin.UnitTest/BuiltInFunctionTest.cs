@@ -14,7 +14,11 @@ namespace NetCasbin.UnitTest
             new object[] {"192.168.2.123", "192.168.2.123", true},
             new object[] {"192.168.2.123", "192.168.2.123/32", true},
             new object[] {"10.0.0.11", "10.0.0.0/8", true},
-            new object[] {"11.0.0.123", "10.0.0.0/8", false}
+            new object[] {"11.0.0.123", "10.0.0.0/8", false},
+            new object[] {"2001:db8::1", "2001:db8::1", true},
+            new object[] {"2001:db8::1", "2001:db9::1", false},
+            new object[] {"2001:db8::1", "2001:db8::1/128", true},
+            new object[] {"2001:db8::1", "2001:db9::/64", false}
         };
 
         [Theory]
