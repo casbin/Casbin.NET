@@ -35,9 +35,9 @@ namespace Casbin.Benchmark
         [Benchmark]
         [BenchmarkCategory(nameof(IPMatch))]
         [ArgumentsSource(nameof(IPMatchTestData))]
-        public void IPMatch(string key1, string key2)
+        public void IPMatch(string ip1, string ip2)
         {
-            _ = BuiltInFunctions.IPMatch(key1, key2);
+            _ = BuiltInFunctions.IPMatch(ip1, ip2);
         }
     }
 }
