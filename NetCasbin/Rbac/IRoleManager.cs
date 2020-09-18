@@ -46,6 +46,13 @@ namespace NetCasbin.Rbac
         /// <returns></returns>
         List<string> GetRoles(string name, params string[] domain);
 
+        /// <summary>
+        /// Gets the users that inherits a role.
+        /// domain is a prefix to the users (can be used for other purposes).
+        /// </summary>
+        /// <param name="name"></param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
         List<string> GetUsers(string name, params string[] domain);
     }
 }

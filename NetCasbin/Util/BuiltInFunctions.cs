@@ -13,6 +13,7 @@ namespace NetCasbin.Util
         private static readonly Regex s_keyMatch2Regex = new Regex(@":[^/]+");
         private static readonly Regex s_keyMatch3Regex = new Regex(@"\{[^/]+\}");
         private static readonly Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
+        private delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to RESTful path),
@@ -187,35 +188,48 @@ namespace NetCasbin.Util
             return Regex.Match(key1, key2).Success;
         }
 
-        delegate bool GCall(string arg1, string arg2, string domain = null);
-
         /// <summary>
         /// GenerateGFunction is the factory method of the g(_, _) function.
         /// </summary>
         /// <param name="name">The name of the g(_, _) function, can be "g", "g2", ..</param>
-        /// <param name="rm">The role manager used by the function.</param>
+        /// <param name="roleManager">The role manager used by the function.</param>
         /// <returns>The function.</returns>
-        internal static AbstractFunction GenerateGFunction(string name, IRoleManager rm)
+        internal static AbstractFunction GenerateGFunction(string name, IRoleManager roleManager)
         {
-            bool Call(string arg1, string arg2, string domain = null)
+            var resultCache = new Dictionary<string, bool>();
+
+            bool GFunction(string subject1, string subject2, string domain = null)
             {
-                if (rm == null)
+                bool hasDomain = domain is not null;
+
+                string cacheKey = hasDomain
+                    ? string.Join(";", subject1, subject2, domain)
+                    : string.Join(";", subject1, subject2);
+
+                if (resultCache.TryGetValue(cacheKey, out bool result))
                 {
-                    return arg1.Equals(arg2);
+                    return result;
                 }
 
-                bool res;
+                if (roleManager == null)
+                {
+                    result = subject1.Equals(subject2);
+                    resultCache[cacheKey] = result;
+                    return result;
+                }
+
                 if (!string.IsNullOrEmpty(domain))
                 {
-                    res = rm.HasLink(arg1, arg2, domain);
-                    return res;
+                    result = roleManager.HasLink(subject1, subject2, domain);
+                    resultCache[cacheKey] = result;
+                    return result;
                 }
 
-                res = rm.HasLink(arg1, arg2);
-                return res;
+                result = roleManager.HasLink(subject1, subject2);
+                resultCache[cacheKey] = result;
+                return result;
             }
-            GCall call = Call;
-            return new AviatorFunction(name, call);
+            return new AviatorFunction(name, (GFunction) GFunction);
         }
     }
 }

@@ -10,10 +10,6 @@ namespace NetCasbin.Rbac
         private readonly Dictionary<string, Role> _allRoles;
         private readonly int _maxHierarchyLevel;
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="maxHierarchyLevel">RBAC最大允许层数</param>
         public DefaultRoleManager(int maxHierarchyLevel)
         {
             _allRoles = new Dictionary<string, Role>();

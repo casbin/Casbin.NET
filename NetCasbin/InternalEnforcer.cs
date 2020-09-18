@@ -387,6 +387,7 @@ namespace NetCasbin
             if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
             {
                 BuildRoleLinks();
+                ExpressionProvider.SetGFunctions();
             }
 
             if (autoNotifyWatcher)
@@ -400,6 +401,7 @@ namespace NetCasbin
             if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
             {
                 BuildRoleLinks();
+                ExpressionProvider.SetGFunctions();
             }
 
             if (autoNotifyWatcher && watcher is not null)

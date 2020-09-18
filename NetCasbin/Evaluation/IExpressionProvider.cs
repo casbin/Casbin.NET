@@ -38,8 +38,16 @@ namespace NetCasbin.Evaluation
 
         public void SetFunction(string name, AbstractFunction function)
         {
+            _expressionCache.Clear();
             var interpreter = GetInterpreter();
             interpreter.SetFunction(name, function);
+        }
+
+        public void SetGFunctions()
+        {
+            _expressionCache.Clear();
+            var interpreter = GetInterpreter();
+            SetGFunctions(interpreter);
         }
 
         public Lambda GetExpression(string expressionString, IReadOnlyList<object> requestValues)
@@ -93,14 +101,24 @@ namespace NetCasbin.Evaluation
         private Interpreter CreateInterpreter()
         {
             var interpreter = new Interpreter();
+            SetFunctions(interpreter);
+            SetGFunctions(interpreter);
+            return interpreter;
+        }
+
+        private void SetFunctions(Interpreter interpreter)
+        {
             foreach (KeyValuePair<string, AbstractFunction> functionKeyValue in _functionMap.FunctionDict)
             {
                 interpreter.SetFunction(functionKeyValue.Key, functionKeyValue.Value);
             }
+        }
 
-            if (!_model.Model.ContainsKey(PermConstants.Section.RoleSection))
+        private void SetGFunctions(Interpreter interpreter)
+        {
+            if (_model.Model.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
-                return interpreter;
+                return;
             }
 
             foreach (KeyValuePair<string, Assertion> assertionKeyValue in _model.Model[PermConstants.Section.RoleSection])
@@ -109,7 +127,6 @@ namespace NetCasbin.Evaluation
                 Assertion assertion = assertionKeyValue.Value;
                 interpreter.SetFunction(key, BuiltInFunctions.GenerateGFunction(key, assertion.RoleManager));
             }
-            return interpreter;
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace NetCasbin.Rbac
@@ -8,42 +9,46 @@ namespace NetCasbin.Rbac
     /// </summary>
     public class Role
     {
-        private string _name;
-
-        private readonly Dictionary<string, Role> _roles = new Dictionary<string, Role>();
+        private readonly Lazy<Dictionary<string, Role>> _roles = new Lazy<Dictionary<string, Role>>();
 
         public Role(string name)
         {
-            _name = name;
+            Name = name;
         }
 
-        public string Name
-        {
-            get => _name;
-            set => _name = value;
-        }
+        public string Name { get; }
 
         public void AddRole(Role role)
         {
-            if (_roles.ContainsKey(role.Name))
+            if (_roles.IsValueCreated is false)
+            {
+                _roles.Value.Add(role.Name, role);
+            }
+
+            if (_roles.Value.ContainsKey(role.Name))
             {
                 return;
             }
 
-            _roles.Add(role.Name, role);
+            _roles.Value.Add(role.Name, role);
         }
 
         public void DeleteRole(Role role)
         {
-            if (_roles.ContainsKey(role._name))
+            if (_roles.IsValueCreated is false)
             {
-                _roles.Remove(role.Name);
+                return;
+            }
+
+            if (_roles.Value.ContainsKey(role.Name))
+            {
+                _roles.Value.Remove(role.Name);
             }
         }
 
         public bool HasRole(string roleName, int hierarchyLevel)
         {
-            if (_name == roleName)
+            if (Name == roleName)
             {
                 return true;
             }
@@ -53,30 +58,27 @@ namespace NetCasbin.Rbac
                 return false;
             }
 
-            foreach (var role in _roles.Values)
+            if (_roles.IsValueCreated is false)
             {
-                if (role.HasRole(roleName, hierarchyLevel - 1))
-                {
-                    return true;
-                }
+                return false;
             }
 
-            return false;
+            return _roles.Value.Values.Any(role => role.HasRole(roleName, hierarchyLevel - 1));
         }
 
         public bool HasDirectRole(string roleName)
         {
-            return _roles.ContainsKey(roleName);
+            return _roles.IsValueCreated is not false && _roles.Value.ContainsKey(roleName);
         }
 
         public List<string> GetRoles()
         {
-            return _roles.Select(x => x.Key).ToList();
+            return _roles.Value.Select(x => x.Key).ToList();
         }
 
         public override string ToString()
         {
-            return $"{_name}{string.Join(",", _roles)}";
+            return $"{Name}{string.Join(",", _roles.Value)}";
         }
     }
 }
