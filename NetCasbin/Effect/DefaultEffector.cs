@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using System.Security.Cryptography;
 using NetCasbin.Abstractions;
 using NetCasbin.Evaluation;
 using NetCasbin.Model;
@@ -15,26 +13,26 @@ namespace NetCasbin.Effect
         /// <summary>
         /// Merges all matching results collected by the enforcer into a single decision.
         /// </summary>
-        /// <param name="policyEffect"></param>
+        /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
         /// <returns></returns>
-        public bool MergeEffects(string policyEffect, Effect[] effects, float[] results)
+        public bool MergeEffects(string effectExpression, Effect[] effects, float[] results)
         {
-            return MergeEffects(policyEffect, effects.AsSpan(), results.AsSpan());
+            return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan());
         }
 
 
         /// <summary>
         /// Merges all matching results collected by the enforcer into a single decision.
         /// </summary>
-        /// <param name="policyEffect"></param>
+        /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
         /// <returns></returns>
-        private bool MergeEffects(string policyEffect, Span<Effect> effects, Span<float> results)
+        private bool MergeEffects(string effectExpression, Span<Effect> effects, Span<float> results)
         {
-            PolicyEffectType = ParsePolicyEffectType(policyEffect);
+            PolicyEffectType = ParsePolicyEffectType(effectExpression);
             return MergeEffects(PolicyEffectType, effects, results);
         }
 
@@ -58,7 +56,7 @@ namespace NetCasbin.Effect
             return finalResult;
         }
 
-        public static PolicyEffectType ParsePolicyEffectType(string policyEffect) => policyEffect switch
+        public static PolicyEffectType ParsePolicyEffectType(string effectExpression) => effectExpression switch
         {
             PermConstants.PolicyEffect.AllowOverride => PolicyEffectType.AllowOverride,
             PermConstants.PolicyEffect.DenyOverride => PolicyEffectType.DenyOverride,

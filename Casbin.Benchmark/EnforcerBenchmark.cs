@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
@@ -116,26 +118,28 @@ namespace Casbin.Benchmark
         private void GlobalSetupForRbacModelWithScale(int groupCount, int userCount)
         {
             GlobalSetupForRbacModel();
+            var policyList = new List<List<string>>();
             for (int i = 0; i < groupCount; i++)
             {
-                NowEnforcer.AddPolicy($"group{i}", $"data{i / 10}", "read");
+                policyList.Add( new[] {$"group{i}", $"data{i / 10}", "read"}.ToList());
             }
+            NowEnforcer.AddPolicies(policyList);
 
-            // Because we still have the policies management api,
-            // so it will run BuildRoleLink at every loop.
-            NowEnforcer.EnableAutoBuildRoleLinks(false);
+            policyList.Clear();
             for (int i = 0; i < userCount; i++)
             {
-                NowEnforcer.AddGroupingPolicy($"user{i}", $"group{i / 10}");
+                policyList.Add( new[] {$"user{i}", $"group{i / 10}"}.ToList());
             }
+            NowEnforcer.EnableAutoBuildRoleLinks(false);
+            NowEnforcer.AddGroupingPolicies(policyList);
             NowEnforcer.BuildRoleLinks();
 
             NowTestUserName = $"user{userCount / 2 + 1}"; // if 1000 => 501...
-            NowTestDataName = $"group{groupCount - 1}"; // if 100 => 99...
+            NowTestDataName = $"data{groupCount / 10 - 1}"; // if 100 => 9...
             Console.WriteLine($"// Already set user name to {NowTestUserName}.");
             Console.WriteLine($"// Already set data name to {NowTestDataName}.");
         }
-        
+
         private void GlobalSetupFromFile(string modelFileName, string policyFileName = null)
         {
             if (policyFileName is null)

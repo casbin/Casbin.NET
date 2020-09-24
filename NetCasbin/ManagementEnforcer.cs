@@ -985,7 +985,7 @@ namespace NetCasbin
         /// <param name="function">The function.</param>
         public void AddFunction(string name, AbstractFunction function)
         {
-            ExpressionProvider.SetFunction(name, function);
+            ExpressionHandler.SetFunction(name, function);
         }
     }
 }

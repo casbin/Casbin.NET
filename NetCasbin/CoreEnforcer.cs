@@ -29,7 +29,7 @@ namespace NetCasbin
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
         protected bool autoNotifyWatcher;
-        internal IExpressionProvider ExpressionProvider { get; private set; }
+        internal IExpressionHandler ExpressionHandler { get; private set; }
 
         protected void Initialize()
         {
@@ -108,7 +108,7 @@ namespace NetCasbin
         public void SetModel(Model.Model model)
         {
             this.model = model;
-            ExpressionProvider = new ExpressionProvider(model);
+            ExpressionHandler = new ExpressionHandler(model);
         }
 
         /// <summary>
@@ -366,22 +366,17 @@ namespace NetCasbin
             var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
             int policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
             string expressionString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
-            IDictionary<string, Parameter> parameters = ExpressionProvider.AddOrUpdateRequestParameters(requestValues);
 
-            int requestTokenCount = ExpressionProvider.RequestAssertion.TokenCount;
+            int requestTokenCount = ExpressionHandler.RequestTokens.Count;
             if (requestTokenCount != requestValues.Length)
             {
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Length}.");
             }
-            int policyTokenCount = ExpressionProvider.PolicyAssertion.TokenCount;
+            int policyTokenCount = ExpressionHandler.PolicyTokens.Count;
+
+            ExpressionHandler.SetRequestParameters(requestValues);
 
             bool hasEval = Utility.HasEval(expressionString);
-
-            Lambda expression = null;
-            if (!hasEval)
-            {
-                expression = ExpressionProvider.GetExpression(expressionString, requestValues);
-            }
 
             bool finalResult = false;
             IChainEffector chainEffector = _effector as IChainEffector;
@@ -399,19 +394,23 @@ namespace NetCasbin
                             throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
                         }
 
-                        parameters = ExpressionProvider.AddOrUpdatePolicyParameters(policyValues);
+                        ExpressionHandler.SetPolicyParameters(policyValues);
+
+                        bool expressionResult;
 
                         if (hasEval)
                         {
-                            string expressionStringWithRule = RewriteEval(expressionString, ExpressionProvider.PolicyAssertion.Tokens, policyValues);
-                            expression = ExpressionProvider.GetExpression(expressionStringWithRule, requestValues);
+                            string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                            expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                         }
-
-                        object expressionResult = expression.Invoke(parameters.Values);
+                        else
+                        {
+                            expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
+                        }
 
                         var nowEffect = GetEffect(expressionResult);
 
-                        if (nowEffect is not Effect.Effect.Indeterminate && parameters.TryGetValue("p_eft", out Parameter parameter))
+                        if (nowEffect is not Effect.Effect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
                         {
                             string policyEffect = parameter.Value as string;
                             nowEffect = policyEffect switch
@@ -437,9 +436,7 @@ namespace NetCasbin
                         throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                     }
 
-                    object expressionResult = expression.Invoke(parameters.Values);
-
-                    var nowEffect = GetEffect(expressionResult);
+                    var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
 
                     if (chainEffector.TryChain(nowEffect))
                     {
@@ -463,15 +460,19 @@ namespace NetCasbin
                         throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
                     }
 
-                    parameters = ExpressionProvider.AddOrUpdatePolicyParameters(policyValues);
+                    ExpressionHandler.SetPolicyParameters(policyValues);
+
+                    bool expressionResult;
 
                     if (hasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(expressionString, ExpressionProvider.PolicyAssertion.Tokens, policyValues);
-                        expression = ExpressionProvider.GetExpression(expressionStringWithRule, requestValues);
+                        string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                     }
-
-                    object expressionResult = expression.Invoke(parameters.Values);
+                    else
+                    {
+                        expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
+                    }
 
                     var nowEffect = GetEffect(expressionResult);
 
@@ -481,7 +482,7 @@ namespace NetCasbin
                         continue;
                     }
 
-                    if (parameters.TryGetValue("p_eft", out Parameter parameter))
+                    if (ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
                     {
                         string policyEffect = parameter.Value as string;
                         nowEffect = policyEffect switch
@@ -509,29 +510,16 @@ namespace NetCasbin
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                object expressionResult = expression.Invoke(parameters.Values);
-
-                var nowEffect = GetEffect(expressionResult);
-
+                var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
                 finalResult = _effector.MergeEffects(effect, new[] { nowEffect }, null);
             }
 
             return finalResult;
         }
 
-        private static Effect.Effect GetEffect(object expressionResult)
+        private static Effect.Effect GetEffect(bool expressionResult)
         {
-            bool nowResult;
-            if (expressionResult is bool expressionBoolResult)
-            {
-                nowResult = expressionBoolResult;
-            }
-            else
-            {
-                nowResult = false;
-            }
-
-            return nowResult ? Effect.Effect.Allow : Effect.Effect.Indeterminate;
+            return expressionResult ? Effect.Effect.Allow : Effect.Effect.Indeterminate;
         }
 
         private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)

@@ -270,7 +270,7 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
-        public void TestRBACModelWithOnlyDeny()
+        public void TestRbacModelWithOnlyDeny()
         {
             var e = new Enforcer(TestModelFixture.GetNewTestModel(
                 _testModelFixture._rbacWithNotDenyModelText,
