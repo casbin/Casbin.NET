@@ -6,6 +6,7 @@ using NetCasbin;
 
 namespace Casbin.Benchmark
 {
+    [MemoryDiagnoser]
     [BenchmarkCategory("Model")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]

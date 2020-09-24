@@ -7,6 +7,7 @@ using static Casbin.Benchmark.TestHelper;
 
 namespace Casbin.Benchmark
 {
+    [MemoryDiagnoser]
     [BenchmarkCategory("Enforcer")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]

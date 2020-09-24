@@ -15,13 +15,13 @@ namespace NetCasbin.Model
             Model = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
-        public void BuildRoleLinks(IRoleManager rm)
+        public void BuildRoleLinks(IRoleManager roleManager)
         {
             if (Model.ContainsKey(PermConstants.Section.RoleSection))
             {
                 foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
                 {
-                    assertion.BuildRoleLinks(rm);
+                    assertion.BuildRoleLinks(roleManager);
                 }
             }
         }
