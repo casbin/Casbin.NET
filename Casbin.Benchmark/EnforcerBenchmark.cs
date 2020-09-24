@@ -126,7 +126,7 @@ namespace Casbin.Benchmark
             NowEnforcer.EnableAutoBuildRoleLinks(false);
             for (int i = 0; i < userCount; i++)
             {
-                NowEnforcer.AddGroupingPolicy($"group{i}", $"group{i / 10}");
+                NowEnforcer.AddGroupingPolicy($"user{i}", $"group{i / 10}");
             }
             NowEnforcer.BuildRoleLinks();
 
