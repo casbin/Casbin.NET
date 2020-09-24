@@ -4,7 +4,7 @@ using NetCasbin.Model;
 
 namespace NetCasbin.Abstractions
 {
-    public interface IExpressionProvider
+    internal interface IExpressionProvider
     {
         public Assertion RequestAssertion { get; }
 
@@ -16,6 +16,8 @@ namespace NetCasbin.Abstractions
 
         public Lambda GetExpression(string expressionString, IReadOnlyList<object> requestValues);
 
-        public IDictionary<string, Parameter> GetParameters(IReadOnlyList<object> requestValues , IReadOnlyList<string> policyValues = null);
+        public IDictionary<string, Parameter> AddOrUpdateRequestParameters(IReadOnlyList<object> requestValues);
+
+        public IDictionary<string, Parameter> AddOrUpdatePolicyParameters(IReadOnlyList<string> policyValues);
     }
 }

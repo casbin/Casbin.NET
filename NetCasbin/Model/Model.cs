@@ -100,7 +100,6 @@ namespace NetCasbin.Model
                 if (tokens.Length != 0)
                 {
                     assertion.Tokens = new Dictionary<string, int>();
-                    assertion.TokenCount = tokens.Length;
                     for (int i = 0; i < tokens.Length; i++)
                     {
                         assertion.Tokens.Add($"{key}_{tokens[i]}", i);

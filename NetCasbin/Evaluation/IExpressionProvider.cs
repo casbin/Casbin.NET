@@ -14,6 +14,7 @@ namespace NetCasbin.Evaluation
         private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
         private readonly Model.Model _model;
         private Interpreter _interpreter;
+        private readonly IDictionary<string, Parameter> _parameters = new Dictionary<string, Parameter>();
 
         public ExpressionProvider(Model.Model model,
             string requestType = PermConstants.DefaultRequestType,
@@ -62,6 +63,48 @@ namespace NetCasbin.Evaluation
             return expression;
         }
 
+        public IDictionary<string, Parameter> AddOrUpdateRequestParameters(IReadOnlyList<object> requestValues = null)
+        {
+            foreach (string token in RequestTokens.Keys)
+            {
+                object requestValue = requestValues?[RequestTokens[token]];
+
+                if (_parameters.ContainsKey(token))
+                {
+                    if (requestValue is not null)
+                    {
+                        _parameters[token] = new Parameter(token, requestValue);
+                    }
+                }
+                else
+                {
+                    _parameters.Add(token, new Parameter(token, requestValue ?? string.Empty));
+                }
+            }
+            return _parameters;
+        }
+
+        public IDictionary<string, Parameter> AddOrUpdatePolicyParameters(IReadOnlyList<string> policyValues = null)
+        {
+            foreach (string token in PolicyTokens.Keys)
+            {
+                string policyValue = policyValues?[PolicyTokens[token]];
+
+                if (_parameters.ContainsKey(token))
+                {
+                    if (policyValue is not null)
+                    {
+                        _parameters[token] = new Parameter(token, policyValue);
+                    }
+                }
+                else
+                {
+                    _parameters.Add(token, new Parameter(token, policyValue ?? string.Empty));
+                }
+            }
+            return _parameters;
+        }
+
         private Lambda CreateExpression(string expressionString, IReadOnlyList<object> requestValues)
         {
             Parameter[] parameterArray = GetParameters(requestValues).Values.ToArray();
@@ -69,22 +112,11 @@ namespace NetCasbin.Evaluation
             return interpreter.Parse(expressionString, parameterArray);;
         }
 
-        public IDictionary<string, Parameter> GetParameters(
-            IReadOnlyList<object> requestValues = null,
-            IReadOnlyList<string> policyValues = null)
+        private IDictionary<string, Parameter> GetParameters(IReadOnlyList<object> requestValues = null)
         {
-            var parameters = new Dictionary<string, Parameter>();
-            foreach (string token in RequestTokens.Keys)
-            {
-                object requestValue = requestValues?[RequestTokens[token]] ?? string.Empty;
-                parameters.Add(token, new Parameter(token, requestValue));
-            }
-            foreach (string token in PolicyTokens.Keys)
-            {
-                string policyValue = policyValues?[PolicyTokens[token]] ?? string.Empty;
-                parameters.Add(token, new Parameter(token, policyValue));
-            }
-            return parameters;
+            AddOrUpdateRequestParameters(requestValues);
+            AddOrUpdatePolicyParameters();
+            return _parameters;
         }
 
         private Interpreter GetInterpreter()

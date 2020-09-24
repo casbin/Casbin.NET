@@ -18,8 +18,6 @@ namespace NetCasbin.Model
 
         public IDictionary<string, int> Tokens { set; get; }
 
-        public int TokenCount { set; get; }
-
         public IRoleManager RoleManager { get; private set; }
 
         public List<List<string>> Policy { set; get; }
