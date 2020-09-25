@@ -54,7 +54,7 @@ namespace NetCasbin.UnitTest
             Assert.False(sampleWatcher.Called);
 
             var enforcer = new Enforcer(_testModelFixture.GetNewRbacTestModel(),
-                new DefaultFileAdapter(TestModelFixture.GetTestFile("rbac_policy.csv")));
+                new DefaultFileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
             enforcer.SetWatcher(sampleWatcher, false);
             enforcer.SavePolicy();
@@ -68,7 +68,7 @@ namespace NetCasbin.UnitTest
             Assert.False(sampleWatcher.AsyncCalled);
 
             var enforcer = new Enforcer(_testModelFixture.GetBasicTestModel(),
-                new DefaultFileAdapter(TestModelFixture.GetTestFile("basic_policy.csv")));
+                new DefaultFileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_async_watcher_test.csv")));
 
             enforcer.SetWatcher(sampleWatcher);
             await enforcer.SavePolicyAsync();

@@ -517,7 +517,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestEnableAutoSaveAsync()
         {
-            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
 
             e.EnableAutoSave(false);
             // Because AutoSave is disabled, the policy change only affects the policy in Casbin enforcer,
@@ -611,7 +611,7 @@ namespace NetCasbin.UnitTest
         [Fact]
         public async Task TestGetAndSetAdapterInMemAsync()
         {
-            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
             var e2 = new Enforcer("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
 
             TestEnforce(e, "alice", "data1", "read", true);
@@ -646,7 +646,7 @@ namespace NetCasbin.UnitTest
 
             TestEnforce(e, "alice", "data1", "read", false);
 
-            IAdapter a = new DefaultFileAdapter("examples/basic_policy.csv");
+            IAdapter a = new DefaultFileAdapter("examples/basic_policy_for_async_adapter_test.csv");
             e.SetAdapter(a);
             await e.LoadPolicyAsync();
 
