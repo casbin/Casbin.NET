@@ -23,23 +23,6 @@ jobs:
       with:
         dotnet-version: 3.1
 
-    - name: Setup side by side .NET SDKs on Windows
-      shell: pwsh
-      run: |
-          $version = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Leaf;
-          echo "Version is: ${version}.";
-          $root = Split-Path (Split-Path $ENV:DOTNET_ROOT -Parent) -Parent;
-          echo "Root is: ${root}.";
-          $directories = Get-ChildItem $root | Where-Object { $_.Name -ne $version };
-
-          foreach ($dir in $directories)
-          {
-              $from = $dir.FullName;
-              $to = "$root\$version";
-              echo "Copying from ${from} to ${to}.";
-              Copy-Item "$from\*" $to -Recurse -Force;
-          }
-
     - name: Check dotnet sdk install
       run: dotnet --info
 
