@@ -106,3 +106,19 @@ jobs:
       with:
         name: "drop-ci-test-results"
         path: './test-results'
+
+  release-build-version:
+    runs-on: windows-latest
+    needs: build
+    if: github.repository_owner == 'casbin' && github.ref == 'refs/heads/master'
+    steps:
+      - name: Download Artefact
+        uses: actions/download-artifact@v1
+        with:
+          name: 'drop-ci-packages'
+
+      - name: Add myget nuget source
+        run: dotnet nuget add source https://www.myget.org/F/casbin-net/api/v2/package --name myget.org
+
+      - name: Push myget package
+        run: dotnet nuget push .\drop-ci-packages\*.nupkg -s myget.org -k $env:MYGET_API_TOKEN --skip-duplicate
