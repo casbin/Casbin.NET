@@ -78,6 +78,12 @@ jobs:
             $LastExitCode = 0;
         }
 
+    - name: Upload test results artefacts
+      uses: actions/upload-artifact@v1.0.0
+      with:
+        name: "drop-ci-test-results"
+        path: './test-results'
+
     - name: Pack packages
       if: github.repository_owner == 'casbin' && github.ref == 'refs/heads/master'
       run: |
@@ -96,16 +102,11 @@ jobs:
         dotnet pack -c Release -o packages /p:PackageVersion=$PackageVersion /p:Version=$Version --no-build;
 
     - name: Upload packages artefacts
+      if: github.repository_owner == 'casbin' && github.ref == 'refs/heads/master'
       uses: actions/upload-artifact@v1.0.0
       with:
         name: "drop-ci-packages"
         path: './packages'
-
-    - name: Upload test results artefacts
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: "drop-ci-test-results"
-        path: './test-results'
 
   release-build-version:
     runs-on: windows-latest
