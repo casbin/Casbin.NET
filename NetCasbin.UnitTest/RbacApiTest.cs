@@ -120,27 +120,27 @@ namespace NetCasbin.UnitTest
 
             await e.AddRoleForUserAsync("alice", "data2_admin");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
 
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data2", "read", true);
+            await TestEnforceAsync(e, "alice", "data2", "write", true);
 
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
 
             await e.DeleteRoleAsync("data2_admin");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", false);
-            TestEnforce(e, "alice", "data2", "write", false);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", false);
+            await TestEnforceAsync(e, "alice", "data2", "write", false);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
     }
 }
