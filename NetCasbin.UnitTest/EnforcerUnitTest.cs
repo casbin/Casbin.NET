@@ -83,52 +83,52 @@ namespace NetCasbin.UnitTest
 
             var e = new Enforcer(m, a);
 
-            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-            TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
-            TestEnforce(e, "alice", "/alice_data/resource2", "GET", true);
-            TestEnforce(e, "alice", "/alice_data/resource2", "POST", false);
-            TestEnforce(e, "alice", "/bob_data/resource1", "GET", false);
-            TestEnforce(e, "alice", "/bob_data/resource1", "POST", false);
-            TestEnforce(e, "alice", "/bob_data/resource2", "GET", false);
-            TestEnforce(e, "alice", "/bob_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "POST", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource2", "GET", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource1", "POST", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource2", "GET", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource2", "POST", false);
 
-            TestEnforce(e, "bob", "/alice_data/resource1", "GET", false);
-            TestEnforce(e, "bob", "/alice_data/resource1", "POST", false);
-            TestEnforce(e, "bob", "/alice_data/resource2", "GET", true);
-            TestEnforce(e, "bob", "/alice_data/resource2", "POST", false);
-            TestEnforce(e, "bob", "/bob_data/resource1", "GET", false);
-            TestEnforce(e, "bob", "/bob_data/resource1", "POST", true);
-            TestEnforce(e, "bob", "/bob_data/resource2", "GET", false);
-            TestEnforce(e, "bob", "/bob_data/resource2", "POST", true);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource1", "POST", false);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource2", "GET", true);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource1", "POST", true);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource2", "GET", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource2", "POST", true);
 
-            TestEnforce(e, "cathy", "/cathy_data", "GET", true);
-            TestEnforce(e, "cathy", "/cathy_data", "POST", true);
-            TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "GET", true);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "POST", true);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "DELETE", false);
 
             e = new Enforcer(m);
             await a.LoadPolicyAsync(e.GetModel());
 
-            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-            TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
-            TestEnforce(e, "alice", "/alice_data/resource2", "GET", true);
-            TestEnforce(e, "alice", "/alice_data/resource2", "POST", false);
-            TestEnforce(e, "alice", "/bob_data/resource1", "GET", false);
-            TestEnforce(e, "alice", "/bob_data/resource1", "POST", false);
-            TestEnforce(e, "alice", "/bob_data/resource2", "GET", false);
-            TestEnforce(e, "alice", "/bob_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "POST", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource2", "GET", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource1", "POST", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource2", "GET", false);
+            await TestEnforceAsync(e, "alice", "/bob_data/resource2", "POST", false);
 
-            TestEnforce(e, "bob", "/alice_data/resource1", "GET", false);
-            TestEnforce(e, "bob", "/alice_data/resource1", "POST", false);
-            TestEnforce(e, "bob", "/alice_data/resource2", "GET", true);
-            TestEnforce(e, "bob", "/alice_data/resource2", "POST", false);
-            TestEnforce(e, "bob", "/bob_data/resource1", "GET", false);
-            TestEnforce(e, "bob", "/bob_data/resource1", "POST", true);
-            TestEnforce(e, "bob", "/bob_data/resource2", "GET", false);
-            TestEnforce(e, "bob", "/bob_data/resource2", "POST", true);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource1", "POST", false);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource2", "GET", true);
+            await TestEnforceAsync(e, "bob", "/alice_data/resource2", "POST", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource1", "GET", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource1", "POST", true);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource2", "GET", false);
+            await TestEnforceAsync(e, "bob", "/bob_data/resource2", "POST", true);
 
-            TestEnforce(e, "cathy", "/cathy_data", "GET", true);
-            TestEnforce(e, "cathy", "/cathy_data", "POST", true);
-            TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "GET", true);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "POST", true);
+            await TestEnforceAsync(e, "cathy", "/cathy_data", "DELETE", false);
         }
 
         [Fact]
@@ -178,7 +178,7 @@ namespace NetCasbin.UnitTest
 
             await e.AddPermissionForUserAsync("alice", "data1", "invalid");
 
-            TestEnforce(e, "alice", "data1", "read", false);
+            await TestEnforceAsync(e, "alice", "data1", "read", false);
         }
 
         [Fact]
@@ -227,14 +227,14 @@ namespace NetCasbin.UnitTest
             await e.AddPermissionForUserAsync("data2_admin", "data2", "write");
             await e.AddRoleForUserAsync("alice", "data2_admin");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", true);
+            await TestEnforceAsync(e, "alice", "data2", "write", true);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
 
         [Fact]
@@ -305,14 +305,14 @@ namespace NetCasbin.UnitTest
             await e.AddPermissionForUserAsync("data2_admin", "data2", "write");
             await e.AddRoleForUserAsync("alice", "data2_admin");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", true);
+            await TestEnforceAsync(e, "alice", "data2", "write", true);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
 
         [Fact]
@@ -355,14 +355,14 @@ namespace NetCasbin.UnitTest
             await e.AddPermissionForUserAsync("alice", "data1", "read");
             await e.AddPermissionForUserAsync("bob", "data2", "write");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", false);
-            TestEnforce(e, "alice", "data2", "write", false);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", false);
+            await TestEnforceAsync(e, "alice", "data2", "write", false);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
 
         [Fact]
@@ -525,14 +525,14 @@ namespace NetCasbin.UnitTest
             await e.RemovePolicyAsync("alice", "data1", "read");
             // Reload the policy from the storage to see the effect.
             await e.LoadPolicyAsync();
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", false);
-            TestEnforce(e, "alice", "data2", "write", false);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", false);
+            await TestEnforceAsync(e, "alice", "data2", "write", false);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
 
             e.EnableAutoSave(true);
             // Because AutoSave is enabled, the policy change not only affects the policy in Casbin enforcer,
@@ -543,14 +543,14 @@ namespace NetCasbin.UnitTest
 
             // Reload the policy from the storage to see the effect.
             await e.LoadPolicyAsync();
-            TestEnforce(e, "alice", "data1", "read", true); // Will not be false here.
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", false);
-            TestEnforce(e, "alice", "data2", "write", false);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true); // Will not be false here.
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", false);
+            await TestEnforceAsync(e, "alice", "data2", "write", false);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
 
         [Fact]
@@ -614,15 +614,15 @@ namespace NetCasbin.UnitTest
             var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
             var e2 = new Enforcer("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
 
             var a2 = e2.GetAdapter();
             e.SetAdapter(a2);
             await e.LoadPolicyAsync();
 
-            TestEnforce(e, "alice", "data1", "read", false);
-            TestEnforce(e, "alice", "data1", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", false);
+            await TestEnforceAsync(e, "alice", "data1", "write", true);
         }
 
         [Fact]
@@ -644,13 +644,13 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer("examples/basic_model.conf");
 
-            TestEnforce(e, "alice", "data1", "read", false);
+            await TestEnforceAsync(e, "alice", "data1", "read", false);
 
             IAdapter a = new DefaultFileAdapter("examples/basic_policy_for_async_adapter_test.csv");
             e.SetAdapter(a);
             await e.LoadPolicyAsync();
 
-            TestEnforce(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
         }
 
         [Fact]
@@ -690,7 +690,7 @@ namespace NetCasbin.UnitTest
             e.SetAdapter(a);
             await e.LoadPolicyAsync();
 
-            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
         }
 
         [Fact]
@@ -733,7 +733,7 @@ namespace NetCasbin.UnitTest
                 e.SetAdapter(a);
                 await e.LoadPolicyAsync();
 
-                TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+                await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
             }
         }
     }

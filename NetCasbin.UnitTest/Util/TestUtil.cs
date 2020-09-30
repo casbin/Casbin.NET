@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using NetCasbin.Util;
 using Xunit;
 
@@ -20,6 +21,11 @@ namespace NetCasbin.UnitTest.Util
         internal static void TestEnforce(Enforcer e, object sub, object obj, string act, bool res)
         {
             Assert.Equal(res, e.Enforce(sub, obj, act));
+        }
+
+        internal static async Task TestEnforceAsync(Enforcer e, object sub, object obj, string act, bool res)
+        {
+            Assert.Equal(res, await e.EnforceAsync(sub, obj, act));
         }
 
         internal static void TestEnforceWithoutUsers(Enforcer e, string obj, string act, bool res)

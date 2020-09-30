@@ -326,28 +326,28 @@ namespace NetCasbin.UnitTest
             // For Casbin, it is equivalent to: e.addGroupingPolicy("bob", "data2_admin")
             await e.AddGroupingPolicyAsync("bob", "data2_admin", "custom_data");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", true);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", true);
+            await TestEnforceAsync(e, "alice", "data2", "write", true);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", true);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
 
             // You should also take the custom data as a parameter when deleting a grouping policy.
             // e.removeGroupingPolicy("bob", "data2_admin") won't work.
             // Or you can remove it by using removeFilteredGroupingPolicy().
             await e.RemoveGroupingPolicyAsync("bob", "data2_admin", "custom_data");
 
-            TestEnforce(e, "alice", "data1", "read", true);
-            TestEnforce(e, "alice", "data1", "write", false);
-            TestEnforce(e, "alice", "data2", "read", true);
-            TestEnforce(e, "alice", "data2", "write", true);
-            TestEnforce(e, "bob", "data1", "read", false);
-            TestEnforce(e, "bob", "data1", "write", false);
-            TestEnforce(e, "bob", "data2", "read", false);
-            TestEnforce(e, "bob", "data2", "write", true);
+            await TestEnforceAsync(e, "alice", "data1", "read", true);
+            await TestEnforceAsync(e, "alice", "data1", "write", false);
+            await TestEnforceAsync(e, "alice", "data2", "read", true);
+            await TestEnforceAsync(e, "alice", "data2", "write", true);
+            await TestEnforceAsync(e, "bob", "data1", "read", false);
+            await TestEnforceAsync(e, "bob", "data1", "write", false);
+            await TestEnforceAsync(e, "bob", "data2", "read", false);
+            await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
 
         [Fact]
