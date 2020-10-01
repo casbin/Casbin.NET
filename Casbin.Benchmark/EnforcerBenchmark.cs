@@ -13,8 +13,7 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("Enforcer")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    // Wait to remove other ci
-    //[SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
     public class EnforcerBenchmark
     {
         private Enforcer NowEnforcer { get; set; }

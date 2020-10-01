@@ -13,15 +13,15 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Setup .NET Core 2.1.x
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 2.1
-
     - name: Setup .NET Core 3.1.x
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 3.1
+
+    - name: Setup .NET 5.0.x
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 5.0.100-rc.1.20452.10
 
     - name: Check dotnet sdk install
       run: dotnet --info
@@ -38,7 +38,7 @@ jobs:
     - name: Run Benchmark
       run: |
         cd Casbin.Benchmark
-        dotnet run -c Release -f netcoreapp31 --filter **
+        dotnet run -c Release -f netcoreapp3.1 --filter **
 
     - name: Upload benchmark results to artefacts
       uses: actions/upload-artifact@v1.0.0
