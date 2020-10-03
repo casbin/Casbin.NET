@@ -3,29 +3,27 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
-    <Description>Casbin ported to dotnet core</Description>
-    <Authors>Casbin, Zhikui H</Authors>
-    <RepositoryUrl>https://github.com/casbin-net/Casbin.NET</RepositoryUrl>
-    <RepositoryType>GIT</RepositoryType>
-    <Company>Zhikui H</Company>
-    <Copyright>Apache License 2.0</Copyright>
-    <Version>1.3.1</Version>
-    <Product>Casbin.NET</Product>
-    <AssemblyVersion>1.3.1.0</AssemblyVersion>
-    <SignAssembly>false</SignAssembly>
-    <DelaySign>false</DelaySign>
-    <AssemblyOriginatorKeyFile>casbin.snk</AssemblyOriginatorKeyFile>
-    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <FileVersion>1.3.1.0</FileVersion>
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
     <PackageId>Casbin.NET</PackageId>
+    <Version>1.4.0</Version>
     <PackageIcon>casbin.png</PackageIcon>
+    <Description>Casbin ported to dotnet core</Description>
+    <PackageReleaseNotes>
+      1. Add Batch APIs，Scaling ABAC (eval function) features.
+2. Improve performance and reduce the allocate of enforcer and build in funtions.
+3. Update DynamicExpresso.Core version to v2.3.2.
+    </PackageReleaseNotes>
+    <Authors>Casbin, Zhikui H</Authors>
+    <Company>Zhikui H</Company>
+    <Product>Casbin.NET</Product>
+    <RepositoryType>GIT</RepositoryType>
+    <Copyright>Apache License 2.0</Copyright>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageReleaseNotes>1. Add KeyMatch4 function support</PackageReleaseNotes>
-    <PackageProjectUrl>https://github.com/casbin-net/Casbin.NET</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/casbin/Casbin.NET</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/casbin/Casbin.NET</PackageProjectUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -33,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.3.1" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.3.2" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
 
