@@ -99,7 +99,7 @@ namespace NetCasbin.UnitTest.Fixtures
 
         public static Model.Model GetNewTestModel(string modelText)
         {
-            return Model.Model.CreateFromText(modelText);
+            return Model.Model.CreateDefaultFromText(modelText);
         }
 
         public static Model.Model GetNewTestModel(string modelText, string policyText)

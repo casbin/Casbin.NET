@@ -16,13 +16,11 @@ namespace NetCasbin.Model
             { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
-        public string FilePath { get; set; }
-
         /// <summary>
         /// Creates a model.
         /// </summary>
         /// <returns></returns>
-        public static Model Create()
+        public static Model CreateDefault()
         {
             return new Model();
         }
@@ -32,7 +30,7 @@ namespace NetCasbin.Model
         /// </summary>
         /// <param name="path">The path of the model file.</param>
         /// <returns></returns>
-        public static Model Create(string path)
+        public static Model CreateDefaultFromFile(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -44,8 +42,7 @@ namespace NetCasbin.Model
                 throw new FileNotFoundException("Can not find the model file.");
             }
 
-            var model = Create();
-            model.FilePath = path;
+            var model = CreateDefault();
             model.LoadModel(path);
             return model;
         }
@@ -55,14 +52,14 @@ namespace NetCasbin.Model
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static Model CreateFromText(string text)
+        public static Model CreateDefaultFromText(string text)
         {
             if (string.IsNullOrEmpty(text))
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            var model = Create();
+            var model = CreateDefault();
             model.LoadModelFromText(text);
             return model;
         }
