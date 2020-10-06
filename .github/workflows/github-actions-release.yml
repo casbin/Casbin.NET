@@ -28,13 +28,13 @@ jobs:
     - name: Install dependencies
       run: dotnet restore
 
-    - name: Build
+    - name: Build solution
       run: dotnet build -c Release --no-restore
 
-    - name: Test
+    - name: Test solution
       run: dotnet test -c Release --no-restore --no-build --verbosity normal
     
-    - name: Publish Casbin.Net
+    - name: Publish Casbin.NET
       uses: brandedoutcast/publish-nuget@v2.5.2
       with:
           PROJECT_FILE_PATH: NetCasbin/NetCasbin.csproj
