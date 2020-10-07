@@ -10,6 +10,7 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("Functions")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
     public class BuildInFunctionsBenchmark
     {
         public IEnumerable<object[]> KeyMatch4TestData() => new[]
@@ -21,9 +22,9 @@ namespace Casbin.Benchmark
         [Benchmark]
         [BenchmarkCategory(nameof(KeyMatch4))]
         [ArgumentsSource(nameof(KeyMatch4TestData))]
-        public void KeyMatch4(string key1, string key2)
+        public void KeyMatch4(string arg1, string arg2)
         {
-            _ = BuiltInFunctions.KeyMatch4(key1, key2);
+            _ = BuiltInFunctions.KeyMatch4(arg1, arg2);
         }
 
         public IEnumerable<object[]> IPMatchTestData() => new[]
@@ -35,9 +36,9 @@ namespace Casbin.Benchmark
         [Benchmark]
         [BenchmarkCategory(nameof(IPMatch))]
         [ArgumentsSource(nameof(IPMatchTestData))]
-        public void IPMatch(string ip1, string ip2)
+        public void IPMatch(string arg1, string arg2)
         {
-            _ = BuiltInFunctions.IPMatch(ip1, ip2);
+            _ = BuiltInFunctions.IPMatch(arg1, arg2);
         }
     }
 }
