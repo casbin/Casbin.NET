@@ -38,7 +38,7 @@ jobs:
     - name: Run Benchmark
       run: |
         cd Casbin.Benchmark
-        dotnet run -c Release -f netcoreapp3.1 --filter **
+        dotnet run -c Release --filter **
 
     - name: Upload benchmark results to artefacts
       uses: actions/upload-artifact@v1.0.0
