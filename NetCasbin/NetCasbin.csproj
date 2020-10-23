@@ -31,7 +31,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.3.2" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.3.3" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
   </ItemGroup>
 
