@@ -200,9 +200,28 @@ namespace NetCasbin.Model
             return deleted;
         }
 
+        public List<string> GetValuesForFieldInPolicyAllTypes(string sec, int fieldIndex)
+        {
+            var section = Model[sec];
+            var values = new List<string>();
+
+            foreach (string policyType in section.Keys)
+            {
+                values.AddRange(GetValuesForFieldInPolicy(
+                    section, policyType, fieldIndex));
+            }
+
+            return values;
+        }
+
         public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
         {
-            var values = Model[sec][ptype].Policy
+            return GetValuesForFieldInPolicy(Model[sec], ptype, fieldIndex);
+        }
+
+        private static List<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section, string ptype, int fieldIndex)
+        {
+            var values = section[ptype].Policy
                 .Select(rule => rule[fieldIndex])
                 .ToList();
 

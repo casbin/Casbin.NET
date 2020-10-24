@@ -142,5 +142,29 @@ namespace NetCasbin.UnitTest
             await TestEnforceAsync(e, "bob", "data2", "read", false);
             await TestEnforceAsync(e, "bob", "data2", "write", true);
         }
+
+        [Fact]
+        public void TestGetImplicitUsersForPermission()
+        {
+            // Arrange
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacModelText,
+                _testModelFixture._rbacWithHierarchyPolicyText));
+            e.BuildRoleLinks();
+
+            Assert.Equal(new[] {"alice"}, e.GetImplicitUsersForPermission("data1", "read"));
+            Assert.Equal(new[] {"alice"}, e.GetImplicitUsersForPermission("data1", "write"));
+            Assert.Equal(new[] {"alice"}, e.GetImplicitUsersForPermission("data2", "read"));
+            Assert.Equal(new[] {"alice", "bob"}, e.GetImplicitUsersForPermission("data2", "write"));
+
+            // Act
+            e.GetModel().ClearPolicy();
+            _ = e.AddPolicy("admin", "data1", "read");
+            _ = e.AddPolicy("bob", "data1", "read");
+            _ = e.AddGroupingPolicy("alice", "admin");
+
+            // Assert
+            Assert.Equal(new[] {"bob", "alice"}, e.GetImplicitUsersForPermission("data1", "read"));
+        }
     }
 }
