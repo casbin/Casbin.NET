@@ -527,5 +527,20 @@ namespace NetCasbin
             }
             return res;
         }
+
+        public IEnumerable<string> GetImplicitUsersForPermission(params string[] permission)
+        {
+            return GetImplicitUsersForPermission((IEnumerable<string>) permission);
+        }
+
+        public IEnumerable<string> GetImplicitUsersForPermission(IEnumerable<string> permissions)
+        {
+            var policySubjects = GetAllSubjects();
+            var groupInherit = model.GetValuesForFieldInPolicyAllTypes("g", 1);
+            var groupSubjects = model.GetValuesForFieldInPolicyAllTypes("g", 0);
+            return policySubjects.Concat(groupSubjects).Distinct()
+                .Where(subject => Enforce(new[]{ subject }.Concat(permissions).Cast<object>().ToArray()))
+                .Except(groupInherit);
+        }
     }
 }
