@@ -536,28 +536,22 @@ namespace NetCasbin
 
         private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
         {
-            if (!Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames))
+            if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
             {
                 return expressionString;
             }
 
+            Dictionary<string, string> rules = new();
             foreach (string ruleName in ruleNames)
             {
-                if (!policyTokens.ContainsKey(ruleName))
+                if (policyTokens.TryGetValue(ruleName, out int ruleIndex) is false)
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
-                string rule = Utility.EscapeAssertion(policyValues[policyTokens[ruleName]]);
-                if (rule.Contains(">") || rule.Contains("<") || rule.Contains("="))
-                {
-                    expressionString = Utility.ReplaceEval(expressionString, rule);
-                }
-                else
-                {
-                    expressionString = Utility.ReplaceEval(expressionString, "false");
-                }
+                rules[ruleName] = Utility.EscapeAssertion(policyValues[ruleIndex]);
             }
 
+            expressionString = Utility.ReplaceEval(expressionString, rules);
             return expressionString;
         }
     }

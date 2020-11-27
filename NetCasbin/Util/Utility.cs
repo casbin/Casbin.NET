@@ -209,5 +209,31 @@ namespace NetCasbin.Util
         {
             return s_evalRegex.Replace(expressStringWithEvalRule, $"({rule})");
         }
+
+        /// <summary>
+        /// Replace eval function with the value of its eval rule
+        /// </summary>
+        /// <param name="expressStringWithEvalRule"></param>
+        /// <param name="rules"></param>
+        /// <returns></returns>
+        public static string ReplaceEval(string expressStringWithEvalRule, IDictionary<string, string> rules)
+        {
+            if (rules is null)
+            {
+                return expressStringWithEvalRule;
+            }
+
+            return s_evalRegex.Replace(expressStringWithEvalRule, match =>
+            {
+                GroupCollection matchGroups = match.Groups;
+                int subMatchCount = matchGroups.Count - 1;
+                if (subMatchCount is 0 || rules.TryGetValue(
+                    matchGroups[1].Value, out string rule) is false)
+                {
+                    return match.Value;
+                }
+                return rule;
+            });
+        }
     }
 }
