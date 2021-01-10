@@ -213,11 +213,13 @@ namespace NetCasbin
         public bool LoadFilteredPolicy(Filter filter)
         {
             model.ClearPolicy();
-            if (!IsFiltered())
+            if (adapter is not IFilteredAdapter filteredAdapter)
             {
-                throw new Exception("filtered policies are not supported by this adapter");
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
             }
-            (adapter as IFilteredAdapter)?.LoadFilteredPolicy(model, filter);
+
+            filteredAdapter.LoadFilteredPolicy(model, filter);
+
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -233,15 +235,12 @@ namespace NetCasbin
         public async Task<bool> LoadFilteredPolicyAsync(Filter filter)
         {
             model.ClearPolicy();
-            if (!IsFiltered())
+            if (adapter is not IFilteredAdapter filteredAdapter)
             {
-                throw new Exception("filtered policies are not supported by this adapter");
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
             }
 
-            if (adapter is IFilteredAdapter filteredAdapter)
-            {
-                await filteredAdapter.LoadFilteredPolicyAsync(model, filter);
-            }
+            await filteredAdapter.LoadFilteredPolicyAsync(model, filter);
 
             if (autoBuildRoleLinks)
             {
@@ -276,7 +275,7 @@ namespace NetCasbin
 
             if (IsFiltered())
             {
-                throw new Exception("cannot save a filtered policy");
+                throw new InvalidOperationException("Cannot save a filtered policy");
             }
             adapter.SavePolicy(model);
             watcher?.Update();
@@ -290,7 +289,7 @@ namespace NetCasbin
         {
             if (IsFiltered())
             {
-                throw new Exception("cannot save a filtered policy");
+                throw new InvalidOperationException("Cannot save a filtered policy");
             }
             await adapter.SavePolicyAsync(model);
             if (!(watcher is null))
