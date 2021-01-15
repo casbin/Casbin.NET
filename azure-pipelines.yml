@@ -28,13 +28,19 @@ stages:
           version: '5.0.x'
 
       - task: DotNetCoreCLI@2
+        displayName: Restore projects
+        inputs:
+          command: 'restore'
+          feedsToUse: 'select'
+
+      - task: DotNetCoreCLI@2
         displayName: Build projects
         inputs:
           command: 'build'
-          arguments: '-c $(buildConfiguration) -v n'
+          arguments: '-c $(buildConfiguration) --no-restore'
 
       - task: DotNetCoreCLI@2
         displayName: Test projects
         inputs:
           command: 'test'
-          arguments: '-c $(buildConfiguration) --no-build'
+          arguments: '-c $(buildConfiguration) --no-build --no-restore --verbosity normal'
