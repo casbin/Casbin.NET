@@ -33,6 +33,11 @@ namespace NetCasbin.UnitTest.Util
             Assert.Equal(res, e.Enforce(obj, act));
         }
 
+        internal static async Task TestEnforceWithoutUsersAsync(Enforcer e, string obj, string act, bool res)
+        {
+            Assert.Equal(res, await e.EnforceAsync(obj, act));
+        }
+
         internal static void TestDomainEnforce(Enforcer e, string sub, string dom, string obj, string act, bool res)
         {
             Assert.Equal(res, e.Enforce(sub, dom, obj, act));
@@ -75,31 +80,38 @@ namespace NetCasbin.UnitTest.Util
             Assert.Equal(res, myRes);
         }
 
-        internal static void TestGetRoles(Enforcer e, string name, List<string> res)
+        internal static void TestGetRoles(Enforcer e, string name, List<string> res, string domain = null)
         {
-            List<string> myRes = e.GetRolesForUser(name);
+            List<string> myRes = e.GetRolesForUser(name, domain);
             string message = "Roles for " + name + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
-        internal static void TestGetUsers(Enforcer e, string name, List<string> res)
+        internal static void TestGetUsers(Enforcer e, string name, List<string> res, string domain = null)
         {
-            List<string> myRes = e.GetUsersForRole(name);
+            List<string> myRes = e.GetUsersForRole(name, domain);
             string message = "Users for " + name + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
-        internal static void TestHasRole(Enforcer e, string name, string role, bool res)
+        internal static void TestHasRole(Enforcer e, string name, string role, bool res, string domain = null)
         {
-            bool myRes = e.HasRoleForUser(name, role);
+            bool myRes = e.HasRoleForUser(name, role, domain);
             Assert.Equal(res, myRes);
         }
 
-        internal static void TestGetPermissions(Enforcer e, string name, List<List<string>> res)
+        internal static void TestGetPermissions(Enforcer e, string name, List<List<string>> res, string domain = null)
         {
-            List<List<string>> myRes = e.GetPermissionsForUser(name);
+            List<List<string>> myRes = e.GetPermissionsForUser(name, domain);
             string message = "Permissions for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Utility.Array2DEquals(res, myRes));
+            Assert.True(Utility.Array2DEquals(res, myRes), message);
+        }
+
+        internal static void TestGetImplicitPermissions(Enforcer e, string name, List<List<string>> res, string domain = null)
+        {
+            List<List<string>> myRes = e.GetImplicitPermissionsForUser(name, domain);
+            string message = "Implicit permissions for " + name + ": " + myRes + ", supposed to be " + res;
+            Assert.True(Utility.Array2DEquals(res, myRes), message);
         }
 
         internal static void TestHasPermission(Enforcer e, string name, List<string> permission, bool res)

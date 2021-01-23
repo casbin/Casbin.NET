@@ -14,16 +14,18 @@ namespace NetCasbin.Abstractions
         /// Gets the roles that a user has.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        List<string> GetRolesForUser(string name);
+        List<string> GetRolesForUser(string name, string domain = null);
 
 
         /// <summary>
         /// Gets the users that has a role.
         /// </summary>
         /// <param name="name"></param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        List<string> GetUsersForRole(string name);
+        List<string> GetUsersForRole(string name, string domain = null);
 
         /// <summary>
         /// Gets the users that has roles.
@@ -37,54 +39,61 @@ namespace NetCasbin.Abstractions
         /// </summary>
         /// <param name="name"></param>
         /// <param name="role"></param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        bool HasRoleForUser(string name, string role);
+        bool HasRoleForUser(string name, string role, string domain = null);
 
         /// <summary>
         /// Adds a role for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <param name="role"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        bool AddRoleForUser(string user, string role);
+        bool AddRoleForUser(string user, string role, string domain = null);
 
         /// <summary>
         /// Adds a role for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <param name="role"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        Task<bool> AddRoleForUserAsync(string user, string role);
+        Task<bool> AddRoleForUserAsync(string user, string role, string domain = null);
 
         /// <summary>
         /// Deletes a role for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <param name="role"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        bool DeleteRoleForUser(string user, string role);
+        bool DeleteRoleForUser(string user, string role, string domain = null);
 
         /// <summary>
         /// Deletes a role for a user.
         /// </summary>
         /// <param name="user"></param>
         /// <param name="role"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        Task<bool> DeleteRoleForUserAsync(string user, string role);
+        Task<bool> DeleteRoleForUserAsync(string user, string role, string domain = null);
 
         /// <summary>
         /// Deletes all roles for a user.
         /// </summary>
         /// <param name="user"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        bool DeleteRolesForUser(string user);
+        bool DeleteRolesForUser(string user, string domain = null);
 
         /// <summary>
         /// Deletes all roles for a user.
         /// </summary>
         /// <param name="user"></param>
+        /// <param name="domain"></param>
         /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        Task<bool> DeleteRolesForUserAsync(string user);
+        Task<bool> DeleteRolesForUserAsync(string user, string domain = null);
 
         /// <summary>
         /// DeleteUser deletes a user
@@ -99,17 +108,18 @@ namespace NetCasbin.Abstractions
         /// <param name="user"></param>
         /// <returns>Returns false if the user does not exist (aka not affected).</returns>
         Task<bool> DeleteUserAsync(string user);
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        void DeleteRole(string role);
 
         /// <summary>
         /// Deletes a role.
         /// </summary>
         /// <param name="role"></param>
-        Task DeleteRoleAsync(string role);
+        bool DeleteRole(string role);
+
+        /// <summary>
+        /// Deletes a role.
+        /// </summary>
+        /// <param name="role"></param>
+        Task<bool> DeleteRoleAsync(string role);
 
         /// <summary>
         /// DeletePermission deletes a permission. 
@@ -221,8 +231,9 @@ namespace NetCasbin.Abstractions
         /// Gets permissions for a user or role.
         /// </summary>
         /// <param name="user">User or role</param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        List<List<string>> GetPermissionsForUser(string user);
+        List<List<string>> GetPermissionsForUser(string user, string domain = null);
 
         /// <summary>
         /// Determines whether a user has a permission.
@@ -299,7 +310,8 @@ namespace NetCasbin.Abstractions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        List<string> GetImplicitRolesForUser(string name, params string[] domain);
+        List<string> GetImplicitRolesForUser(string name, string domain = null);
+
         /// <summary>
         /// <para>Gets implicit permissions for a user or role.</para>
         /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
@@ -311,8 +323,9 @@ namespace NetCasbin.Abstractions
         /// <para>But GetImplicitPermissionsForUser("alice") will get: [["admin", "data1", "read"], ["alice", "data2", "read"]].</para>
         /// </summary>
         /// <param name="user">User or role</param>
+        /// <param name="domain"></param>
         /// <returns></returns>
-        List<List<string>> GetImplicitPermissionsForUser(string user);
+        List<List<string>> GetImplicitPermissionsForUser(string user,  string domain = null);
 
     }
 

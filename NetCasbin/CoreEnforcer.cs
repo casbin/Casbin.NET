@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using DynamicExpresso;
 using NetCasbin.Abstractions;
@@ -447,6 +448,8 @@ namespace NetCasbin
                         throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                     }
 
+                    IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
+                    ExpressionHandler.SetPolicyParameters(policyValues);
                     var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
 
                     if (chainEffector.TryChain(nowEffect))
@@ -521,6 +524,8 @@ namespace NetCasbin
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
+                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
+                ExpressionHandler.SetPolicyParameters(policyValues);
                 var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
                 finalResult = _effector.MergeEffects(effect, new[] { nowEffect }, null);
             }
