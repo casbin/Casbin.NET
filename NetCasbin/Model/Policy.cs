@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
 using NetCasbin.Rbac;
 using NetCasbin.Util;
 
@@ -9,6 +12,10 @@ namespace NetCasbin.Model
     public class Policy
     {
         public Dictionary<string, Dictionary<string, Assertion>> Model { get; }
+
+#if !NET45
+        internal ILogger Logger { get; set; }
+#endif
 
         protected Policy()
         {
