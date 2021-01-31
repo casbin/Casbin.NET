@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NetCasbin.Rbac;
 using NetCasbin.UnitTest.Fixtures;
+using NetCasbin.UnitTest.Mock;
 using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
@@ -354,7 +356,7 @@ namespace NetCasbin.UnitTest
         public void TestRbacModelWithCustomRoleManager()
         {
             var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
-            e.SetRoleManager(new CustomRoleManager());
+            e.SetRoleManager(new MockCustomRoleManager());
             e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "data1", "read", true);
@@ -473,42 +475,6 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             TestEnforce(e, "alice", "/alice_data2/myid", "GET", false);
             TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
-        }
-
-
-        public class CustomRoleManager : IRoleManager
-        {
-            public void Clear()
-            {
-            }
-
-            public void AddLink(string name1, string name2, params string[] domain)
-            {
-            }
-
-            public void DeleteLink(string name1, string name2, params string[] domain)
-            {
-            }
-
-            public bool HasLink(string name1, string name2, params string[] domain)
-            {
-                if (name1.Equals("alice") && name2.Equals("alice"))
-                {
-                    return true;
-                }
-                else if (name1.Equals("alice") && name2.Equals("data2_admin"))
-                {
-                    return true;
-                }
-                else if (name1.Equals("bob") && name2.Equals("bob"))
-                {
-                    return true;
-                }
-                return false;
-            }
-
-            public List<string> GetRoles(string name, params string[] domain) => null;
-            public List<string> GetUsers(string name, params string[] domain) => null;
         }
 
         public class TestResource

@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
+using NetCasbin.Rbac;
 using NetCasbin.Util;
 using Xunit;
 
@@ -132,5 +134,35 @@ namespace NetCasbin.UnitTest.Util
             List<List<string>> myRes = e.GetPermissionsForUserInDomain(name, domain);
             Assert.True(Utility.Array2DEquals(res, myRes), "Permissions for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res);
         }
+
+        #region RoleManger test
+
+        internal static void TestRole(IRoleManager roleManager, string name1, string name2, bool expectResult)
+        {
+            bool result = roleManager.HasLink(name1, name2);
+            Assert.Equal(expectResult, result);
+        }
+
+        internal static void TestDomainRole(IRoleManager roleManager, string name1, string name2, string domain, bool expectResult)
+        {
+            bool result = roleManager.HasLink(name1, name2, domain);
+            Assert.Equal(expectResult, result);
+        }
+
+        internal static void TestGetRoles(IRoleManager roleManager, string name, List<string> expectResult)
+        {
+            List<string> result = roleManager.GetRoles(name);
+            string message = $"{name}: {result}, supposed to be {expectResult}";
+            Assert.True(Utility.SetEquals(expectResult, result), message);
+        }
+
+        internal static void TestGetRolesWithDomain(IRoleManager roleManager, string name, string domain, List<string> expectResult)
+        {
+            List<string> result = roleManager.GetRoles(name, domain);
+            string message = $"{name}: {result}, supposed to be {expectResult}";
+            Assert.True(Utility.SetEquals(expectResult, result), message);
+        }
+
+        #endregion
     }
 }
