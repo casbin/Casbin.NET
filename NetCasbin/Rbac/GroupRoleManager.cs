@@ -15,6 +15,7 @@ namespace NetCasbin.Rbac
     /// DefaultRoleManager, it will return false.
     /// GroupRoleManager is to handle this situation.
     /// </summary>
+    /// 
     public class GroupRoleManager : DefaultRoleManager
     {
         /// <summary>

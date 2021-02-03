@@ -9,7 +9,7 @@ namespace NetCasbin.Rbac
     /// </summary>
     public class Role
     {
-        private readonly Lazy<Dictionary<string, Role>> _roles = new Lazy<Dictionary<string, Role>>();
+        private readonly Lazy<Dictionary<string, Role>> _roles = new();
 
         public Role(string name)
         {
