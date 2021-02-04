@@ -15,14 +15,63 @@ namespace NetCasbin.Model
             Model = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
+
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="roleManager"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="policyType"></param>
+        /// <param name="rule"></param>
+        public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
+            string section, string policyType, IEnumerable<string> rule)
+        {
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetExistAssertion(section, policyType);
+            assertion.BuildIncrementalRoleLink(roleManager, policyOperation, rule);
+        }
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="roleManager"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="policyType"></param>
+        /// <param name="rules"></param>
+        public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
+            string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        {
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetExistAssertion(section, policyType);
+            assertion.BuildIncrementalRoleLinks(roleManager, policyOperation, rules);
+        }
+
+
+        /// <summary>
+        /// Initializes the roles in RBAC.
+        /// </summary>
+        /// <param name="roleManager"></param>
         public void BuildRoleLinks(IRoleManager roleManager)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection))
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
-                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
-                {
-                    assertion.BuildRoleLinks(roleManager);
-                }
+                return;
+            }
+
+            foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
+            {
+                assertion.BuildRoleLinks(roleManager);
             }
         }
 
