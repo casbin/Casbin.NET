@@ -156,13 +156,7 @@ namespace NetCasbin.Util
             return true;
         }
 
-        internal static void LogPrint(string v)
-        {
-            throw new NotImplementedException();
-        }
-
         private static readonly Regex s_evalRegex = new Regex(@"\beval\((?<rule>[^)]*)\)");
-
 
         /// <summary>
         /// Determines whether matcher contains eval function
@@ -197,17 +191,6 @@ namespace NetCasbin.Util
             }
             evalRuleNames = null;
             return false;
-        }
-
-        /// <summary>
-        /// Replace eval function with the value of its eval rule
-        /// </summary>
-        /// <param name="expressStringWithEvalRule"></param>
-        /// <param name="rule"></param>
-        /// <returns></returns>
-        internal static string ReplaceEval(string expressStringWithEvalRule, string rule)
-        {
-            return s_evalRegex.Replace(expressStringWithEvalRule, $"({rule})");
         }
 
         /// <summary>
