@@ -87,11 +87,10 @@ namespace NetCasbin.Model
                 Value = value
             };
 
-            if (section.Equals(PermConstants.Section.RequestSection) ||
-                section.Equals(PermConstants.Section.PolicySection))
+            if (section.Equals(PermConstants.Section.RequestSection)
+                || section.Equals(PermConstants.Section.PolicySection))
             {
-                var tokens = assertion.Value
-                    .Split(PermConstants.PolicySeparatorChar)
+                string[] tokens = assertion.Value.Split(PermConstants.PolicySeparatorChar)
                     .Select(t => t.Trim()).ToArray();
 
                 if (tokens.Length != 0)

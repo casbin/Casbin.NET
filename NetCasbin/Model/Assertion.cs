@@ -12,15 +12,15 @@ namespace NetCasbin.Model
     /// </summary>
     public class Assertion
     {
-        public string Key { set; get; }
+        public string Key { get; internal set; }
 
-        public string Value { set; get; }
+        public string Value { get; internal set;  }
 
-        public IDictionary<string, int> Tokens { set; get; }
+        public IDictionary<string, int> Tokens { get; internal set;  }
 
         public IRoleManager RoleManager { get; private set; }
 
-        public List<List<string>> Policy { set; get; }
+        public List<List<string>> Policy { get; internal set; }
 
         private HashSet<string> PolicyStringSet { get; }
 
