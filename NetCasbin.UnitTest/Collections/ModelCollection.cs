@@ -1,7 +1,7 @@
-﻿using NetCasbin.UnitTest.Fixtures;
+﻿using Casbin.UnitTests.Fixtures;
 using Xunit;
 
-namespace NetCasbin.UnitTest.Collections
+namespace Casbin.UnitTests.Collections
 {
     [CollectionDefinition("Model collection")]
     public class ModelCollection : ICollectionFixture<TestModelFixture>

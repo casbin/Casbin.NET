@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
-using NetCasbin.Extensions;
-using NetCasbin.Rbac;
-using NetCasbin.Util;
+using Casbin.Extensions;
+using Casbin.Rbac;
+using Casbin.Util;
 using Xunit;
-using static NetCasbin.UnitTest.Util.TestUtil;
+using static Casbin.UnitTests.Util.TestUtil;
 
-namespace NetCasbin.UnitTest
+namespace Casbin.UnitTests
 {
     public class RoleManagerTest
     {

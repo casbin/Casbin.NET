@@ -27,6 +27,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Casbin.csproj.DotSettings" />
     <None Remove="casbin.snk" />
   </ItemGroup>
 

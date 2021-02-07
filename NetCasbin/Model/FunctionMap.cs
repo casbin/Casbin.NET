@@ -1,8 +1,7 @@
 ﻿using System.Collections.Generic;
-using NetCasbin.Abstractions;
-using NetCasbin.Util.Function;
+using Casbin.Util.Function;
 
-namespace NetCasbin.Model
+namespace Casbin.Model
 {
     public class FunctionMap
     {

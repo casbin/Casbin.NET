@@ -3,19 +3,19 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using NetCasbin.Model;
+using Casbin.Persist;
 
-namespace NetCasbin.Persist.FileAdapter
+namespace Casbin.Adapter.File
 {
-    public class DefaultFilteredAdapter : DefaultFileAdapter, IFilteredAdapter
+    public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
     {
         public bool IsFiltered { get; private set; }
 
-        public DefaultFilteredAdapter(string filePath) : base(filePath)
+        public FileFilteredAdapter(string filePath) : base(filePath)
         {
         }
 
-        public DefaultFilteredAdapter(Stream inputStream) : base(inputStream)
+        public FileFilteredAdapter(Stream inputStream) : base(inputStream)
         {
         }
 

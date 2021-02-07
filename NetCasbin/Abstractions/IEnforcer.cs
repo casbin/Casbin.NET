@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     /// <summary>
     /// IEnforcer is the API interface of Enforcer

@@ -1,7 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 
-namespace NetCasbin.Persist
+namespace Casbin.Persist
 {
     public class Helper
     {

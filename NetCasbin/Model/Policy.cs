@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using NetCasbin.Rbac;
-using NetCasbin.Util;
+using Casbin.Rbac;
+using Casbin.Util;
 
-namespace NetCasbin.Model
+namespace Casbin.Model
 {
     public class Policy
     {

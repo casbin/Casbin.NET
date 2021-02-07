@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using NetCasbin.Model;
+using Casbin.Model;
 
-namespace NetCasbin.Util
+namespace Casbin.Util
 {
     public static class Utility
     {

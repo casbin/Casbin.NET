@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     public abstract class AbstractFunction
     {

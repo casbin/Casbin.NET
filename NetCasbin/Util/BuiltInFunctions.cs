@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
-using NetCasbin.Abstractions;
-using NetCasbin.Extensions;
-using NetCasbin.Rbac;
+using Casbin.Extensions;
+using Casbin.Rbac;
 
-namespace NetCasbin.Util
+namespace Casbin.Util
 {
     public static class BuiltInFunctions
     {

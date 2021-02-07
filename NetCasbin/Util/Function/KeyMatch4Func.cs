@@ -1,7 +1,6 @@
 ﻿using System;
-using NetCasbin.Abstractions;
 
-namespace NetCasbin.Util.Function
+namespace Casbin.Util.Function
 {
     public class KeyMatch4Func : AbstractFunction
     {

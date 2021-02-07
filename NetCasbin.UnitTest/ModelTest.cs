@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using NetCasbin.Rbac;
-using NetCasbin.UnitTest.Fixtures;
-using NetCasbin.UnitTest.Mock;
+﻿using System.Threading.Tasks;
+using Casbin.UnitTests.Fixtures;
+using Casbin.UnitTests.Mock;
 using Xunit;
-using static NetCasbin.UnitTest.Util.TestUtil;
+using static Casbin.UnitTests.Util.TestUtil;
 
-namespace NetCasbin.UnitTest
+namespace Casbin.UnitTests
 {
     [Collection("Model collection")]
     public class ModelTest

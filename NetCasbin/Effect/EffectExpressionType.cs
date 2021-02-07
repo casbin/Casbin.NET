@@ -1,6 +1,6 @@
-﻿namespace NetCasbin.Effect
+﻿namespace Casbin.Effect
 {
-    public enum PolicyEffectType
+    public enum EffectExpressionType
     {
         Custom,
         AllowOverride,

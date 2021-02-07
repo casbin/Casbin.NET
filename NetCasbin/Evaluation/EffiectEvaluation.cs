@@ -1,18 +1,18 @@
 ﻿using System;
-using NetCasbin.Effect;
+using Casbin.Effect;
 
-namespace NetCasbin.Evaluation
+namespace Casbin.Evaluation
 {
     internal static class EffectEvaluator
     {
-        internal static bool TryEvaluate(Effect.Effect effect, PolicyEffectType policyEffectType, ref bool result)
+        internal static bool TryEvaluate(PolicyEffect effect, EffectExpressionType policyEffectType, ref bool result)
         {
             switch (policyEffectType)
             {
-                case PolicyEffectType.AllowOverride:
+                case EffectExpressionType.AllowOverride:
                 {
                     result = false;
-                    if (effect is Effect.Effect.Allow)
+                    if (effect is PolicyEffect.Allow)
                     {
                         result = true;
                         return true;
@@ -20,10 +20,10 @@ namespace NetCasbin.Evaluation
                 }
                 break;
 
-                case PolicyEffectType.DenyOverride:
+                case EffectExpressionType.DenyOverride:
                 {
                     result = true;
-                    if (effect is Effect.Effect.Deny)
+                    if (effect is PolicyEffect.Deny)
                     {
                         result = false;
                         return true;
@@ -31,31 +31,31 @@ namespace NetCasbin.Evaluation
                 }
                 break;
 
-                case PolicyEffectType.AllowAndDeny:
+                case EffectExpressionType.AllowAndDeny:
                     switch (effect)
                     {
-                        case Effect.Effect.Allow:
+                        case PolicyEffect.Allow:
                             result = true;
                             return false;
-                        case Effect.Effect.Deny:
+                        case PolicyEffect.Deny:
                             result = false;
                             return true;
                     }
                     break;
 
-                case PolicyEffectType.Priority:
+                case EffectExpressionType.Priority:
                     switch (effect)
                     {
-                        case Effect.Effect.Allow:
+                        case PolicyEffect.Allow:
                             result = true;
                             return true;
-                        case Effect.Effect.Deny:
+                        case PolicyEffect.Deny:
                             result = false;
                             return true;
                     }
                     break;
 
-                case PolicyEffectType.Custom:
+                case EffectExpressionType.Custom:
                     // TODO: Support custom policy effect.
                     break;
 

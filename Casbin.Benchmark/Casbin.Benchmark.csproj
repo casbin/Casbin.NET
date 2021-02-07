@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\NetCasbin\NetCasbin.csproj" />
+    <ProjectReference Include="..\NetCasbin\Casbin.csproj" />
   </ItemGroup>
 
   <ItemGroup>

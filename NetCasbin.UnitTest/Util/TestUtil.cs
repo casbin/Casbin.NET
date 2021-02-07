@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Threading.Tasks;
-using NetCasbin.Rbac;
-using NetCasbin.Util;
+using Casbin.Rbac;
+using Casbin.Util;
 using Xunit;
 
-namespace NetCasbin.UnitTest.Util
+namespace Casbin.UnitTests.Util
 {
     public static class TestUtil
     {

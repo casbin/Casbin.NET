@@ -1,4 +1,4 @@
-﻿namespace NetCasbin.Model
+﻿namespace Casbin
 {
     public static class PermConstants
     {

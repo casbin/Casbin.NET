@@ -1,10 +1,10 @@
 using System;
 using System.Threading.Tasks;
-using NetCasbin.Effect;
-using NetCasbin.Persist;
-using NetCasbin.Rbac;
+using Casbin.Effect;
+using Casbin.Persist;
+using Casbin.Rbac;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     /// <summary>
     /// ICoreEnforcer is the API interface of CoreEnforcer

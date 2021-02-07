@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
-using NetCasbin.Util;
+using Casbin.Util;
 using Xunit;
 
-namespace NetCasbin.UnitTest
+namespace Casbin.UnitTests
 {
     public class BuiltInFunctionTest
     {

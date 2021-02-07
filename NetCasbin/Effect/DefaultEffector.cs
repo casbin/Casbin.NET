@@ -1,9 +1,7 @@
 ﻿using System;
-using NetCasbin.Abstractions;
-using NetCasbin.Evaluation;
-using NetCasbin.Model;
+using Casbin.Evaluation;
 
-namespace NetCasbin.Effect
+namespace Casbin.Effect
 {
     /// <summary>
     /// DefaultEffector is default effector for Casbin.
@@ -17,7 +15,7 @@ namespace NetCasbin.Effect
         /// <param name="effects"></param>
         /// <param name="results"></param>
         /// <returns></returns>
-        public bool MergeEffects(string effectExpression, Effect[] effects, float[] results)
+        public bool MergeEffects(string effectExpression, PolicyEffect[] effects, float[] results)
         {
             return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan());
         }
@@ -30,7 +28,7 @@ namespace NetCasbin.Effect
         /// <param name="effects"></param>
         /// <param name="results"></param>
         /// <returns></returns>
-        private bool MergeEffects(string effectExpression, Span<Effect> effects, Span<float> results)
+        private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results)
         {
             PolicyEffectType = ParsePolicyEffectType(effectExpression);
             return MergeEffects(PolicyEffectType, effects, results);
@@ -39,16 +37,16 @@ namespace NetCasbin.Effect
         /// <summary>
         /// Merges all matching results collected by the enforcer into a single decision.
         /// </summary>
-        /// <param name="policyEffectType"></param>
+        /// <param name="effectExpressionType"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
         /// <returns></returns>
-        private bool MergeEffects(PolicyEffectType policyEffectType, Span<Effect> effects, Span<float> results)
+        private bool MergeEffects(EffectExpressionType effectExpressionType, Span<PolicyEffect> effects, Span<float> results)
         {
             bool finalResult = false;
             foreach (var effect in effects)
             {
-                if (EffectEvaluator.TryEvaluate(effect, policyEffectType, ref finalResult))
+                if (EffectEvaluator.TryEvaluate(effect, effectExpressionType, ref finalResult))
                 {
                     return finalResult;
                 }
@@ -56,12 +54,12 @@ namespace NetCasbin.Effect
             return finalResult;
         }
 
-        public static PolicyEffectType ParsePolicyEffectType(string effectExpression) => effectExpression switch
+        public static EffectExpressionType ParsePolicyEffectType(string effectExpression) => effectExpression switch
         {
-            PermConstants.PolicyEffect.AllowOverride => PolicyEffectType.AllowOverride,
-            PermConstants.PolicyEffect.DenyOverride => PolicyEffectType.DenyOverride,
-            PermConstants.PolicyEffect.AllowAndDeny => PolicyEffectType.AllowAndDeny,
-            PermConstants.PolicyEffect.Priority => PolicyEffectType.Priority,
+            PermConstants.PolicyEffect.AllowOverride => EffectExpressionType.AllowOverride,
+            PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
+            PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
+            PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
 
@@ -73,7 +71,7 @@ namespace NetCasbin.Effect
 
         public string EffectExpression { get; private set; }
 
-        public PolicyEffectType PolicyEffectType { get; private set; }
+        public EffectExpressionType PolicyEffectType { get; private set; }
 
         public void StartChain(string effectExpression)
         {
@@ -83,7 +81,7 @@ namespace NetCasbin.Effect
             Result = false;
         }
 
-        public bool Chain(Effect effect)
+        public bool Chain(PolicyEffect effect)
         {
             if (CanChain is false)
             {
@@ -104,7 +102,7 @@ namespace NetCasbin.Effect
         }
 
         
-        public bool TryChain(Effect effect)
+        public bool TryChain(PolicyEffect effect)
         {
             if (CanChain is false)
             {
@@ -123,7 +121,7 @@ namespace NetCasbin.Effect
             return true;
         }
 
-        public bool TryChain(Effect effect, out bool? result)
+        public bool TryChain(PolicyEffect effect, out bool? result)
         {
             if (TryChain(effect))
             {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 
-namespace NetCasbin.Config
+namespace Casbin.Config
 {
     public class Config
     {

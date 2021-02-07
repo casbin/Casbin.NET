@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NetCasbin.Persist
+namespace Casbin.Persist
 {
     public interface IAdapter
     {

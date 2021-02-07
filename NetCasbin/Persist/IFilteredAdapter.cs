@@ -1,7 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-namespace NetCasbin.Persist
+namespace Casbin.Persist
 {
     public interface IFilteredAdapter
     {

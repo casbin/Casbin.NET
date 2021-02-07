@@ -2,16 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Casbin.Effect;
+using Casbin.Evaluation;
+using Casbin.Model;
+using Casbin.Persist;
+using Casbin.Rbac;
+using Casbin.Util;
 using DynamicExpresso;
-using NetCasbin.Abstractions;
-using NetCasbin.Effect;
-using NetCasbin.Evaluation;
-using NetCasbin.Model;
-using NetCasbin.Persist;
-using NetCasbin.Rbac;
-using NetCasbin.Util;
 
-namespace NetCasbin
+namespace Casbin
 {
     /// <summary>
     /// CoreEnforcer defines the core functionality of an enforcer.
@@ -422,14 +421,14 @@ namespace NetCasbin
 
                         var nowEffect = GetEffect(expressionResult);
 
-                        if (nowEffect is not Effect.Effect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                        if (nowEffect is not PolicyEffect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
                         {
                             string policyEffect = parameter.Value as string;
                             nowEffect = policyEffect switch
                             {
-                                "allow" => Effect.Effect.Allow,
-                                "deny" => Effect.Effect.Deny,
-                                _ => Effect.Effect.Indeterminate
+                                "allow" => PolicyEffect.Allow,
+                                "deny" => PolicyEffect.Deny,
+                                _ => PolicyEffect.Indeterminate
                             };
                         }
 
@@ -463,7 +462,7 @@ namespace NetCasbin
 
             if (policyCount != 0)
             {
-                Effect.Effect[] policyEffects = new Effect.Effect[policyCount];
+                PolicyEffect[] policyEffects = new PolicyEffect[policyCount];
 
                 for (int i = 0; i < policyCount; i++)
                 {
@@ -490,7 +489,7 @@ namespace NetCasbin
 
                     var nowEffect = GetEffect(expressionResult);
 
-                    if (nowEffect is Effect.Effect.Indeterminate)
+                    if (nowEffect is PolicyEffect.Indeterminate)
                     {
                         policyEffects[i] = nowEffect;
                         continue;
@@ -501,9 +500,9 @@ namespace NetCasbin
                         string policyEffect = parameter.Value as string;
                         nowEffect = policyEffect switch
                         {
-                            "allow" => Effect.Effect.Allow,
-                            "deny" => Effect.Effect.Deny,
-                            _ => Effect.Effect.Indeterminate
+                            "allow" => PolicyEffect.Allow,
+                            "deny" => PolicyEffect.Deny,
+                            _ => PolicyEffect.Indeterminate
                         };
                     }
 
@@ -533,9 +532,9 @@ namespace NetCasbin
             return finalResult;
         }
 
-        private static Effect.Effect GetEffect(bool expressionResult)
+        private static PolicyEffect GetEffect(bool expressionResult)
         {
-            return expressionResult ? Effect.Effect.Allow : Effect.Effect.Indeterminate;
+            return expressionResult ? PolicyEffect.Allow : PolicyEffect.Indeterminate;
         }
 
         private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)

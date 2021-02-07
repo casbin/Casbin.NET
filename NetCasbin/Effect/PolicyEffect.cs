@@ -1,6 +1,6 @@
-﻿namespace NetCasbin.Effect
+﻿namespace Casbin.Effect
 {
-    public enum Effect : byte
+    public enum PolicyEffect : byte
     {
         Allow,
         Indeterminate,

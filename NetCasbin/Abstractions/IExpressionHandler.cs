@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using DynamicExpresso;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     internal interface IExpressionHandler
     {
