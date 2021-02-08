@@ -179,7 +179,7 @@ Note: you can also initialize an enforcer with policy in DB instead of file, see
 
 See [Policy management APIs](#policy-management) for more usage.
 
-4. Please refer to the `NetCasbin.UnitTest` project for more usage.
+4. Please refer to the `Casbin.UnitTest` project for more usage.
 
 ## Policy management
 

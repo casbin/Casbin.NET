@@ -1,7 +1,6 @@
 ﻿using System;
-using NetCasbin.Abstractions;
 
-namespace NetCasbin.Util
+namespace Casbin.Util
 {
     internal class AviatorFunction : AbstractFunction
     {

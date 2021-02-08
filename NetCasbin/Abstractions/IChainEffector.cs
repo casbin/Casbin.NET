@@ -1,6 +1,6 @@
-﻿using NetCasbin.Effect;
+﻿using Casbin.Effect;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     public interface IChainEffector
     {
@@ -10,14 +10,14 @@ namespace NetCasbin.Abstractions
 
         public string EffectExpression { get; }
 
-        public PolicyEffectType PolicyEffectType { get; }
+        public EffectExpressionType PolicyEffectType { get; }
 
         public void StartChain(string policyEffect);
 
-        public bool Chain(Effect.Effect effect);
+        public bool Chain(PolicyEffect effect);
 
-        public bool TryChain(Effect.Effect effect);
+        public bool TryChain(PolicyEffect effect);
 
-        public bool TryChain(Effect.Effect effect, out bool? result);
+        public bool TryChain(PolicyEffect effect, out bool? result);
     }
 }

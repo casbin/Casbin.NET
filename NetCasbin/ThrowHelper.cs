@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace NetCasbin
+namespace Casbin
 {
     internal static class ThrowHelper
     {

@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Net;
-using NetCasbin.Abstractions;
 
-namespace NetCasbin.Util.Function
+namespace Casbin.Util.Function
 {
     public class IPMatchFunc : AbstractFunction
     {

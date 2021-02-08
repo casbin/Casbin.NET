@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetCasbin.Rbac
+namespace Casbin.Rbac
 {
     /// <summary>
     /// Role represents the data structure for a role in RBAC.

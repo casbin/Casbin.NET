@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using NetCasbin.Util;
+using Casbin.Util;
 
-namespace NetCasbin.Model
+namespace Casbin.Model
 {
     public class Model : Policy
     {

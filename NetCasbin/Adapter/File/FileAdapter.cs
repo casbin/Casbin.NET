@@ -4,23 +4,24 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using NetCasbin.Model;
-using NetCasbin.Util;
+using Casbin.Model;
+using Casbin.Persist;
+using Casbin.Util;
 
-namespace NetCasbin.Persist.FileAdapter
+namespace Casbin.Adapter.File
 {
-    public class DefaultFileAdapter : IAdapter
+    public class FileAdapter : IAdapter
     {
         protected readonly string filePath;
         private readonly bool _readOnly;
         private readonly StreamReader _byteArrayInputStream;
 
-        public DefaultFileAdapter(string filePath)
+        public FileAdapter(string filePath)
         {
             this.filePath = filePath;
         }
 
-        public DefaultFileAdapter(Stream inputStream)
+        public FileAdapter(Stream inputStream)
         {
             _readOnly = true;
             try
@@ -142,7 +143,7 @@ namespace NetCasbin.Persist.FileAdapter
 
         private void SavePolicyFile(string text)
         {
-            File.WriteAllText(filePath, text, Encoding.UTF8);
+            System.IO.File.WriteAllText(filePath, text, Encoding.UTF8);
         }
 
         private async Task SavePolicyFileAsync(string text)

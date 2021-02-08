@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using NetCasbin.Rbac;
+using Casbin.Rbac;
 
-namespace NetCasbin.UnitTest.Mock
+namespace Casbin.UnitTests.Mock
 {
     public class MockCustomRoleManager : IRoleManager
     {

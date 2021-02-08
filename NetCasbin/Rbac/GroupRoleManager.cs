@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NetCasbin.Rbac
+namespace Casbin.Rbac
 {
     /// <summary>
     /// GroupRoleManager is used for authorization if the user's group is the role who has permission,
@@ -15,7 +15,6 @@ namespace NetCasbin.Rbac
     /// DefaultRoleManager, it will return false.
     /// GroupRoleManager is to handle this situation.
     /// </summary>
-    /// 
     public class GroupRoleManager : DefaultRoleManager
     {
         /// <summary>

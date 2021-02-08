@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace NetCasbin.Extensions
+namespace Casbin.Extensions
 {
     public static class IPAddressExtension
     {

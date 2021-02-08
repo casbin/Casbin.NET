@@ -1,9 +1,9 @@
 ﻿using System.Threading.Tasks;
-using NetCasbin.UnitTest.Fixtures;
+using Casbin.UnitTests.Fixtures;
 using Xunit;
-using static NetCasbin.UnitTest.Util.TestUtil;
+using static Casbin.UnitTests.Util.TestUtil;
 
-namespace NetCasbin.UnitTest
+namespace Casbin.UnitTests
 {
     [Collection("Model collection")]
     public class RbacApiWithDomainsTest

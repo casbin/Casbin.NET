@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using NetCasbin.Abstractions;
-using NetCasbin.Model;
+using Casbin.Model;
 
-namespace NetCasbin
+namespace Casbin
 {
     /// <summary>
     /// ManagementEnforcer = InternalEnforcer + Management API.

@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Casbin.Model;
+using Casbin.Util;
 using DynamicExpresso;
-using NetCasbin.Abstractions;
-using NetCasbin.Model;
-using NetCasbin.Util;
 
-namespace NetCasbin.Evaluation
+namespace Casbin.Evaluation
 {
     public class ExpressionHandler : IExpressionHandler
     {

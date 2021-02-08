@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using NetCasbin.Abstractions;
-using NetCasbin.Model;
-using NetCasbin.Persist;
-using NetCasbin.Persist.FileAdapter;
+using Casbin.Adapter.File;
+using Casbin.Persist;
 
-namespace NetCasbin
+namespace Casbin
 {
     /// <summary>
     /// Enforcer = ManagementEnforcer + RBAC API.
@@ -19,7 +17,7 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(string modelPath, string policyFile) : this(modelPath, new DefaultFileAdapter(policyFile))
+        public Enforcer(string modelPath, string policyFile) : this(modelPath, new FileAdapter(policyFile))
         {
         }
 
@@ -47,7 +45,7 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(string modelPath, string policyFile, bool enableLog) : this(modelPath, new DefaultFileAdapter(policyFile))
+        public Enforcer(string modelPath, string policyFile, bool enableLog) : this(modelPath, new FileAdapter(policyFile))
         {
         }
 

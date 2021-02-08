@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace NetCasbin.Rbac
+namespace Casbin.Rbac
 {
     public class DefaultRoleManager : IRoleManager
     {

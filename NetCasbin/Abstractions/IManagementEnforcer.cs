@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace NetCasbin.Abstractions
+namespace Casbin
 {
     /// <summary>
     /// IManagementEnforcer is the API interface of ManagementEnforcer

@@ -1,9 +1,8 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
-using NetCasbin.Persist.FileAdapter;
+using Casbin.Adapter.File;
 
-namespace NetCasbin.UnitTest.Fixtures
+namespace Casbin.UnitTests.Fixtures
 {
     public class TestModelFixture
     {
@@ -119,7 +118,7 @@ namespace NetCasbin.UnitTest.Fixtures
             model.ClearPolicy();
             using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(policy)))
             {
-                DefaultFileAdapter fileAdapter = new DefaultFileAdapter(ms);
+                FileAdapter fileAdapter = new FileAdapter(ms);
                 fileAdapter.LoadPolicy(model);
             }
             model.RefreshPolicyStringSet();
