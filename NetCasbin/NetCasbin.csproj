@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>netstandard2.0;net45</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net45;net461;</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
     <LangVersion>9.0</LangVersion>
   </PropertyGroup>
@@ -33,6 +33,18 @@
   <ItemGroup>
     <PackageReference Include="DynamicExpresso.Core" Version="2.3.3" />
     <PackageReference Include="System.Memory" Version="4.5.4" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Console">
+      <Version>5.0.0</Version>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
+    <PackageReference Include="Microsoft.Extensions.Logging.Console">
+      <Version>5.0.0</Version>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>

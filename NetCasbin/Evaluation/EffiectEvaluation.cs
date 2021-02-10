@@ -5,8 +5,11 @@ namespace NetCasbin.Evaluation
 {
     internal static class EffectEvaluator
     {
-        internal static bool TryEvaluate(Effect.Effect effect, PolicyEffectType policyEffectType, ref bool result)
+        internal static bool TryEvaluate(Effect.Effect effect, PolicyEffectType policyEffectType,
+            ref bool result, out bool hitPolicy)
         {
+            hitPolicy = false;
+
             switch (policyEffectType)
             {
                 case PolicyEffectType.AllowOverride:
@@ -15,6 +18,7 @@ namespace NetCasbin.Evaluation
                     if (effect is Effect.Effect.Allow)
                     {
                         result = true;
+                        hitPolicy = true;
                         return true;
                     }
                 }
@@ -26,6 +30,7 @@ namespace NetCasbin.Evaluation
                     if (effect is Effect.Effect.Deny)
                     {
                         result = false;
+                        hitPolicy = true;
                         return true;
                     }
                 }
@@ -36,9 +41,11 @@ namespace NetCasbin.Evaluation
                     {
                         case Effect.Effect.Allow:
                             result = true;
+                            hitPolicy = true;
                             return false;
                         case Effect.Effect.Deny:
                             result = false;
+                            hitPolicy = true;
                             return true;
                     }
                     break;
@@ -48,9 +55,11 @@ namespace NetCasbin.Evaluation
                     {
                         case Effect.Effect.Allow:
                             result = true;
+                            hitPolicy = true;
                             return true;
                         case Effect.Effect.Deny:
                             result = false;
+                            hitPolicy = true;
                             return true;
                     }
                     break;

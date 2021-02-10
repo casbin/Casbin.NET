@@ -8,6 +8,8 @@ namespace NetCasbin.Abstractions
 
         public bool CanChain { get; }
 
+        public bool HitPolicy { get; }
+
         public string EffectExpression { get; }
 
         public PolicyEffectType PolicyEffectType { get; }
