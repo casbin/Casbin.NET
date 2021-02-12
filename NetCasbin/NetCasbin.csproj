@@ -8,13 +8,17 @@
 
   <PropertyGroup>
     <PackageId>Casbin.NET</PackageId>
-    <Version>1.4.0</Version>
+    <Version>1.5.0</Version>
     <PackageIcon>casbin.png</PackageIcon>
-    <Description>Casbin ported to dotnet core</Description>
+    <Description>Casbin.NET is a powerful and efficient open-source access control library for .NET (C#) projects. It provides support for enforcing authorization based on various access control models.</Description>
     <PackageReleaseNotes>
-      1. Add Batch APIs，Scaling ABAC (eval function) features.
-2. Improve performance and reduce the allocate of enforcer and build in funtions.
-3. Update DynamicExpresso.Core version to v2.3.2.
+1. Support pattern feature at default role manager.
+2. Support build Incremental role links.
+3. Support logging feature and add EnforceEx method.
+4. Support multiple eval functions.
+5. Add domain optional support at RBAC APIs.
+6. Add GetImplicitUsersForPermission API.
+7. Fix determine filter adapter error when loading filter policy.
     </PackageReleaseNotes>
     <Authors>Casbin, Zhikui H</Authors>
     <Company>Zhikui H</Company>
