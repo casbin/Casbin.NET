@@ -187,7 +187,7 @@ jobs:
     - name: Add myget nuget source
       run: dotnet nuget add source https://www.myget.org/F/casbin-net/api/v2/package --name myget.org
 
-    - name: Push myget package
+    - name: Push develop packages to myget.org
       run: dotnet nuget push .\packages\*.nupkg -s myget.org -k $env:MYGET_API_TOKEN --skip-duplicate
 
   release:
@@ -241,7 +241,16 @@ jobs:
         path: './packages'
 
     - name: Add myget nuget source
-      run: dotnet nuget add source https://api.nuget.org/v3/index.json --name nuget.org
+      run: dotnet nuget add source https://www.myget.org/F/casbin-net/api/v2/package --name myget.org
 
-    - name: Push myget package
+    - name: Push packages to myget.org
+      run: dotnet nuget push .\packages\*.nupkg -s myget.org -k $env:MYGET_API_TOKEN --skip-duplicate
+
+    - name: Add github nuget source
+      run: dotnet nuget add source https://nuget.pkg.github.com/casbin/index.json --name github.com --username casbin --password $env:GITHUB_TOKEN
+
+    - name: Push packages to github.com
+      run: dotnet nuget push .\packages\*.nupkg -s github.com --skip-duplicate;
+
+    - name: Push packages to nuget.org
       run: dotnet nuget push .\packages\*.nupkg -s nuget.org -k $env:NUGET_API_TOKEN --skip-duplicate
