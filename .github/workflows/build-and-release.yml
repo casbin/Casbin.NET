@@ -124,11 +124,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Run semantic-release
+      - name: Dry-run semantic-release
         run: |
           export PATH=$PATH:$(yarn global bin)
           yarn global add semantic-release@17.2.4
-          semantic-release
+          semantic-release -d
 
   release-build-version:
     runs-on: windows-latest
@@ -193,7 +193,7 @@ jobs:
   release:
     runs-on: windows-latest
     needs: release-build-version
-    if: github.repository_owner == 'casbin' && github.event_name == 'push'
+    if: github.repository_owner == 'casbin' && github.event_name == 'push' && github.ref == 'refs/heads/master'
 
     steps:
     - name: Checkout
