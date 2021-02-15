@@ -149,8 +149,7 @@ namespace Casbin.Benchmark
 
             NowEnforcer = new Enforcer(
                 GetTestFilePath(modelFileName),
-                GetTestFilePath(policyFileName),
-                false);
+                GetTestFilePath(policyFileName));
         }
         #endregion
 

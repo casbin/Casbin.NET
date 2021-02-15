@@ -1,14 +1,28 @@
-﻿using System.IO;
+﻿using System.Collections.Generic;
+using System.IO;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Persist;
+using Casbin.UnitTest.Mock;
+using Casbin.UnitTests.Fixtures;
 using Xunit;
+using Xunit.Abstractions;
 using static Casbin.UnitTests.Util.TestUtil;
 
 namespace Casbin.UnitTests
 {
-    public class EnforcerUnitTest
+    [Collection("Model collection")]
+    public class EnforcerTest
     {
+        private readonly ITestOutputHelper _testOutputHelper;
+        private readonly TestModelFixture _testModelFixture;
+
+        public EnforcerTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
+        {
+            _testOutputHelper = testOutputHelper;
+            _testModelFixture = testModelFixture;
+        }
+
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
@@ -452,9 +466,10 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestEnableLog()
         {
-            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv", true);
-            // The log is enabled by default, so the above is the same with:
-            // Enforcer e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy.csv")
+            {
+                Logger = new MockLogger<Enforcer>(_testOutputHelper)
+            };
 
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
@@ -465,6 +480,7 @@ namespace Casbin.UnitTests
             TestEnforce(e, "bob", "data2", "read", false);
             TestEnforce(e, "bob", "data2", "write", true);
 
+            e.Logger = null;
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
             TestEnforce(e, "alice", "data2", "read", false);
@@ -735,6 +751,104 @@ namespace Casbin.UnitTests
 
                 await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
             }
+        }
+
+        [Fact]
+        public void TestEnforceExApi()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+
+            TestEnforceEx(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "write", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "read", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+
+            e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "write", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "read", new List<string> {"data2_admin", "data2", "read"});
+            TestEnforceEx(e, "alice", "data2", "write", new List<string> {"data2_admin", "data2", "write"});
+            TestEnforceEx(e, "bob", "data1", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+
+            e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
+            e.BuildRoleLinks();
+
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read", "allow"});
+            TestEnforceEx(e, "alice", "data1", "write",
+                new List<string> {"data1_deny_group", "data1", "write", "deny"});
+            TestEnforceEx(e, "alice", "data2", "read", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "read",
+                new List<string> {"data2_allow_group", "data2", "read", "allow"});
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
+        }
+
+        [Fact]
+        public async Task TestEnforceExApiAsync()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+
+            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
+            await TestEnforceExAsync(e, "alice", "data2", "read", new List<string>());
+            await TestEnforceExAsync(e, "alice", "data2", "write", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data1", "read", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+
+            e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+
+            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read"});
+            await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
+            await TestEnforceExAsync(e, "alice", "data2", "read", new List<string> {"data2_admin", "data2", "read"});
+            await TestEnforceExAsync(e, "alice", "data2", "write", new List<string> {"data2_admin", "data2", "write"});
+            await TestEnforceExAsync(e, "bob", "data1", "read", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+
+            e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
+            e.BuildRoleLinks();
+
+            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read", "allow"});
+            await TestEnforceExAsync(e, "alice", "data1", "write",
+                new List<string> {"data1_deny_group", "data1", "write", "deny"});
+            await TestEnforceExAsync(e, "alice", "data2", "read", new List<string>());
+            await TestEnforceExAsync(e, "alice", "data2", "write", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
+            await TestEnforceExAsync(e, "bob", "data2", "read",
+                new List<string> {"data2_allow_group", "data2", "read", "allow"});
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
+        }
+
+        [Fact]
+        public void TestEnforceExApiLog()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel())
+            {
+                Logger = new MockLogger<Enforcer>(_testOutputHelper)
+            };
+
+            TestEnforceEx(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "write", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "read", new List<string>());
+            TestEnforceEx(e, "alice", "data2", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data1", "write", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "read", new List<string>());
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+
+            e.Logger = null;
         }
     }
 }

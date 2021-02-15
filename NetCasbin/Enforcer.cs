@@ -12,16 +12,17 @@ namespace Casbin
     /// </summary>
     public class Enforcer : ManagementEnforcer, IEnforcer
     {
-
         public Enforcer() : this(string.Empty, string.Empty)
         {
         }
 
-        public Enforcer(string modelPath, string policyFile) : this(modelPath, new FileAdapter(policyFile))
+        public Enforcer(string modelPath, string policyPath)
+            : this(modelPath, new FileAdapter(policyPath))
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter) : this(NewModel(modelPath, string.Empty), adapter)
+        public Enforcer(string modelPath, IAdapter adapter)
+            : this(NewModel(modelPath, string.Empty), adapter)
         {
             this.modelPath = modelPath;
         }
@@ -35,18 +36,21 @@ namespace Casbin
             LoadPolicy();
         }
 
-        public Enforcer(Model.Model m) :
-            this(m, null)
+        public Enforcer(Model.Model m)
+            : this(m, null)
         {
         }
 
-        public Enforcer(string modelPath) :
-            this(modelPath, string.Empty)
+        public Enforcer(string modelPath)
+            : this(modelPath, string.Empty)
         {
         }
 
-        public Enforcer(string modelPath, string policyFile, bool enableLog) : this(modelPath, new FileAdapter(policyFile))
+        [Obsolete("The method will be removed at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/116 to know more information.")]
+        public Enforcer(string modelPath, string policyFile, bool enableLog)
+            : this(modelPath, new FileAdapter(policyFile))
         {
+
         }
 
         #region Get roles or users

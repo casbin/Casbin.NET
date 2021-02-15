@@ -8,6 +8,8 @@ namespace Casbin
 
         public bool CanChain { get; }
 
+        public bool HitPolicy { get; }
+
         public string EffectExpression { get; }
 
         public EffectExpressionType PolicyEffectType { get; }

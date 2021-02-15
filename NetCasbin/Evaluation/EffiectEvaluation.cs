@@ -5,9 +5,12 @@ namespace Casbin.Evaluation
 {
     internal static class EffectEvaluator
     {
-        internal static bool TryEvaluate(PolicyEffect effect, EffectExpressionType policyEffectType, ref bool result)
+        internal static bool TryEvaluate(PolicyEffect effect, EffectExpressionType effectExpressionType,
+            ref bool result, out bool hitPolicy)
         {
-            switch (policyEffectType)
+            hitPolicy = false;
+
+            switch (effectExpressionType)
             {
                 case EffectExpressionType.AllowOverride:
                 {
@@ -15,6 +18,7 @@ namespace Casbin.Evaluation
                     if (effect is PolicyEffect.Allow)
                     {
                         result = true;
+                        hitPolicy = true;
                         return true;
                     }
                 }
@@ -26,6 +30,7 @@ namespace Casbin.Evaluation
                     if (effect is PolicyEffect.Deny)
                     {
                         result = false;
+                        hitPolicy = true;
                         return true;
                     }
                 }
@@ -36,9 +41,11 @@ namespace Casbin.Evaluation
                     {
                         case PolicyEffect.Allow:
                             result = true;
+                            hitPolicy = true;
                             return false;
                         case PolicyEffect.Deny:
                             result = false;
+                            hitPolicy = true;
                             return true;
                     }
                     break;
@@ -48,9 +55,11 @@ namespace Casbin.Evaluation
                     {
                         case PolicyEffect.Allow:
                             result = true;
+                            hitPolicy = true;
                             return true;
                         case PolicyEffect.Deny:
                             result = false;
+                            hitPolicy = true;
                             return true;
                     }
                     break;

@@ -4,10 +4,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Effect;
 using Casbin.Evaluation;
-using Casbin.Model;
+using Casbin.Extensions;
 using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.Util;
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
 using DynamicExpresso;
 
 namespace Casbin
@@ -29,7 +32,11 @@ namespace Casbin
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
         protected bool autoNotifyWatcher;
+
         internal IExpressionHandler ExpressionHandler { get; private set; }
+#if !NET45
+        public ILogger Logger { get; set; }
+#endif
 
         protected void Initialize()
         {
@@ -166,6 +173,10 @@ namespace Casbin
         public void ClearPolicy()
         {
             model.ClearPolicy();
+
+#if !NET45
+            Logger?.LogInformation("Policy Management, Cleared all policy.");
+#endif
         }
 
         /// <summary>
@@ -368,20 +379,105 @@ namespace Casbin
         /// <returns>Whether to allow the request.</returns>
         public bool Enforce(params object[] requestValues)
         {
-            if (!_enabled)
+            return Enforce((IReadOnlyList<object>) requestValues);
+        }
+
+#if !NET45
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceEx(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = Enforce(requestValues, explains);
+            return (result, explains);
+        }
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExAsync(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = await EnforceAsync(requestValues, explains);
+            return (result, explains);
+        }
+#else
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceEx(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = Enforce(requestValues, explains);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
+        }
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExAsync(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = await EnforceAsync(requestValues, explains);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
+        }
+#endif
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <param name="explains"></param>
+        /// <returns>Whether to allow the request.</returns>
+        private Task<bool> EnforceAsync(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
+        {
+            return Task.FromResult(Enforce(requestValues, explains));
+        }
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="explains"></param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        private bool Enforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
+        {
+            if (_enabled is false)
             {
                 return true;
             }
 
+            bool explain = explains is not null;
             string effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
             var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
             int policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
             string expressionString = model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
 
             int requestTokenCount = ExpressionHandler.RequestTokens.Count;
-            if (requestTokenCount != requestValues.Length)
+            if (requestTokenCount != requestValues.Count)
             {
-                throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Length}.");
+                throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Count}.");
             }
             int policyTokenCount = ExpressionHandler.PolicyTokens.Count;
 
@@ -396,7 +492,7 @@ namespace Casbin
             {
                 chainEffector.StartChain(effect);
 
-                if (policyCount != 0)
+                if (policyCount is not 0)
                 {
                     foreach (var policyValues in policyList)
                     {
@@ -432,7 +528,14 @@ namespace Casbin
                             };
                         }
 
-                        if (chainEffector.TryChain(nowEffect) is false || chainEffector.CanChain is false)
+                        bool chainResult = chainEffector.TryChain(nowEffect);
+
+                        if (explain && chainEffector.HitPolicy)
+                        {
+                            explains.Add(policyValues);
+                        }
+
+                        if (chainResult is false || chainEffector.CanChain is false)
                         {
                             break;
                         }
@@ -455,11 +558,27 @@ namespace Casbin
                     {
                         finalResult = chainEffector.Result;
                     }
+
+                    if (explain && chainEffector.HitPolicy)
+                    {
+                        explains.Add(policyValues);
+                    }
                 }
 
+#if !NET45
+                if (explain)
+                {
+                    Logger?.LogEnforceResult(requestValues, finalResult, explains);
+                }
+                else
+                {
+                    Logger?.LogEnforceResult(requestValues, finalResult);
+                }
+#endif
                 return finalResult;
             }
 
+            int hitPolicyIndex;
             if (policyCount != 0)
             {
                 PolicyEffect[] policyEffects = new PolicyEffect[policyCount];
@@ -514,7 +633,7 @@ namespace Casbin
                     }
                 }
 
-                finalResult = _effector.MergeEffects(effect, policyEffects, null);
+                finalResult = _effector.MergeEffects(effect, policyEffects, null, out hitPolicyIndex);
             }
             else
             {
@@ -526,9 +645,24 @@ namespace Casbin
                 IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
                 ExpressionHandler.SetPolicyParameters(policyValues);
                 var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
-                finalResult = _effector.MergeEffects(effect, new[] { nowEffect }, null);
+                finalResult = _effector.MergeEffects(effect, new[] { nowEffect }, null, out hitPolicyIndex);
             }
 
+            if (explain && hitPolicyIndex is not -1)
+            {
+                explains.Add(policyList[hitPolicyIndex]);
+            }
+
+#if !NET45
+            if (explain)
+            {
+                Logger?.LogEnforceResult(requestValues, finalResult, explains);
+            }
+            else
+            {
+                Logger?.LogEnforceResult(requestValues, finalResult);
+            }
+#endif
             return finalResult;
         }
 

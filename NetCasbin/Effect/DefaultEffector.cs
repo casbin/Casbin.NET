@@ -14,10 +14,11 @@ namespace Casbin.Effect
         /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        public bool MergeEffects(string effectExpression, PolicyEffect[] effects, float[] results)
+        public bool MergeEffects(string effectExpression, PolicyEffect[] effects, float[] results, out int hitPolicyIndex)
         {
-            return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan());
+            return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan(), out hitPolicyIndex);
         }
 
 
@@ -27,11 +28,12 @@ namespace Casbin.Effect
         /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results)
+        private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
         {
             PolicyEffectType = ParsePolicyEffectType(effectExpression);
-            return MergeEffects(PolicyEffectType, effects, results);
+            return MergeEffects(PolicyEffectType, effects, results, out hitPolicyIndex);
         }
 
         /// <summary>
@@ -40,17 +42,25 @@ namespace Casbin.Effect
         /// <param name="effectExpressionType"></param>
         /// <param name="effects"></param>
         /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        private bool MergeEffects(EffectExpressionType effectExpressionType, Span<PolicyEffect> effects, Span<float> results)
+        private bool MergeEffects(EffectExpressionType effectExpressionType, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
         {
             bool finalResult = false;
-            foreach (var effect in effects)
+            hitPolicyIndex = -1;
+            for (int index = 0; index < effects.Length; index++)
             {
-                if (EffectEvaluator.TryEvaluate(effect, effectExpressionType, ref finalResult))
+                if (EffectEvaluator.TryEvaluate(effects[index] , effectExpressionType,
+                    ref finalResult, out bool hitPolicy))
                 {
+                    if (hitPolicy)
+                    {
+                        hitPolicyIndex = index;
+                    }
                     return finalResult;
                 }
             }
+
             return finalResult;
         }
 
@@ -66,6 +76,8 @@ namespace Casbin.Effect
         #region IChainEffector
 
         public bool Result { get; private set; }
+
+        public bool HitPolicy { get; private set; }
 
         public bool CanChain { get; private set; }
 
@@ -90,14 +102,17 @@ namespace Casbin.Effect
 
             bool result = Result;
 
-            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType, ref result))
+            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType,
+                ref result, out bool hitPolicy))
             {
                 CanChain = false;
                 Result = result;
+                HitPolicy = hitPolicy;
                 return true;
             }
 
             Result = result;
+            HitPolicy = hitPolicy;
             return true;
         }
 
@@ -110,14 +125,17 @@ namespace Casbin.Effect
             }
 
             bool result = Result;
-            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType, ref result))
+            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType,
+                ref result, out bool hitPolicy))
             {
                 CanChain = false;
                 Result = result;
+                HitPolicy = hitPolicy;
                 return true;
             }
 
             Result = result;
+            HitPolicy = hitPolicy;
             return true;
         }
 

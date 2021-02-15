@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Casbin.Model;
+using Casbin;
 
 namespace Casbin
 {
@@ -45,7 +46,14 @@ namespace Casbin
                 return false;
             }
 
-            NoticePolicyChanged(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                    sec, ptype, rule);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            NotifyPolicyChanged();
             return true;
         }
 
@@ -82,7 +90,14 @@ namespace Casbin
                 return false;
             }
 
-            await NoticePolicyChangedAsync(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                    sec, ptype, rule);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            await NotifyPolicyChangedAsync();
             return true;
         }
 
@@ -121,7 +136,14 @@ namespace Casbin
                 return false;
             }
 
-            NoticePolicyChanged(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                    sec, ptype, ruleArray);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            NotifyPolicyChanged();
             return true;
         }
 
@@ -161,7 +183,14 @@ namespace Casbin
                 return false;
             }
 
-            await NoticePolicyChangedAsync(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                    sec, ptype, ruleArray);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            await NotifyPolicyChangedAsync();
             return true;
         }
 
@@ -198,7 +227,14 @@ namespace Casbin
                 return false;
             }
 
-            NoticePolicyChanged(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                    sec, ptype, rule);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            NotifyPolicyChanged();
             return true;
         }
 
@@ -235,7 +271,14 @@ namespace Casbin
                 return false;
             }
 
-            await NoticePolicyChangedAsync(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                    sec, ptype, rule);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            await NotifyPolicyChangedAsync();
             return true;
         }
 
@@ -274,7 +317,14 @@ namespace Casbin
                 return false;
             }
 
-            NoticePolicyChanged(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                    sec, ptype, ruleArray);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            NotifyPolicyChanged();
             return true;
         }
 
@@ -313,7 +363,14 @@ namespace Casbin
                 return false;
             }
 
-            await NoticePolicyChangedAsync(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                    sec, ptype, ruleArray);
+                ExpressionHandler.SetGFunctions();
+            }
+
+            await NotifyPolicyChangedAsync();
             return true;
         }
 
@@ -346,7 +403,13 @@ namespace Casbin
                 return false;
             }
 
-            NoticePolicyChanged(sec);
+            if (sec.Equals(PermConstants.Section.RoleSection))
+            {
+                BuildRoleLinks();
+                ExpressionHandler.SetGFunctions();
+            }
+
+            NotifyPolicyChanged();
             return true;
         }
 
@@ -379,32 +442,26 @@ namespace Casbin
                 return false;
             }
 
-            await NoticePolicyChangedAsync(sec);
-            return true;
-        }
-
-        private void NoticePolicyChanged(string section)
-        {
-            if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
+            if (sec.Equals(PermConstants.Section.RoleSection))
             {
                 BuildRoleLinks();
                 ExpressionHandler.SetGFunctions();
             }
 
+            await NotifyPolicyChangedAsync();
+            return true;
+        }
+
+        private void NotifyPolicyChanged()
+        {
             if (autoNotifyWatcher)
             {
                 watcher?.Update();
             }
         }
 
-        private async Task NoticePolicyChangedAsync(string section)
+        private async Task NotifyPolicyChangedAsync()
         {
-            if (autoBuildRoleLinks && section.Equals(PermConstants.Section.RoleSection))
-            {
-                BuildRoleLinks();
-                ExpressionHandler.SetGFunctions();
-            }
-
             if (autoNotifyWatcher && watcher is not null)
             {
                 await watcher.UpdateAsync();

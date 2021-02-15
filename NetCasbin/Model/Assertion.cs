@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Casbin.Rbac;
 using Casbin.Util;
+using Casbin;
 
 namespace Casbin.Model
 {
@@ -40,34 +41,110 @@ namespace Casbin.Model
             }
         }
 
+        internal void BuildIncrementalRoleLink(IRoleManager roleManager,
+            PolicyOperation policyOperation, IEnumerable<string> rule)
+        {
+            RoleManager = roleManager;
+            int count = Value.Count(c => c is '_');
+            if (count < 2)
+            {
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+            }
+
+            BuildRoleLink(roleManager, count, policyOperation, rule);
+        }
+
+        internal void BuildIncrementalRoleLinks(IRoleManager roleManager,
+            PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
+        {
+            RoleManager = roleManager;
+            int count = Value.Count(c => c is '_');
+            if (count < 2)
+            {
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+            }
+
+            foreach (var rule in rules)
+            {
+                BuildRoleLink(roleManager, count, policyOperation, rule);
+            }
+        }
+
         public void BuildRoleLinks(IRoleManager roleManager)
         {
             RoleManager = roleManager;
-            int count = Value.ToCharArray().Count(x => x == '_');
+            int count = Value.Count(c => c is '_');
+            if (count < 2)
+            {
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+            }
+
             foreach (var rule in Policy)
             {
-                if (count < 2)
-                {
-                    throw new Exception("the number of \"_\" in role definition should be at least 2");
-                }
-                if (rule.Count < count)
-                {
-                    throw new Exception("grouping policy elements do not meet role definition");
-                }
-
-                if (count == 2)
-                {
-                    roleManager.AddLink(rule[0], rule[1]);
-                }
-                else if (count == 3)
-                {
-                    roleManager.AddLink(rule[0], rule[1], rule[2]);
-                }
-                else if (count == 4)
-                {
-                    roleManager.AddLink(rule[0], rule[1], rule[2], rule[3]);
-                }
+                BuildRoleLink(roleManager, count, PolicyOperation.PolicyAdd, rule);
             }
+        }
+
+        private static void BuildRoleLink(IRoleManager roleManager, int groupPolicyCount,
+            PolicyOperation policyOperation, IEnumerable<string> rule)
+        {
+            List<string> ruleEnum = rule as List<string> ?? rule.ToList();
+            int ruleCount = ruleEnum.Count;
+
+            if (ruleCount < groupPolicyCount)
+            {
+                throw new InvalidOperationException("Grouping policy elements do not meet role definition.");
+            }
+
+            if (ruleCount > groupPolicyCount)
+            {
+                ruleEnum = ruleEnum.GetRange(0, groupPolicyCount);
+            }
+
+            switch (policyOperation)
+            {
+                case PolicyOperation.PolicyAdd:
+                    switch (groupPolicyCount)
+                    {
+                        case 2:
+                            roleManager.AddLink(ruleEnum[0], ruleEnum[1]);
+                            break;
+                        case 3:
+                            roleManager.AddLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
+                            break;
+                        case 4:
+                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
+                                ruleEnum[2], ruleEnum[3]);
+                            break;
+                        default:
+                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
+                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
+                            break;
+                    }
+                    break;
+                case PolicyOperation.PolicyRemove:
+                    switch (groupPolicyCount)
+                    {
+                        case 2:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1]);
+                            break;
+                        case 3:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
+                            break;
+                        case 4:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
+                                ruleEnum[2], ruleEnum[3]);
+                            break;
+                        default:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
+                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
+                            break;
+                    }
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);
+            }
+
         }
 
         internal bool Contains(IEnumerable<string> rule)
