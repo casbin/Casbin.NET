@@ -18,9 +18,9 @@ namespace NetCasbin.Abstractions
 
         protected abstract Delegate GetFunc();
 
-        public static implicit operator Delegate(AbstractFunction aviator)
+        public static implicit operator Delegate(AbstractFunction thisClass)
         {
-            return aviator.GetFunc();
+            return thisClass.GetFunc();
         }
     }
 }

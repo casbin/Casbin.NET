@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using DynamicExpresso;
 
 namespace NetCasbin.Abstractions
@@ -11,7 +12,7 @@ namespace NetCasbin.Abstractions
 
         public IDictionary<string, Parameter> Parameters { get; } 
 
-        public void SetFunction(string name, AbstractFunction function);
+        public void SetFunction(string name, Delegate function);
 
         public void SetGFunctions();
 
