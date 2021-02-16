@@ -557,7 +557,7 @@ namespace NetCasbin.Abstractions
         /// </summary>
         /// <param name="name">The name of the new function.</param>
         /// <param name="function">The function.</param>
-        void AddFunction(string name, AbstractFunction function);
+        void AddFunction(string name, Delegate function);
     }
 
 }

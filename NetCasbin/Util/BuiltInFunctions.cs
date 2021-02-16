@@ -194,7 +194,7 @@ namespace NetCasbin.Util
         /// <param name="name">The name of the g(_, _) function, can be "g", "g2", ..</param>
         /// <param name="roleManager">The role manager used by the function.</param>
         /// <returns>The function.</returns>
-        internal static AbstractFunction GenerateGFunction(string name, IRoleManager roleManager)
+        internal static Delegate GenerateGFunction(string name, IRoleManager roleManager)
         {
             var resultCache = new Dictionary<string, bool>();
 
@@ -229,7 +229,7 @@ namespace NetCasbin.Util
                 resultCache[cacheKey] = result;
                 return result;
             }
-            return new AviatorFunction(name, (GFunction) GFunction);
+            return (GFunction) GFunction;
         }
     }
 }

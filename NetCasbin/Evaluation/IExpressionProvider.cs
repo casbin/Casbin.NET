@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using DynamicExpresso;
 using NetCasbin.Abstractions;
@@ -140,7 +141,7 @@ namespace NetCasbin.Evaluation
 
         private void SetFunctions(Interpreter interpreter)
         {
-            foreach (KeyValuePair<string, AbstractFunction> functionKeyValue in _functionMap.FunctionDict)
+            foreach (KeyValuePair<string, Delegate> functionKeyValue in _functionMap.FunctionDict)
             {
                 interpreter.SetFunction(functionKeyValue.Key, functionKeyValue.Value);
             }
