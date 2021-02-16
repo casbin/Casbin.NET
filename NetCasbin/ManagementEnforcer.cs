@@ -988,5 +988,15 @@ namespace NetCasbin
         {
             ExpressionHandler.SetFunction(name, function);
         }
+
+        /// <summary>
+        /// Adds a customized function.
+        /// </summary>
+        /// <param name="name">The name of the new function.</param>
+        /// <param name="function">The function.</param>
+        public void AddFunction(string name, Func<string, string, bool> function)
+        {
+            AddFunction(name, (Delegate) function);
+        }
     }
 }
