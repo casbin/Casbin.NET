@@ -474,6 +474,25 @@ namespace Casbin.UnitTests
             TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
         }
 
+        [Fact]
+        public void TestKeyMatchCustomModel()
+        {
+            static bool CustomFunction(string key1, string key2)
+            {
+                return key1 is "/alice_data2/myid/using/res_id" && key2 is "/alice_data/:resource"
+                       || key1 is "/alice_data2/myid/using/res_id" && key2 is "/alice_data2/:id/using/:resId";
+            }
+
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._keyMatchCustomModelText,
+                _testModelFixture._keyMatch2PolicyText));
+
+            e.AddFunction("keyMatchCustom", CustomFunction);
+
+            TestEnforce(e, "alice", "/alice_data2/myid", "GET", false);
+            TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
+        }
+
         public class TestResource
         {
             public TestResource(string name, string owner)

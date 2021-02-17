@@ -1,13 +1,14 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using Casbin.Util.Function;
 
 namespace Casbin.Model
 {
     public class FunctionMap
     {
-        public IDictionary<string, AbstractFunction> FunctionDict { get; private set; }
+        public IDictionary<string, Delegate> FunctionDict { get; private set; }
 
-        public void AddFunction(string name, AbstractFunction function)
+        public void AddFunction(string name, Delegate function)
         {
             FunctionDict.Add(name, function);
         }
@@ -16,10 +17,10 @@ namespace Casbin.Model
         {
             var map = new FunctionMap
             {
-                FunctionDict = new Dictionary<string, AbstractFunction>()
+                FunctionDict = new Dictionary<string, Delegate>()
             };
 
-            map.AddFunction("keyMatch", new KeyMatchFunc());
+            map.AddFunction("keyMatch",  new KeyMatchFunc());
             map.AddFunction("keyMatch2", new KeyMatch2Func());
             map.AddFunction("keyMatch3", new KeyMatch3Func());
             map.AddFunction("keyMatch4", new KeyMatch4Func());

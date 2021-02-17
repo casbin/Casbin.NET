@@ -49,7 +49,7 @@ namespace Casbin.Evaluation
         public IDictionary<string, Parameter> Parameters { get; }
             = new Dictionary<string, Parameter>();
 
-        public void SetFunction(string name, AbstractFunction function)
+        public void SetFunction(string name, Delegate function)
         {
             _expressionCache.Clear();
             _onlyStringFuncCache.Clear();
@@ -198,7 +198,7 @@ namespace Casbin.Evaluation
 
         private void SetFunctions(Interpreter interpreter)
         {
-            foreach (KeyValuePair<string, AbstractFunction> functionKeyValue in _functionMap.FunctionDict)
+            foreach (KeyValuePair<string, Delegate> functionKeyValue in _functionMap.FunctionDict)
             {
                 interpreter.SetFunction(functionKeyValue.Key, functionKeyValue.Value);
             }

@@ -15,6 +15,7 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _ipMatchModelText = ReadTestFile("ipmatch_model.conf");
         internal readonly string _keyMatchModelText = ReadTestFile("keymatch_model.conf");
         internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
+        internal readonly string _keyMatchCustomModelText = ReadTestFile("keymatch_custom_model.conf");
         internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
         internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
         internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
