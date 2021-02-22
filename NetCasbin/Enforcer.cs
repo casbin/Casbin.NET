@@ -3,16 +3,25 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
+using Casbin.Effect;
+using Casbin.Evaluation;
+using Casbin.Extensions;
 using Casbin.Persist;
+using Casbin.Rbac;
+using Casbin.Util;
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
+using DynamicExpresso;
 
 namespace Casbin
 {
     /// <summary>
-    /// Enforcer = ManagementEnforcer + RBAC API.
+    /// CoreEnforcer defines the core functionality of an enforcer.
     /// </summary>
-    public class Enforcer : ManagementEnforcer, IEnforcer
+    public class Enforcer : IEnforcer
     {
-        public Enforcer() : this(string.Empty, string.Empty)
+        public Enforcer()
         {
         }
 
@@ -21,629 +30,651 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter)
-            : this(NewModel(modelPath, string.Empty), adapter)
+        public Enforcer(string modelPath, IAdapter adapter = null)
+            : this(Casbin.Model.Model.CreateDefaultFromFile(modelPath), adapter)
         {
-            this.modelPath = modelPath;
+            ModelPath = modelPath;
         }
 
-        public Enforcer(Model.Model model, IAdapter adapter)
+        public Enforcer(Model.Model model, IAdapter adapter = null)
         {
-            this.adapter = adapter;
-            watcher = null;
+            if (adapter is not null)
+            {
+                SetAdapter(adapter);
+            }
+
             SetModel(model);
-            Initialize();
             LoadPolicy();
         }
 
-        public Enforcer(Model.Model m)
-            : this(m, null)
-        {
-        }
+        #region Options
+        public bool Enabled { get; private set; } = true;
+        public bool AutoSave { get; private set; } = true;
+        public bool AutoBuildRoleLinks { get; private set; } = true;
+        public bool AutoNotifyWatcher { get; private set; } = true;
+        #endregion
 
-        public Enforcer(string modelPath)
-            : this(modelPath, string.Empty)
-        {
-        }
+        #region Extensions
+        public IEffector Effector { get; private set; } = new DefaultEffector();
+        public Model.Model Model { get; private set; }
+        public IAdapter Adapter { get; private set; }
+        public IWatcher Watcher { get; private set; }
+        public IRoleManager RoleManager { get; private set; } = new DefaultRoleManager(10);
+#if !NET45
+        public ILogger Logger { get; set; }
+#endif
+        #endregion
 
-        [Obsolete("The method will be removed at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/116 to know more information.")]
-        public Enforcer(string modelPath, string policyFile, bool enableLog)
-            : this(modelPath, new FileAdapter(policyFile))
-        {
+        public string ModelPath { get; private set; }
+        public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
 
-        }
+        public IExpressionHandler ExpressionHandler { get; private set; }
 
-        #region Get roles or users
-
-        /// <summary>
-        /// Gets the roles that a user has.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<string> GetRolesForUser(string name,  string domain = null)
-        {
-            return domain is null
-                ? model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetRoles(name)
-                : model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetRoles(name, domain);
-        }
+        #region Set options
 
         /// <summary>
-        /// Gets the users that has a role.
+        /// Changes the enforcing state of Casbin, when Casbin is disabled,
+        /// all access will be allowed by the enforce() function.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<string> GetUsersForRole(string name, string domain = null)
+        /// <param name="enable"></param>
+        public void EnableEnforce(bool enable)
         {
-            return domain is null
-                ? model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name)
-                : model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name, domain);
+            Enabled = enable;
         }
 
         /// <summary>
-        /// Gets the users that has roles.
+        /// Controls whether to save a policy rule automatically to the
+        /// adapter when it is added or removed.
         /// </summary>
-        /// <param name="names"></param>
-        /// <returns></returns>
-        public List<string> GetUsersForRoles(string[] names)
+        /// <param name="autoSave"></param>
+        public void EnableAutoSave(bool autoSave)
         {
-            var userIds = new List<string>();
-            foreach (string name in names)
+            AutoSave = autoSave;
+        }
+
+        /// <summary>
+        /// Controls whether to save a policy rule automatically
+        /// to the adapter when it is added or removed.
+        /// </summary>
+        /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
+        public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks)
+        {
+            AutoBuildRoleLinks = autoBuildRoleLinks;
+        }
+
+        /// <summary>
+        /// Controls whether to save a policy rule automatically
+        /// notify the Watcher when it is added or removed.
+        /// </summary>
+        /// <param name="autoNotifyWatcher">Whether to automatically notify watcher.</param>
+        public void EnableAutoNotifyWatcher(bool autoNotifyWatcher)
+        {
+            AutoNotifyWatcher = autoNotifyWatcher;
+        }
+
+        #endregion
+
+        #region Set extensions
+
+        /// <summary>
+        /// Sets the current effector.
+        /// </summary>
+        /// <param name="effector"></param>
+        public void SetEffector(IEffector effector)
+        {
+            Effector = effector;
+        }
+
+        /// <summary>
+        /// Sets the current model.
+        /// </summary>
+        /// <param name="modelPath"></param>
+        public void SetModel(string modelPath)
+        {
+            Model.Model model = Casbin.Model.Model.CreateDefaultFromFile(modelPath);
+            SetModel(model);
+            ModelPath = modelPath;
+        }
+
+        /// <summary>
+        /// Sets the current model.
+        /// </summary>
+        /// <param name="model"></param>
+        public void SetModel(Model.Model model)
+        {
+            Model = model;
+            ExpressionHandler = new ExpressionHandler(model);
+        }
+
+        /// <summary>
+        /// Sets an adapter.
+        /// </summary>
+        /// <param name="adapter"></param>
+        public void SetAdapter(IAdapter adapter)
+        {
+            Adapter = adapter;
+        }
+
+        /// <summary>
+        /// Sets an watcher.
+        /// </summary>
+        /// <param name="watcher"></param>
+        /// <param name="useAsync">Whether use async update callback.</param>
+        public void SetWatcher(IWatcher watcher, bool useAsync = true)
+        {
+            Watcher = watcher;
+            if (useAsync)
             {
-                userIds.AddRange(model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name));
+                watcher?.SetUpdateCallback(LoadPolicyAsync);
+                return;
             }
-            return userIds;
+            watcher?.SetUpdateCallback(LoadPolicy);
+        }
+
+        /// <summary>
+        /// Sets the current role manager.
+        /// </summary>
+        /// <param name="roleManager"></param>
+        public void SetRoleManager(IRoleManager roleManager)
+        {
+            RoleManager = roleManager;
         }
 
         #endregion
 
-        #region Has roles or users
-
         /// <summary>
-        /// Determines whether a user has a role.
+        /// LoadModel reloads the model from the model CONF file. Because the policy is
+        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
+        /// calling LoadPolicy().
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public bool HasRoleForUser(string name, string role, string domain = null)
+        public void LoadModel()
         {
-            var roles = GetRolesForUser(name, domain);
-            return roles.Any(roleEnum => roleEnum.Equals(role));
-        }
-
-        #endregion
-
-        #region Add roles or users
-
-        /// <summary>
-        /// Adds a role for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public bool AddRoleForUser(string user, string role, string domain = null)
-        {
-            return domain is null
-                ? AddGroupingPolicy(user, role)
-                : AddGroupingPolicy(user, role, domain);
-        }
-
-        /// <summary>
-        /// Adds a role for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public Task<bool> AddRoleForUserAsync(string user, string role, string domain = null)
-        {
-            return domain is null
-                ? AddGroupingPolicyAsync(user, role)
-                : AddGroupingPolicyAsync(user, role, domain);
-        }
-
-        /// <summary>
-        /// AddRolesForUser adds roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public bool AddRolesForUser(string user, IEnumerable<string> role, string domain = null)
-        {
-            return domain is null
-                ? AddGroupingPolicies(role.Select(r => new List<string>{user, r}))
-                : AddGroupingPolicies(role.Select(r => new List<string>{user, r, domain}));
-        }
-
-        /// <summary>
-        /// AddRolesForUser adds roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public Task<bool> AddRolesForUserAsync(string user, IEnumerable<string> role, string domain = null)
-        {
-            return domain is null
-                ? AddGroupingPoliciesAsync(role.Select(r => new List<string> {user, r}))
-                : AddGroupingPoliciesAsync(role.Select(r => new List<string> {user, r, domain}));
-        }
-
-        #endregion
-
-        #region Delete roles or users
-
-        /// <summary>
-        /// Deletes a role for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        public bool DeleteRoleForUser(string user, string role, string domain = null)
-        {
-            return domain is null
-                ? RemoveGroupingPolicy(user, role)
-                : RemoveGroupingPolicy(user, role, domain);
-        }
-
-        /// <summary>
-        /// Deletes a role for a user.？《{&
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the us/*does */not have the role (aka not affected).</returns>
-        public Task<bool> DeleteRoleForUserAsync(string user, string role, string domain = null)
-        {
-            return domain is null
-                ? RemoveGroupingPolicyAsync(user, role)
-                : RemoveGroupingPolicyAsync(user, role, domain);
-        }
-
-        /// <summary>
-        /// Deletes all roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        public bool DeleteRolesForUser(string user, string domain = null)
-        {
-            return domain is null
-                ? RemoveFilteredGroupingPolicy(0, user)
-                : RemoveFilteredGroupingPolicy(0, user, string.Empty, domain);
-        }
-
-        /// <summary>
-        /// Deletes all roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        public Task<bool> DeleteRolesForUserAsync(string user, string domain = null)
-        {
-            return domain is null
-                ? RemoveFilteredGroupingPolicyAsync(0, user)
-                : RemoveFilteredGroupingPolicyAsync(0, user, string.Empty, domain);
-        }
-
-        /// <summary>
-        /// Deletes a user
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        public bool DeleteUser(string user)
-        {
-            bool groupResult = RemoveFilteredGroupingPolicy(0, user);
-            bool result = RemoveFilteredPolicy(0, user);
-            return groupResult || result;
-        }
-
-        /// <summary>
-        /// Deletes a user
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        public async Task<bool> DeleteUserAsync(string user)
-        {
-            bool groupResult = await RemoveFilteredGroupingPolicyAsync(0, user);
-            bool result = await RemoveFilteredPolicyAsync(0, user);
-            return groupResult || result;
-        }
-
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        /// <returns>Returns false if the role does not exist (aka not affected).</returns>
-        public bool DeleteRole(string role)
-        {
-            bool groupResult = RemoveFilteredGroupingPolicy(1, role);
-            bool result = RemoveFilteredPolicy(0, role);
-            return groupResult || result;
-        }
-
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        public async Task<bool> DeleteRoleAsync(string role)
-        {
-            bool groupResult = await RemoveFilteredGroupingPolicyAsync(1, role);
-            bool result = await RemoveFilteredPolicyAsync(0, role);
-            return groupResult || result;
-        }
-
-        #endregion
-
-        #region Get permissions
-
-        /// <summary>
-        /// Gets permissions for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<List<string>> GetPermissionsForUser(string user, string domain = null)
-        {
-            return domain is null
-                ? GetFilteredPolicy(0, user)
-                : GetFilteredPolicy(0, user, domain);
-        }
-
-        #endregion
-
-        #region Has permissions
-
-        /// <summary>
-        /// Determines whether a user has a permission.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        public bool HasPermissionForUser(string user, List<string> permission)
-        {
-            return HasPermissionForUser(user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// Determines whether a user has a permission.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        public bool HasPermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new List<string>
+            if (ModelPath is null)
             {
-                user
-            };
-            parameters.AddRange(permission);
-            return HasPolicy(parameters);
-        }
-
-        #endregion
-
-        #region Add permissions
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public bool AddPermissionForUser(string user, List<string> permission)
-        {
-            return AddPermissionForUser(user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// Adds multiple permissions for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public Task<bool> AddPermissionForUserAsync(string user, List<string> permission)
-        {
-            return AddPermissionForUserAsync(user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public bool AddPermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new[] {user}.Concat(permission);
-            return AddPolicy(parameters.ToList());
-        }
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public Task<bool> AddPermissionForUserAsync(string user, params string[] permission)
-        {
-            var parameters = new[] {user}.Concat(permission);
-            return AddPolicyAsync(parameters.ToList());
-        }
-
-        #endregion
-
-        #region Delete permissions
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public bool DeletePermission(List<string> permission)
-        {
-            return DeletePermission(permission.ToArray());
-        }
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public Task<bool> DeletePermissionAsync(List<string> permission)
-        {
-            return DeletePermissionAsync(permission.ToArray());
-        }
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public bool DeletePermission(params string[] permission)
-        {
-            return RemoveFilteredPolicy(1, permission);
-        }
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public Task<bool> DeletePermissionAsync(params string[] permission)
-        {
-            return RemoveFilteredPolicyAsync(1, permission);
-        }
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public bool DeletePermissionForUser(string user, List<string> permission)
-        {
-            return DeletePermissionForUser(user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Task<bool> DeletePermissionForUserAsync(string user, List<string> permission)
-        {
-            return DeletePermissionForUserAsync(user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        public bool DeletePermissionForUser(string user, params string[] permission)
-        {
-            var parameters = new[] {user}.Concat(permission);
-            return RemovePolicy(parameters.ToList());
-        }
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        public Task<bool> DeletePermissionForUserAsync(string user, params string[] permission)
-        {
-            var parameters = new[] {user}.Concat(permission);
-            return RemovePolicyAsync(parameters.ToList());
-        }
-
-        /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public bool DeletePermissionsForUser(string user)
-        {
-            return RemoveFilteredPolicy(0, user);
-        }
-
-        /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public Task<bool> DeletePermissionsForUserAsync(string user)
-        {
-            return RemoveFilteredPolicyAsync(0, user);
-        }
-
-        #endregion
-
-        #region Get implicit roles or users
-
-        /// <summary>
-        /// Gets implicit roles that a user has.
-        /// Compared to GetRolesForUser(), this function retrieves indirect roles besides direct roles.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        [Obsolete("This api will be removed in next mainline version. please use the another overwrite.")]
-        public List<string> GetImplicitRolesForUser(string name, params string[] domain)
-        {
-            var roles = roleManager.GetRoles(name, domain);
-            var res = new List<string>();
-            res.AddRange(roles);
-            res.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
-            return res;
-        }
-
-        /// <summary>
-        /// Gets implicit roles that a user has.
-        /// Compared to GetRolesForUser(), this function retrieves indirect roles besides direct roles.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<string> GetImplicitRolesForUser(string name, string domain = null)
-        {
-            var roles = domain is null
-                ? roleManager.GetRoles(name)
-                : roleManager.GetRoles(name, domain);
-            var result = new List<string>();
-            result.AddRange(roles);
-            result.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
-            return result;
-        }
-
-        /// <summary>
-        /// <para>Gets implicit permissions for a user or role.</para>
-        /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
-        /// <para>For example:</para>
-        /// <para>p, admin, data1, read</para>
-        /// <para>p, alice, data2, read</para>
-        /// <para>g, alice, admin </para>
-        /// <para>GetPermissionsForUser("alice") can only get: [["alice", "data2", "read"]].</para>
-        /// <para>But GetImplicitPermissionsForUser("alice") will get: [["admin", "data1", "read"], ["alice", "data2", "read"]].</para>
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<List<string>> GetImplicitPermissionsForUser(string user, string domain = null)
-        {
-            var roles = new List<string> { user };
-            roles.AddRange(GetImplicitRolesForUser(user, domain));
-            var result = new List<List<string>>();
-            foreach (string role in roles)
-            {
-                result.AddRange(GetPermissionsForUser(role, domain));
+                return;
             }
-            return result;
+            Model = Casbin.Model.Model.CreateDefaultFromFile(ModelPath);
         }
 
-        public IEnumerable<string> GetImplicitUsersForPermission(params string[] permission)
+        /// <summary>
+        /// Manually rebuilds the role inheritance relations.
+        /// </summary>
+        public void BuildRoleLinks()
         {
-            return GetImplicitUsersForPermission((IEnumerable<string>) permission);
+            RoleManager.Clear();
+            Model.BuildRoleLinks(RoleManager);
         }
 
-        public IEnumerable<string> GetImplicitUsersForPermission(IEnumerable<string> permissions)
+        #region Policy Management
+
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public void LoadPolicy()
         {
-            var policySubjects = GetAllSubjects();
-            var groupInherit = model.GetValuesForFieldInPolicyAllTypes("g", 1);
-            var groupSubjects = model.GetValuesForFieldInPolicyAllTypes("g", 0);
-            return policySubjects.Concat(groupSubjects).Distinct()
-                .Where(subject => Enforce(new[]{ subject }.Concat(permissions).Cast<object>().ToArray()))
-                .Except(groupInherit);
+            if (Adapter is null)
+            {
+                return;
+            }
+
+            Model.ClearPolicy();
+            Adapter.LoadPolicy(Model);
+            Model.RefreshPolicyStringSet();
+            if (AutoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+        }
+
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public async Task LoadPolicyAsync()
+        {
+            if (Adapter is null)
+            {
+                return;
+            }
+
+            Model.ClearPolicy();
+            await Adapter.LoadPolicyAsync(Model);
+            if (AutoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+        }
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public bool LoadFilteredPolicy(Filter filter)
+        {
+            Model.ClearPolicy();
+            if (Adapter is not IFilteredAdapter filteredAdapter)
+            {
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
+            }
+
+            filteredAdapter.LoadFilteredPolicy(Model, filter);
+
+            if (AutoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public async Task<bool> LoadFilteredPolicyAsync(Filter filter)
+        {
+            Model.ClearPolicy();
+            if (Adapter is not IFilteredAdapter filteredAdapter)
+            {
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
+            }
+
+            await filteredAdapter.LoadFilteredPolicyAsync(Model, filter);
+
+            if (AutoBuildRoleLinks)
+            {
+                BuildRoleLinks();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public void SavePolicy()
+        {
+            if (Adapter is null)
+            {
+                return;
+            }
+
+            if (IsFiltered)
+            {
+                throw new InvalidOperationException("Cannot save a filtered policy");
+            }
+            Adapter.SavePolicy(Model);
+            Watcher?.Update();
+        }
+
+        /// <summary>
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public async Task SavePolicyAsync()
+        {
+            if (Adapter is null)
+            {
+                return;
+            }
+
+            if (IsFiltered)
+            {
+                throw new InvalidOperationException("Cannot save a filtered policy");
+            }
+            await Adapter.SavePolicyAsync(Model);
+            if (Watcher is not null)
+            {
+                await Watcher.UpdateAsync();
+            }
+        }
+
+        /// <summary>
+        /// Clears all policy.
+        /// </summary>
+        public void ClearPolicy()
+        {
+            Model.ClearPolicy();
+
+#if !NET45
+            Logger?.LogInformation("Policy Management, Cleared all policy.");
+#endif
         }
 
         #endregion
 
-        #region RBAC APIs with domains
-
         /// <summary>
-        /// 
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<string> GetRolesForUserInDomain(string name, string domain)
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public Task<bool> EnforceAsync(params object[] requestValues)
         {
-            return model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
+            return Task.FromResult(Enforce(requestValues));
         }
 
         /// <summary>
-        /// 
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public List<List<string>> GetPermissionsForUserInDomain(string user, string domain)
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public bool Enforce(params object[] requestValues)
         {
-            return GetFilteredPolicy(0, user, domain);
+            return Enforce((IReadOnlyList<object>) requestValues);
+        }
+
+#if !NET45
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceEx(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = Enforce(requestValues, explains);
+            return (result, explains);
         }
 
         /// <summary>
-        /// 
+        /// Explains enforcement by informing matched rules
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public bool AddRoleForUserInDomain(string user, string role, string domain)
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExAsync(params object[] requestValues)
         {
-            return AddGroupingPolicy(user, role, domain);
+            var explains = new List<IEnumerable<string>>();
+            bool result = await EnforceAsync(requestValues, explains);
+            return (result, explains);
+        }
+#else
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceEx(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = Enforce(requestValues, explains);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
 
         /// <summary>
-        /// 
+        /// Explains enforcement by informing matched rules
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public Task<bool> AddRoleForUserInDomainAsync(string user, string role, string domain)
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExAsync(params object[] requestValues)
         {
-            return AddGroupingPolicyAsync(user, role, domain);
+            var explains = new List<IEnumerable<string>>();
+            bool result = await EnforceAsync(requestValues, explains);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
+        }
+#endif
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <param name="explains"></param>
+        /// <returns>Whether to allow the request.</returns>
+        private Task<bool> EnforceAsync(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
+        {
+            return Task.FromResult(Enforce(requestValues, explains));
         }
 
         /// <summary>
-        /// 
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public bool DeleteRoleForUserInDomain(string user, string role, string domain)
+        /// <param name="explains"></param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        private bool Enforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
-            return RemoveGroupingPolicy(user, role, domain);
+            if (Enabled is false)
+            {
+                return true;
+            }
+
+            bool explain = explains is not null;
+            string effect = Model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
+            var policyList = Model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
+            int policyCount = Model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
+            string expressionString = Model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+
+            int requestTokenCount = ExpressionHandler.RequestTokens.Count;
+            if (requestTokenCount != requestValues.Count)
+            {
+                throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Count}.");
+            }
+            int policyTokenCount = ExpressionHandler.PolicyTokens.Count;
+
+            ExpressionHandler.SetRequestParameters(requestValues);
+
+            bool hasEval = Utility.HasEval(expressionString);
+
+            bool finalResult = false;
+            IChainEffector chainEffector = Effector as IChainEffector;
+            bool isChainEffector = chainEffector is not null;
+            if (isChainEffector)
+            {
+                chainEffector.StartChain(effect);
+
+                if (policyCount is not 0)
+                {
+                    foreach (var policyValues in policyList)
+                    {
+                        if (policyTokenCount != policyValues.Count)
+                        {
+                            throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
+                        }
+
+                        ExpressionHandler.SetPolicyParameters(policyValues);
+
+                        bool expressionResult;
+
+                        if (hasEval)
+                        {
+                            string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                            expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
+                        }
+                        else
+                        {
+                            expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
+                        }
+
+                        var nowEffect = GetEffect(expressionResult);
+
+                        if (nowEffect is not PolicyEffect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                        {
+                            string policyEffect = parameter.Value as string;
+                            nowEffect = policyEffect switch
+                            {
+                                "allow" => PolicyEffect.Allow,
+                                "deny" => PolicyEffect.Deny,
+                                _ => PolicyEffect.Indeterminate
+                            };
+                        }
+
+                        bool chainResult = chainEffector.TryChain(nowEffect);
+
+                        if (explain && chainEffector.HitPolicy)
+                        {
+                            explains.Add(policyValues);
+                        }
+
+                        if (chainResult is false || chainEffector.CanChain is false)
+                        {
+                            break;
+                        }
+                    }
+
+                    finalResult = chainEffector.Result;
+                }
+                else
+                {
+                    if (hasEval)
+                    {
+                        throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                    }
+
+                    IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
+                    ExpressionHandler.SetPolicyParameters(policyValues);
+                    var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
+
+                    if (chainEffector.TryChain(nowEffect))
+                    {
+                        finalResult = chainEffector.Result;
+                    }
+
+                    if (explain && chainEffector.HitPolicy)
+                    {
+                        explains.Add(policyValues);
+                    }
+                }
+
+#if !NET45
+                if (explain)
+                {
+                    Logger?.LogEnforceResult(requestValues, finalResult, explains);
+                }
+                else
+                {
+                    Logger?.LogEnforceResult(requestValues, finalResult);
+                }
+#endif
+                return finalResult;
+            }
+
+            int hitPolicyIndex;
+            if (policyCount != 0)
+            {
+                PolicyEffect[] policyEffects = new PolicyEffect[policyCount];
+
+                for (int i = 0; i < policyCount; i++)
+                {
+                    IReadOnlyList<string> policyValues = policyList[i];
+
+                    if (policyTokenCount != policyValues.Count)
+                    {
+                        throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
+                    }
+
+                    ExpressionHandler.SetPolicyParameters(policyValues);
+
+                    bool expressionResult;
+
+                    if (hasEval)
+                    {
+                        string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
+                    }
+                    else
+                    {
+                        expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
+                    }
+
+                    var nowEffect = GetEffect(expressionResult);
+
+                    if (nowEffect is PolicyEffect.Indeterminate)
+                    {
+                        policyEffects[i] = nowEffect;
+                        continue;
+                    }
+
+                    if (ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                    {
+                        string policyEffect = parameter.Value as string;
+                        nowEffect = policyEffect switch
+                        {
+                            "allow" => PolicyEffect.Allow,
+                            "deny" => PolicyEffect.Deny,
+                            _ => PolicyEffect.Indeterminate
+                        };
+                    }
+
+                    policyEffects[i] = nowEffect;
+
+                    if (effect.Equals(PermConstants.PolicyEffect.Priority))
+                    {
+                        break;
+                    }
+                }
+
+                finalResult = Effector.MergeEffects(effect, policyEffects, null, out hitPolicyIndex);
+            }
+            else
+            {
+                if (hasEval)
+                {
+                    throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                }
+
+                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
+                ExpressionHandler.SetPolicyParameters(policyValues);
+                var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
+                finalResult = Effector.MergeEffects(effect, new[] { nowEffect }, null, out hitPolicyIndex);
+            }
+
+            if (explain && hitPolicyIndex is not -1)
+            {
+                explains.Add(policyList[hitPolicyIndex]);
+            }
+
+#if !NET45
+            if (explain)
+            {
+                Logger?.LogEnforceResult(requestValues, finalResult, explains);
+            }
+            else
+            {
+                Logger?.LogEnforceResult(requestValues, finalResult);
+            }
+#endif
+            return finalResult;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public Task<bool> DeleteRoleForUserInDomainAsync(string user, string role, string domain)
+        private static PolicyEffect GetEffect(bool expressionResult)
         {
-            return RemoveGroupingPolicyAsync(user, role, domain);
+            return expressionResult ? PolicyEffect.Allow : PolicyEffect.Indeterminate;
         }
 
-        #endregion
+        private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
+        {
+            if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
+            {
+                return expressionString;
+            }
+
+            Dictionary<string, string> rules = new();
+            foreach (string ruleName in ruleNames)
+            {
+                if (policyTokens.TryGetValue(ruleName, out int ruleIndex) is false)
+                {
+                    throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                }
+                rules[ruleName] = Utility.EscapeAssertion(policyValues[ruleIndex]);
+            }
+
+            expressionString = Utility.ReplaceEval(expressionString, rules);
+            return expressionString;
+        }
     }
 }

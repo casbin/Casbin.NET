@@ -1,37 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Casbin.Model;
-using Casbin;
 
-namespace Casbin
+namespace Casbin.Extensions
 {
-    /// <summary>
-    /// InternalEnforcer = CoreEnforcer + Internal API.
-    /// </summary>
-    public class InternalEnforcer : CoreEnforcer
+    internal static class InternalEnforcerExtension
     {
         /// <summary>
         /// Adds a rule to the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected bool InternalAddPolicy(string sec, string ptype, List<string> rule)
+        internal static bool InternalAddPolicy(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
         {
-            if (model.HasPolicy(sec, ptype, rule))
+            if (enforcer.Model.HasPolicy(sec, ptype, rule))
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    adapter.AddPolicy(sec, ptype, rule);
+                    enforcer.Adapter.AddPolicy(sec, ptype, rule);
                 }
                 catch (NotImplementedException)
                 {
@@ -39,7 +34,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleAdded = model.AddPolicy(sec, ptype, rule);
+            bool ruleAdded = enforcer.Model.AddPolicy(sec, ptype, rule);
 
             if (ruleAdded is false)
             {
@@ -48,34 +43,35 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, PolicyOperation.PolicyAdd,
                     sec, ptype, rule);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            NotifyPolicyChanged();
+            NotifyPolicyChanged(enforcer);
             return true;
         }
 
         /// <summary>
         /// Adds a rule to the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalAddPolicyAsync(string sec, string ptype, List<string> rule)
+        internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
         {
-            if (model.HasPolicy(sec, ptype, rule))
+            if (enforcer.Model.HasPolicy(sec, ptype, rule))
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    await adapter.AddPolicyAsync(sec, ptype, rule);
+                    await enforcer.Adapter.AddPolicyAsync(sec, ptype, rule);
                 }
                 catch (NotImplementedException)
                 {
@@ -83,7 +79,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleAdded = model.AddPolicy(sec, ptype, rule);
+            bool ruleAdded = enforcer.Model.AddPolicy(sec, ptype, rule);
 
             if (ruleAdded is false)
             {
@@ -92,36 +88,37 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, PolicyOperation.PolicyAdd,
                     sec, ptype, rule);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            await NotifyPolicyChangedAsync();
+            await NotifyPolicyChangedAsync(enforcer);
             return true;
         }
 
         /// <summary>
         /// Adds rules to the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected bool InternalAddPolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static bool InternalAddPolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (model.HasPolicies(sec, ptype, ruleArray))
+            if (enforcer.Model.HasPolicies(sec, ptype, ruleArray))
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    adapter.AddPolicies(sec, ptype, ruleArray);
+                    enforcer.Adapter.AddPolicies(sec, ptype, ruleArray);
                 }
                 catch (NotImplementedException)
                 {
@@ -129,7 +126,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleAdded = model.AddPolicies(sec, ptype, ruleArray);
+            bool ruleAdded = enforcer.Model.AddPolicies(sec, ptype, ruleArray);
 
             if (ruleAdded is false)
             {
@@ -138,37 +135,38 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, PolicyOperation.PolicyAdd,
                     sec, ptype, ruleArray);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            NotifyPolicyChanged();
+            NotifyPolicyChanged(enforcer);
             return true;
         }
 
-                
+
         /// <summary>
         /// Adds rules to the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalAddPoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (model.HasPolicies(sec, ptype, ruleArray))
+            if (enforcer.Model.HasPolicies(sec, ptype, ruleArray))
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    await adapter.AddPoliciesAsync(sec, ptype, ruleArray);
+                    await enforcer.Adapter.AddPoliciesAsync(sec, ptype, ruleArray);
                 }
                 catch (NotImplementedException)
                 {
@@ -176,7 +174,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleAdded = model.AddPolicies(sec, ptype, ruleArray);
+            bool ruleAdded = enforcer.Model.AddPolicies(sec, ptype, ruleArray);
 
             if (ruleAdded is false)
             {
@@ -185,34 +183,35 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, PolicyOperation.PolicyAdd,
                     sec, ptype, ruleArray);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            await NotifyPolicyChangedAsync();
+            await NotifyPolicyChangedAsync(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes a rule from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected bool InternalRemovePolicy(string sec, string ptype, List<string> rule)
+        internal static bool InternalRemovePolicy(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
         {
-            if (model.HasPolicy(sec, ptype, rule) is false)
+            if (enforcer.Model.HasPolicy(sec, ptype, rule) is false)
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    adapter.RemovePolicy(sec, ptype, rule);
+                    enforcer.Adapter.RemovePolicy(sec, ptype, rule);
                 }
                 catch (NotImplementedException)
                 {
@@ -220,7 +219,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            bool ruleRemoved = enforcer.Model.RemovePolicy(sec, ptype, rule);
 
             if (ruleRemoved is false)
             {
@@ -229,34 +228,35 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, PolicyOperation.PolicyRemove,
                     sec, ptype, rule);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            NotifyPolicyChanged();
+            NotifyPolicyChanged(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes a rule from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalRemovePolicyAsync(string sec, string ptype, List<string> rule)
+        internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
         {
-            if (model.HasPolicy(sec, ptype, rule) is false)
+            if (enforcer.Model.HasPolicy(sec, ptype, rule) is false)
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    await adapter.RemovePolicyAsync(sec, ptype, rule);
+                    await enforcer.Adapter.RemovePolicyAsync(sec, ptype, rule);
                 }
                 catch (NotImplementedException)
                 {
@@ -264,7 +264,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemovePolicy(sec, ptype, rule);
+            bool ruleRemoved = enforcer.Model.RemovePolicy(sec, ptype, rule);
 
             if (ruleRemoved is false)
             {
@@ -273,36 +273,37 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, PolicyOperation.PolicyRemove,
                     sec, ptype, rule);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            await NotifyPolicyChangedAsync();
+            await NotifyPolicyChangedAsync(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes rules from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected bool InternalRemovePolicies(string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static bool InternalRemovePolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (model.HasPolicies(sec, ptype, ruleArray) is false)
+            if (enforcer.Model.HasPolicies(sec, ptype, ruleArray) is false)
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    adapter.RemovePolicies(sec, ptype, ruleArray);
+                    enforcer.Adapter.RemovePolicies(sec, ptype, ruleArray);
                 }
                 catch (NotImplementedException)
                 {
@@ -310,7 +311,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemovePolicies(sec, ptype, ruleArray);
+            bool ruleRemoved = enforcer.Model.RemovePolicies(sec, ptype, ruleArray);
 
             if (ruleRemoved is false)
             {
@@ -319,36 +320,37 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, PolicyOperation.PolicyRemove,
                     sec, ptype, ruleArray);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            NotifyPolicyChanged();
+            NotifyPolicyChanged(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes rules from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalRemovePoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
-            if (model.HasPolicies(sec, ptype, ruleArray) is false)
+            if (enforcer.Model.HasPolicies(sec, ptype, ruleArray) is false)
             {
                 return false;
             }
 
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    await adapter.RemovePoliciesAsync(sec, ptype, ruleArray);
+                    await enforcer.Adapter.RemovePoliciesAsync(sec, ptype, ruleArray);
                 }
                 catch (NotImplementedException)
                 {
@@ -356,7 +358,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemovePolicies(sec, ptype, ruleArray);
+            bool ruleRemoved = enforcer.Model.RemovePolicies(sec, ptype, ruleArray);
 
             if (ruleRemoved is false)
             {
@@ -365,30 +367,31 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, PolicyOperation.PolicyRemove,
                     sec, ptype, ruleArray);
-                ExpressionHandler.SetGFunctions();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            await NotifyPolicyChangedAsync();
+            await NotifyPolicyChangedAsync(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes rules based on field filters from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected bool InternalRemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    adapter.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+                    enforcer.Adapter.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
                 }
                 catch (NotImplementedException)
                 {
@@ -396,7 +399,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = enforcer.Model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
 
             if (ruleRemoved is false)
             {
@@ -405,29 +408,30 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                BuildRoleLinks();
-                ExpressionHandler.SetGFunctions();
+                enforcer.BuildRoleLinks();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            NotifyPolicyChanged();
+            NotifyPolicyChanged(enforcer);
             return true;
         }
 
         /// <summary>
         /// Removes rules based on field filters from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="sec"></param>
         /// <param name="ptype"></param>
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalRemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string sec, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            if (adapter is not null && autoSave)
+            if (enforcer.Adapter is not null && enforcer.AutoSave)
             {
                 try
                 {
-                    await adapter.RemoveFilteredPolicyAsync(sec, ptype, fieldIndex, fieldValues);
+                    await enforcer.Adapter.RemoveFilteredPolicyAsync(sec, ptype, fieldIndex, fieldValues);
                 }
                 catch (NotImplementedException)
                 {
@@ -435,7 +439,7 @@ namespace Casbin
                 }
             }
 
-            bool ruleRemoved = model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
+            bool ruleRemoved = enforcer.Model.RemoveFilteredPolicy(sec, ptype, fieldIndex, fieldValues);
 
             if (ruleRemoved is false)
             {
@@ -444,27 +448,27 @@ namespace Casbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                BuildRoleLinks();
-                ExpressionHandler.SetGFunctions();
+                enforcer.BuildRoleLinks();
+                enforcer.ExpressionHandler.SetGFunctions();
             }
 
-            await NotifyPolicyChangedAsync();
+            await NotifyPolicyChangedAsync(enforcer);
             return true;
         }
 
-        private void NotifyPolicyChanged()
+        private static void NotifyPolicyChanged(IEnforcer enforcer)
         {
-            if (autoNotifyWatcher)
+            if (enforcer.AutoNotifyWatcher)
             {
-                watcher?.Update();
+                enforcer.Watcher?.Update();
             }
         }
 
-        private async Task NotifyPolicyChangedAsync()
+        private static async Task NotifyPolicyChangedAsync(IEnforcer enforcer)
         {
-            if (autoNotifyWatcher && watcher is not null)
+            if (enforcer.AutoNotifyWatcher && enforcer.Watcher is not null)
             {
-                await watcher.UpdateAsync();
+                await enforcer.Watcher.UpdateAsync();
             }
         }
     }

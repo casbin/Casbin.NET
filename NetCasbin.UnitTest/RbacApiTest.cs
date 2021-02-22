@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Casbin.Extensions;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
@@ -467,7 +468,7 @@ namespace Casbin.UnitTests
             Assert.Equal(new[] { "alice", "bob" }, e.GetImplicitUsersForPermission("data2", "write"));
 
             // Act
-            e.GetModel().ClearPolicy();
+            e.ClearPolicy();
             _ = e.AddPolicy("admin", "data1", "read");
             _ = e.AddPolicy("bob", "data1", "read");
             _ = e.AddGroupingPolicy("alice", "admin");

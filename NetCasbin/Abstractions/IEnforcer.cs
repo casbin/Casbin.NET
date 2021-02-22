@@ -1,332 +1,157 @@
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
+using Casbin.Persist;
+using Casbin.Rbac;
 
 namespace Casbin
 {
     /// <summary>
     /// IEnforcer is the API interface of Enforcer
     /// </summary>
-    [Obsolete("The interface will be changed a lot at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/56 to know more information.")]
-    public interface IEnforcer : IManagementEnforcer
+    public interface IEnforcer
     {
+        #region Options
+        public bool Enabled { get; }
+        public bool AutoSave { get; }
+        public bool AutoBuildRoleLinks { get; }
+        public bool AutoNotifyWatcher { get; }
+        #endregion
+
+        #region Extensions
+        public IEffector Effector { get; }
+        public Model.Model Model { get; }
+        public IAdapter Adapter { get; }
+        public IWatcher Watcher { get; }
+        public IRoleManager RoleManager { get; }
+        #endregion
+
+        public string ModelPath { get; }
+        public bool IsFiltered { get; }
+
+        public IExpressionHandler ExpressionHandler { get; }
+
         /// <summary>
-        /// Gets the roles that a user has.
+        /// Changes the enforcing state of Casbin, when Casbin is disabled,
+        /// all access will be allowed by the enforce() function.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
+        /// <param name="enable"></param>
+        public void EnableEnforce(bool enable);
+
+        /// <summary>
+        /// Controls whether to save a policy rule automatically to the
+        /// adapter when it is added or removed.
+        /// </summary>
+        /// <param name="autoSave"></param>
+        public void EnableAutoSave(bool autoSave);
+
+        /// <summary>
+        /// Controls whether to save a policy rule automatically
+        /// to the adapter when it is added or removed.
+        /// </summary>
+        /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
+        public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks);
+
+        /// <summary>
+        /// Sets the current model.
+        /// </summary>
+        /// <param name="modelPath"></param>
+        public void SetModel(string modelPath);
+
+        /// <summary>
+        /// Sets the current model.
+        /// </summary>
+        /// <param name="model"></param>
+        public void SetModel(Model.Model model);
+
+        /// <summary>
+        /// Sets an adapter.
+        /// </summary>
+        /// <param name="adapter"></param>
+        public void SetAdapter(IAdapter adapter);
+
+        /// <summary>
+        /// Sets an watcher.
+        /// </summary>
+        /// <param name="watcher"></param>
+        /// <param name="useAsync">Whether use async update callback.</param>
+        public void SetWatcher(IWatcher watcher, bool useAsync = true);
+
+        /// <summary>
+        /// Sets the current role manager.
+        /// </summary>
+        /// <param name="roleManager"></param>
+        public void SetRoleManager(IRoleManager roleManager);
+
+        /// <summary>
+        /// Sets the current effector.
+        /// </summary>
+        /// <param name="effector"></param>
+        public void SetEffector(IEffector effector);
+
+        /// <summary>
+        /// LoadModel reloads the model from the model CONF file. Because the policy is
+        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
+        /// calling LoadPolicy().
+        /// </summary>
+        public void LoadModel();
+
+        /// <summary>
+        /// Manually rebuilds the role inheritance relations.
+        /// </summary>
+        public void BuildRoleLinks();
+
+        #region Policy Management
+
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public void LoadPolicy();
+
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public Task LoadPolicyAsync();
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
         /// <returns></returns>
-        List<string> GetRolesForUser(string name, string domain = null);
-
+        public bool LoadFilteredPolicy(Filter filter);
 
         /// <summary>
-        /// Gets the users that has a role.
+        /// Reloads a filtered policy from file/database.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
         /// <returns></returns>
-        List<string> GetUsersForRole(string name, string domain = null);
+        public Task<bool> LoadFilteredPolicyAsync(Filter filter);
 
         /// <summary>
-        /// Gets the users that has roles.
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
         /// </summary>
-        /// <param name="names"></param>
-        /// <returns></returns>
-        List<string> GetUsersForRoles(string[] names);
+        public void SavePolicy();
 
         /// <summary>
-        /// Determines whether a user has a role.
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
         /// </summary>
-        /// <param name="name"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        bool HasRoleForUser(string name, string role, string domain = null);
+        public Task SavePolicyAsync();
 
         /// <summary>
-        /// Adds a role for a user.
+        /// Clears all policy.
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        bool AddRoleForUser(string user, string role, string domain = null);
+        public void ClearPolicy();
+
+        #endregion
 
         /// <summary>
-        /// Adds a role for a user.
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        Task<bool> AddRoleForUserAsync(string user, string role, string domain = null);
-
-        /// <summary>
-        /// Deletes a role for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        bool DeleteRoleForUser(string user, string role, string domain = null);
-
-        /// <summary>
-        /// Deletes a role for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have the role (aka not affected).</returns>
-        Task<bool> DeleteRoleForUserAsync(string user, string role, string domain = null);
-
-        /// <summary>
-        /// Deletes all roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        bool DeleteRolesForUser(string user, string domain = null);
-
-        /// <summary>
-        /// Deletes all roles for a user.
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="domain"></param>
-        /// <returns>Returns false if the user does not have any roles (aka not affected).</returns>
-        Task<bool> DeleteRolesForUserAsync(string user, string domain = null);
-
-        /// <summary>
-        /// DeleteUser deletes a user
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        bool DeleteUser(string user);
-
-        /// <summary>
-        /// DeleteUser deletes a user
-        /// </summary>
-        /// <param name="user"></param>
-        /// <returns>Returns false if the user does not exist (aka not affected).</returns>
-        Task<bool> DeleteUserAsync(string user);
-
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        bool DeleteRole(string role);
-
-        /// <summary>
-        /// Deletes a role.
-        /// </summary>
-        /// <param name="role"></param>
-        Task<bool> DeleteRoleAsync(string role);
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        bool DeletePermission(List<string> permission);
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        Task<bool> DeletePermissionAsync(List<string> permission);
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        bool DeletePermission(params string[] permission);
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        Task<bool> DeletePermissionAsync(params string[] permission);
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        bool AddPermissionForUser(string user, List<string> permission);
-
-        /// <summary>
-        /// Adds multiple permissions for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        Task<bool> AddPermissionForUserAsync(string user, List<string> permission);
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        bool AddPermissionForUser(string user, params string[] permission);
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        Task<bool> AddPermissionForUserAsync(string user, params string[] permission);
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        bool DeletePermissionForUser(string user, List<string> permission);
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        Task<bool> DeletePermissionForUserAsync(string user, List<string> permission);
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        bool DeletePermissionForUser(string user, params string[] permission);
-
-        /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        Task<bool> DeletePermissionForUserAsync(string user, params string[] permission);
-
-        /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        bool DeletePermissionsForUser(string user);
-
-        /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        Task<bool> DeletePermissionsForUserAsync(string user);
-
-        /// <summary>
-        /// Gets permissions for a user or role.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        List<List<string>> GetPermissionsForUser(string user, string domain = null);
-
-        /// <summary>
-        /// Determines whether a user has a permission.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        bool HasPermissionForUser(string user, params string[] permission);
-
-        /// <summary>
-        /// Determines whether a user has a permission.
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns></returns>
-        bool HasPermissionForUser(string user, List<string> permission);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        List<string> GetRolesForUserInDomain(string name, string domain);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        List<List<string>> GetPermissionsForUserInDomain(string user, string domain);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        bool AddRoleForUserInDomain(string user, string role, string domain);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        Task<bool> AddRoleForUserInDomainAsync(string user, string role, string domain);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        bool DeleteRoleForUserInDomain(string user, string role, string domain);
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="user"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        Task<bool> DeleteRoleForUserInDomainAsync(string user, string role, string domain);
-
-        /// <summary>
-        /// Gets implicit roles that a user has.
-        /// Compared to GetRolesForUser(), this function retrieves indirect roles besides direct roles.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        List<string> GetImplicitRolesForUser(string name, string domain = null);
-
-        /// <summary>
-        /// <para>Gets implicit permissions for a user or role.</para>
-        /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
-        /// <para>For example:</para>
-        /// <para>p, admin, data1, read</para>
-        /// <para>p, alice, data2, read</para>
-        /// <para>g, alice, admin </para>
-        /// <para>GetPermissionsForUser("alice") can only get: [["alice", "data2", "read"]].</para>
-        /// <para>But GetImplicitPermissionsForUser("alice") will get: [["admin", "data1", "read"], ["alice", "data2", "read"]].</para>
-        /// </summary>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        List<List<string>> GetImplicitPermissionsForUser(string user,  string domain = null);
-
+        /// <param name="rvals">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public bool Enforce(params object[] rvals);
     }
 
 }

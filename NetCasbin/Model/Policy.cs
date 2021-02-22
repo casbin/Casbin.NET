@@ -22,8 +22,6 @@ namespace Casbin.Model
             Model = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
-
-
         /// <summary>
         /// Provides incremental build the role inheritance relation.
         /// </summary>
