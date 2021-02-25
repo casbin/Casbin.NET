@@ -4,7 +4,7 @@ using DynamicExpresso;
 
 namespace Casbin
 {
-    internal interface IExpressionHandler
+    public interface IExpressionHandler
     {
         public IDictionary<string, int> RequestTokens { get; }
 

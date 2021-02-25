@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
+using Casbin.Extensions;
 using Casbin.Persist;
 using Casbin.UnitTest.Mock;
 using Casbin.UnitTests.Fixtures;
@@ -59,7 +60,7 @@ namespace Casbin.UnitTests
             TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
 
             e = new Enforcer(m);
-            a.LoadPolicy(e.GetModel());
+            a.LoadPolicy(e.Model);
 
             TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
             TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
@@ -120,7 +121,7 @@ namespace Casbin.UnitTests
             await TestEnforceAsync(e, "cathy", "/cathy_data", "DELETE", false);
 
             e = new Enforcer(m);
-            await a.LoadPolicyAsync(e.GetModel());
+            await a.LoadPolicyAsync(e.Model);
 
             await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
             await TestEnforceAsync(e, "alice", "/alice_data/resource1", "POST", true);
@@ -602,7 +603,7 @@ namespace Casbin.UnitTests
 
             TestEnforce(e, "root", "data1", "read", false);
 
-            e.SetModel(e2.GetModel());
+            e.SetModel(e2.Model);
 
             TestEnforce(e, "root", "data1", "read", true);
         }
@@ -616,7 +617,7 @@ namespace Casbin.UnitTests
             TestEnforce(e, "alice", "data1", "read", true);
             TestEnforce(e, "alice", "data1", "write", false);
 
-            var a2 = e2.GetAdapter();
+            var a2 = e2.Adapter;
             e.SetAdapter(a2);
             e.LoadPolicy();
 
@@ -633,7 +634,7 @@ namespace Casbin.UnitTests
             await TestEnforceAsync(e, "alice", "data1", "read", true);
             await TestEnforceAsync(e, "alice", "data1", "write", false);
 
-            var a2 = e2.GetAdapter();
+            var a2 = e2.Adapter;
             e.SetAdapter(a2);
             await e.LoadPolicyAsync();
 
