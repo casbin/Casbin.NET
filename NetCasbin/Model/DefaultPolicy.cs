@@ -9,17 +9,17 @@ using Casbin.Util;
 
 namespace Casbin.Model
 {
-    public class Policy
+    public class DefaultPolicy
     {
-        public Dictionary<string, Dictionary<string, Assertion>> Model { get; }
+        public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
 #if !NET45
         internal ILogger Logger { get; set; }
 #endif
 
-        protected Policy()
+        protected DefaultPolicy()
         {
-            Model = new Dictionary<string, Dictionary<string, Assertion>>();
+            Sections = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
         /// <summary>
@@ -33,7 +33,7 @@ namespace Casbin.Model
         public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<string> rule)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
                 return;
             }
@@ -53,7 +53,7 @@ namespace Casbin.Model
         public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
                 return;
             }
@@ -69,12 +69,12 @@ namespace Casbin.Model
         /// <param name="roleManager"></param>
         public void BuildRoleLinks(IRoleManager roleManager)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
                 return;
             }
 
-            foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
+            foreach (Assertion assertion in Sections[PermConstants.Section.RoleSection].Values)
             {
                 assertion.BuildRoleLinks(roleManager);
             }
@@ -82,7 +82,7 @@ namespace Casbin.Model
 
         public void RefreshPolicyStringSet()
         {
-            foreach (Assertion assertion in Model.Values
+            foreach (Assertion assertion in Sections.Values
                 .SelectMany(pair => pair.Values))
             {
                 assertion.RefreshPolicyStringSet();
@@ -91,17 +91,17 @@ namespace Casbin.Model
 
         public void ClearPolicy()
         {
-            if (Model.ContainsKey(PermConstants.Section.PolicySection))
+            if (Sections.ContainsKey(PermConstants.Section.PolicySection))
             {
-                foreach (Assertion assertion in Model[PermConstants.Section.PolicySection].Values)
+                foreach (Assertion assertion in Sections[PermConstants.Section.PolicySection].Values)
                 {
                     assertion.ClearPolicy();
                 }
             }
 
-            if (Model.ContainsKey(PermConstants.Section.RoleSection))
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection))
             {
-                foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
+                foreach (Assertion assertion in Sections[PermConstants.Section.RoleSection].Values)
                 {
                     assertion.ClearPolicy();
                 }
@@ -110,7 +110,7 @@ namespace Casbin.Model
 
         public List<List<string>> GetPolicy(string sec, string ptype)
         {
-            return Model[sec][ptype].Policy;
+            return Sections[sec][ptype].Policy;
         }
 
         public List<List<string>> GetFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
@@ -122,12 +122,12 @@ namespace Casbin.Model
 
             if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
-                return Model[sec][ptype].Policy;
+                return Sections[sec][ptype].Policy;
             }
 
             var result = new List<List<string>>();
 
-            foreach (var rule in Model[sec][ptype].Policy)
+            foreach (var rule in Sections[sec][ptype].Policy)
             {
                 // Matched means all the fieldValue equals rule[fieldIndex + i].
                 // when fieldValue is empty, this field will skip equals check.
@@ -229,7 +229,7 @@ namespace Casbin.Model
             var newPolicy = new List<List<string>>();
             bool deleted = false;
 
-            Assertion assertion = Model[sec][ptype];
+            Assertion assertion = Sections[sec][ptype];
             foreach (var rule in assertion.Policy)
             {
                 // Matched means all the fieldValue equals rule[fieldIndex + i].
@@ -256,7 +256,7 @@ namespace Casbin.Model
 
         public List<string> GetValuesForFieldInPolicyAllTypes(string sec, int fieldIndex)
         {
-            var section = Model[sec];
+            var section = Sections[sec];
             var values = new List<string>();
 
             foreach (string policyType in section.Keys)
@@ -270,7 +270,7 @@ namespace Casbin.Model
 
         public List<string> GetValuesForFieldInPolicy(string sec, string ptype, int fieldIndex)
         {
-            return GetValuesForFieldInPolicy(Model[sec], ptype, fieldIndex);
+            return GetValuesForFieldInPolicy(Sections[sec], ptype, fieldIndex);
         }
 
         private static List<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section, string ptype, int fieldIndex)
@@ -295,7 +295,7 @@ namespace Casbin.Model
 
         private bool TryGetExistAssertion(string section, string policyType, out Assertion returnAssertion)
         {
-            if (Model[section].TryGetValue(policyType, out var assertion))
+            if (Sections[section].TryGetValue(policyType, out var assertion))
             {
                 if (assertion is null)
                 {

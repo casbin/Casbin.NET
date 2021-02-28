@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Casbin.Config;
 using Casbin.Util;
 
 namespace Casbin.Model
 {
-    public class Model : Policy
+    public class DefaultModel : DefaultPolicy, IModel
     {
         private static readonly IDictionary<string, string> _sectionNameMap = new Dictionary<string, string>() {
             { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
@@ -17,20 +18,20 @@ namespace Casbin.Model
         };
 
         /// <summary>
-        /// Creates a model.
+        /// Creates a default model.
         /// </summary>
         /// <returns></returns>
-        public static Model CreateDefault()
+        public static IModel Create()
         {
-            return new Model();
+            return new DefaultModel();
         }
 
         /// <summary>
-        /// Creates a model.
+        /// Creates a default model from file.
         /// </summary>
         /// <param name="path">The path of the model file.</param>
         /// <returns></returns>
-        public static Model CreateDefaultFromFile(string path)
+        public static IModel CreateFromFile(string path)
         {
             if (string.IsNullOrEmpty(path))
             {
@@ -42,36 +43,36 @@ namespace Casbin.Model
                 throw new FileNotFoundException("Can not find the model file.");
             }
 
-            var model = CreateDefault();
-            model.LoadModel(path);
+            var model = Create();
+            model.LoadModelFromFile(path);
             return model;
         }
 
         /// <summary>
-        /// Creates a model.
+        /// Creates a default model from text.
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        public static Model CreateDefaultFromText(string text)
+        public static IModel CreateFromText(string text)
         {
             if (string.IsNullOrEmpty(text))
             {
                 throw new ArgumentNullException(nameof(text));
             }
 
-            var model = CreateDefault();
+            var model = Create();
             model.LoadModelFromText(text);
             return model;
         }
 
-        public void LoadModel(string path)
+        public void LoadModelFromFile(string path)
         {
-            LoadModel(Config.Config.NewConfig(path));
+            LoadModel(DefaultConfig.CreatefromFile(path));
         }
 
         public void LoadModelFromText(string text)
         {
-            LoadModel(Config.Config.NewConfigFromText(text));
+            LoadModel(DefaultConfig.CreateFromText(text));
         }
 
         public bool AddDef(string section, string key, string value)
@@ -107,23 +108,23 @@ namespace Casbin.Model
                 assertion.Value = Utility.RemoveComments(Utility.EscapeAssertion(assertion.Value));
             }
 
-            if (!Model.ContainsKey(section))
+            if (Sections.ContainsKey(section) is false)
             {
                 var assertionMap = new Dictionary<string, Assertion>
                 {
                     [key] = assertion
                 };
-                Model.Add(section, assertionMap);
+                Sections.Add(section, assertionMap);
             }
             else
             {
-                Model[section].Add(key, assertion);
+                Sections[section].Add(key, assertion);
             }
 
             return true;
         }
 
-        private void LoadModel(Config.Config config)
+        private void LoadModel(IConfig config)
         {
             LoadSection(config, PermConstants.Section.RequestSection);
             LoadSection(config, PermConstants.Section.PolicySection);
@@ -132,7 +133,7 @@ namespace Casbin.Model
             LoadSection(config, PermConstants.Section.MatcherSection);
         }
 
-        private void LoadSection(Config.Config config, string section)
+        private void LoadSection(IConfig config, string section)
         {
             int i = 1;
             while (true)
@@ -146,7 +147,7 @@ namespace Casbin.Model
             }
         }
 
-        private bool LoadAssertion(Config.Config config, string section, string key)
+        private bool LoadAssertion(IConfig config, string section, string key)
         {
             string sectionName = _sectionNameMap[section];
             string value = config.GetString($"{sectionName}::{key}");

@@ -20,9 +20,9 @@ namespace Casbin.Extensions
         public static List<string> GetRolesForUser(this IEnforcer enforcer, string name,  string domain = null)
         {
             return domain is null
-                ? enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
                     .RoleManager.GetRoles(name)
-                : enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                : enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
                     .RoleManager.GetRoles(name, domain);
         }
 
@@ -36,9 +36,9 @@ namespace Casbin.Extensions
         public static List<string> GetUsersForRole(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
-                ? enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
                     .RoleManager.GetUsers(name)
-                : enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                : enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
                     .RoleManager.GetUsers(name, domain);
         }
 
@@ -53,7 +53,7 @@ namespace Casbin.Extensions
             var userIds = new List<string>();
             foreach (string name in names)
             {
-                userIds.AddRange(enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                userIds.AddRange(enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
                     .RoleManager.GetUsers(name));
             }
             return userIds;
@@ -556,7 +556,7 @@ namespace Casbin.Extensions
         /// <returns></returns>
         public static List<string> GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain)
         {
-            return enforcer.Model.Model[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
+            return enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
         }
 
         /// <summary>

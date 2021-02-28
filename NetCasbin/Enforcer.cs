@@ -6,6 +6,7 @@ using Casbin.Adapter.File;
 using Casbin.Effect;
 using Casbin.Evaluation;
 using Casbin.Extensions;
+using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.Util;
@@ -31,12 +32,12 @@ namespace Casbin
         }
 
         public Enforcer(string modelPath, IAdapter adapter = null)
-            : this(Casbin.Model.Model.CreateDefaultFromFile(modelPath), adapter)
+            : this(DefaultModel.CreateFromFile(modelPath), adapter)
         {
             ModelPath = modelPath;
         }
 
-        public Enforcer(Model.Model model, IAdapter adapter = null)
+        public Enforcer(IModel model, IAdapter adapter = null)
         {
             if (adapter is not null)
             {
@@ -56,7 +57,7 @@ namespace Casbin
 
         #region Extensions
         public IEffector Effector { get; private set; } = new DefaultEffector();
-        public Model.Model Model { get; private set; }
+        public IModel Model { get; private set; }
         public IAdapter Adapter { get; private set; }
         public IWatcher Watcher { get; private set; }
         public IRoleManager RoleManager { get; private set; } = new DefaultRoleManager(10);
@@ -131,7 +132,7 @@ namespace Casbin
         /// <param name="modelPath"></param>
         public void SetModel(string modelPath)
         {
-            Model.Model model = Casbin.Model.Model.CreateDefaultFromFile(modelPath);
+            IModel model = DefaultModel.CreateFromFile(modelPath);
             SetModel(model);
             ModelPath = modelPath;
         }
@@ -140,7 +141,7 @@ namespace Casbin
         /// Sets the current model.
         /// </summary>
         /// <param name="model"></param>
-        public void SetModel(Model.Model model)
+        public void SetModel(IModel model)
         {
             Model = model;
             ExpressionHandler = new ExpressionHandler(model);
@@ -193,7 +194,7 @@ namespace Casbin
             {
                 return;
             }
-            Model = Casbin.Model.Model.CreateDefaultFromFile(ModelPath);
+            Model = DefaultModel.CreateFromFile(ModelPath);
         }
 
         /// <summary>
@@ -454,10 +455,10 @@ namespace Casbin
             }
 
             bool explain = explains is not null;
-            string effect = Model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
-            var policyList = Model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
-            int policyCount = Model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
-            string expressionString = Model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+            string effect = Model.Sections[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
+            var policyList = Model.Sections[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
+            int policyCount = Model.Sections[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
+            string expressionString = Model.Sections[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
 
             int requestTokenCount = ExpressionHandler.RequestTokens.Count;
             if (requestTokenCount != requestValues.Count)

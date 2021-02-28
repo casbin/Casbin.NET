@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Text;
 using Casbin.Adapter.File;
+using Casbin.Model;
 
 namespace Casbin.UnitTests.Fixtures
 {
@@ -39,72 +40,72 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _rbacWithHierarchyWithDomainsPolicyText = ReadTestFile("rbac_with_hierarchy_with_domains_policy.csv");
         internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_policy.csv");
 
-        public Model.Model GetNewAbacModel()
+        public IModel GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
         }
 
-        public Model.Model GetNewAbacWithEvalModel()
+        public IModel GetNewAbacWithEvalModel()
         {
             return GetNewTestModel(_abacWithEvalModelText, _abacWithEvalPolicyText);
         }
 
-        public Model.Model GetBasicTestModel()
+        public IModel GetBasicTestModel()
         {
             return GetNewTestModel(_basicModelText, _basicPolicyText);
         }
 
-        public Model.Model GetBasicWithoutResourceTestModel()
+        public IModel GetBasicWithoutResourceTestModel()
         {
             return GetNewTestModel(_basicWithoutResourceModelText, _basicWithoutResourcePolicyText);
         }
 
-        public Model.Model GetBasicWithoutUserTestModel()
+        public IModel GetBasicWithoutUserTestModel()
         {
             return GetNewTestModel(_basicWithoutUserModelText, _basicWithoutUserPolicyText);
         }
 
-        public Model.Model GetNewKeyMatchTestModel()
+        public IModel GetNewKeyMatchTestModel()
         {
             return GetNewTestModel(_keyMatchModelText, _keyMatchPolicyText);
         }
 
-        public Model.Model GetNewKeyMatch2TestModel()
+        public IModel GetNewKeyMatch2TestModel()
         {
             return GetNewTestModel(_keyMatch2ModelText, _keyMatch2PolicyText);
         }
 
-        public Model.Model GetNewPriorityTestModel()
+        public IModel GetNewPriorityTestModel()
         {
             return GetNewTestModel(_priorityModelText, _priorityPolicyText);
         }
 
-        public Model.Model GetNewRbacTestModel()
+        public IModel GetNewRbacTestModel()
         {
             return GetNewTestModel(_rbacModelText, _rbacPolicyText);
         }
 
-        public Model.Model GetNewRbacWithDenyTestModel()
+        public IModel GetNewRbacWithDenyTestModel()
         {
             return GetNewTestModel(_rbacWithDenyModelText, _rbacWithDenyPolicyText);
         }
 
-        public Model.Model GetNewRbacWithDomainsTestModel()
+        public IModel GetNewRbacWithDomainsTestModel()
         {
             return GetNewTestModel(_rbacWithDomainsModelText, _rbacWithDomainsPolicyText);
         }
 
-        public Model.Model GetNewRbacWithResourceRoleTestModel()
+        public IModel GetNewRbacWithResourceRoleTestModel()
         {
             return GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
         }
 
-        public static Model.Model GetNewTestModel(string modelText)
+        public static IModel GetNewTestModel(string modelText)
         {
-            return Model.Model.CreateDefaultFromText(modelText);
+            return DefaultModel.CreateFromText(modelText);
         }
 
-        public static Model.Model GetNewTestModel(string modelText, string policyText)
+        public static IModel GetNewTestModel(string modelText, string policyText)
         {
             return LoadModelFromMemory(GetNewTestModel(modelText), policyText);
         }
@@ -114,7 +115,7 @@ namespace Casbin.UnitTests.Fixtures
             return Path.Combine("examples", fileName);
         }
 
-        private static Model.Model LoadModelFromMemory(Model.Model model, string policy)
+        private static IModel LoadModelFromMemory(IModel model, string policy)
         {
             model.ClearPolicy();
             using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(policy)))

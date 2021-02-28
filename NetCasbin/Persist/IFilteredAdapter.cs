@@ -4,9 +4,9 @@ namespace Casbin.Persist
 {
     public interface IFilteredAdapter
     {
-        void LoadFilteredPolicy(Model.Model model, Filter filter);
+        void LoadFilteredPolicy(IModel model, Filter filter);
 
-        Task LoadFilteredPolicyAsync(Model.Model model, Filter filter);
+        Task LoadFilteredPolicyAsync(IModel model, Filter filter);
 
         bool IsFiltered { get; }
     }

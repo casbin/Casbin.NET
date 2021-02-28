@@ -3,6 +3,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Extensions;
+using Casbin.Model;
 using Casbin.Persist;
 using Casbin.UnitTest.Mock;
 using Casbin.UnitTests.Fixtures;
@@ -27,7 +28,7 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -88,7 +89,7 @@ namespace Casbin.UnitTests
         [Fact]
         public async Task TestKeyMatchModelInMemoryAsync()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -149,7 +150,7 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestKeyMatchModelInMemoryDeny()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "!some(where (p.eft == deny))");
@@ -165,7 +166,7 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestRbacModelInMemoryIndeterminate()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -182,7 +183,7 @@ namespace Casbin.UnitTests
         [Fact]
         public async Task TestRbacModelInMemoryIndeterminateAsync()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -199,7 +200,7 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestRbacModelInMemory()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -227,7 +228,7 @@ namespace Casbin.UnitTests
         [Fact]
         public async Task TestRbacModelInMemoryAsync()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -271,7 +272,7 @@ namespace Casbin.UnitTests
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            var m = Model.Model.CreateDefaultFromText(text);
+            var m = DefaultModel.CreateFromText(text);
 
             var e = new Enforcer(m);
 
@@ -310,7 +311,7 @@ namespace Casbin.UnitTests
                 + "[matchers]\n"
                 + "m = g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act\n";
 
-            var m = Model.Model.CreateDefaultFromText(text);
+            var m = DefaultModel.CreateFromText(text);
 
             var e = new Enforcer(m);
 
@@ -333,7 +334,7 @@ namespace Casbin.UnitTests
         [Fact]
         public void TestNotUsedRbacModelInMemory()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -358,7 +359,7 @@ namespace Casbin.UnitTests
         [Fact]
         public async Task TestNotUsedRbacModelInMemoryAsync()
         {
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("g", "g", "_, _");
@@ -675,7 +676,7 @@ namespace Casbin.UnitTests
         {
             var e = new Enforcer();
 
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -695,7 +696,7 @@ namespace Casbin.UnitTests
         {
             var e = new Enforcer();
 
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -715,7 +716,7 @@ namespace Casbin.UnitTests
         {
             var e = new Enforcer();
 
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");
@@ -737,7 +738,7 @@ namespace Casbin.UnitTests
         {
             var e = new Enforcer();
 
-            var m = Model.Model.CreateDefault();
+            var m = DefaultModel.Create();
             m.AddDef("r", "r", "sub, obj, act");
             m.AddDef("p", "p", "sub, obj, act");
             m.AddDef("e", "e", "some(where (p.eft == allow))");

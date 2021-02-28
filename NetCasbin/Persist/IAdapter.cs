@@ -5,32 +5,32 @@ namespace Casbin.Persist
 {
     public interface IAdapter
     {
-        void LoadPolicy(Model.Model model);
+        void LoadPolicy(IModel model);
 
-        Task LoadPolicyAsync(Model.Model model);
+        Task LoadPolicyAsync(IModel model);
 
-        void SavePolicy(Model.Model model);
+        void SavePolicy(IModel model);
 
-        Task SavePolicyAsync(Model.Model model);
+        Task SavePolicyAsync(IModel model);
 
-        void AddPolicy(string sec, string ptype, IList<string> rule);
+        void AddPolicy(string section, string policyType, IList<string> rule);
 
-        Task AddPolicyAsync(string sec, string ptype, IList<string> rule);
+        Task AddPolicyAsync(string section, string policyType, IList<string> rule);
 
-        void AddPolicies(string sec, string ptype, IEnumerable<IList<string>> rules);
+        void AddPolicies(string section, string policyType, IEnumerable<IList<string>> rules);
 
-        Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules);
+        Task AddPoliciesAsync(string section, string policyType, IEnumerable<IList<string>> rules);
 
-        void RemovePolicy(string sec, string ptype, IList<string> rule);
+        void RemovePolicy(string section, string policyType, IList<string> rule);
 
-        Task RemovePolicyAsync(string sec, string ptype, IList<string> rule);
+        Task RemovePolicyAsync(string section, string policyType, IList<string> rule);
 
-        void RemovePolicies(string sec, string ptype, IEnumerable<IList<string>> rules);
+        void RemovePolicies(string section, string policyType, IEnumerable<IList<string>> rules);
 
-        Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IList<string>> rules);
+        Task RemovePoliciesAsync(string section, string policyType, IEnumerable<IList<string>> rules);
 
-        void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues);
+        void RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
 
-        Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues);
+        Task RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues);
     }
 }

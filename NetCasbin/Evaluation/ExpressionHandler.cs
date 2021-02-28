@@ -16,26 +16,26 @@ namespace Casbin.Evaluation
             = new Dictionary<string, Func<string, string, string, string, string, string, bool>>();
 
         private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
-        private readonly Model.Model _model;
+        private readonly IModel _model;
         private Interpreter _interpreter;
         private readonly Parameter[] _orderedParameters;
 
-        public ExpressionHandler(Model.Model model,
+        public ExpressionHandler(IModel model,
             string requestType = PermConstants.DefaultRequestType,
             string policyType = PermConstants.DefaultPolicyType)
         {
             _model = model;
             int parametersCount = 0;
 
-            if (model.Model.ContainsKey(PermConstants.Section.RequestSection))
+            if (model.Sections.ContainsKey(PermConstants.Section.RequestSection))
             {
-                RequestTokens = model.Model[PermConstants.Section.RequestSection][requestType].Tokens;
+                RequestTokens = model.Sections[PermConstants.Section.RequestSection][requestType].Tokens;
                 parametersCount += RequestTokens.Count;
             }
 
-            if (model.Model.ContainsKey(PermConstants.Section.PolicySection))
+            if (model.Sections.ContainsKey(PermConstants.Section.PolicySection))
             {
-                PolicyTokens = model.Model[PermConstants.Section.PolicySection][policyType].Tokens;
+                PolicyTokens = model.Sections[PermConstants.Section.PolicySection][policyType].Tokens;
                 parametersCount += PolicyTokens.Count;
             }
 
@@ -206,12 +206,12 @@ namespace Casbin.Evaluation
 
         private void SetGFunctions(Interpreter interpreter)
         {
-            if (_model.Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            if (_model.Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
                 return;
             }
 
-            foreach (KeyValuePair<string, Assertion> assertionKeyValue in _model.Model[PermConstants.Section.RoleSection])
+            foreach (KeyValuePair<string, Assertion> assertionKeyValue in _model.Sections[PermConstants.Section.RoleSection])
             {
                 string key = assertionKeyValue.Key;
                 Assertion assertion = assertionKeyValue.Value;

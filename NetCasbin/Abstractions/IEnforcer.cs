@@ -18,7 +18,7 @@ namespace Casbin
 
         #region Extensions
         public IEffector Effector { get; }
-        public Model.Model Model { get; }
+        public IModel Model { get; }
         public IAdapter Adapter { get; }
         public IWatcher Watcher { get; }
         public IRoleManager RoleManager { get; }
@@ -60,7 +60,7 @@ namespace Casbin
         /// Sets the current model.
         /// </summary>
         /// <param name="model"></param>
-        public void SetModel(Model.Model model);
+        public void SetModel(IModel model);
 
         /// <summary>
         /// Sets an adapter.

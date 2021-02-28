@@ -4,7 +4,7 @@ using System.IO;
 
 namespace Casbin.Config
 {
-    public class Config
+    public class DefaultConfig : IConfig
     {
         private static readonly string _defaultSection = "default";
         private static readonly string _defaultComment = "#";
@@ -13,33 +13,123 @@ namespace Casbin.Config
         // Section:key=value
         private readonly IDictionary<string, IDictionary<string, string>> _data;
 
-        private Config()
+        private DefaultConfig()
         {
             _data = new Dictionary<string, IDictionary<string, string>>();
         }
 
         /// <summary>
-        /// Creates an empty configuration representation from file.
+        /// Creates an empty default configuration representation.
         /// </summary>
-        /// <param name="configFilePath">The path of the model file.</param>
         /// <returns>The constructor of Config.</returns>
-        public static Config NewConfig(string configFilePath)
+        public static IConfig Create()
         {
-            var c = new Config();
-            c.Parse(configFilePath);
-            return c;
+            return new DefaultConfig();
         }
 
         /// <summary>
-        /// Creates an empty configuration representation from text.
+        /// Creates an empty default configuration representation from file.
+        /// </summary>
+        /// <param name="configFilePath">The path of the model file.</param>
+        /// <returns>The constructor of Config.</returns>
+        public static IConfig CreatefromFile(string configFilePath)
+        {
+            var config = new DefaultConfig();
+            config.Parse(configFilePath);
+            return config;
+        }
+
+        /// <summary>
+        /// Creates an empty default configuration representation from text.
         /// </summary>
         /// <param name="text">The model text.</param>
         /// <returns>The constructor of Config.</returns>
-        public static Config NewConfigFromText(string text)
+        public static IConfig CreateFromText(string text)
         {
-            var c = new Config();
-            c.ParseBuffer(new StringReader(text));
-            return c;
+            var config = new DefaultConfig();
+            config.ParseBuffer(new StringReader(text));
+            return config;
+        }
+
+        public string Get(string key)
+        {
+            string section;
+            string option;
+
+            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
+            if (keys.Length >= 2)
+            {
+                section = keys[0];
+                option = keys[1];
+            }
+            else
+            {
+                section = _defaultSection;
+                option = keys[0];
+            }
+
+            bool ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
+            if (ok)
+            {
+                return _data[section][option];
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        public bool GetBool(string key)
+        {
+            return bool.Parse(Get(key));
+        }
+
+        public int GetInt(string key)
+        {
+            return int.Parse(Get(key));
+        }
+
+        public float GetFloat(string key)
+        {
+            return float.Parse(Get(key));
+        }
+
+        public string GetString(string key)
+        {
+            return Get(key);
+        }
+
+        public string[] GetStrings(string key)
+        {
+            string v = Get(key);
+            if (string.IsNullOrEmpty(v))
+            {
+                return null;
+            }
+            return v.Split(',');
+        }
+
+        public void Set(string key, string value)
+        {
+            if (string.IsNullOrEmpty(key))
+            {
+                throw new Exception("key is empty");
+            }
+
+            string section = string.Empty;
+            string option;
+
+            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
+            if (keys.Length >= 2)
+            {
+                section = keys[0];
+                option = keys[1];
+            }
+            else
+            {
+                option = keys[0];
+            }
+            AddConfig(section, option, value);
         }
 
         /// <summary>
@@ -130,86 +220,5 @@ namespace Casbin.Config
             }
         }
 
-        public bool GetBool(string key)
-        {
-            return bool.Parse(Get(key));
-        }
-
-        public int GetInt(string key)
-        {
-            return int.Parse(Get(key));
-        }
-
-        public float GetFloat(string key)
-        {
-            return float.Parse(Get(key));
-        }
-
-        public string GetString(string key)
-        {
-            return Get(key);
-        }
-
-        public string[] GetStrings(string key)
-        {
-            string v = Get(key);
-            if (string.IsNullOrEmpty(v))
-            {
-                return null;
-            }
-            return v.Split(',');
-        }
-
-        public void Set(string key, string value)
-        {
-
-            if (string.IsNullOrEmpty(key))
-            {
-                throw new Exception("key is empty");
-            }
-
-            string section = string.Empty;
-            string option;
-
-            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
-            if (keys.Length >= 2)
-            {
-                section = keys[0];
-                option = keys[1];
-            }
-            else
-            {
-                option = keys[0];
-            }
-            AddConfig(section, option, value);
-        }
-
-        public string Get(string key)
-        {
-            string section;
-            string option;
-
-            var keys = key.ToLower().Split(new string[] { "::" }, StringSplitOptions.None);
-            if (keys.Length >= 2)
-            {
-                section = keys[0];
-                option = keys[1];
-            }
-            else
-            {
-                section = _defaultSection;
-                option = keys[0];
-            }
-
-            bool ok = _data.ContainsKey(section) && _data[section].ContainsKey(option);
-            if (ok)
-            {
-                return _data[section][option];
-            }
-            else
-            {
-                return string.Empty;
-            }
-        }
     }
 }
