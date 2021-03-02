@@ -34,7 +34,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public void LoadPolicy(Model.Model model)
+        public void LoadPolicy(IModel model)
         {
             if (!string.IsNullOrWhiteSpace(filePath))
             {
@@ -51,7 +51,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public async Task LoadPolicyAsync(Model.Model model)
+        public async Task LoadPolicyAsync(IModel model)
         {
             if (!string.IsNullOrWhiteSpace(filePath))
             {
@@ -68,7 +68,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public void SavePolicy(Model.Model model)
+        public void SavePolicy(IModel model)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {
@@ -84,7 +84,7 @@ namespace Casbin.Adapter.File
             SavePolicyFile(string.Join("\n", policy));
         }
 
-        public async Task SavePolicyAsync(Model.Model model)
+        public async Task SavePolicyAsync(IModel model)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {
@@ -100,10 +100,10 @@ namespace Casbin.Adapter.File
             await SavePolicyFileAsync(string.Join("\n", policy));
         }
 
-        private static IEnumerable<string> GetModelPolicy(Model.Model model, string ptype)
+        private static IEnumerable<string> GetModelPolicy(IModel model, string ptype)
         {
             var policy = new List<string>();
-            foreach (var pair in model.Model[ptype])
+            foreach (var pair in model.Sections[ptype])
             {
                 string key = pair.Key;
                 Assertion value = pair.Value;
@@ -112,7 +112,7 @@ namespace Casbin.Adapter.File
             return policy;
         }
 
-        private static void LoadPolicyData(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
+        private static void LoadPolicyData(IModel model, Helper.LoadPolicyLineHandler<string, IModel> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {
@@ -121,7 +121,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        private async Task LoadPolicyDataAsync(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
+        private async Task LoadPolicyDataAsync(IModel model, Helper.LoadPolicyLineHandler<string, IModel> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {
@@ -130,11 +130,11 @@ namespace Casbin.Adapter.File
             }
         }
 
-        private IList<string> ConvertToPolicyStrings(Model.Model model)
+        private IList<string> ConvertToPolicyStrings(IModel model)
         {
             var policy = new List<string>();
             policy.AddRange(GetModelPolicy(model, PermConstants.DefaultPolicyType));
-            if (model.Model.ContainsKey(PermConstants.Section.RoleSection))
+            if (model.Sections.ContainsKey(PermConstants.Section.RoleSection))
             {
                 policy.AddRange(GetModelPolicy(model, PermConstants.Section.RoleSection));
             }

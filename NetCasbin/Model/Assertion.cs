@@ -144,7 +144,6 @@ namespace Casbin.Model
                 default:
                     throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);
             }
-
         }
 
         internal bool Contains(IEnumerable<string> rule)

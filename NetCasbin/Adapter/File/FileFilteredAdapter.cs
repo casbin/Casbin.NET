@@ -19,7 +19,7 @@ namespace Casbin.Adapter.File
         {
         }
 
-        public void LoadFilteredPolicy(Model.Model model, Filter filter)
+        public void LoadFilteredPolicy(IModel model, Filter filter)
         {
             if (filter == null)
             {
@@ -36,7 +36,7 @@ namespace Casbin.Adapter.File
             IsFiltered = true;
         }
 
-        public async Task LoadFilteredPolicyAsync(Model.Model model, Filter filter)
+        public async Task LoadFilteredPolicyAsync(IModel model, Filter filter)
         {
             if (filter == null)
             {
@@ -53,7 +53,7 @@ namespace Casbin.Adapter.File
             IsFiltered = true;
         }
 
-        private void LoadFilteredPolicyFile(Model.Model model, Filter filter, Action<string, Model.Model> handler)
+        private void LoadFilteredPolicyFile(IModel model, Filter filter, Action<string, IModel> handler)
         {
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             while (!reader.EndOfStream)
@@ -67,7 +67,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        private async Task LoadFilteredPolicyFileAsync(Model.Model model, Filter filter, Action<string, Model.Model> handler)
+        private async Task LoadFilteredPolicyFileAsync(IModel model, Filter filter, Action<string, IModel> handler)
         {
             var reader = new StreamReader(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
             while (!reader.EndOfStream)

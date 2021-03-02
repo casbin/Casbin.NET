@@ -6,7 +6,7 @@ namespace Casbin.Persist
     {
         public delegate void LoadPolicyLineHandler<T, TU>(T t, TU u);
 
-        public static void LoadPolicyLine(string line, Model.Model model)
+        public static void LoadPolicyLine(string line, IModel model)
         {
             if (string.IsNullOrEmpty(line))
             {
@@ -23,9 +23,9 @@ namespace Casbin.Persist
             string key = tokens[0];
             string sec = key.Substring(0, 1);
 
-            if (model.Model.ContainsKey(sec))
+            if (model.Sections.ContainsKey(sec))
             {
-                var item = model.Model[sec];
+                var item = model.Sections[sec];
                 var policy = item[key];
                 if (policy == null)
                 {
