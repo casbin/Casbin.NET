@@ -265,7 +265,7 @@ namespace Casbin.Extensions
         /// <param name="user">User or role</param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<List<string>> GetPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
+        public static IEnumerable<IEnumerable<string>> GetPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
         {
             return domain is null
                 ? enforcer.GetFilteredPolicy(0, user)
@@ -516,11 +516,11 @@ namespace Casbin.Extensions
         /// <param name="user"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<List<string>> GetImplicitPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
+        public static IEnumerable<IEnumerable<string>> GetImplicitPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
         {
             var roles = new List<string> { user };
             roles.AddRange(GetImplicitRolesForUser(enforcer, user, domain));
-            var result = new List<List<string>>();
+            var result = new List<IEnumerable<string>>();
             foreach (string role in roles)
             {
                 result.AddRange(GetPermissionsForUser(enforcer, role, domain));
@@ -566,7 +566,7 @@ namespace Casbin.Extensions
         /// <param name="user">User or role</param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<List<string>> GetPermissionsForUserInDomain(this IEnforcer enforcer, string user, string domain)
+        public static IEnumerable<IEnumerable<string>> GetPermissionsForUserInDomain(this IEnforcer enforcer, string user, string domain)
         {
             return enforcer.GetFilteredPolicy(0, user, domain);
         }

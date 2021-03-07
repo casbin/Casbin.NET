@@ -26,7 +26,7 @@ namespace Casbin.Extensions
 
             for (int i = 0; i < bytesLength; i++)
             {
-                byte cidrByte = nowCidrMaskCount == 0 ? 0x00 : 0xFF;
+                byte cidrByte = (byte)(nowCidrMaskCount == 0 ? 0x00 : 0xFF);
 
                 if ((ipBytes1[i] & cidrByte) != (ipBytes2[i] & cidrByte))
                 {
