@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Casbin.Rbac;
 using Casbin.Util;
-using Casbin;
+using Casbin.Extensions;
 
 namespace Casbin.Model
 {
@@ -21,13 +21,13 @@ namespace Casbin.Model
 
         public IRoleManager RoleManager { get; private set; }
 
-        public List<List<string>> Policy { get; internal set; }
+        public List<IReadOnlyList<string>> Policy { get; internal set; }
 
         private HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {
-            Policy = new List<List<string>>();
+            Policy = new List<IReadOnlyList<string>>();
             PolicyStringSet = new HashSet<string>();
             RoleManager = new DefaultRoleManager(0);
         }
@@ -79,7 +79,7 @@ namespace Casbin.Model
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            foreach (var rule in Policy)
+            foreach (IEnumerable<string> rule in Policy)
             {
                 BuildRoleLink(roleManager, count, PolicyOperation.PolicyAdd, rule);
             }
@@ -151,32 +151,34 @@ namespace Casbin.Model
             return PolicyStringSet.Contains(Utility.RuleToString(rule));
         }
 
-        internal bool TryAddPolicy(List<string> rule)
+        internal bool TryAddPolicy(IEnumerable<string> rule)
         {
-            if (Contains(rule))
+            var ruleList = rule as IReadOnlyList<string> ?? rule.ToArray();
+            if (Contains(ruleList))
             {
                 return false;
             }
-            Policy.Add(rule);
-            PolicyStringSet.Add(Utility.RuleToString(rule));
+            Policy.Add(ruleList);
+            PolicyStringSet.Add(Utility.RuleToString(ruleList));
             return true;
         }
 
-        internal bool TryRemovePolicy(List<string> rule)
+        internal bool TryRemovePolicy(IEnumerable<string> rule)
         {
-            if (!Contains(rule))
+            var ruleList = rule as IReadOnlyList<string> ?? rule.ToArray();
+            if (Contains(ruleList) is false)
             {
                 return false;
             }
             for (int i = 0; i < Policy.Count; i++)
             {
                 var ruleInPolicy = Policy[i];
-                if (!Utility.ArrayEquals(rule, ruleInPolicy))
+                if (ruleList.DeepEquals(ruleInPolicy) is false)
                 {
                     continue;
                 }
                 Policy.RemoveAt(i);
-                PolicyStringSet.Remove(Utility.RuleToString(rule));
+                PolicyStringSet.Remove(Utility.RuleToString(ruleList));
                 break;
             }
             return true;

@@ -10,22 +10,22 @@ namespace Casbin
         /// </summary>
         /// <param name="roleManager"></param>
         /// <param name="policyOperation"></param>
-        /// <param name="sectiontion"></param>
+        /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
         public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
-            string sectiontion, string policyType, IEnumerable<string> rule);
+            string section, string policyType, IEnumerable<string> rule);
 
         /// <summary>
         /// Provides incremental build the role inheritance relations.
         /// </summary>
         /// <param name="roleManager"></param>
         /// <param name="policyOperation"></param>
-        /// <param name="sectiontion"></param>
+        /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
         public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
-            string sectiontion, string policyType, IEnumerable<IEnumerable<string>> rules);
+            string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
         /// <summary>
         /// Initializes the roles in RBAC.
@@ -35,26 +35,26 @@ namespace Casbin
 
         public void RefreshPolicyStringSet();
 
-        public List<List<string>> GetPolicy(string section, string policyType);
+        public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType);
 
-        public List<List<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
+        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
             params string[] fieldValues);
 
-        public List<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex);
+        public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex);
 
-        public List<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex);
+        public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex);
 
-        public bool HasPolicy(string section, string policyType, List<string> rule);
+        public bool HasPolicy(string section, string policyType, IEnumerable<string> rule);
 
-        public bool HasPolicies(string section, string policyType, IEnumerable<List<string>> rules);
+        public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
-        public bool AddPolicy(string section, string policyType, List<string> rule);
+        public bool AddPolicy(string section, string policyType, IEnumerable<string> rule);
 
-        public bool AddPolicies(string section, string policyType, IEnumerable<List<string>> rules);
+        public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
-        public bool RemovePolicy(string section, string policyType, List<string> rule);
+        public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule);
 
-        public bool RemovePolicies(string section, string policyType, IEnumerable<List<string>> rules);
+        public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
         public bool RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
 

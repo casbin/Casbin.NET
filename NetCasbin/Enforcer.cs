@@ -480,7 +480,7 @@ namespace Casbin
 
                 if (policyCount is not 0)
                 {
-                    foreach (var policyValues in policyList)
+                    foreach (IReadOnlyList<string> policyValues in policyList)
                     {
                         if (policyTokenCount != policyValues.Count)
                         {

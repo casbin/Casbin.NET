@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Extensions;
 using Casbin.Rbac;
+using Casbin.UnitTests.Extensions;
 using Casbin.Util;
 using Xunit;
 
@@ -67,26 +68,26 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetPolicy(Enforcer e, List<List<string>> res)
         {
-            List<List<string>> myRes = e.GetPolicy();
-            Assert.True(Utility.Array2DEquals(res, myRes));
+            var myRes = e.GetPolicy();
+            Assert.True(res.DeepEquals(myRes));
         }
 
         internal static void TestGetFilteredPolicy(Enforcer e, int fieldIndex, List<List<string>> res, params string[] fieldValues)
         {
-            List<List<string>> myRes = e.GetFilteredPolicy(fieldIndex, fieldValues);
+            var myRes = e.GetFilteredPolicy(fieldIndex, fieldValues);
 
-            Assert.True(Utility.Array2DEquals(res, myRes));
+            Assert.True(res.DeepEquals(myRes));
         }
 
         internal static void TestGetGroupingPolicy(Enforcer e, List<List<string>> res)
         {
-            List<List<string>> myRes = e.GetGroupingPolicy();
+            var myRes = e.GetGroupingPolicy();
             Assert.Equal(res, myRes);
         }
 
         internal static void TestGetFilteredGroupingPolicy(Enforcer e, int fieldIndex, List<List<string>> res, params string[] fieldValues)
         {
-            List<List<string>> myRes = e.GetFilteredGroupingPolicy(fieldIndex, fieldValues);
+            var myRes = e.GetFilteredGroupingPolicy(fieldIndex, fieldValues);
             Assert.Equal(res, myRes);
         }
 
@@ -124,16 +125,16 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetPermissions(Enforcer e, string name, List<List<string>> res, string domain = null)
         {
-            List<List<string>> myRes = e.GetPermissionsForUser(name, domain);
+            var myRes = e.GetPermissionsForUser(name, domain);
             string message = "Permissions for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Utility.Array2DEquals(res, myRes), message);
+            Assert.True(res.DeepEquals(myRes), message);
         }
 
         internal static void TestGetImplicitPermissions(Enforcer e, string name, List<List<string>> res, string domain = null)
         {
-            List<List<string>> myRes = e.GetImplicitPermissionsForUser(name, domain);
+            var myRes = e.GetImplicitPermissionsForUser(name, domain);
             string message = "Implicit permissions for " + name + ": " + myRes + ", supposed to be " + res;
-            Assert.True(Utility.Array2DEquals(res, myRes), message);
+            Assert.True(res.DeepEquals(myRes), message);
         }
 
         internal static void TestHasPermission(Enforcer e, string name, List<string> permission, bool res)
@@ -151,8 +152,8 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetPermissionsInDomain(Enforcer e, string name, string domain, List<List<string>> res)
         {
-            List<List<string>> myRes = e.GetPermissionsForUserInDomain(name, domain);
-            Assert.True(Utility.Array2DEquals(res, myRes), "Permissions for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res);
+            var myRes = e.GetPermissionsForUserInDomain(name, domain);
+            Assert.True(res.DeepEquals(myRes), "Permissions for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res);
         }
 
         #region RoleManger test

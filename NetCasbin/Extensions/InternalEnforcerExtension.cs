@@ -15,7 +15,7 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static bool InternalAddPolicy(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
+        internal static bool InternalAddPolicy(this IEnforcer enforcer, string sec, string ptype, IEnumerable<string> rule)
         {
             if (enforcer.Model.HasPolicy(sec, ptype, rule))
             {
@@ -60,7 +60,7 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
+        internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<string> rule)
         {
             if (enforcer.Model.HasPolicy(sec, ptype, rule))
             {
@@ -105,9 +105,9 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static bool InternalAddPolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static bool InternalAddPolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+            var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (enforcer.Model.HasPolicies(sec, ptype, ruleArray))
             {
@@ -153,9 +153,9 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+            var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (enforcer.Model.HasPolicies(sec, ptype, ruleArray))
             {
@@ -200,7 +200,7 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static bool InternalRemovePolicy(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
+        internal static bool InternalRemovePolicy(this IEnforcer enforcer, string sec, string ptype, IEnumerable<string> rule)
         {
             if (enforcer.Model.HasPolicy(sec, ptype, rule) is false)
             {
@@ -245,7 +245,7 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string sec, string ptype, List<string> rule)
+        internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<string> rule)
         {
             if (enforcer.Model.HasPolicy(sec, ptype, rule) is false)
             {
@@ -290,9 +290,9 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static bool InternalRemovePolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static bool InternalRemovePolicies(this IEnforcer enforcer, string sec, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+            var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (enforcer.Model.HasPolicies(sec, ptype, ruleArray) is false)
             {
@@ -337,9 +337,9 @@ namespace Casbin.Extensions
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<List<string>> rules)
+        internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string sec, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            var ruleArray = rules as List<string>[] ?? rules.ToArray();
+            var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (enforcer.Model.HasPolicies(sec, ptype, ruleArray) is false)
             {
