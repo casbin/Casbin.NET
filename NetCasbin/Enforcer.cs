@@ -564,12 +564,11 @@ namespace NetCasbin
 
         public IEnumerable<string> GetImplicitUsersForPermission(IEnumerable<string> permissions)
         {
-            var policySubjects = GetAllSubjects();
-            var groupInherit = model.GetValuesForFieldInPolicyAllTypes("g", 1);
-            var groupSubjects = model.GetValuesForFieldInPolicyAllTypes("g", 0);
-            return policySubjects.Concat(groupSubjects).Distinct()
-                .Where(subject => Enforce(new[]{ subject }.Concat(permissions).Cast<object>().ToArray()))
-                .Except(groupInherit);
+            List<string> policySubjects = GetAllSubjects();
+            List<string> groupInherit = model.GetValuesForFieldInPolicyAllTypes("g", 1);
+            List<string> groupSubjects = model.GetValuesForFieldInPolicyAllTypes("g", 0);
+            return policySubjects.Concat(groupSubjects).Distinct().Except(groupInherit)
+                .Where(subject => Enforce(new[]{ subject }.Concat(permissions).Cast<object>().ToArray()));
         }
 
         #endregion
