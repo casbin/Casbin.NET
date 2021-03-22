@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 #if !NET45
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 #endif
 using DynamicExpresso;
 using NetCasbin.Abstractions;
@@ -15,6 +16,8 @@ using NetCasbin.Persist;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
 using NetCasbin.Extensions;
+using NetCasbin.Caching;
+using System.Text;
 
 namespace NetCasbin
 {
@@ -37,7 +40,10 @@ namespace NetCasbin
         protected bool autoNotifyWatcher;
 
         internal IExpressionHandler ExpressionHandler { get; private set; }
+
 #if !NET45
+        private bool _enableCache;
+        public IEnforceCache EnforceCache { get; set; }
         public ILogger Logger { get; set; }
 #endif
 
@@ -169,6 +175,17 @@ namespace NetCasbin
         {
             _effector = effector;
         }
+
+#if !NET45
+        /// <summary>
+        /// Sets an enforce cache.
+        /// </summary>
+        /// <param name="enforceCache"></param>
+        public void SetEnforceCache(IEnforceCache enforceCache)
+        {
+            EnforceCache = enforceCache;
+        }
+#endif
 
         /// <summary>
         /// Clears all policy.
@@ -306,9 +323,9 @@ namespace NetCasbin
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
             await adapter.SavePolicyAsync(model);
-            if (!(watcher is null))
+            if (watcher is not null)
             {
-                await watcher?.UpdateAsync();
+                await watcher.UpdateAsync();
             }
         }
 
@@ -352,6 +369,13 @@ namespace NetCasbin
             this.autoNotifyWatcher = autoNotifyWatcher;
         }
 
+#if !NET45
+        public void EnableCache(bool enableCache)
+        {
+            _enableCache = enableCache;
+        }
+#endif
+
         /// <summary>
         /// Manually rebuilds the role inheritance relations.
         /// </summary>
@@ -368,9 +392,35 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public Task<bool> EnforceAsync(params object[] requestValues)
+        public async Task<bool> EnforceAsync(params object[] requestValues)
         {
-            return Task.FromResult(Enforce(requestValues));
+#if !NET45
+            if (requestValues.Any(requestValue => requestValue is not string))
+            {
+                return InternalEnforce(requestValues);
+            }
+
+            if (_enableCache)
+            {
+                string key = string.Join("$$", requestValues);
+                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+                bool? tryGetCachedResult = await EnforceCache.TryGetResultAsync(requestValues, key);
+                if (tryGetCachedResult.HasValue)
+                {
+                    bool cachedResult = tryGetCachedResult.Value;
+                    Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                    return cachedResult;
+                }
+
+                bool result = InternalEnforce(requestValues);
+
+                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+                await EnforceCache.TrySetResultAsync(requestValues, key, result);
+                return result;
+            }
+#endif
+
+            return InternalEnforce(requestValues);
         }
 
         /// <summary>
@@ -382,7 +432,30 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         public bool Enforce(params object[] requestValues)
         {
-            return Enforce((IReadOnlyList<object>) requestValues);
+#if !NET45
+            if (requestValues.Any(requestValue => requestValue is not string))
+            {
+                return InternalEnforce(requestValues);
+            }
+
+            if (_enableCache)
+            {
+                string key = string.Join("$$", requestValues);
+                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+                if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
+                {
+                    Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                    return cachedResult;
+                }
+
+                bool result  = InternalEnforce(requestValues);
+                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+                EnforceCache.TrySetResult(requestValues, key, result);
+                return result;
+            }
+#endif
+
+            return InternalEnforce(requestValues);
         }
 
 #if !NET45
@@ -396,7 +469,7 @@ namespace NetCasbin
             EnforceEx(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
-            bool result = Enforce(requestValues, explains);
+            bool result = InternalEnforce(requestValues, explains);
             return (result, explains);
         }
 
@@ -424,7 +497,7 @@ namespace NetCasbin
             EnforceEx(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
-            bool result = Enforce(requestValues, explains);
+            bool result = InternalEnforce(requestValues, explains);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
 
@@ -453,7 +526,7 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         private Task<bool> EnforceAsync(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
-            return Task.FromResult(Enforce(requestValues, explains));
+            return Task.FromResult(InternalEnforce(requestValues, explains));
         }
 
         /// <summary>
@@ -464,7 +537,7 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        private bool Enforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
+        private bool InternalEnforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
             if (_enabled is false)
             {
