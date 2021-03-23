@@ -176,7 +176,7 @@ jobs:
         echo "Now branch name: $NowBranchName";
         $PackageVersion = ($LastTag).TrimStart('v') + "-" + $env:BUILD_RUN_NUMBER + "." + $NowBranchName + "." + $env:SHA.SubString(0, 7);
         echo "Publishing package version: ${PackageVersion}";
-        dotnet pack -c Release -o packages /p:PackageVersion=$PackageVersion /p:Version=$Version --no-build;
+        dotnet pack -c Release -o packages /p:PackageVersion=$PackageVersion /p:Version=$Version;
 
     - name: Upload packages artefacts
       uses: actions/upload-artifact@v1.0.0
@@ -232,7 +232,7 @@ jobs:
         echo "Last tag is: $LastTag";
         $Version = ($LastTag).TrimStart('v');
         echo "Publishing version: $Version";
-        dotnet pack -c Release -o packages /p:PackageVersion=$Version /p:Version=$Version --no-build;
+        dotnet pack -c Release -o packages /p:PackageVersion=$Version /p:Version=$Version;
 
     - name: Upload packages artefacts
       uses: actions/upload-artifact@v1.0.0
