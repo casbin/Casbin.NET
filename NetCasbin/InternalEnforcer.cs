@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Xml.Schema;
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
 using NetCasbin.Model;
 
 namespace NetCasbin
@@ -455,6 +455,14 @@ namespace NetCasbin
 
         private void NotifyPolicyChanged()
         {
+            if (autoCleanEnforceCache)
+            {
+                EnforceCache?.Clear();
+#if !NET45
+                Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
+
             if (autoNotifyWatcher)
             {
                 watcher?.Update();
@@ -463,6 +471,14 @@ namespace NetCasbin
 
         private async Task NotifyPolicyChangedAsync()
         {
+            if (autoCleanEnforceCache && EnforceCache is not null)
+            {
+                await EnforceCache.ClearAsync();
+#if !NET45
+                Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
+
             if (autoNotifyWatcher && watcher is not null)
             {
                 await watcher.UpdateAsync();
