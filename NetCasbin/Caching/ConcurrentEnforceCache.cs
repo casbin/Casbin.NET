@@ -1,10 +1,6 @@
-﻿#if !NET45
-using System;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using NetCasbin.Abstractions;
 
 namespace NetCasbin.Caching
@@ -40,11 +36,18 @@ namespace NetCasbin.Caching
             _memoryCache.Clear();
         }
 
+#if !NET45
         public Task ClearAsync()
         {
             Clear();
             return Task.CompletedTask;
         }
+#else
+        public Task ClearAsync()
+        {
+            Clear();
+            return Task.FromResult(false);
+        }
+#endif
     }
 }
-#endif

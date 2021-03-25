@@ -1,11 +1,11 @@
-﻿#if !NET45
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
 using NetCasbin.Abstractions;
+#if !NET45
+using Microsoft.Extensions.Options;
+#endif
 
 namespace NetCasbin.Caching
 {
@@ -14,11 +14,21 @@ namespace NetCasbin.Caching
         private readonly ReaderWriterLockSlim _lockSlim = new();
         private Dictionary<string, bool> _memoryCache = new();
 
+#if !NET45
         public ReaderWriterEnforceCache(IOptions<ReaderWriterEnforceCacheOptions> options)
         {
             if (options?.Value is not null)
             {
                 CacheOptions = options.Value;
+            }
+        }
+#endif
+
+        public ReaderWriterEnforceCache(ReaderWriterEnforceCacheOptions options)
+        {
+            if (options is not null)
+            {
+                CacheOptions = options;
             }
         }
 
@@ -86,11 +96,18 @@ namespace NetCasbin.Caching
             _memoryCache = new Dictionary<string, bool>();
         }
 
+#if !NET45
         public Task ClearAsync()
         {
             Clear();
             return Task.CompletedTask;
         }
+#else
+        public Task ClearAsync()
+        {
+            Clear();
+            return Task.FromResult(false);
+        }
+#endif
     }
 }
-#endif

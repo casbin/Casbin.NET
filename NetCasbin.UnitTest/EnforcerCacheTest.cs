@@ -1,5 +1,4 @@
-﻿#if !NET452
-using NetCasbin.UnitTest.Fixtures;
+﻿using NetCasbin.UnitTest.Fixtures;
 using NetCasbin.UnitTest.Mock;
 using Xunit;
 using Xunit.Abstractions;
@@ -22,10 +21,14 @@ namespace NetCasbin.UnitTest
         [Fact]
         public void TestEnforceWithCache()
         {
+#if !NET452
             var e = new Enforcer(_testModelFixture.GetBasicTestModel())
             {
                 Logger = new MockLogger<Enforcer>(_testOutputHelper)
             };
+#else
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+#endif
             e.EnableCache(true);
 
             TestEnforce(e, "alice", "data1", "read", true);
@@ -50,9 +53,6 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "alice", "data1", "write", false);
             TestEnforce(e, "alice", "data2", "read", false);
             TestEnforce(e, "alice", "data2", "write", false);
-
-            e.Logger = null;
         }
     }
 }
-#endif
