@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
 using NetCasbin.UnitTest.Fixtures;
@@ -464,6 +463,7 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "bob", "data2", "write", true);
         }
 
+#if !NET452
         [Fact]
         public void TestEnableLog()
         {
@@ -491,6 +491,7 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "bob", "data2", "read", false);
             TestEnforce(e, "bob", "data2", "write", true);
         }
+#endif
 
         [Fact]
         public void TestEnableAutoSave()
@@ -832,6 +833,7 @@ namespace NetCasbin.UnitTest
             await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
         }
 
+#if !NET452
         [Fact]
         public void TestEnforceExApiLog()
         {
@@ -851,5 +853,6 @@ namespace NetCasbin.UnitTest
 
             e.Logger = null;
         }
+#endif
     }
 }

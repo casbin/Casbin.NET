@@ -1,4 +1,5 @@
-﻿using System;
+﻿#if !NET452
+using System;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
@@ -30,3 +31,4 @@ namespace NetCasbin.UnitTest.Mock
         }
     }
 }
+#endif

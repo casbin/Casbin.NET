@@ -25,6 +25,7 @@ namespace NetCasbin.UnitTest.Util
             Assert.Equal(res, e.Enforce(sub, obj, act));
         }
 
+#if !NET452
         internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
         {
             var myRes = e.EnforceEx(sub, obj, act).Explains.ToList();
@@ -34,10 +35,21 @@ namespace NetCasbin.UnitTest.Util
                 Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
             }
         }
+#else
+        internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
+        {
+            var myRes = e.EnforceEx(sub, obj, act).Item2.ToList();
+            string message = "Key: " + myRes + ", supposed to be " + res;
+            if (myRes.Count > 0)
+            {
+                Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
+            }
+        }
+#endif
 
         internal static async Task TestEnforceExAsync(Enforcer e, object sub, object obj, string act, List<string> res)
         {
-            var myRes = (await e.EnforceExAsync(sub, obj, act)).Explains.ToList();
+            var myRes = (await e.EnforceExAsync(sub, obj, act)).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
             if (myRes.Count > 0)
             {

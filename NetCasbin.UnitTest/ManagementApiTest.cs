@@ -118,7 +118,7 @@ namespace NetCasbin.UnitTest
             e.RemoveFilteredPolicy(1, "data2");
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
 
-            e.RemoveFilteredPolicy(1, Array.Empty<string>());
+            e.RemoveFilteredPolicy(1);
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
 
             e.RemoveFilteredPolicy(1, "");
