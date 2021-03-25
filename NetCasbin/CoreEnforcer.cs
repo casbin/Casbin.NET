@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +16,6 @@ using NetCasbin.Rbac;
 using NetCasbin.Util;
 using NetCasbin.Extensions;
 using NetCasbin.Caching;
-using System.Text;
 
 namespace NetCasbin
 {
@@ -41,9 +39,10 @@ namespace NetCasbin
 
         internal IExpressionHandler ExpressionHandler { get; private set; }
 
-#if !NET45
         private bool _enableCache;
         public IEnforceCache EnforceCache { get; set; }
+
+#if !NET45
         public ILogger Logger { get; set; }
 #endif
 
@@ -369,12 +368,10 @@ namespace NetCasbin
             this.autoNotifyWatcher = autoNotifyWatcher;
         }
 
-#if !NET45
         public void EnableCache(bool enableCache)
         {
             _enableCache = enableCache;
         }
-#endif
 
         /// <summary>
         /// Manually rebuilds the role inheritance relations.
@@ -392,7 +389,6 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-#if !NET45
         public async Task<bool> EnforceAsync(params object[] requestValues)
         {
             if (_enableCache is false)
@@ -406,28 +402,23 @@ namespace NetCasbin
             }
 
             string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             bool? tryGetCachedResult = await EnforceCache.TryGetResultAsync(requestValues, key);
             if (tryGetCachedResult.HasValue)
             {
                 bool cachedResult = tryGetCachedResult.Value;
+#if !NET45
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+#endif
                 return cachedResult;
             }
 
             bool result = InternalEnforce(requestValues);
 
-            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
             return result;
-
         }
-#else
-        public Task<bool> EnforceAsync(params object[] requestValues)
-        {
-            return Task.FromResult(InternalEnforce(requestValues));
-        }
-#endif
 
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
@@ -436,7 +427,6 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-#if !NET45
         public bool Enforce(params object[] requestValues)
         {
             if (_enableCache is false)
@@ -450,25 +440,20 @@ namespace NetCasbin
             }
 
             string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
+#if !NET45
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+#endif
                 return cachedResult;
             }
 
             bool result  = InternalEnforce(requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
             return result;
         }
-#else
-        public bool Enforce(params object[] requestValues)
-        {
-            return InternalEnforce(requestValues);
-        }
-#endif
-
 
         /// <summary>
         /// Explains enforcement by informing matched rules
