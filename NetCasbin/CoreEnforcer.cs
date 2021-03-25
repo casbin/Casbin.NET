@@ -392,36 +392,42 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
+#if !NET45
         public async Task<bool> EnforceAsync(params object[] requestValues)
         {
-#if !NET45
+            if (_enableCache is false)
+            {
+                return InternalEnforce(requestValues);
+            }
+
             if (requestValues.Any(requestValue => requestValue is not string))
             {
                 return InternalEnforce(requestValues);
             }
 
-            if (_enableCache)
+            string key = string.Join("$$", requestValues);
+            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            bool? tryGetCachedResult = await EnforceCache.TryGetResultAsync(requestValues, key);
+            if (tryGetCachedResult.HasValue)
             {
-                string key = string.Join("$$", requestValues);
-                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
-                bool? tryGetCachedResult = await EnforceCache.TryGetResultAsync(requestValues, key);
-                if (tryGetCachedResult.HasValue)
-                {
-                    bool cachedResult = tryGetCachedResult.Value;
-                    Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                    return cachedResult;
-                }
-
-                bool result = InternalEnforce(requestValues);
-
-                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
-                await EnforceCache.TrySetResultAsync(requestValues, key, result);
-                return result;
+                bool cachedResult = tryGetCachedResult.Value;
+                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                return cachedResult;
             }
-#endif
 
-            return InternalEnforce(requestValues);
+            bool result = InternalEnforce(requestValues);
+
+            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            await EnforceCache.TrySetResultAsync(requestValues, key, result);
+            return result;
+
         }
+#else
+        public Task<bool> EnforceAsync(params object[] requestValues)
+        {
+            return Task.FromResult(InternalEnforce(requestValues));
+        }
+#endif
 
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
@@ -430,60 +436,52 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
+#if !NET45
         public bool Enforce(params object[] requestValues)
         {
-#if !NET45
+            if (_enableCache is false)
+            {
+                return InternalEnforce(requestValues);
+            }
+
             if (requestValues.Any(requestValue => requestValue is not string))
             {
                 return InternalEnforce(requestValues);
             }
 
-            if (_enableCache)
+            string key = string.Join("$$", requestValues);
+            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
-                string key = string.Join("$$", requestValues);
-                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
-                if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-                    Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                    return cachedResult;
-                }
-
-                bool result  = InternalEnforce(requestValues);
-                EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
-                EnforceCache.TrySetResult(requestValues, key, result);
-                return result;
+                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                return cachedResult;
             }
-#endif
 
+            bool result  = InternalEnforce(requestValues);
+            EnforceCache ??= new ReaderWriterEnforceCache(Options.Create(new ReaderWriterEnforceCacheOptions()));
+            EnforceCache.TrySetResult(requestValues, key, result);
+            return result;
+        }
+#else
+        public bool Enforce(params object[] requestValues)
+        {
             return InternalEnforce(requestValues);
         }
+#endif
 
-#if !NET45
+
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
         public (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceEx(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
             bool result = InternalEnforce(requestValues, explains);
-            return (result, explains);
-        }
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
-            EnforceExAsync(params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            bool result = await EnforceAsync(requestValues, explains);
             return (result, explains);
         }
 #else
@@ -500,6 +498,7 @@ namespace NetCasbin
             bool result = InternalEnforce(requestValues, explains);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
+#endif
 
         /// <summary>
         /// Explains enforcement by informing matched rules
@@ -507,6 +506,15 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExAsync(params object[] requestValues)
+        {
+            var explains = new List<IEnumerable<string>>();
+            bool result = await EnforceAsync(requestValues, explains);
+            return (result, explains);
+        }
+#else
         public async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
             EnforceExAsync(params object[] requestValues)
         {

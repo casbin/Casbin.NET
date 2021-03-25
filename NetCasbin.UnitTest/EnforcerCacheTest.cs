@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿#if !NET452
 using NetCasbin.UnitTest.Fixtures;
 using NetCasbin.UnitTest.Mock;
 using Xunit;
@@ -55,3 +55,4 @@ namespace NetCasbin.UnitTest
         }
     }
 }
+#endif
