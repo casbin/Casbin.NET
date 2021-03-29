@@ -149,6 +149,13 @@ namespace NetCasbin.UnitTest.Util
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
+        internal static void TestGetImplicitRolesInDomain(Enforcer e, string name, string domain, List<string> res)
+        {
+            List<string> myRes = e.GetImplicitRolesForUser(name, domain);
+            string message = "Implicit roles in domain " + name + " under " + domain + ": " + myRes + ", supposed to be " + res;
+            Assert.True(Utility.SetEquals(res, myRes), message);
+        }
+
         internal static void TestGetPermissionsInDomain(Enforcer e, string name, string domain, List<List<string>> res)
         {
             List<List<string>> myRes = e.GetPermissionsForUserInDomain(name, domain);

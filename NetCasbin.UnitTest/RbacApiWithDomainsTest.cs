@@ -3,6 +3,7 @@ using NetCasbin.UnitTest.Fixtures;
 using Xunit;
 using static NetCasbin.UnitTest.Util.TestUtil;
 
+
 namespace NetCasbin.UnitTest
 {
     [Collection("Model collection")]
@@ -13,6 +14,22 @@ namespace NetCasbin.UnitTest
         public RbacApiWithDomainsTest(TestModelFixture testModelFixture)
         {
             _testModelFixture = testModelFixture;
+        }
+
+        [Fact]
+        public void TestGetRolesFromUserWithDomains()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithDomainsModelText,
+                _testModelFixture._rbacWithHierarchyWithDomainsPolicyText));
+
+            e.BuildRoleLinks();
+
+            // This is only able to retrieve the first level of roles.
+            TestGetRolesInDomain(e, "alice", "domain1", AsList("role:global_admin"));
+
+            // Retrieve all inherit roles. It supports domains as well.
+            TestGetImplicitRolesInDomain(e, "alice", "domain1", AsList("role:global_admin", "role:reader", "role:writer"));
         }
 
         [Fact]
