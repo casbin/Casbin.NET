@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 #if !NET45
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 #endif
 using DynamicExpresso;
 using NetCasbin.Abstractions;
@@ -124,6 +123,13 @@ namespace NetCasbin
         {
             this.model = model;
             ExpressionHandler = new ExpressionHandler(model);
+            if (autoCleanEnforceCache)
+            {
+                EnforceCache?.Clear();
+#if !NET45
+                Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
         }
 
         /// <summary>
@@ -402,6 +408,11 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         public bool Enforce(params object[] requestValues)
         {
+            if (_enabled is false)
+            {
+                return true;
+            }
+
             if (_enableCache is false)
             {
                 return InternalEnforce(requestValues);
@@ -437,6 +448,11 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         public async Task<bool> EnforceAsync(params object[] requestValues)
         {
+            if (_enabled is false)
+            {
+                return true;
+            }
+
             if (_enableCache is false)
             {
                 return await InternalEnforceAsync(requestValues);
@@ -477,6 +493,11 @@ namespace NetCasbin
             EnforceEx(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
+            if (_enabled is false)
+            {
+                return (true, explains);
+            }
+
             if (_enableCache is false)
             {
                 return (InternalEnforce(requestValues, explains), explains);
@@ -527,6 +548,11 @@ namespace NetCasbin
             EnforceExAsync(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
+            if (_enabled is false)
+            {
+                return (true, explains);
+            }
+
             if (_enableCache is false)
             {
                 return (await InternalEnforceAsync(requestValues, explains), explains);
@@ -583,11 +609,6 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         private bool InternalEnforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
-            if (_enabled is false)
-            {
-                return true;
-            }
-
             bool explain = explains is not null;
             string effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
             var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;

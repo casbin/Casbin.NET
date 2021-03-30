@@ -17,7 +17,7 @@ namespace NetCasbin.Caching
         public Task<bool?> TryGetResultAsync(IReadOnlyList<object> requestValues, string key)
         {
             return TryGetResult(requestValues, key, out bool result)
-                ? Task.FromResult((bool?) result) : null;
+                ? Task.FromResult((bool?) result) : Task.FromResult((bool?) null);
         }
 
         public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result)
