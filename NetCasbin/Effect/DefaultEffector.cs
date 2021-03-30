@@ -6,8 +6,75 @@ namespace Casbin.Effect
     /// <summary>
     /// DefaultEffector is default effector for Casbin.
     /// </summary>
-    public class DefaultEffector : IEffector
+    public class DefaultEffector : IEffector, IChainEffector
     {
+        /// <summary>
+        /// Merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="effectExpression"></param>
+        /// <param name="effects"></param>
+        /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
+        /// <returns></returns>
+        public bool MergeEffects(string effectExpression, PolicyEffect[] effects, float[] results, out int hitPolicyIndex)
+        {
+            return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan(), out hitPolicyIndex);
+        }
+
+
+        /// <summary>
+        /// Merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="effectExpression"></param>
+        /// <param name="effects"></param>
+        /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
+        /// <returns></returns>
+        private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
+        {
+            PolicyEffectType = ParsePolicyEffectType(effectExpression);
+            return MergeEffects(PolicyEffectType, effects, results, out hitPolicyIndex);
+        }
+
+        /// <summary>
+        /// Merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="effectExpressionType"></param>
+        /// <param name="effects"></param>
+        /// <param name="results"></param>
+        /// <param name="hitPolicyIndex"></param>
+        /// <returns></returns>
+        private bool MergeEffects(EffectExpressionType effectExpressionType, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
+        {
+            bool finalResult = false;
+            hitPolicyIndex = -1;
+            for (int index = 0; index < effects.Length; index++)
+            {
+                if (EffectEvaluator.TryEvaluate(effects[index] , effectExpressionType,
+                    ref finalResult, out bool hitPolicy))
+                {
+                    if (hitPolicy)
+                    {
+                        hitPolicyIndex = index;
+                    }
+                    return finalResult;
+                }
+            }
+
+            return finalResult;
+        }
+
+        public static EffectExpressionType ParsePolicyEffectType(string effectExpression) => effectExpression switch
+        {
+            PermConstants.PolicyEffect.AllowOverride => EffectExpressionType.AllowOverride,
+            PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
+            PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
+            PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
+            _ => throw new NotSupportedException("Not supported policy effect.")
+        };
+
+        #region IChainEffector
+
         public bool Result { get; private set; }
 
         public bool HitPolicy { get; private set; }
@@ -21,7 +88,7 @@ namespace Casbin.Effect
         public void StartChain(string effectExpression)
         {
             EffectExpression = effectExpression ?? throw new ArgumentNullException(nameof(effectExpression));
-            PolicyEffectType = ParseEffectExpressionType(EffectExpression);
+            PolicyEffectType = ParsePolicyEffectType(EffectExpression);
             CanChain = true;
             Result = false;
         }
@@ -83,14 +150,6 @@ namespace Casbin.Effect
             result = null;
             return false;
         }
-
-        private static EffectExpressionType ParseEffectExpressionType(string effectExpression) => effectExpression switch
-        {
-            PermConstants.PolicyEffect.AllowOverride => EffectExpressionType.AllowOverride,
-            PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
-            PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
-            PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
-            _ => throw new NotSupportedException("Not supported policy effect.")
-        };
+        #endregion
     }
 }
