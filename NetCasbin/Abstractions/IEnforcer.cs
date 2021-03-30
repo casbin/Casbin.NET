@@ -1,7 +1,9 @@
 using System.Threading.Tasks;
 using Casbin.Persist;
 using Casbin.Rbac;
-
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
 namespace Casbin
 {
     /// <summary>
@@ -11,9 +13,11 @@ namespace Casbin
     {
         #region Options
         public bool Enabled { get; }
+        public bool EnabledCache { get; }
         public bool AutoSave { get; }
         public bool AutoBuildRoleLinks { get; }
         public bool AutoNotifyWatcher { get; }
+        public bool AutoCleanEnforceCache { get; }
         #endregion
 
         #region Extensions
@@ -22,6 +26,10 @@ namespace Casbin
         public IAdapter Adapter { get; }
         public IWatcher Watcher { get; }
         public IRoleManager RoleManager { get; }
+        public IEnforceCache EnforceCache { get; }
+#if !NET45
+        public ILogger Logger { get; set; }
+#endif
         #endregion
 
         public string ModelPath { get; }
@@ -49,6 +57,8 @@ namespace Casbin
         /// </summary>
         /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
         public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks);
+
+
 
         /// <summary>
         /// Sets the current model.
@@ -86,6 +96,12 @@ namespace Casbin
         /// </summary>
         /// <param name="effector"></param>
         public void SetEffector(IEffector effector);
+
+        /// <summary>
+        /// Sets an enforce cache.
+        /// </summary>
+        /// <param name="enforceCache"></param>
+        public void SetEnforceCache(IEnforceCache enforceCache);
 
         /// <summary>
         /// LoadModel reloads the model from the model CONF file. Because the policy is

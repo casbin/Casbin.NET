@@ -1,8 +1,9 @@
-﻿using System;
+﻿#if !NET452
+using System;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
-namespace Casbin.UnitTest.Mock
+namespace Casbin.UnitTests.Mock
 {
     public class MockLogger<T> : ILogger<T>
     {
@@ -30,3 +31,4 @@ namespace Casbin.UnitTest.Mock
         }
     }
 }
+#endif

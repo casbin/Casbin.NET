@@ -17,6 +17,22 @@ namespace Casbin.UnitTests
         }
 
         [Fact]
+        public void TestGetRolesFromUserWithDomains()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithDomainsModelText,
+                _testModelFixture._rbacWithHierarchyWithDomainsPolicyText));
+
+            e.BuildRoleLinks();
+
+            // This is only able to retrieve the first level of roles.
+            TestGetRolesInDomain(e, "alice", "domain1", AsList("role:global_admin"));
+
+            // Retrieve all inherit roles. It supports domains as well.
+            TestGetImplicitRolesInDomain(e, "alice", "domain1", AsList("role:global_admin", "role:reader", "role:writer"));
+        }
+
+        [Fact]
         public void TestRoleApiWithDomains()
         {
             var e = new Enforcer(_testModelFixture.GetNewRbacWithDomainsTestModel());

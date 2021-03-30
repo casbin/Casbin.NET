@@ -32,7 +32,7 @@ namespace Casbin.Effect
         /// <returns></returns>
         private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
         {
-            PolicyEffectType = ParsePolicyEffectType(effectExpression);
+            PolicyEffectType = ParseEffectExpressionType(effectExpression);
             return MergeEffects(PolicyEffectType, effects, results, out hitPolicyIndex);
         }
 
@@ -64,7 +64,7 @@ namespace Casbin.Effect
             return finalResult;
         }
 
-        public static EffectExpressionType ParsePolicyEffectType(string effectExpression) => effectExpression switch
+        public static EffectExpressionType ParseEffectExpressionType(string effectExpression) => effectExpression switch
         {
             PermConstants.PolicyEffect.AllowOverride => EffectExpressionType.AllowOverride,
             PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
@@ -88,7 +88,7 @@ namespace Casbin.Effect
         public void StartChain(string effectExpression)
         {
             EffectExpression = effectExpression ?? throw new ArgumentNullException(nameof(effectExpression));
-            PolicyEffectType = ParsePolicyEffectType(EffectExpression);
+            PolicyEffectType = ParseEffectExpressionType(EffectExpression);
             CanChain = true;
             Result = false;
         }

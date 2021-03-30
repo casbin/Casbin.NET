@@ -71,9 +71,9 @@ namespace Casbin.Rbac
             return _roles.IsValueCreated is not false && _roles.Value.ContainsKey(roleName);
         }
 
-        public List<string> GetRoles()
+        public IEnumerable<string> GetRoles()
         {
-            return _roles.Value.Select(x => x.Key).ToList();
+            return _roles.Value.Keys;
         }
 
         public override string ToString()

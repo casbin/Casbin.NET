@@ -7,6 +7,12 @@ namespace Casbin.Extensions
 {
     public static class LoggerExtension
     {
+        public static void LogEnforceCachedResult(this ILogger logger, IEnumerable<object> requestValues, bool result)
+        {
+            logger.LogInformation("Request: {1} ---> {0} (cached)", result, 
+                string.Join(", ", requestValues));
+        }
+
         public static void LogEnforceResult(this ILogger logger, IEnumerable<object> requestValues, bool result)
         {
             logger.LogInformation("Request: {1} ---> {0}", result, 

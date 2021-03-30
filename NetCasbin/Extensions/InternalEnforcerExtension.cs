@@ -2,6 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+#if !NET45
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace Casbin.Extensions
 {
@@ -458,6 +461,14 @@ namespace Casbin.Extensions
 
         private static void NotifyPolicyChanged(IEnforcer enforcer)
         {
+            if (enforcer.AutoCleanEnforceCache)
+            {
+                enforcer.EnforceCache?.Clear();
+#if !NET45
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
+
             if (enforcer.AutoNotifyWatcher)
             {
                 enforcer.Watcher?.Update();
@@ -466,6 +477,14 @@ namespace Casbin.Extensions
 
         private static async Task NotifyPolicyChangedAsync(IEnforcer enforcer)
         {
+            if (enforcer.AutoCleanEnforceCache && enforcer.EnforceCache is not null)
+            {
+                await enforcer.EnforceCache.ClearAsync();
+#if !NET45
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
+
             if (enforcer.AutoNotifyWatcher && enforcer.Watcher is not null)
             {
                 await enforcer.Watcher.UpdateAsync();

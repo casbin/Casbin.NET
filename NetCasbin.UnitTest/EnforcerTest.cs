@@ -5,8 +5,8 @@ using Casbin.Adapter.File;
 using Casbin.Extensions;
 using Casbin.Model;
 using Casbin.Persist;
-using Casbin.UnitTest.Mock;
 using Casbin.UnitTests.Fixtures;
+using Casbin.UnitTests.Mock;
 using Xunit;
 using Xunit.Abstractions;
 using static Casbin.UnitTests.Util.TestUtil;
@@ -465,6 +465,7 @@ namespace Casbin.UnitTests
             TestEnforce(e, "bob", "data2", "write", true);
         }
 
+#if !NET452
         [Fact]
         public void TestEnableLog()
         {
@@ -492,6 +493,7 @@ namespace Casbin.UnitTests
             TestEnforce(e, "bob", "data2", "read", false);
             TestEnforce(e, "bob", "data2", "write", true);
         }
+#endif
 
         [Fact]
         public void TestEnableAutoSave()
@@ -833,6 +835,7 @@ namespace Casbin.UnitTests
             await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
         }
 
+#if !NET452
         [Fact]
         public void TestEnforceExApiLog()
         {
@@ -852,5 +855,6 @@ namespace Casbin.UnitTests
 
             e.Logger = null;
         }
+#endif
     }
 }

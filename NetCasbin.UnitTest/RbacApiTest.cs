@@ -449,7 +449,7 @@ namespace Casbin.UnitTests
                 AsList("bob", "data2", "write")));
             Assert.Equal(new[] { "admin", "data1_admin", "data2_admin" },
                 e.GetImplicitRolesForUser("alice"));
-            Assert.Equal(Array.Empty<string>(),
+            Assert.Equal(new string[0],
                 e.GetImplicitRolesForUser("bob"));
         }
 

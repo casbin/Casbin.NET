@@ -26,6 +26,7 @@ namespace Casbin.UnitTests.Util
             Assert.Equal(res, e.Enforce(sub, obj, act));
         }
 
+#if !NET452
         internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
         {
             var myRes = e.EnforceEx(sub, obj, act).Explains.ToList();
@@ -35,10 +36,21 @@ namespace Casbin.UnitTests.Util
                 Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
             }
         }
+#else
+        internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
+        {
+            var myRes = e.EnforceEx(sub, obj, act).Item2.ToList();
+            string message = "Key: " + myRes + ", supposed to be " + res;
+            if (myRes.Count > 0)
+            {
+                Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
+            }
+        }
+#endif
 
         internal static async Task TestEnforceExAsync(Enforcer e, object sub, object obj, string act, List<string> res)
         {
-            var myRes = (await e.EnforceExAsync(sub, obj, act)).Explains.ToList();
+            var myRes = (await e.EnforceExAsync(sub, obj, act)).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
             if (myRes.Count > 0)
             {
@@ -147,6 +159,13 @@ namespace Casbin.UnitTests.Util
         {
             List<string> myRes = e.GetRolesForUserInDomain(name, domain);
             string message = "Roles for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res;
+            Assert.True(Utility.SetEquals(res, myRes), message);
+        }
+
+        internal static void TestGetImplicitRolesInDomain(Enforcer e, string name, string domain, List<string> res)
+        {
+            List<string> myRes = e.GetImplicitRolesForUser(name, domain);
+            string message = "Implicit roles in domain " + name + " under " + domain + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
 

@@ -10,11 +10,11 @@ using static Casbin.Benchmark.TestHelper;
 namespace Casbin.Benchmark
 {
     [MemoryDiagnoser]
-    [BenchmarkCategory("Enforcer")]
+    [BenchmarkCategory("EnforcerWithCache")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
-    public class EnforcerBenchmark
+    public class EnforcerWithCacheBenchmark
     {
         private Enforcer NowEnforcer { get; set; }
         private string NowTestUserName { get; set; }
@@ -143,16 +143,13 @@ namespace Casbin.Benchmark
         {
             if (policyFileName is null)
             {
-                NowEnforcer = new Enforcer(
-                    GetTestFilePath(modelFileName));
-                NowEnforcer.EnableCache(false);
+                NowEnforcer = new Enforcer(GetTestFilePath(modelFileName));
+                NowEnforcer.EnableCache(true);
                 return;
             }
 
-            NowEnforcer = new Enforcer(
-                GetTestFilePath(modelFileName),
-                GetTestFilePath(policyFileName));
-            NowEnforcer.EnableCache(false);
+            NowEnforcer = new Enforcer(GetTestFilePath(modelFileName), GetTestFilePath(policyFileName));
+            NowEnforcer.EnableCache(true);
         }
         #endregion
 
