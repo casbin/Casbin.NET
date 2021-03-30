@@ -2,24 +2,19 @@
 
 namespace Casbin
 {
+    /// <summary>
+    /// Effector is the interface for Casbin effectors.
+    /// </summary>
     public interface IEffector
     {
-        public bool Result { get; }
-
-        public bool CanChain { get; }
-
-        public bool HitPolicy { get; }
-
-        public string EffectExpression { get; }
-
-        public EffectExpressionType PolicyEffectType { get; }
-
-        public void StartChain(string policyEffect);
-
-        public bool Chain(PolicyEffect effect);
-
-        public bool TryChain(PolicyEffect effect);
-
-        public bool TryChain(PolicyEffect effect, out bool? result);
+        /// <summary>
+        /// Merges all matching results collected by the enforcer into a single decision.
+        /// </summary>
+        /// <param name="policyEffect">The expression of [policy_effect].</param>
+        /// <param name="effects">The effects of all matched rules.</param>
+        /// <param name="results">The matcher results of all matched rules.</param>
+        /// <param name="hitPolicyIndex"></param>
+        /// <returns>The final effect.</returns>
+        bool MergeEffects(string policyEffect, PolicyEffect[] effects, float[] results, out int hitPolicyIndex);
     }
 }
