@@ -10,6 +10,40 @@ namespace Casbin.Extensions
 {
     internal static class InternalEnforcerExtension
     {
+        internal static IEnumerable<IEnumerable<string>> InternalGetPolicy(this IEnforcer enforcer, string section, string policyType)
+        {
+            return enforcer.PolicyManager.GetPolicy(section, policyType);
+        }
+
+        internal static IEnumerable<IEnumerable<string>> InternalGetFilteredPolicy(this IEnforcer enforcer,
+            string section, string policyType, int fieldIndex,
+            params string[] fieldValues)
+        {
+            return enforcer.PolicyManager.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+        }
+
+        internal static IEnumerable<string> InternalGetValuesForFieldInPolicy(this IEnforcer enforcer, string section, string policyType, int fieldIndex)
+        {
+            return enforcer.PolicyManager.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
+        }
+
+        internal static IEnumerable<string> InternalGetValuesForFieldInPolicyAllTypes(this IEnforcer enforcer, string section, int fieldIndex)
+        {
+            return enforcer.PolicyManager.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
+        }
+
+        internal static bool InternalHasPolicy(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<string> rule)
+        {
+            return enforcer.PolicyManager.HasPolicy(section, policyType, rule);
+        }
+
+        internal static bool InternalHasPolicies(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
+        {
+            return enforcer.PolicyManager.HasPolicies(section, policyType, rules);
+        }
+
         /// <summary>
         /// Adds a rule to the current policy.
         /// </summary>
@@ -21,24 +55,8 @@ namespace Casbin.Extensions
         internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-            if (enforcer.Model.HasPolicy(section, policyType, ruleArray))
-            {
-                return false;
-            }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    enforcer.Adapter.AddPolicy(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleAdded = enforcer.Model.AddPolicy(section, policyType, ruleArray);
+            bool ruleAdded = enforcer.PolicyManager.AddPolicy(section, policyType, ruleArray);
 
             if (ruleAdded is false)
             {
@@ -60,24 +78,12 @@ namespace Casbin.Extensions
         internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-            if (enforcer.Model.HasPolicy(section, policyType, ruleArray))
+            if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray))
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    await enforcer.Adapter.AddPolicyAsync(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleAdded = enforcer.Model.AddPolicy(section, policyType, ruleArray);
+            bool ruleAdded = await enforcer.PolicyManager.AddPolicyAsync(section, policyType, ruleArray);
 
             if (ruleAdded is false)
             {
@@ -100,24 +106,12 @@ namespace Casbin.Extensions
         {
             var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
-            if (enforcer.Model.HasPolicies(section, policyType, ruleArray))
+            if (enforcer.PolicyManager.HasPolicies(section, policyType, ruleArray))
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    enforcer.Adapter.AddPolicies(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleAdded = enforcer.Model.AddPolicies(section, policyType, ruleArray);
+            bool ruleAdded = enforcer.PolicyManager.AddPolicies(section, policyType, ruleArray);
 
             if (ruleAdded is false)
             {
@@ -141,24 +135,12 @@ namespace Casbin.Extensions
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
-            if (enforcer.Model.HasPolicies(section, policyType, rulesArray))
+            if (enforcer.PolicyManager.HasPolicies(section, policyType, rulesArray))
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    await enforcer.Adapter.AddPoliciesAsync(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleAdded = enforcer.Model.AddPolicies(section, policyType, rulesArray);
+            bool ruleAdded = await enforcer.PolicyManager.AddPoliciesAsync(section, policyType, rulesArray);
 
             if (ruleAdded is false)
             {
@@ -180,24 +162,12 @@ namespace Casbin.Extensions
         internal static bool InternalRemovePolicy(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-            if (enforcer.Model.HasPolicy(section, policyType, ruleArray) is false)
+            if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray) is false)
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    enforcer.Adapter.RemovePolicy(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleRemoved = enforcer.Model.RemovePolicy(section, policyType, ruleArray);
+            bool ruleRemoved = enforcer.PolicyManager.RemovePolicy(section, policyType, ruleArray);
 
             if (ruleRemoved is false)
             {
@@ -219,24 +189,12 @@ namespace Casbin.Extensions
         internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-            if (enforcer.Model.HasPolicy(section, policyType, ruleArray) is false)
+            if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray) is false)
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    await enforcer.Adapter.RemovePolicyAsync(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleRemoved = enforcer.Model.RemovePolicy(section, policyType, ruleArray);
+            bool ruleRemoved = await enforcer.PolicyManager.RemovePolicyAsync(section, policyType, ruleArray);
 
             if (ruleRemoved is false)
             {
@@ -259,24 +217,12 @@ namespace Casbin.Extensions
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
-            if (enforcer.Model.HasPolicies(section, policyType, rulesArray) is false)
+            if (enforcer.PolicyManager.HasPolicies(section, policyType, rulesArray) is false)
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    enforcer.Adapter.RemovePolicies(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleRemoved = enforcer.Model.RemovePolicies(section, policyType, rulesArray);
+            bool ruleRemoved = enforcer.PolicyManager.RemovePolicies(section, policyType, rulesArray);
 
             if (ruleRemoved is false)
             {
@@ -299,24 +245,12 @@ namespace Casbin.Extensions
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
-            if (enforcer.Model.HasPolicies(section, policyType, rulesArray) is false)
+            if (enforcer.PolicyManager.HasPolicies(section, policyType, rulesArray) is false)
             {
                 return false;
             }
 
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    await enforcer.Adapter.RemovePoliciesAsync(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            bool ruleRemoved = enforcer.Model.RemovePolicies(section, policyType, rulesArray);
+            bool ruleRemoved = await enforcer.PolicyManager.RemovePoliciesAsync(section, policyType, rulesArray);
 
             if (ruleRemoved is false)
             {
@@ -338,19 +272,7 @@ namespace Casbin.Extensions
         /// <returns></returns>
         internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    enforcer.Adapter.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            var effectPolices = enforcer.Model.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+            var effectPolices = enforcer.PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
             if (effectPolices is null)
             {
@@ -372,19 +294,7 @@ namespace Casbin.Extensions
         /// <returns></returns>
         internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
-            if (enforcer.Adapter is not null && enforcer.AutoSave)
-            {
-                try
-                {
-                    await enforcer.Adapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
-            }
-
-            var effectPolicies = enforcer.Model.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+            var effectPolicies = await enforcer.PolicyManager.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
 
             if (effectPolicies is null)
             {
@@ -400,7 +310,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
                     section, policyType, rule);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -413,7 +323,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.Model.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
                     section, policyType, rule);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -425,7 +335,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
                     section, policyType, rules);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -437,7 +347,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.Model.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
                     section, policyType, rules);
                 enforcer.ExpressionHandler.SetGFunctions();
             }

@@ -118,7 +118,7 @@ namespace Casbin.Extensions
         /// <returns>The "p" policy rules of the specified ptype.</returns>
         public static IEnumerable<IEnumerable<string>> GetNamedPolicy(this IEnforcer enforcer, string ptype)
         {
-            return enforcer.Model.GetPolicy(PermConstants.Section.PolicySection, ptype);
+            return enforcer.InternalGetPolicy(PermConstants.Section.PolicySection, ptype);
         }
 
         /// <summary>
@@ -143,7 +143,7 @@ namespace Casbin.Extensions
         /// <returns>The filtered "p" policy rules of the specified ptype.</returns>
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedPolicy(this IEnforcer enforcer, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return enforcer.Model.GetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
+            return enforcer.InternalGetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
         #endregion End of "p" (Policy) Management
@@ -589,7 +589,7 @@ namespace Casbin.Extensions
         /// Duplicates are removed.</returns>
         public static IEnumerable<string> GetAllNamedRoles(this IEnforcer enforcer, string ptype)
         {
-            return enforcer.Model.GetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
+            return enforcer.InternalGetValuesForFieldInPolicy(PermConstants.Section.RoleSection, ptype, 1);
         }
 
         #endregion
@@ -628,7 +628,7 @@ namespace Casbin.Extensions
         /// <returns>Whether the rule exists.</returns>
         public static bool HasNamedGroupingPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
         {
-            return enforcer.Model.HasPolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            return enforcer.InternalHasPolicy(PermConstants.Section.RoleSection, ptype, parameters);
         }
 
         /// <summary>
@@ -677,7 +677,7 @@ namespace Casbin.Extensions
         /// <returns>The "g" policy rules of the specified ptype.</returns>
         public static IEnumerable<IEnumerable<string>> GetNamedGroupingPolicy(this IEnforcer enforcer, string ptype)
         {
-            return enforcer.Model.GetPolicy(PermConstants.Section.RoleSection, ptype);
+            return enforcer.InternalGetPolicy(PermConstants.Section.RoleSection, ptype);
         }
 
         /// <summary>
@@ -690,7 +690,7 @@ namespace Casbin.Extensions
         /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedGroupingPolicy(this IEnforcer enforcer, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return enforcer.Model.GetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
+            return enforcer.InternalGetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
         }
 
         #endregion

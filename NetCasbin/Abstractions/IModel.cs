@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using Casbin.Model;
-
-namespace Casbin
+﻿namespace Casbin
 {
     public interface IModel : IPolicy
     {
-        public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
+        public IPolicyManager PolicyManager { get; }
+
+        public void SetPolicyManager(IPolicyManager policyManager);
 
         public void LoadModelFromFile(string path);
 

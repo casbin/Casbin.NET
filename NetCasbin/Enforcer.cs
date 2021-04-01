@@ -37,19 +37,18 @@ namespace Casbin
 
         public Enforcer(IModel model, IAdapter adapter = null)
         {
+            SetModel(model);
             if (adapter is not null)
             {
                 SetAdapter(adapter);
             }
-
-            SetModel(model);
             LoadPolicy();
         }
 
         #region Options
         public bool Enabled { get; private set; } = true;
         public bool EnabledCache { get; private set; } = true;
-        public bool AutoSave { get; private set; } = true;
+        public bool AutoSave => PolicyManager.AutoSave;
         public bool AutoBuildRoleLinks { get; private set; } = true;
         public bool AutoNotifyWatcher { get; private set; } = true;
         public bool AutoCleanEnforceCache { get; private set; } = true;
@@ -58,7 +57,8 @@ namespace Casbin
         #region Extensions
         public IEffector Effector { get; private set; } = new DefaultEffector();
         public IModel Model { get; private set; }
-        public IAdapter Adapter { get; private set; }
+        public IPolicyManager PolicyManager => Model.PolicyManager;
+        public IAdapter Adapter => PolicyManager.Adapter;
         public IWatcher Watcher { get; private set; }
         public IRoleManager RoleManager { get; private set; } = new DefaultRoleManager(10);
         public IEnforceCache EnforceCache { get; private set; }
@@ -90,7 +90,7 @@ namespace Casbin
         /// <param name="autoSave"></param>
         public void EnableAutoSave(bool autoSave)
         {
-            AutoSave = autoSave;
+            PolicyManager.AutoSave = autoSave;
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace Casbin
         /// <param name="adapter"></param>
         public void SetAdapter(IAdapter adapter)
         {
-            Adapter = adapter;
+            PolicyManager.SetAdapter(adapter);
         }
 
         /// <summary>

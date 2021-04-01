@@ -23,6 +23,7 @@ namespace Casbin
         #region Extensions
         public IEffector Effector { get; }
         public IModel Model { get; }
+        public IPolicyManager PolicyManager { get; }
         public IAdapter Adapter { get; }
         public IWatcher Watcher { get; }
         public IRoleManager RoleManager { get; }

@@ -9,7 +9,7 @@ using Casbin.Util;
 
 namespace Casbin.Model
 {
-    public class DefaultPolicy
+    public class DefaultPolicy : IPolicy
     {
         public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
@@ -17,9 +17,14 @@ namespace Casbin.Model
         internal ILogger Logger { get; set; }
 #endif
 
-        protected DefaultPolicy()
+        internal DefaultPolicy()
         {
             Sections = new Dictionary<string, Dictionary<string, Assertion>>();
+        }
+
+        internal static IPolicy Create()
+        {
+            return new DefaultPolicy();
         }
 
         /// <summary>

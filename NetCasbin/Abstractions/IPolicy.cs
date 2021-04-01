@@ -1,10 +1,13 @@
 ﻿using System.Collections.Generic;
+using Casbin.Model;
 using Casbin.Rbac;
 
 namespace Casbin
 {
    public interface IPolicy
    {
+        public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
+
         /// <summary>
         /// Provides incremental build the role inheritance relation.
         /// </summary>

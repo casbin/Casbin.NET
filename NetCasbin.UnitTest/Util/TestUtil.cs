@@ -87,7 +87,6 @@ namespace Casbin.UnitTests.Util
         internal static void TestGetFilteredPolicy(Enforcer e, int fieldIndex, List<List<string>> res, params string[] fieldValues)
         {
             var myRes = e.GetFilteredPolicy(fieldIndex, fieldValues);
-
             Assert.True(res.DeepEquals(myRes));
         }
 

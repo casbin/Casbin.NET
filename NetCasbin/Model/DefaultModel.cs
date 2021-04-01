@@ -3,11 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Casbin.Config;
+using Casbin.Rbac;
 using Casbin.Util;
 
 namespace Casbin.Model
 {
-    public class DefaultModel : DefaultPolicy, IModel
+    public class DefaultModel : IModel
     {
         private static readonly IDictionary<string, string> _sectionNameMap = new Dictionary<string, string>() {
             { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
@@ -17,13 +18,22 @@ namespace Casbin.Model
             { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
+        private DefaultModel(IPolicyManager policyManager)
+        {
+            PolicyManager = policyManager;
+        }
+
+        public IPolicyManager PolicyManager { get; private set; }
+
+        public Dictionary<string, Dictionary<string, Assertion>> Sections => PolicyManager.Policy.Sections;
+
         /// <summary>
         /// Creates a default model.
         /// </summary>
         /// <returns></returns>
         public static IModel Create()
         {
-            return new DefaultModel();
+            return new DefaultModel(DefaultPolicyManager.Create());
         }
 
         /// <summary>
@@ -63,6 +73,11 @@ namespace Casbin.Model
             var model = Create();
             model.LoadModelFromText(text);
             return model;
+        }
+
+        public void SetPolicyManager(IPolicyManager policyManager)
+        {
+            PolicyManager = policyManager;
         }
 
         public void LoadModelFromFile(string path)
@@ -158,5 +173,56 @@ namespace Casbin.Model
         {
             return i == 1 ? string.Empty : i.ToString();
         }
+
+        #region IPolicy
+
+        public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation, string section,
+            string policyType, IEnumerable<string> rule)
+            => PolicyManager.Policy.BuildIncrementalRoleLink(roleManager, policyOperation, section, policyType, rule);
+
+        public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation, string section,
+            string policyType, IEnumerable<IEnumerable<string>> rules)
+            => PolicyManager.Policy.BuildIncrementalRoleLinks(roleManager, policyOperation, section, policyType, rules);
+
+        public void BuildRoleLinks(IRoleManager roleManager) => PolicyManager.Policy.BuildRoleLinks(roleManager);
+
+        public void RefreshPolicyStringSet() => PolicyManager.Policy.RefreshPolicyStringSet();
+
+        public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
+            => PolicyManager.GetPolicy(section, policyType);
+
+        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+            => PolicyManager.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+
+        public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex)
+            => PolicyManager.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
+
+        public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex)
+            => PolicyManager.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
+
+        public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
+            => PolicyManager.HasPolicy(section, policyType, rule);
+
+        public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+            => PolicyManager.HasPolicies(section, policyType, rules);
+
+        public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
+            => PolicyManager.AddPolicy(section, policyType, rule);
+
+        public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+            => PolicyManager.AddPolicies(section, policyType, rules);
+
+        public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
+            => PolicyManager.RemovePolicy(section, policyType, rule);
+
+        public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+            => PolicyManager.RemovePolicies(section, policyType, rules);
+
+        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+            => PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+
+        public void ClearPolicy() => PolicyManager.ClearPolicy();
+
+        #endregion
     }
 }

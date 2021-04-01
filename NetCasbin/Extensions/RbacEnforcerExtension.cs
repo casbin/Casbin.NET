@@ -536,8 +536,8 @@ namespace Casbin.Extensions
         public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer, IEnumerable<string> permissions)
         {
             var policySubjects = enforcer.GetAllSubjects();
-            var groupInherit = enforcer.Model.GetValuesForFieldInPolicyAllTypes("g", 1);
-            var groupSubjects = enforcer.Model.GetValuesForFieldInPolicyAllTypes("g", 0);
+            var groupInherit = enforcer.InternalGetValuesForFieldInPolicyAllTypes("g", 1);
+            var groupSubjects = enforcer.InternalGetValuesForFieldInPolicyAllTypes("g", 0);
             return policySubjects.Concat(groupSubjects).Distinct()
                 .Where(subject => enforcer.Enforce(new[]{subject}.Concat(permissions).Cast<object>().ToArray()))
                 .Except(groupInherit);
