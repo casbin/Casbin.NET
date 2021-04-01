@@ -23,7 +23,7 @@ namespace Casbin.Model
 
         public List<IReadOnlyList<string>> Policy { get; internal set; }
 
-        private HashSet<string> PolicyStringSet { get; }
+        internal HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {

@@ -56,7 +56,7 @@ namespace Casbin
 
         public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
-        public bool RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
+        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
 
         public void ClearPolicy();
    }

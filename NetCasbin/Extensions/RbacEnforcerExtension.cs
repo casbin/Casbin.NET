@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Casbin.Extensions
 {
-    public static class RbacEnforcerEnxtension
+    public static class RbacEnforcerExtension
     {
 
         #region Get roles or users

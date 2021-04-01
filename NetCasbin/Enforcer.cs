@@ -18,9 +18,6 @@ using DynamicExpresso;
 
 namespace Casbin
 {
-    /// <summary>
-    /// CoreEnforcer defines the core functionality of an enforcer.
-    /// </summary>
     public class Enforcer : IEnforcer
     {
         public Enforcer()
@@ -72,7 +69,6 @@ namespace Casbin
 
         public string ModelPath { get; private set; }
         public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
-
         public IExpressionHandler ExpressionHandler { get; private set; }
 
         #region Set options
@@ -379,6 +375,9 @@ namespace Casbin
         }
 
         #endregion
+
+        #region Enforce method
+
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
@@ -812,5 +811,7 @@ namespace Casbin
             expressionString = Utility.ReplaceEval(expressionString, rules);
             return expressionString;
         }
+
+        #endregion
     }
 }

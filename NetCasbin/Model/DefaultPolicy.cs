@@ -214,7 +214,7 @@ namespace Casbin.Model
             return true;
         }
 
-        public bool RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
             if (fieldValues == null)
             {
@@ -223,11 +223,11 @@ namespace Casbin.Model
 
             if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
-                return true;
+                return null;
             }
 
             var newPolicy = new List<IReadOnlyList<string>>();
-            bool deleted = false;
+            List<IEnumerable<string>> effectPolicies = null;
 
             Assertion assertion = Sections[section][policyType];
             foreach (var rule in assertion.Policy)
@@ -241,7 +241,9 @@ namespace Casbin.Model
 
                 if (matched)
                 {
-                    deleted = true;
+                    effectPolicies ??= new List<IEnumerable<string>>();
+                    effectPolicies.Add(rule);
+                    assertion.PolicyStringSet.Remove(Utility.RuleToString(rule));
                 }
                 else
                 {
@@ -250,8 +252,7 @@ namespace Casbin.Model
             }
 
             assertion.Policy = newPolicy;
-            assertion.RefreshPolicyStringSet();
-            return deleted;
+            return effectPolicies;
         }
 
         public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex)

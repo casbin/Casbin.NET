@@ -34,7 +34,6 @@ namespace Casbin
 
         public string ModelPath { get; }
         public bool IsFiltered { get; }
-
         public IExpressionHandler ExpressionHandler { get; }
 
         /// <summary>
