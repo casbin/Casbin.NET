@@ -17,7 +17,7 @@ namespace Casbin.Model
         internal ILogger Logger { get; set; }
 #endif
 
-        internal DefaultPolicy()
+        private DefaultPolicy()
         {
             Sections = new Dictionary<string, Dictionary<string, Assertion>>();
         }

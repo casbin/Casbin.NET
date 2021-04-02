@@ -8,12 +8,12 @@ using static Casbin.UnitTests.Util.TestUtil;
 namespace Casbin.UnitTests
 {
     [Collection("Model collection")]
-    public class EnforcerCacheTest
+    public class EnforcerWithCacheTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly TestModelFixture _testModelFixture;
 
-        public EnforcerCacheTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
+        public EnforcerWithCacheTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
         {
             _testOutputHelper = testOutputHelper;
             _testModelFixture = testModelFixture;

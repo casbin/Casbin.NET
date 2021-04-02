@@ -32,7 +32,7 @@ namespace Casbin.Config
         /// </summary>
         /// <param name="configFilePath">The path of the model file.</param>
         /// <returns>The constructor of Config.</returns>
-        public static IConfig CreatefromFile(string configFilePath)
+        public static IConfig CreateFromFile(string configFilePath)
         {
             var config = new DefaultConfig();
             config.Parse(configFilePath);

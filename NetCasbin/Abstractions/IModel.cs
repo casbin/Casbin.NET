@@ -2,9 +2,9 @@
 {
     public interface IModel : IPolicy
     {
-        public IPolicyManager PolicyManager { get; }
+        public string ModelPath { get; }
 
-        public void SetPolicyManager(IPolicyManager policyManager);
+        public IPolicyManager PolicyManager { get; set; }
 
         public void LoadModelFromFile(string path);
 

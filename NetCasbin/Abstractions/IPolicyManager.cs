@@ -6,15 +6,15 @@ namespace Casbin
 {
     public interface IPolicyManager
     {
-        public IAdapter Adapter { get; }
+        public bool IsSynchronized { get; }
+
+        public IAdapter Adapter { get; set; }
 
         public bool HasAdapter { get; }
 
         public bool AutoSave { get; set; }
 
-        public IPolicy Policy { get; }
-
-        public void SetAdapter(IAdapter adapter);
+        public IPolicy Policy { get; set; }
 
         public void StartRead();
 

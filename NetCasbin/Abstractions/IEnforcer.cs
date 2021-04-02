@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Casbin.Persist;
 using Casbin.Rbac;
@@ -12,22 +14,23 @@ namespace Casbin
     public interface IEnforcer
     {
         #region Options
-        public bool Enabled { get; }
-        public bool EnabledCache { get; }
-        public bool AutoSave { get; }
-        public bool AutoBuildRoleLinks { get; }
-        public bool AutoNotifyWatcher { get; }
-        public bool AutoCleanEnforceCache { get; }
+        public bool Enabled { get; set; }
+        public bool EnabledCache { get; set; }
+        public bool AutoSave { get; set; }
+        public bool AutoBuildRoleLinks { get; set; }
+        public bool AutoNotifyWatcher { get; set; }
+        public bool AutoCleanEnforceCache { get; set; }
         #endregion
 
         #region Extensions
-        public IEffector Effector { get; }
-        public IModel Model { get; }
-        public IPolicyManager PolicyManager { get; }
-        public IAdapter Adapter { get; }
-        public IWatcher Watcher { get; }
-        public IRoleManager RoleManager { get; }
-        public IEnforceCache EnforceCache { get; }
+        public IEffector Effector { get; set; }
+        public IModel Model { get; set; }
+        public IPolicyManager PolicyManager { get; set; }
+        public IAdapter Adapter { get; set; }
+        public IWatcher Watcher { get; set; }
+        public IRoleManager RoleManager { get; set; }
+        public IEnforceCache EnforceCache { get; set; }
+        public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET45
         public ILogger Logger { get; set; }
 #endif
@@ -35,73 +38,6 @@ namespace Casbin
 
         public string ModelPath { get; }
         public bool IsFiltered { get; }
-        public IExpressionHandler ExpressionHandler { get; }
-
-        /// <summary>
-        /// Changes the enforcing state of Casbin, when Casbin is disabled,
-        /// all access will be allowed by the enforce() function.
-        /// </summary>
-        /// <param name="enable"></param>
-        public void EnableEnforce(bool enable);
-
-        /// <summary>
-        /// Controls whether to save a policy rule automatically to the
-        /// adapter when it is added or removed.
-        /// </summary>
-        /// <param name="autoSave"></param>
-        public void EnableAutoSave(bool autoSave);
-
-        /// <summary>
-        /// Controls whether to save a policy rule automatically
-        /// to the adapter when it is added or removed.
-        /// </summary>
-        /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
-        public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks);
-
-
-
-        /// <summary>
-        /// Sets the current model.
-        /// </summary>
-        /// <param name="modelPath"></param>
-        public void SetModel(string modelPath);
-
-        /// <summary>
-        /// Sets the current model.
-        /// </summary>
-        /// <param name="model"></param>
-        public void SetModel(IModel model);
-
-        /// <summary>
-        /// Sets an adapter.
-        /// </summary>
-        /// <param name="adapter"></param>
-        public void SetAdapter(IAdapter adapter);
-
-        /// <summary>
-        /// Sets an watcher.
-        /// </summary>
-        /// <param name="watcher"></param>
-        /// <param name="useAsync">Whether use async update callback.</param>
-        public void SetWatcher(IWatcher watcher, bool useAsync = true);
-
-        /// <summary>
-        /// Sets the current role manager.
-        /// </summary>
-        /// <param name="roleManager"></param>
-        public void SetRoleManager(IRoleManager roleManager);
-
-        /// <summary>
-        /// Sets the current effector.
-        /// </summary>
-        /// <param name="effector"></param>
-        public void SetEffector(IEffector effector);
-
-        /// <summary>
-        /// Sets an enforce cache.
-        /// </summary>
-        /// <param name="enforceCache"></param>
-        public void SetEnforceCache(IEnforceCache enforceCache);
 
         /// <summary>
         /// LoadModel reloads the model from the model CONF file. Because the policy is
@@ -164,10 +100,48 @@ namespace Casbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="rvals">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public bool Enforce(params object[] rvals);
+        public bool Enforce(params object[] requestValues);
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public Task<bool> EnforceAsync(params object[] requestValues);
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+
+        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceEx(params object[] requestValues);
+#else
+        public Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceEx(params object[] requestValues);
+#endif
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExAsync(params object[] requestValues);
+#else
+        public Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExAsync(params object[] requestValues);
+#endif
     }
 
 }

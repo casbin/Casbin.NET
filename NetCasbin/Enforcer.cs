@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Caching;
 using Casbin.Effect;
-using Casbin.Evaluation;
 using Casbin.Extensions;
 using Casbin.Model;
 using Casbin.Persist;
@@ -32,181 +31,54 @@ namespace Casbin
         public Enforcer(string modelPath, IAdapter adapter = null)
             : this(DefaultModel.CreateFromFile(modelPath), adapter)
         {
-            ModelPath = modelPath;
         }
 
         public Enforcer(IModel model, IAdapter adapter = null)
         {
-            SetModel(model);
+            this.SetModel(model);
             if (adapter is not null)
             {
-                SetAdapter(adapter);
+                this.SetAdapter(adapter);
             }
             LoadPolicy();
         }
 
         #region Options
-        public bool Enabled { get; private set; } = true;
-        public bool EnabledCache { get; private set; } = true;
-        public bool AutoSave => PolicyManager.AutoSave;
-        public bool AutoBuildRoleLinks { get; private set; } = true;
-        public bool AutoNotifyWatcher { get; private set; } = true;
-        public bool AutoCleanEnforceCache { get; private set; } = true;
+        public bool Enabled { get; set; } = true;
+        public bool EnabledCache { get; set; } = true;
+        public bool AutoSave
+        {
+            get => PolicyManager.AutoSave;
+            set => PolicyManager.AutoSave = value;
+        }
+        public bool AutoBuildRoleLinks { get; set; } = true;
+        public bool AutoNotifyWatcher { get; set; } = true;
+        public bool AutoCleanEnforceCache { get; set; } = true;
         #endregion
 
         #region Extensions
-        public IEffector Effector { get; private set; } = new DefaultEffector();
-        public IModel Model { get; private set; }
-        public IPolicyManager PolicyManager => Model.PolicyManager;
-        public IAdapter Adapter => PolicyManager.Adapter;
-        public IWatcher Watcher { get; private set; }
-        public IRoleManager RoleManager { get; private set; } = new DefaultRoleManager(10);
-        public IEnforceCache EnforceCache { get; private set; }
+        public IEffector Effector { get; set; } = new DefaultEffector();
+        public IModel Model { get; set; }
+        public IPolicyManager PolicyManager
+        {
+            get => Model?.PolicyManager;
+            set => Model.SetPolicyManager(value);
+        }
+        public IAdapter Adapter
+        {
+            get => PolicyManager?.Adapter;
+            set => PolicyManager.SetAdapter(value);
+        }
+        public IWatcher Watcher { get; set; }
+        public IRoleManager RoleManager { get; set; } = new DefaultRoleManager(10);
+        public IEnforceCache EnforceCache { get; set; }
+        public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET45
         public ILogger Logger { get; set; }
 #endif
         #endregion
-
-        public string ModelPath { get; private set; }
+        public string ModelPath => Model?.ModelPath;
         public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
-        public IExpressionHandler ExpressionHandler { get; private set; }
-
-        #region Set options
-
-        /// <summary>
-        /// Changes the enforcing state of Casbin, when Casbin is disabled,
-        /// all access will be allowed by the enforce() function.
-        /// </summary>
-        /// <param name="enable"></param>
-        public void EnableEnforce(bool enable)
-        {
-            Enabled = enable;
-        }
-
-        /// <summary>
-        /// Controls whether to save a policy rule automatically to the
-        /// adapter when it is added or removed.
-        /// </summary>
-        /// <param name="autoSave"></param>
-        public void EnableAutoSave(bool autoSave)
-        {
-            PolicyManager.AutoSave = autoSave;
-        }
-
-        /// <summary>
-        /// Controls whether to save a policy rule automatically
-        /// to the adapter when it is added or removed.
-        /// </summary>
-        /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
-        public void EnableAutoBuildRoleLinks(bool autoBuildRoleLinks)
-        {
-            AutoBuildRoleLinks = autoBuildRoleLinks;
-        }
-
-        /// <summary>
-        /// Controls whether to save a policy rule automatically
-        /// notify the Watcher when it is added or removed.
-        /// </summary>
-        /// <param name="autoNotifyWatcher">Whether to automatically notify watcher.</param>
-        public void EnableAutoNotifyWatcher(bool autoNotifyWatcher)
-        {
-            AutoNotifyWatcher = autoNotifyWatcher;
-        }
-
-        public void EnableCache(bool enableCache)
-        {
-            EnabledCache = enableCache;
-        }
-
-        public void EnableAutoCleanEnforceCache(bool autoCleanEnforceCache)
-        {
-            AutoCleanEnforceCache = autoCleanEnforceCache;
-        }
-
-        #endregion
-
-        #region Set extensions
-
-        /// <summary>
-        /// Sets the current effector.
-        /// </summary>
-        /// <param name="effector"></param>
-        public void SetEffector(IEffector effector)
-        {
-            Effector = effector;
-        }
-
-        /// <summary>
-        /// Sets the current model.
-        /// </summary>
-        /// <param name="modelPath"></param>
-        public void SetModel(string modelPath)
-        {
-            IModel model = DefaultModel.CreateFromFile(modelPath);
-            SetModel(model);
-            ModelPath = modelPath;
-        }
-
-        /// <summary>
-        /// Sets the current model.
-        /// </summary>
-        /// <param name="model"></param>
-        public void SetModel(IModel model)
-        {
-            Model = model;
-            ExpressionHandler = new ExpressionHandler(model);
-            if (AutoCleanEnforceCache)
-            {
-                EnforceCache?.Clear();
-#if !NET45
-                Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
-#endif
-            }
-        }
-
-        /// <summary>
-        /// Sets an adapter.
-        /// </summary>
-        /// <param name="adapter"></param>
-        public void SetAdapter(IAdapter adapter)
-        {
-            PolicyManager.SetAdapter(adapter);
-        }
-
-        /// <summary>
-        /// Sets an watcher.
-        /// </summary>
-        /// <param name="watcher"></param>
-        /// <param name="useAsync">Whether use async update callback.</param>
-        public void SetWatcher(IWatcher watcher, bool useAsync = true)
-        {
-            Watcher = watcher;
-            if (useAsync)
-            {
-                watcher?.SetUpdateCallback(LoadPolicyAsync);
-                return;
-            }
-            watcher?.SetUpdateCallback(LoadPolicy);
-        }
-
-        /// <summary>
-        /// Sets the current role manager.
-        /// </summary>
-        /// <param name="roleManager"></param>
-        public void SetRoleManager(IRoleManager roleManager)
-        {
-            RoleManager = roleManager;
-        }
-
-        /// <summary>
-        /// Sets an enforce cache.
-        /// </summary>
-        /// <param name="enforceCache"></param>
-        public void SetEnforceCache(IEnforceCache enforceCache)
-        {
-            EnforceCache = enforceCache;
-        }
-        #endregion
 
         /// <summary>
         /// LoadModel reloads the model from the model CONF file. Because the policy is
@@ -307,7 +179,6 @@ namespace Casbin
 
             ClearPolicy();
             await filteredAdapter.LoadFilteredPolicyAsync(Model, filter);
-
             if (AutoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -394,12 +265,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return InternalEnforce(requestValues);
+                return InternalEnforce(PolicyManager, requestValues);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return InternalEnforce(requestValues);
+                return InternalEnforce(PolicyManager, requestValues);
             }
 
             string key = string.Join("$$", requestValues);
@@ -412,7 +283,7 @@ namespace Casbin
                 return cachedResult;
             }
 
-            bool result  = InternalEnforce(requestValues);
+            bool result  = InternalEnforce(PolicyManager, requestValues);
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
             return result;
@@ -434,12 +305,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return await InternalEnforceAsync(requestValues);
+                return await InternalEnforceAsync(PolicyManager, requestValues);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return await InternalEnforceAsync(requestValues);
+                return await InternalEnforceAsync(PolicyManager, requestValues);
             }
 
             string key = string.Join("$$", requestValues);
@@ -454,7 +325,7 @@ namespace Casbin
                 return cachedResult;
             }
 
-            bool result = await InternalEnforceAsync(requestValues);
+            bool result = await InternalEnforceAsync(PolicyManager, requestValues);
 
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
@@ -479,12 +350,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return (InternalEnforce(requestValues, explains), explains);
+                return (InternalEnforce(PolicyManager, requestValues, explains), explains);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return (InternalEnforce(requestValues, explains), explains);
+                return (InternalEnforce(PolicyManager, requestValues, explains), explains);
             }
 
             string key = string.Join("$$", requestValues);
@@ -495,7 +366,7 @@ namespace Casbin
                 return (cachedResult, explains);
             }
 
-            bool result  = InternalEnforce(requestValues, explains);
+            bool result  = InternalEnforce(PolicyManager, requestValues, explains);
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
             return (result, explains);
@@ -511,7 +382,7 @@ namespace Casbin
             EnforceEx(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
-            bool result = InternalEnforce(requestValues, explains);
+            bool result = InternalEnforce(PolicyManager, requestValues, explains);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
 #endif
@@ -534,12 +405,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return (await InternalEnforceAsync(requestValues, explains), explains);
+                return (await InternalEnforceAsync(PolicyManager, requestValues, explains), explains);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return (await InternalEnforceAsync(requestValues, explains), explains);
+                return (await InternalEnforceAsync(PolicyManager, requestValues, explains), explains);
             }
 
             string key = string.Join("$$", requestValues);
@@ -550,7 +421,7 @@ namespace Casbin
                 return (cachedResult, explains);
             }
 
-            bool result  = await InternalEnforceAsync(requestValues, explains);
+            bool result  = await InternalEnforceAsync(PolicyManager, requestValues, explains);
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
             return (result, explains);
@@ -560,32 +431,34 @@ namespace Casbin
             EnforceExAsync(params object[] requestValues)
         {
             var explains = new List<IEnumerable<string>>();
-            bool result = await InternalEnforceAsync(requestValues, explains);
+            bool result = await InternalEnforceAsync(PolicyManager, requestValues, explains);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
 #endif
 
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <param name="explains"></param>
-        /// <returns>Whether to allow the request.</returns>
-        private Task<bool> InternalEnforceAsync(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
+        private async Task<bool> InternalEnforceAsync(IPolicyManager policyManager, IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
-            return Task.FromResult(InternalEnforce(requestValues, explains));
+            if (policyManager.IsSynchronized)
+            {
+                return await Task.Run(() => InternalEnforce(requestValues, explains));
+            }
+            return InternalEnforce(policyManager, requestValues, explains);
         }
 
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="explains"></param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request.</returns>
+        private bool InternalEnforce(IPolicyManager policyManager, IReadOnlyList<object> requestValues,
+            ICollection<IEnumerable<string>> explains = null)
+        {
+            try
+            {
+                policyManager.StartRead();
+                return InternalEnforce(requestValues, explains);
+            }
+            finally
+            {
+                policyManager.EndRead();
+            }
+        }
+
         private bool InternalEnforce(IReadOnlyList<object> requestValues, ICollection<IEnumerable<string>> explains = null)
         {
             bool explain = explains is not null;

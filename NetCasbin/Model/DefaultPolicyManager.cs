@@ -8,7 +8,7 @@ namespace Casbin.Model
 {
     public class DefaultPolicyManager : IPolicyManager
     {
-        private DefaultPolicyManager(IPolicy policy, IAdapter adapter = null)
+        public DefaultPolicyManager(IPolicy policy, IAdapter adapter = null)
         {
             Policy = policy;
             if (adapter is not null)
@@ -17,19 +17,15 @@ namespace Casbin.Model
             }
         }
 
+        public virtual bool IsSynchronized => false;
         public bool AutoSave { get; set; }
-        public IAdapter Adapter { get; private set; }
+        public IAdapter Adapter { get; set; }
         public bool HasAdapter => Adapter is null;
-        public IPolicy Policy { get; }
+        public IPolicy Policy { get; set; }
 
         public static IPolicyManager Create()
         {
             return new DefaultPolicyManager(DefaultPolicy.Create());
-        }
-
-        public void SetAdapter(IAdapter adapter)
-        {
-            Adapter = adapter;
         }
 
         public virtual void StartRead()
@@ -61,9 +57,14 @@ namespace Casbin.Model
 
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
         {
+            if (TryStartRead() is false)
+            {
+                return null;
+            }
+
             try
             {
-                return TryStartRead() ? Policy.GetPolicy(section, policyType) : null;
+                return Policy.GetPolicy(section, policyType);
             }
             finally
             {
@@ -73,9 +74,14 @@ namespace Casbin.Model
 
         public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
+            if (TryStartRead() is false)
+            {
+                return null;
+            }
+
             try
             {
-                return TryStartRead() ? Policy.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues) : null;
+                return Policy.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
             finally
             {
@@ -85,9 +91,14 @@ namespace Casbin.Model
 
         public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex)
         {
+            if (TryStartRead() is false)
+            {
+                return null;
+            }
+
             try
             {
-                return TryStartRead() ? Policy.GetValuesForFieldInPolicy(section, policyType, fieldIndex) : null;
+                return Policy.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
             }
             finally
             {
@@ -97,9 +108,14 @@ namespace Casbin.Model
 
         public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex)
         {
+            if (TryStartRead() is false)
+            {
+                return null;
+            }
+
             try
             {
-                return TryStartRead() ? Policy.GetValuesForFieldInPolicyAllTypes(section, fieldIndex) : null;
+                return Policy.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
             }
             finally
             {
@@ -109,9 +125,9 @@ namespace Casbin.Model
 
         public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
         {
+            StartRead();
             try
             {
-                StartRead();
                 return Policy.HasPolicy(section, policyType, rule);
             }
             finally
@@ -122,9 +138,9 @@ namespace Casbin.Model
 
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
+            StartRead();
             try
             {
-                StartRead();
                 return Policy.HasPolicies(section, policyType, rules);
             }
             finally
@@ -135,13 +151,13 @@ namespace Casbin.Model
 
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -168,13 +184,13 @@ namespace Casbin.Model
 
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -201,13 +217,13 @@ namespace Casbin.Model
 
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -234,13 +250,13 @@ namespace Casbin.Model
 
         public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -267,13 +283,13 @@ namespace Casbin.Model
 
         public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
+            if (TryStartWrite() is false)
+            {
+                return null;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return null;
-                }
-
                 if (HasAdapter is false || AutoSave is false)
                 {
                     return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
@@ -298,13 +314,13 @@ namespace Casbin.Model
 
         public async Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -331,13 +347,13 @@ namespace Casbin.Model
 
         public async Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -364,13 +380,13 @@ namespace Casbin.Model
 
         public async Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -397,13 +413,13 @@ namespace Casbin.Model
 
         public async Task<bool> RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return false;
-                }
-
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
                 if (HasAdapter is false || AutoSave is false)
@@ -430,13 +446,13 @@ namespace Casbin.Model
 
         public async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
+            if (TryStartWrite() is false)
+            {
+                return null;
+            }
+
             try
             {
-                if (TryStartWrite() is false)
-                {
-                    return null;
-                }
-
                 if (HasAdapter is false || AutoSave is false)
                 {
                     return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
@@ -461,12 +477,10 @@ namespace Casbin.Model
 
         public void ClearPolicy()
         {
+            StartRead();
             try
             {
-                if (TryStartRead())
-                {
-                    Policy.ClearPolicy();
-                }
+                Policy.ClearPolicy();
             }
             finally
             {

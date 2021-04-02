@@ -7,7 +7,6 @@ namespace Casbin.Extensions
 {
     public static class RbacEnforcerExtension
     {
-
         #region Get roles or users
 
         /// <summary>
