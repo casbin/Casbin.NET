@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
-using Casbin.Model;
 
 namespace Casbin.Util
 {

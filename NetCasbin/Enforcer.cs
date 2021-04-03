@@ -77,6 +77,7 @@ namespace Casbin
         public ILogger Logger { get; set; }
 #endif
         #endregion
+        public bool IsSynchronized => Model?.IsSynchronized ?? false;
         public string ModelPath => Model?.ModelPath;
         public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
 
