@@ -11,7 +11,6 @@ namespace Casbin.Extensions
     public static class EnforcerExtension
     {
         #region Set options
-
         /// <summary>
         /// Changes the enforcing state of Casbin, when Casbin is disabled,
         /// all access will be allowed by the enforce() function.
@@ -71,11 +70,9 @@ namespace Casbin.Extensions
             enforcer.AutoCleanEnforceCache = autoCleanEnforceCache;
             return enforcer;
         }
-
         #endregion
 
         #region Set extensions
-
         /// <summary>
         /// Sets the current effector.
         /// </summary>
@@ -106,6 +103,10 @@ namespace Casbin.Extensions
         /// <param name="model"></param>
         public static IEnforcer SetModel(this IEnforcer enforcer, IModel model)
         {
+            if (enforcer.IsSynchronized)
+            {
+                model = model.ToSyncModel();
+            }
             enforcer.Model = model;
             enforcer.ExpressionHandler = new ExpressionHandler(model);
             if (enforcer.AutoCleanEnforceCache)

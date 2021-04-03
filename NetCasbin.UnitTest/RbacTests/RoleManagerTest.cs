@@ -5,7 +5,7 @@ using Casbin.Util;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.RbacTests
 {
     public class RoleManagerTest
     {

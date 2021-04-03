@@ -6,7 +6,7 @@ using Casbin.Persist;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.PersistTests
 {
     [Collection("Model collection")]
     public class WatcherTest

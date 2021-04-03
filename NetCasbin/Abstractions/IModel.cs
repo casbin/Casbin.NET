@@ -2,6 +2,8 @@
 {
     public interface IModel : IPolicy
     {
+        public bool IsSynchronized { get; }
+
         public string ModelPath { get; }
 
         public IPolicyManager PolicyManager { get; set; }

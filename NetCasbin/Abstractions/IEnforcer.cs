@@ -13,6 +13,7 @@ namespace Casbin
     /// </summary>
     public interface IEnforcer
     {
+
         #region Options
         public bool Enabled { get; set; }
         public bool EnabledCache { get; set; }
@@ -36,6 +37,7 @@ namespace Casbin
 #endif
         #endregion
 
+        public bool IsSynchronized { get; }
         public string ModelPath { get; }
         public bool IsFiltered { get; }
 

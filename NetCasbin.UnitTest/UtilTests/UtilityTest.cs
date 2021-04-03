@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using Casbin.Util;
 using Xunit;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.UtilTests
 {
     public class UtilityTest
     {

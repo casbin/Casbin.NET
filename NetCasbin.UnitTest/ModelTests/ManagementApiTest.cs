@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Casbin.Extensions;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.ModelTests
 {
     [Collection("Model collection")]
     public class ManagementApiTest

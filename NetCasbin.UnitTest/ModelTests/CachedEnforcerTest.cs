@@ -5,15 +5,15 @@ using Xunit;
 using Xunit.Abstractions;
 using static Casbin.UnitTests.Util.TestUtil;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.ModelTests
 {
     [Collection("Model collection")]
-    public class EnforcerWithCacheTest
+    public class CachedEnforcerTest
     {
         private readonly ITestOutputHelper _testOutputHelper;
         private readonly TestModelFixture _testModelFixture;
 
-        public EnforcerWithCacheTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
+        public CachedEnforcerTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
         {
             _testOutputHelper = testOutputHelper;
             _testModelFixture = testModelFixture;

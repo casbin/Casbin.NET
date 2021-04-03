@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security;
 using Casbin.Config;
 using Casbin.Rbac;
 using Casbin.Util;
@@ -19,10 +18,9 @@ namespace Casbin.Model
             { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
         };
 
-
-        private DefaultModel(IPolicyManager policyManager)
+        internal DefaultModel(IPolicyManager policyManager)
         {
-            PolicyManager = policyManager;
+            PolicyManager = policyManager ?? throw new NullReferenceException(nameof(policyManager));
         }
 
         public IPolicyManager PolicyManager { get; set; }
@@ -30,11 +28,9 @@ namespace Casbin.Model
         public Dictionary<string, Dictionary<string, Assertion>> Sections
             => PolicyManager.Policy.Sections;
 
-        private string _modelPath;
-        public string ModelPath
-        {
-            get => _modelPath;
-        }
+        public bool IsSynchronized => PolicyManager.IsSynchronized;
+
+        public string ModelPath { get; private set; }
 
         /// <summary>
         /// Creates a default model.
@@ -84,16 +80,10 @@ namespace Casbin.Model
             return model;
         }
 
-        public IModel SetPolicyManager(IPolicyManager policyManager)
-        {
-            PolicyManager = policyManager;
-            return this;
-        }
-
         public void LoadModelFromFile(string path)
         {
             LoadModel(DefaultConfig.CreateFromFile(path));
-            _modelPath = path;
+            ModelPath = path;
         }
 
         public void LoadModelFromText(string text)

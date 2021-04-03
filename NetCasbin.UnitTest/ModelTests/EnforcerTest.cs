@@ -11,7 +11,7 @@ using Xunit;
 using Xunit.Abstractions;
 using static Casbin.UnitTests.Util.TestUtil;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.ModelTests
 {
     [Collection("Model collection")]
     public class EnforcerTest
