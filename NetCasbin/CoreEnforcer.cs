@@ -181,7 +181,6 @@ namespace NetCasbin
             _effector = effector;
         }
 
-#if !NET45
         /// <summary>
         /// Sets an enforce cache.
         /// </summary>
@@ -190,7 +189,6 @@ namespace NetCasbin
         {
             EnforceCache = enforceCache;
         }
-#endif
 
         /// <summary>
         /// Clears all policy.
