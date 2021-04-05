@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using DynamicExpresso;
 using NetCasbin.Abstractions;
 using NetCasbin.Model;
@@ -10,11 +9,8 @@ namespace NetCasbin.Evaluation
 {
     public class ExpressionHandler : IExpressionHandler
     {
-        private readonly IDictionary<string, Lambda> _expressionCache
-            = new Dictionary<string, Lambda>();
-
-        private readonly IDictionary<string, Func<string, string, string, string, string, string, bool>> _onlyStringFuncCache
-            = new Dictionary<string, Func<string, string, string, string, string, string, bool>>();
+        private readonly IDictionary<Type, IExpressionCache> _cachePool
+            = new Dictionary<Type, IExpressionCache>();
 
         private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
         private readonly Model.Model _model;
@@ -47,78 +43,115 @@ namespace NetCasbin.Evaluation
 
         public IDictionary<string, int> PolicyTokens { get; }
 
+        public IReadOnlyList<object> RequestValues { get; set; }
+
+        public IReadOnlyList<string> PolicyValues { get; set; }
+
         public IDictionary<string, Parameter> Parameters { get; }
             = new Dictionary<string, Parameter>();
 
         public void SetFunction(string name, Delegate function)
         {
-            _expressionCache.Clear();
-            _onlyStringFuncCache.Clear();
+            ClearCache();
             var interpreter = GetInterpreter();
             interpreter.SetFunction(name, function);
         }
 
         public void SetGFunctions()
         {
-            _expressionCache.Clear();
-            _onlyStringFuncCache.Clear();
+            ClearCache();
             var interpreter = GetInterpreter();
             SetGFunctions(interpreter);
         }
 
-        
-        public void EnsureCreated(string expressionString, IReadOnlyList<object> requestValues)
+        public bool Invoke(string expressionString)
         {
-            if (_expressionCache.ContainsKey(expressionString))
-            {
-                return;
-            }
-
-            if (_onlyStringFuncCache.ContainsKey(expressionString))
-            {
-                return;
-            }
-
-            Lambda expression = CreateExpression(expressionString, requestValues);
-
-            if (RequestTokens.Count is 3 && PolicyTokens.Count is 3
-                && CheckRequestValuesOnlyString(requestValues))
-            {
-                _onlyStringFuncCache[expressionString] =
-                    expression.Compile<Func<string, string, string, string, string, string, bool>>();
-                return;
-            }
-
-            _expressionCache[expressionString] = expression;
+            var expressionResult = GetLambda(expressionString).Invoke(GetParameters());
+            return expressionResult is bool result && result;
         }
 
-        public bool Invoke(string expressionString, IReadOnlyList<object> requestValues)
+        public bool Invoke<T1>(string expressionString, T1 value1) => throw new NotImplementedException();
+        public bool Invoke<T1, T2>(string expressionString, T1 value1, T2 value2) => throw new NotImplementedException();
+        public bool Invoke<T1, T2, T3>(string expressionString, T1 value1, T2 value2, T3 value3)
         {
-            EnsureCreated(expressionString, requestValues);
+            return InternalInvoke(expressionString, PolicyTokens.Count, value1, value2, value3);
+        }
+        public bool Invoke<T1, T2, T3, T4>(string expressionString, T1 value1, T2 value2, T3 value3, T4 value4) => throw new NotImplementedException();
+        public bool Invoke<T1, T2, T3, T4, T5>(string expressionString, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5) => throw new NotImplementedException();
 
-            if (_expressionCache.TryGetValue(expressionString, out var lambda))
+        private bool InternalInvoke<T1, T2, T3>(string expressionString, int policyTokenCount, T1 value1, T2 value2, T3 value3)
+        {
+            var policyValues = PolicyValues;
+            return policyTokenCount switch
             {
-                var expressionResult = lambda.Invoke(_orderedParameters);
-                return expressionResult is bool result && result;
-            }
-
-            if (_onlyStringFuncCache.TryGetValue(
-                expressionString, out var func) is false)
-            {
-                throw new ArgumentException($"Can not find expression of the expression string {expressionString}");
-            }
-
-            var parameters = _orderedParameters;
-            return func(
-                parameters[0].Value as string,
-                parameters[1].Value as string,
-                parameters[2].Value as string,
-                parameters[3].Value as string,
-                parameters[4].Value as string,
-                parameters[5].Value as  string);
+                0 => GetFunc<Func<T1, T2, T3, bool>>(expressionString)
+                    (value1, value2, value3),
+                1 => GetFunc<Func<T1, T2, T3, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0]),
+                2 => GetFunc<Func<T1, T2, T3, string, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0], policyValues[1]),
+                3 => GetFunc<Func<T1, T2, T3, string, string, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0], policyValues[1], policyValues[2]),
+                4 => GetFunc<Func<T1, T2, T3, string, string, string, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+                5 => GetFunc<Func<T1, T2, T3, string, string, string, string, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+                6 => GetFunc<Func<T1, T2, T3, string, string, string, string, string, string, bool>>(expressionString)
+                    (value1, value2, value3, policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+                _ => Invoke(expressionString)
+            };
         }
 
-        public void SetRequestParameters(IReadOnlyList<object> requestValues)
+        private Lambda GetLambda(string expressionString)
+        {
+            Type type = typeof(Lambda);
+            if (_cachePool.TryGetValue(type, out var cache) is false)
+            {
+                cache = new ExpressionCache();
+                _cachePool[type] = cache;
+            }
+
+            var cacheImpl = (ExpressionCache) cache;
+            if (cacheImpl.TryGet(expressionString, out var func))
+            {
+                return func;
+            }
+
+            var lambda = CreateExpression(expressionString);
+            cacheImpl.Set(expressionString, lambda);
+            return lambda;
+        }
+
+        private TFunc GetFunc<TFunc>(string expressionString) where TFunc : Delegate
+        {
+            Type type = typeof(TFunc);
+            if (_cachePool.TryGetValue(type, out var cache) is false)
+            {
+                cache = new ExpressionCache<TFunc>();
+                _cachePool[type] = cache;
+            }
+
+            var cacheImpl = (IExpressionCache<TFunc>) cache;
+            if (cacheImpl.TryGet(expressionString, out var func))
+            {
+                return func;
+            }
+
+            var expression = CreateExpression(expressionString);
+            func = expression.Compile<TFunc>();
+            cacheImpl.Set(expressionString, func);
+            return func;
+        }
+
+        private void ClearCache()
+        {
+            foreach (var cache in _cachePool.Values)
+            {
+                cache?.Clear();
+            }
+        }
+
+        private void SetRequestParameters(IReadOnlyList<object> requestValues)
         {
             foreach (string token in RequestTokens.Keys)
             {
@@ -140,7 +173,7 @@ namespace NetCasbin.Evaluation
             }
         }
 
-        public void SetPolicyParameters(IReadOnlyList<string> policyValues = null)
+        private void SetPolicyParameters(IReadOnlyList<string> policyValues = null)
         {
             int requestCount = RequestTokens.Count;
             foreach (string token in PolicyTokens.Keys)
@@ -158,22 +191,21 @@ namespace NetCasbin.Evaluation
                 {
                     Parameters.Add(token, new Parameter(token, policyValue ?? string.Empty));
                 }
-
                 _orderedParameters[PolicyTokens[token] + requestCount] = Parameters[token];
             }
         }
 
-        private Lambda CreateExpression(string expressionString, IReadOnlyList<object> requestValues)
+        private Lambda CreateExpression(string expressionString)
         {
-            Parameter[] parameterArray = GetParameters(requestValues);
+            Parameter[] parameterArray = GetParameters();
             Interpreter interpreter = GetInterpreter();
             return interpreter.Parse(expressionString, parameterArray);;
         }
 
-        private Parameter[] GetParameters(IReadOnlyList<object> requestValues = null)
+        private Parameter[] GetParameters()
         {
-            SetRequestParameters(requestValues);
-            SetPolicyParameters();
+            SetRequestParameters(RequestValues);
+            SetPolicyParameters(PolicyValues);
             return _orderedParameters;
         }
 
@@ -187,7 +219,6 @@ namespace NetCasbin.Evaluation
             _interpreter = CreateInterpreter();
             return _interpreter;
         }
-
 
         private Interpreter CreateInterpreter()
         {
@@ -220,16 +251,5 @@ namespace NetCasbin.Evaluation
             }
         }
 
-        private bool CheckRequestValuesOnlyString(IReadOnlyCollection<object> requestValues)
-        {
-            int count = RequestTokens.Count;
-
-            if (requestValues.Count != count)
-            {
-                throw new ArgumentException("Request values count should equal to request tokens.");
-            }
-
-            return requestValues.All(value => value is string);
-        }
     }
 }

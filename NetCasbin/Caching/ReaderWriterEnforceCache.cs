@@ -36,11 +36,6 @@ namespace NetCasbin.Caching
 
         public bool TryGetResult(IReadOnlyList<object> requestValues, string key, out bool result)
         {
-            if (requestValues is null)
-            {
-                throw new ArgumentNullException(nameof(requestValues));
-            }
-
             if (_lockSlim.TryEnterReadLock(CacheOptions.WaitTimeOut) is false)
             {
                 result = false;
@@ -65,11 +60,6 @@ namespace NetCasbin.Caching
 
         public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result)
         {
-            if (requestValues is null)
-            {
-                throw new ArgumentNullException(nameof(requestValues));
-            }
-
             if (_lockSlim.TryEnterWriteLock(CacheOptions.WaitTimeOut) is false)
             {
                 return false;

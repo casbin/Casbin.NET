@@ -10,18 +10,21 @@ namespace NetCasbin.Abstractions
 
         public IDictionary<string, int> PolicyTokens { get; }
 
+        public IReadOnlyList<object> RequestValues { get; set; }
+
+        public IReadOnlyList<string> PolicyValues { get; set; }
+
         public IDictionary<string, Parameter> Parameters { get; } 
 
         public void SetFunction(string name, Delegate function);
 
         public void SetGFunctions();
 
-        public void EnsureCreated(string expressionString, IReadOnlyList<object> requestValues);
-
-        public bool Invoke(string expressionString, IReadOnlyList<object> requestValues);
-
-        public void SetRequestParameters(IReadOnlyList<object> requestValues);
-
-        public void SetPolicyParameters(IReadOnlyList<string> policyValues);
+        public bool Invoke(string expressionString);
+        public bool Invoke<T1>(string expressionString, T1 value1);
+        public bool Invoke<T1, T2>(string expressionString, T1 value1, T2 value2);
+        public bool Invoke<T1, T2, T3>(string expressionString, T1 value1, T2 value2, T3 value3);
+        public bool Invoke<T1, T2, T3, T4>(string expressionString, T1 value1, T2 value2, T3 value3, T4 value4);
+        public bool Invoke<T1, T2, T3, T4, T5>(string expressionString, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5);
     }
 }

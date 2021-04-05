@@ -20,6 +20,11 @@ namespace NetCasbin.UnitTest.Util
             return values.ToList();
         }
 
+        internal static void TestEnforce<T1, T2, T3>(Enforcer e, T1 sub, T2 obj, T3 act, bool res)
+        {
+            Assert.Equal(res, e.Enforce(sub, obj, act));
+        }
+
         internal static void TestEnforce(Enforcer e, object sub, object obj, string act, bool res)
         {
             Assert.Equal(res, e.Enforce(sub, obj, act));
