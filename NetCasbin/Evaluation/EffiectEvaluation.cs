@@ -64,6 +64,20 @@ namespace NetCasbin.Evaluation
                     }
                     break;
 
+                case PolicyEffectType.Deny:
+                    {
+                        result = false;
+                        if (effect is Effect.Effect.Deny)
+                        {
+                            result = true;
+                            hitPolicy = true;
+                            return true;
+                        }
+                    }
+                    break;
+
+
+
                 case PolicyEffectType.Custom:
                     // TODO: Support custom policy effect.
                     break;
