@@ -507,11 +507,7 @@ namespace NetCasbin
         [Obsolete("This api will be removed in next mainline version. please use the another overwrite.")]
         public List<string> GetImplicitRolesForUser(string name, params string[] domain)
         {
-            var roles = roleManager.GetRoles(name, domain);
-            var res = new List<string>();
-            res.AddRange(roles);
-            res.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
-            return res;
+            return domain.Length is 0 ? GetImplicitRolesForUser(name) : GetImplicitRolesForUser(name, domain[0]);
         }
 
         /// <summary>
@@ -523,13 +519,34 @@ namespace NetCasbin
         /// <returns></returns>
         public List<string> GetImplicitRolesForUser(string name, string domain = null)
         {
-            var roles = domain is null
-                ? roleManager.GetRoles(name)
-                : roleManager.GetRoles(name, domain);
-            var result = new List<string>();
-            result.AddRange(roles);
-            result.AddRange(roles.SelectMany(x => GetImplicitRolesForUser(x, domain)));
-            return result;
+            HashSet<string> roleSet = new() {name};
+            Queue<string> queue = new();
+            queue.Enqueue(name);
+
+            while (queue.Count is not 0)
+            {
+                string nowRole = queue.Dequeue();
+                foreach (var assertion in model.Model[PermConstants.Section.RoleSection].Values)
+                {
+                    var roles = domain is null
+                        ? assertion.RoleManager.GetRoles(nowRole)
+                        : assertion.RoleManager.GetRoles(nowRole, domain);
+
+                    foreach (string role in roles)
+                    {
+                        if (roleSet.Contains(role))
+                        {
+                            continue;
+                        }
+
+                        roleSet.Add(role);
+                        queue.Enqueue(role);
+                    }
+                }
+            }
+
+            roleSet.Remove(name);
+            return roleSet.ToList();
         }
 
         /// <summary>

@@ -31,12 +31,10 @@ namespace NetCasbin
 
         protected IAdapter adapter;
         protected IWatcher watcher;
-        protected IRoleManager roleManager;
         protected bool autoSave;
         protected bool autoBuildRoleLinks;
         protected bool autoNotifyWatcher;
         protected bool autoCleanEnforceCache = true;
-
         internal IExpressionHandler ExpressionHandler { get; private set; }
 
         private bool _enableCache;
@@ -47,7 +45,6 @@ namespace NetCasbin
 
         protected void Initialize()
         {
-            roleManager = new DefaultRoleManager(10);
             _effector = new DefaultEffector();
             watcher = null;
 
@@ -169,7 +166,22 @@ namespace NetCasbin
         /// <param name="roleManager"></param>
         public void SetRoleManager(IRoleManager roleManager)
         {
-            this.roleManager = roleManager;
+            SetRoleManager(PermConstants.DefaultRoleType, roleManager);
+        }
+
+        /// <summary>
+        /// Sets the current role manager.
+        /// </summary>
+        /// <param name="roleType"></param>
+        /// <param name="roleManager"></param>
+        public void SetRoleManager(string roleType, IRoleManager roleManager)
+        {
+            Assertion assertion = model.GetExistAssertion(PermConstants.Section.RoleSection, roleType);
+            assertion.RoleManager = roleManager;
+            if (autoBuildRoleLinks)
+            {
+                assertion.BuildRoleLinks();
+            }
         }
 
         /// <summary>
@@ -393,8 +405,7 @@ namespace NetCasbin
         /// </summary>
         public void BuildRoleLinks()
         {
-            roleManager.Clear();
-            model.BuildRoleLinks(roleManager);
+            model.BuildRoleLinks();
         }
 
         /// <summary>

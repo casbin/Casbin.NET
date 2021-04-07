@@ -49,7 +49,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                model.BuildIncrementalRoleLink(PolicyOperation.PolicyAdd,
                     sec, ptype, rule);
                 ExpressionHandler.SetGFunctions();
             }
@@ -93,7 +93,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyAdd,
+                model.BuildIncrementalRoleLink(PolicyOperation.PolicyAdd,
                     sec, ptype, rule);
                 ExpressionHandler.SetGFunctions();
             }
@@ -139,7 +139,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                model.BuildIncrementalRoleLinks(PolicyOperation.PolicyAdd,
                     sec, ptype, ruleArray);
                 ExpressionHandler.SetGFunctions();
             }
@@ -186,7 +186,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyAdd,
+                model.BuildIncrementalRoleLinks(PolicyOperation.PolicyAdd,
                     sec, ptype, ruleArray);
                 ExpressionHandler.SetGFunctions();
             }
@@ -230,7 +230,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                model.BuildIncrementalRoleLink(PolicyOperation.PolicyRemove,
                     sec, ptype, rule);
                 ExpressionHandler.SetGFunctions();
             }
@@ -274,7 +274,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLink(roleManager, PolicyOperation.PolicyRemove,
+                model.BuildIncrementalRoleLink(PolicyOperation.PolicyRemove,
                     sec, ptype, rule);
                 ExpressionHandler.SetGFunctions();
             }
@@ -320,7 +320,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                model.BuildIncrementalRoleLinks(PolicyOperation.PolicyRemove,
                     sec, ptype, ruleArray);
                 ExpressionHandler.SetGFunctions();
             }
@@ -366,7 +366,7 @@ namespace NetCasbin
 
             if (sec.Equals(PermConstants.Section.RoleSection))
             {
-                model.BuildIncrementalRoleLinks(roleManager, PolicyOperation.PolicyRemove,
+                model.BuildIncrementalRoleLinks(PolicyOperation.PolicyRemove,
                     sec, ptype, ruleArray);
                 ExpressionHandler.SetGFunctions();
             }

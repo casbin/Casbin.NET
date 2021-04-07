@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
 
@@ -18,7 +19,7 @@ namespace NetCasbin.Model
 
         public IDictionary<string, int> Tokens { set; get; }
 
-        public IRoleManager RoleManager { get; private set; }
+        public IRoleManager RoleManager { get; internal set; }
 
         public List<List<string>> Policy { set; get; }
 
@@ -28,7 +29,7 @@ namespace NetCasbin.Model
         {
             Policy = new List<List<string>>();
             PolicyStringSet = new HashSet<string>();
-            RoleManager = new DefaultRoleManager(0);
+            RoleManager = new DefaultRoleManager(10);
         }
 
         public void RefreshPolicyStringSet()
@@ -40,23 +41,19 @@ namespace NetCasbin.Model
             }
         }
 
-        internal void BuildIncrementalRoleLink(IRoleManager roleManager,
-            PolicyOperation policyOperation, IEnumerable<string> rule)
+        internal void BuildIncrementalRoleLink(PolicyOperation policyOperation, IEnumerable<string> rule)
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            BuildRoleLink(roleManager, count, policyOperation, rule);
+            BuildRoleLink(count, policyOperation, rule);
         }
 
-        internal void BuildIncrementalRoleLinks(IRoleManager roleManager,
-            PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
+        internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
@@ -65,13 +62,12 @@ namespace NetCasbin.Model
 
             foreach (var rule in rules)
             {
-                BuildRoleLink(roleManager, count, policyOperation, rule);
+                BuildRoleLink(count, policyOperation, rule);
             }
         }
 
-        public void BuildRoleLinks(IRoleManager roleManager)
+        public void BuildRoleLinks()
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
@@ -80,13 +76,14 @@ namespace NetCasbin.Model
 
             foreach (var rule in Policy)
             {
-                BuildRoleLink(roleManager, count, PolicyOperation.PolicyAdd, rule);
+                BuildRoleLink(count, PolicyOperation.PolicyAdd, rule);
             }
         }
 
-        private static void BuildRoleLink(IRoleManager roleManager, int groupPolicyCount,
+        private void BuildRoleLink(int groupPolicyCount,
             PolicyOperation policyOperation, IEnumerable<string> rule)
         {
+            var roleManager = RoleManager;
             List<string> ruleEnum = rule as List<string> ?? rule.ToList();
             int ruleCount = ruleEnum.Count;
 

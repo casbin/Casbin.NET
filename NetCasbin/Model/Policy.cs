@@ -22,7 +22,64 @@ namespace NetCasbin.Model
             Model = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
+        /// <summary>
+        /// Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="policyType"></param>
+        /// <param name="rule"></param>
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
+            string section, string policyType, IEnumerable<string> rule)
+        {
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
 
+            Assertion assertion = GetExistAssertion(section, policyType);
+            assertion.BuildIncrementalRoleLink(policyOperation, rule);
+        }
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="policyType"></param>
+        /// <param name="rules"></param>
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
+            string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        {
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetExistAssertion(section, policyType);
+            assertion.BuildIncrementalRoleLinks(policyOperation, rules);
+        }
+
+        /// <summary>
+        /// Initializes the roles in RBAC.
+        /// </summary>
+        public void BuildRoleLinks()
+        {
+            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
+            {
+                assertion.RoleManager.Clear();
+            }
+
+            foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
+            {
+                assertion.BuildRoleLinks();
+            }
+        }
 
         /// <summary>
         /// Provides incremental build the role inheritance relation.
@@ -32,16 +89,11 @@ namespace NetCasbin.Model
         /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
+        [Obsolete("Use overload instead.")]
         public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<string> rule)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            Assertion assertion = GetExistAssertion(section, policyType);
-            assertion.BuildIncrementalRoleLink(roleManager, policyOperation, rule);
+            BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
         }
 
         /// <summary>
@@ -52,16 +104,11 @@ namespace NetCasbin.Model
         /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
+        [Obsolete("Use overload instead.")]
         public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            Assertion assertion = GetExistAssertion(section, policyType);
-            assertion.BuildIncrementalRoleLinks(roleManager, policyOperation, rules);
+            BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
         }
 
 
@@ -69,17 +116,10 @@ namespace NetCasbin.Model
         /// Initializes the roles in RBAC.
         /// </summary>
         /// <param name="roleManager"></param>
+        [Obsolete("Use overload instead.")]
         public void BuildRoleLinks(IRoleManager roleManager)
         {
-            if (Model.ContainsKey(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            foreach (Assertion assertion in Model[PermConstants.Section.RoleSection].Values)
-            {
-                assertion.BuildRoleLinks(roleManager);
-            }
+            BuildRoleLinks();
         }
 
         public void RefreshPolicyStringSet()
@@ -285,7 +325,7 @@ namespace NetCasbin.Model
             return values;
         }
 
-        private Assertion GetExistAssertion(string section, string policyType)
+        internal Assertion GetExistAssertion(string section, string policyType)
         {
             bool exist = TryGetExistAssertion(section, policyType, out var assertion);
             if (!exist)
