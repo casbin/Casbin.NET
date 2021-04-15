@@ -157,7 +157,7 @@ namespace NetCasbin.Rbac
 
             Func<string, string, bool> matchingFunc = MatchingFunc;
             if (HasRole(roles, name1, matchingFunc) is false
-                || HasRole(roles, name1, matchingFunc) is false)
+                || HasRole(roles, name2, matchingFunc) is false)
             {
                 return false;
             }
