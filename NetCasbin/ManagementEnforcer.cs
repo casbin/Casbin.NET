@@ -741,6 +741,19 @@ namespace NetCasbin
         }
 
         /// <summary>
+        /// Adds a named role inheritance rule to the current 
+        /// policy. If the rule already exists, the function returns false and the rule
+        /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parameters">The "g" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public Task<bool> AddNamedGroupingPolicyAsync(string ptype, params string[] parameters)
+        {
+            return AddNamedGroupingPolicyAsync(ptype, parameters.ToList());
+        }
+
+        /// <summary>
         /// Adds roles inheritance rule to the current policy. If the
         /// rule already exists, the function returns false and the rule will not be
         /// Added.Otherwise the function returns true by adding the new rule.
