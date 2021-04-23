@@ -74,6 +74,13 @@ namespace NetCasbin.Model
             LoadModel(Config.Config.NewConfigFromText(text));
         }
 
+        /// <summary>
+        /// Adds an assertion to the model.
+        /// </summary>
+        /// <param name="section"></param>
+        /// <param name="key">Key of the assertion, it is same to "policyType" when section is "p" or "g".</param>
+        /// <param name="value">Value of the assertion.</param>
+        /// <returns></returns>
         public bool AddDef(string section, string key, string value)
         {
             if (string.IsNullOrWhiteSpace(value))
@@ -90,7 +97,7 @@ namespace NetCasbin.Model
             if (section.Equals(PermConstants.Section.RequestSection) ||
                 section.Equals(PermConstants.Section.PolicySection))
             {
-                var tokens = assertion.Value
+                string[] tokens = assertion.Value
                     .Split(PermConstants.PolicySeparatorChar)
                     .Select(t => t.Trim()).ToArray();
 
@@ -108,7 +115,7 @@ namespace NetCasbin.Model
                 assertion.Value = Utility.RemoveComments(Utility.EscapeAssertion(assertion.Value));
             }
 
-            if (!Model.ContainsKey(section))
+            if (Model.ContainsKey(section) is false)
             {
                 var assertionMap = new Dictionary<string, Assertion>
                 {
