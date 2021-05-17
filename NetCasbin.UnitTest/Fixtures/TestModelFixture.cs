@@ -40,6 +40,10 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _rbacWithHierarchyWithDomainsPolicyText = ReadTestFile("rbac_with_hierarchy_with_domains_policy.csv");
         internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_policy.csv");
 
+        // https://github.com/casbin/Casbin.NET/issues/154
+        internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
+        internal readonly string _rbacMultiplePolicyText = ReadTestFile("rbac_multiple_rolemanager_policy.csv");
+
         public Model.Model GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
