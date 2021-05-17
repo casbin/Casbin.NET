@@ -167,6 +167,7 @@ namespace NetCasbin
         public void SetRoleManager(IRoleManager roleManager)
         {
             SetRoleManager(PermConstants.DefaultRoleType, roleManager);
+            ExpressionHandler.SetGFunctions();
         }
 
         /// <summary>

@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using NetCasbin.Extensions;
 using NetCasbin.Persist;
 using NetCasbin.Persist.FileAdapter;
+using NetCasbin.Rbac;
 using NetCasbin.UnitTest.Fixtures;
 using NetCasbin.UnitTest.Mock;
 using Xunit;
@@ -915,5 +917,24 @@ namespace NetCasbin.UnitTest
         }
 #endif
         #endregion
+
+        [Fact]
+        public void TestEnforceWithMultipleRoleManager()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleModelText,
+                _testModelFixture._rbacMultiplePolicyText));
+
+            var roleManager = new DefaultRoleManager(5);
+            roleManager.AddMatchingFunc((arg1, arg2) => arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            bool result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.True(result);
+
+            roleManager.AddMatchingFunc((arg1, arg2) => !arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.False(result);
+        }
     }
 }
