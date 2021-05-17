@@ -16,7 +16,7 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("EnforcerWithCache")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp50)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net50)]
     public class EnforcerWithCacheBenchmark
     {
         private Enforcer NowEnforcer { get; set; }

@@ -19,13 +19,13 @@ namespace NetCasbin.Extensions
 
         public static Enforcer AddNamedMatchingFunc(this Enforcer enforcer, string roleType, Func<string, string, bool> func)
         {
-            enforcer.GetModel().GetNamedRoleManger(roleType).AddMatchingFunc(func);
+            enforcer.GetModel().GetRoleManger(roleType).AddMatchingFunc(func);
             return enforcer;
         }
 
         public static Enforcer AddNamedDomainMatchingFunc(this Enforcer enforcer, string roleType,  Func<string, string, bool> func)
         {
-            enforcer.GetModel().GetNamedRoleManger(roleType).AddMatchingFunc(func);
+            enforcer.GetModel().GetRoleManger(roleType).AddMatchingFunc(func);
             return enforcer;
         }
     }

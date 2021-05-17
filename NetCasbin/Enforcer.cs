@@ -592,6 +592,12 @@ namespace NetCasbin
 
         #region RBAC APIs with domains
 
+        public IEnumerable<string> GetDomainsForUser(string name, string roleType = null)
+        {
+            roleType ??= PermConstants.DefaultRoleType;
+            return model.Model[PermConstants.Section.RoleSection][roleType].RoleManager.GetDomains(name);
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using NetCasbin.Rbac;
 
 namespace NetCasbin.UnitTest.Mock
@@ -8,11 +9,15 @@ namespace NetCasbin.UnitTest.Mock
     {
         public Func<string, string, bool> MatchingFunc { get; set; }
         public Func<string, string, bool> DomainMatchingFunc { get; set; }
-        public bool HasPattern { get; } = false;
-        public bool HasDomainPattern { get; } = false;
+        public bool HasPattern => false;
+        public bool HasDomainPattern => false;
 
         public List<string> GetRoles(string name, params string[] domain) => null;
         public List<string> GetUsers(string name, params string[] domain) => null;
+        public IEnumerable<string> GetDomains(string name)
+        {
+            return Enumerable.Empty<string>();
+        }
 
         public bool HasLink(string name1, string name2, params string[] domain)
         {
