@@ -89,6 +89,20 @@ namespace NetCasbin.Rbac
         }
         #endregion
 
+        public IEnumerable<string> GetDomains(string name)
+        {
+            _cachedAllDomains ??= _allDomains.Keys;
+            var domains = new HashSet<string>();
+            foreach (string domain in _cachedAllDomains)
+            {
+                if (AnyRolesInDomain(name, domain))
+                {
+                    domains.Add(domain);
+                }
+            }
+            return domains;
+        }
+
         private IEnumerable<string> GetRoles(string name, string domain = null)
         {
             domain ??= _defaultDomain;
@@ -106,7 +120,38 @@ namespace NetCasbin.Rbac
             return roleNames.Distinct();
         }
 
-        private IEnumerable<string> GetRolesInDomain(string name1, string domain)
+        private bool AnyRolesInDomain(string name, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles;
+
+            if (domain == _defaultDomain)
+            {
+                roles = _defaultRoles;
+            }
+            else
+            {
+                if (_allDomains.TryGetValue(domain, out roles) is false)
+                {
+                    return false;
+                }
+            }
+
+            if (HasPattern is false)
+            {
+                return roles.ContainsKey(name);
+            }
+
+            foreach (var role in roles)
+            {
+                if (MatchingFunc(name, role.Key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private IEnumerable<string> GetRolesInDomain(string name, string domain)
         {
             ConcurrentDictionary<string, Role> roles;
 
@@ -124,14 +169,14 @@ namespace NetCasbin.Rbac
 
             if (HasPattern is false)
             {
-                return roles.TryGetValue(name1, out var role)
+                return roles.TryGetValue(name, out var role)
                     ? role.GetRoles() : Enumerable.Empty<string>();
             }
 
             var rolesNames = new List<string>();
             foreach (var role in roles)
             {
-                if (MatchingFunc(name1, role.Key))
+                if (MatchingFunc(name, role.Key))
                 {
                     rolesNames.AddRange(role.Value.GetRoles());
                 }
@@ -142,7 +187,6 @@ namespace NetCasbin.Rbac
         private IEnumerable<string> GetUsers(string name, string domain = null)
         {
             domain ??= _defaultDomain;
-            ConcurrentDictionary<string, Role> roles;
 
             if (HasDomainPattern is false)
             {
