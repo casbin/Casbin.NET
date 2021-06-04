@@ -84,7 +84,7 @@ jobs:
       - name: Run semantic-release
         run: |
           export PATH=$PATH:$(yarn global bin)
-          yarn global add semantic-release@17.2.4
+          yarn global add semantic-release@17.4.3
           semantic-release
 
   release:
