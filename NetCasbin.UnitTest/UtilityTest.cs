@@ -8,22 +8,30 @@ namespace NetCasbin.UnitTest
 {
     public class UtilityTest
     {
-        private delegate bool GFunction(string arg = null);
+        private delegate bool GFunction(string a, string b, string arg = null);
 
         [Fact]
         public void TestParseGFunction()
         {
-            static bool GetGFunction(string arg = null)
+            const string name = "a";
+            bool GetGFunction(string a, string b, string arg = null)
             {
-                return arg is not null;
-            };
+                if (arg is not null)
+                {
+                    return a == name;
+                }
+                return b == name;
+            }
 
             var interpreter = new Interpreter();
             interpreter.SetFunction("GFunction", (GFunction) GetGFunction);
-            interpreter.SetVariable("arg", "arg");
 
-            Assert.True((bool) interpreter.Eval("GFunction(arg)"));
-            Assert.False((bool) interpreter.Eval("GFunction()"));
+            interpreter.SetVariable("arg", "arg");
+            interpreter.SetVariable("a", "a");
+            interpreter.SetVariable("b", "b");
+
+            Assert.True((bool) interpreter.Eval("GFunction(a, b, arg)"));
+            Assert.False((bool) interpreter.Eval("GFunction(a, b)"));
         }
 
         [Fact]
