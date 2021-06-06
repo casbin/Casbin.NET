@@ -936,5 +936,21 @@ namespace NetCasbin.UnitTest
             result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
             Assert.False(result);
         }
+
+        [Fact]
+        public void TestEnforceWithMultipleEval()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleEvalModelText,
+                _testModelFixture._rbacMultipleEvalPolicyText));
+
+            bool result = e.Enforce(
+                "domain1",
+                new { Role = "admin" },
+                new { Name = "admin_panel" },
+                "view");
+
+            Assert.True(result);
+        }
     }
 }
