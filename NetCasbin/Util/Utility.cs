@@ -163,7 +163,6 @@ namespace NetCasbin.Util
 
         private static readonly Regex s_evalRegex = new Regex(@"\beval\((?<rule>[^)]*)\)");
 
-
         /// <summary>
         /// Determines whether matcher contains eval function
         /// </summary>
@@ -182,21 +181,26 @@ namespace NetCasbin.Util
         /// <returns></returns>
         internal static bool TryGetEvalRuleNames(string expressString, out IEnumerable<string> evalRuleNames)
         {
-            var match = s_evalRegex.Match(expressString);
-            var group = match.Groups;
-            int subMatchCount = group.Count - 1;
-            if (subMatchCount > 0)
+            MatchCollection matches = s_evalRegex.Matches(expressString);
+            int matchCount = matches.Count;
+            if (matchCount is 0)
             {
-                var rules = new string[subMatchCount];
-                for (int i = 0; i < subMatchCount; i++)
-                {
-                    rules[i] = group[i + 1].Value;
-                }
-                evalRuleNames = rules;
-                return true;
+                evalRuleNames = null;
+                return false;
             }
-            evalRuleNames = null;
-            return false;
+            string[] rules = new string[matchCount];
+            for (int i = 0; i < matchCount; i++)
+            {
+                GroupCollection group = matches[i].Groups;
+                if (group.Count < 2)
+                {
+                    evalRuleNames = null;
+                    return false;
+                }
+                rules[i] = group[1].Value;
+            }
+            evalRuleNames = rules;
+            return true;
         }
 
         /// <summary>
