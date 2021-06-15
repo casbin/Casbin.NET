@@ -7,10 +7,13 @@ namespace Casbin.Rbac
 {
     public class DefaultRoleManager : IRoleManager
     {
-        private readonly string _defaultDomain = "casbin::default";
+        private readonly string _defaultDomain = string.Empty;
 
         private readonly ConcurrentDictionary<string, ConcurrentDictionary<string, Role>> _allDomains = new();
         private readonly int _maxHierarchyLevel;
+
+        private IEnumerable<string> _cachedAllDomains;
+        private readonly ConcurrentDictionary<string, Role> _defaultRoles = new();
 
         public Func<string, string, bool> MatchingFunc { get; set; }
         public Func<string, string, bool> DomainMatchingFunc { get; set; }
@@ -20,7 +23,7 @@ namespace Casbin.Rbac
 
         public DefaultRoleManager(int maxHierarchyLevel)
         {
-            _allDomains.TryAdd(_defaultDomain, new ConcurrentDictionary<string, Role>());
+            _allDomains[_defaultDomain] = _defaultRoles;
             _maxHierarchyLevel = maxHierarchyLevel;
         }
 
@@ -81,18 +84,80 @@ namespace Casbin.Rbac
         {
             if (domain.Length > 1)
             {
-                throw new ArgumentException(" Domain should be 1 parameter.");
+                throw new ArgumentException("Domain should be 1 parameter.");
             }
         }
         #endregion
 
+        public IEnumerable<string> GetDomains(string name)
+        {
+            _cachedAllDomains ??= _allDomains.Keys;
+            var domains = new HashSet<string>();
+            foreach (string domain in _cachedAllDomains)
+            {
+                if (AnyRolesInDomain(name, domain))
+                {
+                    domains.Add(domain);
+                }
+            }
+            return domains;
+        }
+
         private IEnumerable<string> GetRoles(string name, string domain = null)
         {
             domain ??= _defaultDomain;
-            ConcurrentDictionary<string, Role> roles;
-            if (HasPattern || HasDomainPattern)
+            if (HasDomainPattern is false)
             {
-                roles = GenerateTempRoles(domain);
+                return GetRolesInDomain(name, domain);
+            }
+
+            var roleNames = new List<string>();
+            foreach (string matchDomain in GetPatternDomains(domain))
+            {
+                roleNames.AddRange(GetRolesInDomain(name, matchDomain));
+            }
+
+            return roleNames.Distinct();
+        }
+
+        private bool AnyRolesInDomain(string name, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles;
+
+            if (domain == _defaultDomain)
+            {
+                roles = _defaultRoles;
+            }
+            else
+            {
+                if (_allDomains.TryGetValue(domain, out roles) is false)
+                {
+                    return false;
+                }
+            }
+
+            if (HasPattern is false)
+            {
+                return roles.ContainsKey(name);
+            }
+
+            foreach (var role in roles)
+            {
+                if (MatchingFunc(name, role.Key))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private IEnumerable<string> GetRolesInDomain(string name, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles;
+
+            if (domain == _defaultDomain)
+            {
+                roles = _defaultRoles;
             }
             else
             {
@@ -102,171 +167,221 @@ namespace Casbin.Rbac
                 }
             }
 
-            Func<string, string, bool> matchingFunc = MatchingFunc;
-            return HasRole(roles, name, matchingFunc)
-                ? CreateRole(roles, name, matchingFunc).GetRoles()
-                : Enumerable.Empty<string>();
+            if (HasPattern is false)
+            {
+                return roles.TryGetValue(name, out var role)
+                    ? role.GetRoles() : Enumerable.Empty<string>();
+            }
+
+            var rolesNames = new List<string>();
+            foreach (var role in roles)
+            {
+                if (MatchingFunc(name, role.Key))
+                {
+                    rolesNames.AddRange(role.Value.GetRoles());
+                }
+            }
+            return rolesNames;
         }
 
         private IEnumerable<string> GetUsers(string name, string domain = null)
         {
             domain ??= _defaultDomain;
-            ConcurrentDictionary<string, Role> roles;
-            if (HasPattern || HasDomainPattern)
+
+            if (HasDomainPattern is false)
             {
-                roles = GenerateTempRoles(domain);
+                return GetUsersInDomain(name, domain);
+            }
+
+            var userNames = new List<string>();
+            foreach (string matchDomain in GetPatternDomains(domain))
+            {
+                userNames.AddRange(GetUsersInDomain(name, matchDomain));
+            }
+
+            return userNames.Distinct();
+        }
+
+        private IEnumerable<string> GetUsersInDomain(string name, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles;
+
+            if (domain == _defaultDomain)
+            {
+                roles = _defaultRoles;
             }
             else
             {
                 if (_allDomains.TryGetValue(domain, out roles) is false)
                 {
-                    // ThrowHelper.ThrowNameNotFoundException();
-                    // return null;
-                    return Enumerable.Empty<string>(); // Avoid breaking change
+                    return Enumerable.Empty<string>();
                 }
             }
 
-            if (HasRole(roles, name, MatchingFunc) is false)
+            var userNames = new List<string>();
+            foreach (var role in roles)
             {
-                // ThrowHelper.ThrowNameNotFoundException();
-                return Enumerable.Empty<string>(); // Avoid breaking change
+                if (role.Value.HasDirectRole(name))
+                {
+                    userNames.Add(role.Key);
+                }
             }
-
-            return roles.Values
-                .Where(role => role.HasDirectRole(name))
-                .Select(role => role.Name);
+            return userNames;
         }
 
         private bool HasLink(string name1, string name2, string domain = null)
         {
-            domain ??= _defaultDomain;
             if (string.Equals(name1, name2))
             {
                 return true;
             }
 
-            ConcurrentDictionary<string, Role> roles;
-            if (HasPattern || HasDomainPattern)
+            domain ??= _defaultDomain;
+            if (HasDomainPattern is false)
             {
-                roles = GenerateTempRoles(domain);
+                return HasLinkInDomain(name1, name2, domain);
+            }
+
+            foreach (string matchDomain in GetPatternDomains(domain))
+            {
+                if (HasLinkInDomain(name1, name2, matchDomain))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private bool HasLinkInDomain(string name1, string name2, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles;
+
+            if (domain == _defaultDomain)
+            {
+                roles = _defaultRoles;
             }
             else
             {
-                roles = _allDomains.GetOrAdd(domain, new ConcurrentDictionary<string, Role>());
+                if (_allDomains.TryGetValue(domain, out roles) is false)
+                {
+                    return false;
+                }
             }
 
-            Func<string, string, bool> matchingFunc = MatchingFunc;
-            if (HasRole(roles, name1, matchingFunc) is false
-                || HasRole(roles, name1, matchingFunc) is false)
+            if (HasPattern is false)
             {
-                return false;
+                return roles.TryGetValue(name1, out var role1) is not false
+                       && role1.HasRole(name2, _maxHierarchyLevel);
             }
 
-            Role role = CreateRole(roles, name1, matchingFunc);
-            return role.HasRole(name2, _maxHierarchyLevel);
+            foreach (var role in roles)
+            {
+                if (MatchingFunc(name1, role.Key) is false)
+                {
+                    continue;
+                }
+
+                if (role.Value.HasRole(name2, _maxHierarchyLevel, MatchingFunc))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void AddLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
-            var roles = _allDomains.GetOrAdd(domain,
-                new ConcurrentDictionary<string, Role>());
+            if (HasDomainPattern)
+            {
+                foreach (string matchDomain in GetPatternDomains(domain))
+                {
+                    AddLinkInDomain(name1, name2, matchDomain);
+                }
+                _cachedAllDomains = null;
+                return;
+            }
+            _cachedAllDomains = null;
+            AddLinkInDomain(name1, name2, domain);
+        }
 
-            Role role1 = roles.GetOrAdd(name1, new Role(name1));
-            Role role2 = roles.GetOrAdd(name2, new Role(name2));
+        private void AddLinkInDomain(string name1, string name2, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles = domain == _defaultDomain
+                ? _defaultRoles
+                : _allDomains.GetOrAdd(domain, new ConcurrentDictionary<string, Role>());
+
+            Role role1 = roles.GetOrAdd(name1, new Role(name1, domain));
+            Role role2 = roles.GetOrAdd(name2, new Role(name2, domain));
             role1.AddRole(role2);
+
+            if (HasPattern is false)
+            {
+                return;
+            }
+
+            foreach (var role in roles)
+            {
+                string name = role.Key;
+                if (name == name1 || name == name2)
+                {
+                    return;
+                }
+                if (MatchingFunc(name, name1) || MatchingFunc(name1, name))
+                {
+                    role.Value.AddRole(role1);
+                }
+                if (MatchingFunc(name, name2) || MatchingFunc(name2, name))
+                {
+                    role2.AddRole(role.Value);
+                }
+            }
         }
 
         private void DeleteLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
-            var roles = _allDomains.GetOrAdd(domain,
-                new ConcurrentDictionary<string, Role>());
-
-            if (roles.ContainsKey(name1) is false
-                || roles.ContainsKey(name2) is false)
+            ConcurrentDictionary<string, Role> roles;
+            if (domain == _defaultDomain)
             {
-                ThrowHelper.ThrowOneOfNamesNotFoundException();
+                roles = _defaultRoles;
+            }
+            else
+            {
+                if (_allDomains.TryGetValue(domain, out roles) is false)
+                {
+                    ThrowHelper.ThrowOneOfNamesNotFoundException();
+                    return;
+                }
             }
 
-            Role role1 = roles.GetOrAdd(name1, new Role(name1));
-            Role role2 = roles.GetOrAdd(name2, new Role(name2));
+            if (roles.TryGetValue(name1, out var role1) is false
+                || roles.TryGetValue(name2, out var role2) is false)
+            {
+                ThrowHelper.ThrowOneOfNamesNotFoundException();
+                return;
+            }
             role1.DeleteRole(role2);
         }
 
         public virtual void Clear()
         {
             _allDomains.Clear();
+            _defaultRoles.Clear();
+            _allDomains[_defaultDomain] = _defaultRoles;
+            _cachedAllDomains = null;
         }
 
-        private static bool HasRole(ConcurrentDictionary<string, Role> roles, string name,
-            Func<string, string, bool> matchingFunc = null)
+        private IEnumerable<string> GetPatternDomains(string domain)
         {
-            if (matchingFunc is null)
-            {
-                return roles.ContainsKey(name);
-            }
-
-            ICollection<string> keys = roles.Keys;
-            return keys.Any(key => matchingFunc(name, key));
-        }
-
-        private static Role CreateRole(ConcurrentDictionary<string, Role> roles, string name,
-            Func<string, string, bool> matchingFunc = null)
-        {
-            Role role = roles.GetOrAdd(name, new Role(name));
-
-            if (matchingFunc is null)
-            {
-                return role;
-            }
-
-            ICollection<string> keys = roles.Keys;
-            foreach (string key in keys)
-            {
-                if (name == key || matchingFunc(name, key) is false)
-                {
-                    continue;
-                }
-
-                Role matchingRole = roles.GetOrAdd(key, new Role(key));
-                role.AddRole(matchingRole);
-            }
-            return role;
-        }
-
-        private ConcurrentDictionary<string, Role> GenerateTempRoles(string domain)
-        {
-            _allDomains.TryAdd(domain, new ConcurrentDictionary<string, Role>());
-
-            List<string> patternDomains = new() { domain };
+            List<string> matchDomains = new() { domain };
+            _cachedAllDomains ??= _allDomains.Keys;
             if (HasDomainPattern)
             {
-                Func<string, string, bool> domainMatchingFunc = DomainMatchingFunc;
-                ICollection<string> keys = _allDomains.Keys;
-                patternDomains.AddRange(keys.Where(key =>
-                    domainMatchingFunc(domain, key)));
+                matchDomains.AddRange(_cachedAllDomains.Where(key =>
+                    DomainMatchingFunc(domain, key) && key != domain));
             }
-
-            Func<string, string, bool> matchingFunc = MatchingFunc;
-            ConcurrentDictionary<string, Role> roles = new();
-            foreach (string patternDomain in patternDomains)
-            {
-                var rolesInDomain = _allDomains.GetOrAdd(
-                    patternDomain, new ConcurrentDictionary<string, Role>());
-                foreach (KeyValuePair<string, Role> keyValue in rolesInDomain)
-                {
-                    Role role2 = keyValue.Value;
-                    Role role1 = CreateRole(roles, role2.Name, matchingFunc);
-                    foreach (string roleName in role2.GetRoles())
-                    {
-                        role1.AddRole(CreateRole(roles, roleName, matchingFunc));
-                    }
-                }
-            }
-
-            return roles;
+            return matchDomains;
         }
-
     }
 }

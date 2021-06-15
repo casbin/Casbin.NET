@@ -16,7 +16,15 @@ namespace Casbin.Rbac
             Name = name;
         }
 
+        public Role(string name, string domain)
+        {
+            Name = name;
+            Domain = domain;
+        }
+
         public string Name { get; }
+
+        public string Domain { get; } = string.Empty;
 
         public void AddRole(Role role)
         {
@@ -46,9 +54,9 @@ namespace Casbin.Rbac
             }
         }
 
-        public bool HasRole(string roleName, int hierarchyLevel)
+        public bool HasRole(string name, int hierarchyLevel, Func<string, string, bool> matchingFunc = null)
         {
-            if (Name == roleName)
+            if (HasDirectRole(name, matchingFunc))
             {
                 return true;
             }
@@ -63,17 +71,35 @@ namespace Casbin.Rbac
                 return false;
             }
 
-            return _roles.Value.Values.Any(role => role.HasRole(roleName, hierarchyLevel - 1));
+            return _roles.Value.Values.Any(role => role.HasRole(name, hierarchyLevel - 1));
         }
 
-        public bool HasDirectRole(string roleName)
+        public bool HasDirectRole(string name, Func<string, string, bool> matchingFunc = null)
         {
-            return _roles.IsValueCreated is not false && _roles.Value.ContainsKey(roleName);
+            if (_roles.IsValueCreated is false)
+            {
+                return false;
+            }
+
+            if (matchingFunc is null)
+            {
+                return _roles.Value.ContainsKey(name);
+            }
+
+            
+            foreach (var role in _roles.Value.Values)
+            {
+                if (name == role.Name || matchingFunc(role.Name, name) && role.Name != name)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public IEnumerable<string> GetRoles()
         {
-            return _roles.Value.Keys;
+            return _roles.IsValueCreated ? _roles.Value.Keys : Enumerable.Empty<string>();
         }
 
         public override string ToString()

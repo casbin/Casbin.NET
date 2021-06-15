@@ -19,7 +19,7 @@ namespace Casbin.Model
 
         public IDictionary<string, int> Tokens { get; internal set;  }
 
-        public IRoleManager RoleManager { get; private set; }
+        public IRoleManager RoleManager { get; internal set; }
 
         public List<IReadOnlyList<string>> Policy { get; internal set; }
 
@@ -29,7 +29,7 @@ namespace Casbin.Model
         {
             Policy = new List<IReadOnlyList<string>>();
             PolicyStringSet = new HashSet<string>();
-            RoleManager = new DefaultRoleManager(0);
+            RoleManager = new DefaultRoleManager(10);
         }
 
         public void RefreshPolicyStringSet()
@@ -41,23 +41,19 @@ namespace Casbin.Model
             }
         }
 
-        internal void BuildIncrementalRoleLink(IRoleManager roleManager,
-            PolicyOperation policyOperation, IEnumerable<string> rule)
+        internal void BuildIncrementalRoleLink(PolicyOperation policyOperation, IEnumerable<string> rule)
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            BuildRoleLink(roleManager, count, policyOperation, rule);
+            BuildRoleLink(count, policyOperation, rule);
         }
 
-        internal void BuildIncrementalRoleLinks(IRoleManager roleManager,
-            PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
+        internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
@@ -66,13 +62,12 @@ namespace Casbin.Model
 
             foreach (var rule in rules)
             {
-                BuildRoleLink(roleManager, count, policyOperation, rule);
+                BuildRoleLink(count, policyOperation, rule);
             }
         }
 
-        public void BuildRoleLinks(IRoleManager roleManager)
+        public void BuildRoleLinks()
         {
-            RoleManager = roleManager;
             int count = Value.Count(c => c is '_');
             if (count < 2)
             {
@@ -81,13 +76,14 @@ namespace Casbin.Model
 
             foreach (IEnumerable<string> rule in Policy)
             {
-                BuildRoleLink(roleManager, count, PolicyOperation.PolicyAdd, rule);
+                BuildRoleLink(count, PolicyOperation.PolicyAdd, rule);
             }
         }
 
-        private static void BuildRoleLink(IRoleManager roleManager, int groupPolicyCount,
+        private void BuildRoleLink(int groupPolicyCount,
             PolicyOperation policyOperation, IEnumerable<string> rule)
         {
+            var roleManager = RoleManager;
             List<string> ruleEnum = rule as List<string> ?? rule.ToList();
             int ruleCount = ruleEnum.Count;
 

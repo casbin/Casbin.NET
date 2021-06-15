@@ -5,6 +5,7 @@ using Casbin.Adapter.File;
 using Casbin.Extensions;
 using Casbin.Model;
 using Casbin.Persist;
+using Casbin.Rbac;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
 using Xunit;
@@ -25,6 +26,7 @@ namespace Casbin.UnitTests.ModelTests
             _testModelFixture = testModelFixture;
         }
 
+        #region In memory model
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
@@ -382,6 +384,144 @@ namespace Casbin.UnitTests.ModelTests
         }
 
         [Fact]
+        public void TestMultipleGroupTypeModelInMemory()
+        {
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("g", "g", "_, _");
+            m.AddDef("g", "g2", "_, _");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "g(r.sub, p.sub) && g2(r.obj, p.obj) && r.act == p.act");
+
+            var e = new Enforcer(m);
+            e.AddPolicy("alice", "data1", "read");
+            e.AddPolicy("bob", "data2", "write");
+            e.AddPolicy("data_group_admin", "data_group", "write");
+            e.AddNamedGroupingPolicy("g", "alice", "data_group_admin");
+            e.AddNamedGroupingPolicy("g2", "data1", "data_group");
+            e.AddNamedGroupingPolicy("g2", "data2", "data_group");
+
+            Assert.True(e.Enforce("alice", "data1", "read"));
+            Assert.True(e.Enforce("alice", "data1", "write"));
+            Assert.False(e.Enforce("alice", "data2", "read"));
+            Assert.True(e.Enforce("alice", "data2", "write"));
+        }
+
+        [Fact]
+        public async Task TestMultipleGroupTypeModelInMemoryAsync()
+        {
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("g", "g", "_, _");
+            m.AddDef("g", "g2", "_, _");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "g(r.sub, p.sub) && g2(r.obj, p.obj) && r.act == p.act");
+
+            var e = new Enforcer(m);
+            await e.AddPolicyAsync("alice", "data1", "read");
+            await e.AddPolicyAsync("bob", "data2", "write");
+            await e.AddPolicyAsync("data_group_admin", "data_group", "write");
+            await e.AddNamedGroupingPolicyAsync("g", "alice", "data_group_admin");
+            await e.AddNamedGroupingPolicyAsync("g2", "data1", "data_group");
+            await e.AddNamedGroupingPolicyAsync("g2", "data2", "data_group");
+
+            Assert.True(await e.EnforceAsync("alice", "data1", "read"));
+            Assert.True(await e.EnforceAsync("alice", "data1", "write"));
+            Assert.False(await e.EnforceAsync("alice", "data2", "read"));
+            Assert.True(await e.EnforceAsync("alice", "data2", "write"));
+        }
+        #endregion
+
+        #region Init enmpty
+        [Fact]
+        public void TestInitEmpty()
+        {
+            var e = new Enforcer();
+
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+
+            e.SetModel(m);
+            e.SetAdapter(a);
+            e.LoadPolicy();
+
+            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+        }
+
+        [Fact]
+        public async Task TestInitEmptyAsync()
+        {
+            var e = new Enforcer();
+
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+
+            e.SetModel(m);
+            e.SetAdapter(a);
+            await e.LoadPolicyAsync();
+
+            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
+        }
+
+        [Fact]
+        public void TestInitEmptyByInputStream()
+        {
+            var e = new Enforcer();
+
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                IAdapter a = new FileAdapter(fs);
+                e.SetModel(m);
+                e.SetAdapter(a);
+                e.LoadPolicy();
+
+                TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+            }
+        }
+
+        [Fact]
+        public async Task TestInitEmptyByInputStreamAsync()
+        {
+            var e = new Enforcer();
+
+            var m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            {
+                IAdapter a = new FileAdapter(fs);
+                e.SetModel(m);
+                e.SetAdapter(a);
+                await e.LoadPolicyAsync();
+
+                await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
+            }
+        }
+        #endregion
+
+        #region Policy management
+        [Fact]
         public void TestReloadPolicy()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
@@ -438,7 +578,9 @@ namespace Casbin.UnitTests.ModelTests
 
             e.ClearPolicy();
         }
+        #endregion
 
+        #region Extension features
         [Fact]
         public void TestEnableEnforce()
         {
@@ -674,90 +816,6 @@ namespace Casbin.UnitTests.ModelTests
         }
 
         [Fact]
-        public void TestInitEmpty()
-        {
-            var e = new Enforcer();
-
-            var m = DefaultModel.Create();
-            m.AddDef("r", "r", "sub, obj, act");
-            m.AddDef("p", "p", "sub, obj, act");
-            m.AddDef("e", "e", "some(where (p.eft == allow))");
-            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
-
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
-
-            e.SetModel(m);
-            e.SetAdapter(a);
-            e.LoadPolicy();
-
-            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-        }
-
-        [Fact]
-        public async Task TestInitEmptyAsync()
-        {
-            var e = new Enforcer();
-
-            var m = DefaultModel.Create();
-            m.AddDef("r", "r", "sub, obj, act");
-            m.AddDef("p", "p", "sub, obj, act");
-            m.AddDef("e", "e", "some(where (p.eft == allow))");
-            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
-
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
-
-            e.SetModel(m);
-            e.SetAdapter(a);
-            await e.LoadPolicyAsync();
-
-            await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
-        }
-
-        [Fact]
-        public void TestInitEmptyByInputStream()
-        {
-            var e = new Enforcer();
-
-            var m = DefaultModel.Create();
-            m.AddDef("r", "r", "sub, obj, act");
-            m.AddDef("p", "p", "sub, obj, act");
-            m.AddDef("e", "e", "some(where (p.eft == allow))");
-            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
-
-            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                IAdapter a = new FileAdapter(fs);
-                e.SetModel(m);
-                e.SetAdapter(a);
-                e.LoadPolicy();
-
-                TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-            }
-        }
-
-        [Fact]
-        public async Task TestInitEmptyByInputStreamAsync()
-        {
-            var e = new Enforcer();
-
-            var m = DefaultModel.Create();
-            m.AddDef("r", "r", "sub, obj, act");
-            m.AddDef("p", "p", "sub, obj, act");
-            m.AddDef("e", "e", "some(where (p.eft == allow))");
-            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
-
-            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
-            {
-                IAdapter a = new FileAdapter(fs);
-                e.SetModel(m);
-                e.SetAdapter(a);
-                await e.LoadPolicyAsync();
-
-                await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
-            }
-        }
-
-        [Fact]
         public void TestEnforceExApi()
         {
             var e = new Enforcer(_testModelFixture.GetBasicTestModel());
@@ -856,5 +914,41 @@ namespace Casbin.UnitTests.ModelTests
             e.Logger = null;
         }
 #endif
+        #endregion
+
+        [Fact]
+        public void TestEnforceWithMultipleRoleManager()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleModelText,
+                _testModelFixture._rbacMultiplePolicyText));
+
+            var roleManager = new DefaultRoleManager(5);
+            roleManager.AddMatchingFunc((arg1, arg2) => arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            bool result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.True(result);
+
+            roleManager.AddMatchingFunc((arg1, arg2) => !arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void TestEnforceWithMultipleEval()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleEvalModelText,
+                _testModelFixture._rbacMultipleEvalPolicyText));
+
+            bool result = e.Enforce(
+                "domain1",
+                new { Role = "admin" },
+                new { Name = "admin_panel" },
+                "view");
+
+            Assert.True(result);
+        }
     }
 }

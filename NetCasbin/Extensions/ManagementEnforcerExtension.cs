@@ -169,7 +169,7 @@ namespace Casbin.Extensions
         /// <returns>Whether the rule exists.</returns>
         public static bool HasPolicy(this IEnforcer enforcer, params string[] parameters)
         {
-            return HasPolicy(enforcer, parameters.ToList());
+            return HasPolicy(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -193,7 +193,7 @@ namespace Casbin.Extensions
         /// <returns>Whether the rule exists.</returns>
         public static bool HasNamedPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return HasNamedPolicy(enforcer, ptype, parameters.ToList());
+            return HasNamedPolicy(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         #endregion
@@ -210,7 +210,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool AddPolicy(this IEnforcer enforcer, params string[] parameters)
         {
-            return AddPolicy(enforcer, parameters.ToList());
+            return AddPolicy(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -223,7 +223,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddPolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
-            return AddPolicyAsync(enforcer, parameters.ToList());
+            return AddPolicyAsync(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -263,7 +263,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool AddNamedPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return AddNamedPolicy(enforcer, ptype, parameters.ToList());
+            return AddNamedPolicy(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -277,7 +277,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return AddNamedPolicyAsync(enforcer, ptype, parameters.ToList());
+            return AddNamedPolicyAsync(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -396,7 +396,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemovePolicy(this IEnforcer enforcer, params string[] parameters)
         {
-            return RemovePolicy(enforcer, parameters.ToList());
+            return RemovePolicy(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -407,7 +407,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemovePolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
-            return RemovePolicyAsync(enforcer, parameters.ToList());
+            return RemovePolicyAsync(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -419,7 +419,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return RemoveNamedPolicy(enforcer, ptype, parameters.ToList());
+            return RemoveNamedPolicy(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -431,7 +431,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveNamedPolicyAsync(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return RemoveNamedPolicyAsync(enforcer, ptype, parameters.ToList());
+            return RemoveNamedPolicyAsync(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -615,7 +615,7 @@ namespace Casbin.Extensions
         /// <returns>Whether the rule exists.</returns>
         public static bool HasGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
         {
-            return HasGroupingPolicy(enforcer, parameters.ToList());
+            return HasGroupingPolicy(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -641,7 +641,7 @@ namespace Casbin.Extensions
         /// <returns>Whether the rule exists.</returns>
         public static bool HasNamedGroupingPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return HasNamedGroupingPolicy(enforcer, ptype, parameters.ToList());
+            return HasNamedGroupingPolicy(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         #endregion
@@ -696,33 +696,6 @@ namespace Casbin.Extensions
         #endregion
 
         #region Add Grouping/Role Policy
-
-        /// <summary>
-        /// Adds a role inheritance rule to the current policy. If the
-        /// rule already exists, the function returns false and the rule will not be
-        /// Added.Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static bool AddGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
-        {
-            return AddGroupingPolicy(enforcer, parameters.ToList());
-        }
-
-        /// <summary>
-        /// Adds a role inheritance rule to the current policy. If the
-        /// rule already exists, the function returns false and the rule will not be
-        /// Added.Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static Task<bool> AddGroupingPolicyAsync(this IEnforcer enforcer, params string[] parameters)
-        {
-            return AddGroupingPolicyAsync(enforcer, parameters.ToList());
-        }
-
         /// <summary>
         /// Adds a role inheritance rule to the current policy. If the
         /// rule already exists, the function returns false and the rule will not be
@@ -750,6 +723,32 @@ namespace Casbin.Extensions
         }
 
         /// <summary>
+        /// Adds a role inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// Added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static bool AddGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
+        {
+            return AddGroupingPolicy(enforcer, parameters as IEnumerable<string>);
+        }
+
+        /// <summary>
+        /// Adds a role inheritance rule to the current policy. If the
+        /// rule already exists, the function returns false and the rule will not be
+        /// Added.Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static Task<bool> AddGroupingPolicyAsync(this IEnforcer enforcer, params string[] parameters)
+        {
+            return AddGroupingPolicyAsync(enforcer, parameters as IEnumerable<string>);
+        }
+
+        /// <summary>
         /// Adds a named role inheritance rule to the current 
         /// policy. If the rule already exists, the function returns false and the rule
         /// will not be added. Otherwise the function returns true by adding the new rule.
@@ -760,7 +759,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
         {
-            return enforcer.InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters); ;
+            return enforcer.InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
         }
 
         /// <summary>
@@ -774,7 +773,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
         {
-            return await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);;
+            return await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
         }
 
         /// <summary>
@@ -788,7 +787,21 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return AddNamedGroupingPolicy(enforcer, ptype, parameters.ToList());
+            return enforcer.AddNamedGroupingPolicy(ptype, parameters as IEnumerable<string>);
+        }
+
+        /// <summary>
+        /// Adds a named role inheritance rule to the current 
+        /// policy. If the rule already exists, the function returns false and the rule
+        /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="parameters">The "g" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype, params string[] parameters)
+        {
+            return enforcer.AddNamedGroupingPolicyAsync(ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -828,7 +841,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool AddNamedGroupingPolicies(this IEnforcer enforcer, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);;
+            return enforcer.InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);
         }
 
         /// <summary>
@@ -842,7 +855,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> AddNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            return await enforcer.InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);;
+            return await enforcer.InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
         }
 
         #endregion
@@ -903,19 +916,20 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return RemoveNamedGroupingPolicy(enforcer, ptype, parameters.ToList());
+            return RemoveNamedGroupingPolicy(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
         /// Removes a role inheritance rule from the current 
         /// policy, field filters can be specified.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
-            return RemoveNamedGroupingPolicyAsync(enforcer, ptype, parameters.ToList());
+            return RemoveNamedGroupingPolicyAsync(enforcer, ptype, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -959,6 +973,7 @@ namespace Casbin.Extensions
         /// <summary>
         /// Removes roles inheritance rule from the current policy.
         /// </summary>
+        /// <param name="enforcer"></param>
         /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveGroupingPoliciesAsync(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
@@ -976,7 +991,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicies(this IEnforcer enforcer, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules); ;
+            return enforcer.InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules);
         }
 
         /// <summary>
@@ -989,7 +1004,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> RemoveNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype, IEnumerable<IEnumerable<string>> rules)
         {
-            return await enforcer.InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules); ;
+            return await enforcer.InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
         }
 
         /// <summary>
@@ -1002,7 +1017,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveFilteredGroupingPolicy(this IEnforcer enforcer, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicy(enforcer, PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues); ;
+            return RemoveFilteredNamedGroupingPolicy(enforcer, PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -1015,7 +1030,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveFilteredGroupingPolicyAsync(this IEnforcer enforcer, int fieldIndex, params string[] fieldValues)
         {
-            return RemoveFilteredNamedGroupingPolicyAsync(enforcer, PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues); ;
+            return RemoveFilteredNamedGroupingPolicyAsync(enforcer, PermConstants.DefaultGroupingPolicyType, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -1028,7 +1043,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveFilteredNamedGroupingPolicy(this IEnforcer enforcer, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return enforcer.InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues); ;
+            return enforcer.InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
         }
 
         /// <summary>
@@ -1041,7 +1056,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype, int fieldIndex, params string[] fieldValues)
         {
-            return await enforcer.InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues); ;
+            return await enforcer.InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype, fieldIndex, fieldValues);
         }
 
         #endregion

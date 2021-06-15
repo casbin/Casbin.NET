@@ -1,4 +1,8 @@
-﻿namespace Casbin.Extensions
+﻿using System;
+using Casbin.Model;
+using Casbin.Rbac;
+
+namespace Casbin.Extensions
 {
     public static class ModelExtension
     {
@@ -14,6 +18,11 @@
                     .SetAdapter(model.PolicyManager.Adapter)
                     .SetPolicy(model.PolicyManager.Policy));
             return model;
+        }
+
+        internal static IRoleManager GetRoleManger(this IModel model, string roleType = PermConstants.DefaultRoleType)
+        {
+            return model.Sections[PermConstants.Section.RoleSection][roleType].RoleManager;
         }
     }
 }

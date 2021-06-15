@@ -17,6 +17,20 @@ namespace Casbin.UnitTests.ModelTests
         }
 
         [Fact]
+        public void TestGetDomainsForUser()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithDomainsModelText,
+                _testModelFixture._rbacWithDomainsPolicy2Text));
+
+            e.BuildRoleLinks();
+
+            e.TestGetDomainsForUser("alice", new[] { "domain1", "domain2" });
+            e.TestGetDomainsForUser("bob",   new[] { "domain2", "domain3" });
+            e.TestGetDomainsForUser("user",  new[] { "domain3" });
+        }
+
+        [Fact]
         public void TestGetRolesFromUserWithDomains()
         {
             var e = new Enforcer(TestModelFixture.GetNewTestModel(

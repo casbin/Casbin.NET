@@ -1,4 +1,5 @@
-﻿using Casbin.Evaluation;
+﻿using System;
+using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
@@ -156,6 +157,29 @@ namespace Casbin.Extensions
         public static IEnforcer SetRoleManager(this IEnforcer enforcer, IRoleManager roleManager)
         {
             enforcer.RoleManager = roleManager;
+            enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
+            enforcer.ExpressionHandler.SetGFunctions();
+            return enforcer;
+        }
+
+        /// <summary>
+        /// Sets the current role manager.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="roleType"></param>
+        /// <param name="roleManager"></param>
+        public static IEnforcer SetRoleManager(this IEnforcer enforcer, string roleType, IRoleManager roleManager)
+        {
+            Assertion assertion = enforcer.Model.Sections[PermConstants.Section.RoleSection][roleType];
+            assertion.RoleManager = roleManager;
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                assertion.BuildRoleLinks();
+            }
+            if (enforcer.AutoCleanEnforceCache)
+            {
+                enforcer.EnforceCache?.Clear();
+            }
             return enforcer;
         }
 
@@ -170,5 +194,29 @@ namespace Casbin.Extensions
             return enforcer;
         }
         #endregion
+
+        public static Enforcer AddMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
+        {
+            enforcer.AddNamedMatchingFunc(PermConstants.DefaultRoleType, func);
+            return enforcer;
+        }
+
+        public static Enforcer AddDomainMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
+        {
+            enforcer.AddNamedDomainMatchingFunc(PermConstants.DefaultRoleType, func);
+            return enforcer;
+        }
+
+        public static Enforcer AddNamedMatchingFunc(this Enforcer enforcer, string roleType, Func<string, string, bool> func)
+        {
+            enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
+            return enforcer;
+        }
+
+        public static Enforcer AddNamedDomainMatchingFunc(this Enforcer enforcer, string roleType, Func<string, string, bool> func)
+        {
+            enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
+            return enforcer;
+        }
     }
 }

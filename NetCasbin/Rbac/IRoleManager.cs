@@ -43,6 +43,13 @@ namespace Casbin.Rbac
         public List<string> GetUsers(string name, params string[] domain);
 
         /// <summary>
+        /// Gets the domains that a user has.
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
+        public IEnumerable<string> GetDomains(string name);
+
+        /// <summary>
         /// Determines whether a link exists between two roles. role: name1
         /// inherits role: name2. domain is a prefix to the roles.
         /// </summary>

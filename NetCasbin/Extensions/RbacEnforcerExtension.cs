@@ -490,15 +490,37 @@ namespace Casbin.Extensions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<string> GetImplicitRolesForUser(this IEnforcer enforcer, string name, string domain = null)
+        public static IEnumerable<string> GetImplicitRolesForUser(this IEnforcer enforcer, string name, string domain = null)
         {
-            var roles = domain is null
-                ? enforcer.RoleManager.GetRoles(name)
-                : enforcer.RoleManager.GetRoles(name, domain);
-            var result = new List<string>();
-            result.AddRange(roles);
-            result.AddRange(roles.SelectMany(role => GetImplicitRolesForUser(enforcer, role, domain)));
-            return result;
+            HashSet<string> roleSet = new() {name};
+            Queue<string> queue = new();
+            queue.Enqueue(name);
+            var sections = enforcer.Model.Sections;
+
+            while (queue.Count is not 0)
+            {
+                string nowRole = queue.Dequeue();
+                foreach (var assertion in sections[PermConstants.Section.RoleSection].Values)
+                {
+                    var roles = domain is null
+                        ? assertion.RoleManager.GetRoles(nowRole)
+                        : assertion.RoleManager.GetRoles(nowRole, domain);
+
+                    foreach (string role in roles)
+                    {
+                        if (roleSet.Contains(role))
+                        {
+                            continue;
+                        }
+
+                        roleSet.Add(role);
+                        queue.Enqueue(role);
+                    }
+                }
+            }
+
+            roleSet.Remove(name);
+            return roleSet;
         }
 
         /// <summary>
@@ -545,6 +567,12 @@ namespace Casbin.Extensions
         #endregion
 
         #region RBAC APIs with domains
+
+        public static IEnumerable<string> GetDomainsForUser(this IEnforcer enforcer, string name, string roleType = null)
+        {
+            roleType ??= PermConstants.DefaultRoleType;
+            return enforcer.Model.Sections[PermConstants.Section.RoleSection][roleType].RoleManager.GetDomains(name);
+        }
 
         /// <summary>
         /// 
