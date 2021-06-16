@@ -116,14 +116,14 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetRoles(IEnforcer e, string name, List<string> res, string domain = null)
         {
-            List<string> myRes = e.GetRolesForUser(name, domain);
+            List<string> myRes = e.GetRolesForUser(name, domain).ToList();
             string message = "Roles for " + name + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
 
         internal static void TestGetUsers(IEnforcer e, string name, List<string> res, string domain = null)
         {
-            List<string> myRes = e.GetUsersForRole(name, domain);
+            List<string> myRes = e.GetUsersForRole(name, domain).ToList();
             string message = "Users for " + name + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
@@ -156,7 +156,7 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetRolesInDomain(IEnforcer e, string name, string domain, List<string> res)
         {
-            List<string> myRes = e.GetRolesForUserInDomain(name, domain);
+            List<string> myRes = e.GetRolesForUserInDomain(name, domain).ToList();
             string message = "Roles for " + name + " under " + domain + ": " + myRes + ", supposed to be " + res;
             Assert.True(Utility.SetEquals(res, myRes), message);
         }
@@ -197,14 +197,14 @@ namespace Casbin.UnitTests.Util
 
         internal static void TestGetRoles(IRoleManager roleManager, string name, List<string> expectResult)
         {
-            List<string> result = roleManager.GetRoles(name);
+            List<string> result = roleManager.GetRoles(name).ToList();
             string message = $"{name}: {result}, supposed to be {expectResult}";
             Assert.True(Utility.SetEquals(expectResult, result), message);
         }
 
         internal static void TestGetRolesWithDomain(IRoleManager roleManager, string name, string domain, List<string> expectResult)
         {
-            List<string> result = roleManager.GetRoles(name, domain);
+            List<string> result = roleManager.GetRoles(name, domain).ToList();
             string message = $"{name}: {result}, supposed to be {expectResult}";
             Assert.True(Utility.SetEquals(expectResult, result), message);
         }

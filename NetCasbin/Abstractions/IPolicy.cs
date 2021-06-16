@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using Casbin.Model;
-using Casbin.Rbac;
 
 namespace Casbin
 {
@@ -11,30 +10,27 @@ namespace Casbin
         /// <summary>
         /// Provides incremental build the role inheritance relation.
         /// </summary>
-        /// <param name="roleManager"></param>
         /// <param name="policyOperation"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
-        public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<string> rule);
 
         /// <summary>
         /// Provides incremental build the role inheritance relations.
         /// </summary>
-        /// <param name="roleManager"></param>
         /// <param name="policyOperation"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
-        public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
             string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
         /// <summary>
         /// Initializes the roles in RBAC.
         /// </summary>
-        /// <param name="roleManager"></param>
-        public void BuildRoleLinks(IRoleManager roleManager);
+        public void BuildRoleLinks();
 
         public void RefreshPolicyStringSet();
 

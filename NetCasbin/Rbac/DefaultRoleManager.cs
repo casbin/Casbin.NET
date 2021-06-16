@@ -27,69 +27,7 @@ namespace Casbin.Rbac
             _maxHierarchyLevel = maxHierarchyLevel;
         }
 
-        #region Obsoleted APIs
-        public virtual List<string> GetRoles(string name, params string[] domain)
-        {
-            CheckDomainArgument(domain);
-            IEnumerable<string> roles = domain.Length is 0
-                ? GetRoles(name)
-                : GetRoles(name, domain[0]);
-            return roles as List<string> ?? roles.ToList();
-        }
-
-        public virtual List<string> GetUsers(string name, params string[] domain)
-        {
-            CheckDomainArgument(domain);
-            IEnumerable<string> users =  domain.Length is 0
-                ? GetUsers(name)
-                : GetUsers(name, domain[0]);
-            return users as List<string> ?? users.ToList();
-        }
-
-        public virtual bool HasLink(string name1, string name2, params string[] domain)
-        {
-            CheckDomainArgument(domain);
-            return domain.Length is 0
-                ? HasLink(name1, name2)
-                : HasLink(name1, name2, domain[0]);
-        }
-
-        public virtual void AddLink(string name1, string name2, params string[] domain)
-        {
-            CheckDomainArgument(domain);
-            if (domain.Length is 0)
-            {
-                AddLink(name1, name2);
-            }
-            else
-            {
-                AddLink(name1, name2, domain[0]);
-            }
-        }
-
-        public virtual void DeleteLink(string name1, string name2, params string[] domain)
-        {
-            CheckDomainArgument(domain);
-            if (domain.Length is 0)
-            {
-                DeleteLink(name1, name2);
-            }
-            else
-            {
-                DeleteLink(name1, name2, domain[0]);
-            }
-        }
-
-        private void CheckDomainArgument(string[] domain)
-        {
-            if (domain.Length > 1)
-            {
-                throw new ArgumentException("Domain should be 1 parameter.");
-            }
-        }
-        #endregion
-
-        public IEnumerable<string> GetDomains(string name)
+        public virtual IEnumerable<string> GetDomains(string name)
         {
             _cachedAllDomains ??= _allDomains.Keys;
             var domains = new HashSet<string>();
@@ -103,7 +41,7 @@ namespace Casbin.Rbac
             return domains;
         }
 
-        private IEnumerable<string> GetRoles(string name, string domain = null)
+        public virtual IEnumerable<string> GetRoles(string name, string domain = null)
         {
             domain ??= _defaultDomain;
             if (HasDomainPattern is false)
@@ -184,7 +122,7 @@ namespace Casbin.Rbac
             return rolesNames;
         }
 
-        private IEnumerable<string> GetUsers(string name, string domain = null)
+        public virtual IEnumerable<string> GetUsers(string name, string domain = null)
         {
             domain ??= _defaultDomain;
 
@@ -229,7 +167,7 @@ namespace Casbin.Rbac
             return userNames;
         }
 
-        private bool HasLink(string name1, string name2, string domain = null)
+        public virtual bool HasLink(string name1, string name2, string domain = null)
         {
             if (string.Equals(name1, name2))
             {
@@ -289,7 +227,7 @@ namespace Casbin.Rbac
             return false;
         }
 
-        private void AddLink(string name1, string name2, string domain = null)
+        public virtual void AddLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
             if (HasDomainPattern)
@@ -338,7 +276,7 @@ namespace Casbin.Rbac
             }
         }
 
-        private void DeleteLink(string name1, string name2, string domain = null)
+        public virtual void DeleteLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
             ConcurrentDictionary<string, Role> roles;

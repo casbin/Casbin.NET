@@ -358,7 +358,7 @@ namespace Casbin.Extensions
         public static void BuildRoleLinks(this IEnforcer enforcer)
         {
             enforcer.RoleManager.Clear();
-            enforcer.Model.BuildRoleLinks(enforcer.RoleManager);
+            enforcer.Model.BuildRoleLinks();
         }
 
         public static Enforcer AddMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)

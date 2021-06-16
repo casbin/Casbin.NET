@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Casbin.Rbac
 {
@@ -34,33 +35,14 @@ namespace Casbin.Rbac
         /// <param name="name2"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public override bool HasLink(string name1, string name2, params string[] domain)
+        public override bool HasLink(string name1, string name2, string domain = null)
         {
             if (base.HasLink(name1, name2, domain))
             {
                 return true;
             }
-            // check name1's groups
-            if (domain.Length == 1)
-            {
-                try
-                {
-                    var groups = base.GetRoles(name1) ?? new List<string>();
-
-                    foreach (string group in groups)
-                    {
-                        if (HasLink(group, name2, domain))
-                        {
-                            return true;
-                        }
-                    }
-                }
-                catch (Exception)
-                {
-                    return false;
-                }
-            }
-            return false;
+            var groups = base.GetRoles(name1) ?? Enumerable.Empty<string>();
+            return groups.Any(g => HasLink(g, name2, domain));
         }
     }
 }

@@ -177,16 +177,16 @@ namespace Casbin.Model
 
         #region IPolicy
 
-        public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation, string section,
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation, string section,
             string policyType, IEnumerable<string> rule)
-            => PolicyManager.Policy.BuildIncrementalRoleLink(roleManager, policyOperation, section, policyType, rule);
+            => PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
 
-        public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation, string section,
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation, string section,
             string policyType, IEnumerable<IEnumerable<string>> rules)
-            => PolicyManager.Policy.BuildIncrementalRoleLinks(roleManager, policyOperation, section, policyType, rules);
+            => PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
 
-        public void BuildRoleLinks(IRoleManager roleManager)
-            => PolicyManager.Policy.BuildRoleLinks(roleManager);
+        public void BuildRoleLinks()
+            => PolicyManager.Policy.BuildRoleLinks();
 
         public void RefreshPolicyStringSet()
             => PolicyManager.Policy.RefreshPolicyStringSet();

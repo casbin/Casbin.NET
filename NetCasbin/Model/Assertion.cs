@@ -108,14 +108,8 @@ namespace Casbin.Model
                         case 3:
                             roleManager.AddLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
                             break;
-                        case 4:
-                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum[2], ruleEnum[3]);
-                            break;
                         default:
-                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
-                            break;
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
                     break;
                 case PolicyOperation.PolicyRemove:
@@ -127,14 +121,8 @@ namespace Casbin.Model
                         case 3:
                             roleManager.DeleteLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
                             break;
-                        case 4:
-                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum[2], ruleEnum[3]);
-                            break;
                         default:
-                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
-                            break;
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
                     break;
                 default:

@@ -31,7 +31,7 @@ namespace Casbin.Rbac
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<string> GetRoles(string name, params string[] domain);
+        public IEnumerable<string> GetRoles(string name, string domain = null);
 
         /// <summary>
         /// Gets the users that inherits a role.
@@ -40,7 +40,7 @@ namespace Casbin.Rbac
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public List<string> GetUsers(string name, params string[] domain);
+        public IEnumerable<string> GetUsers(string name, string domain = null);
 
         /// <summary>
         /// Gets the domains that a user has.
@@ -57,7 +57,7 @@ namespace Casbin.Rbac
         /// <param name="name2">The second role.</param>
         /// <param name="domain">The domain the roles belong to.</param>
         /// <returns>Whether name1 inherits name2 (name1 has role name2).</returns>
-        public bool HasLink(string name1, string name2, params string[] domain);
+        public bool HasLink(string name1, string name2, string domain = null);
 
         /// <summary>
         /// Adds the inheritance link between two roles. role: name1 and role:
@@ -66,7 +66,7 @@ namespace Casbin.Rbac
         /// <param name="name1">The first role (or user).</param>
         /// <param name="name2">The second role.</param>
         /// <param name="domain">The domain the roles belong to.</param>
-        public void AddLink(string name1, string name2, params string[] domain);
+        public void AddLink(string name1, string name2, string domain = null);
 
         /// <summary>
         /// Deletes the inheritance link between two roles. role: name1 and
@@ -75,7 +75,7 @@ namespace Casbin.Rbac
         /// <param name="name1">The first role (or user).</param>
         /// <param name="name2">The second role.</param>
         /// <param name="domain">The domain the roles belong to.</param>
-        public void DeleteLink(string name1, string name2, params string[] domain);
+        public void DeleteLink(string name1, string name2, string domain = null);
 
         /// <summary>
         /// Clears all stored data and resets the role manager to the initial state.

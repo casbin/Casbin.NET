@@ -309,7 +309,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, rule);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -322,7 +322,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, rule);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -334,7 +334,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
                 enforcer.ExpressionHandler.SetGFunctions();
             }
@@ -346,7 +346,7 @@ namespace Casbin.Extensions
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(enforcer.RoleManager, policyOperation,
+                enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
                 enforcer.ExpressionHandler.SetGFunctions();
             }

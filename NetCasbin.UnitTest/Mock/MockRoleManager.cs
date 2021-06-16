@@ -12,14 +12,14 @@ namespace Casbin.UnitTests.Mock
         public bool HasPattern => false;
         public bool HasDomainPattern => false;
 
-        public List<string> GetRoles(string name, params string[] domain) => null;
-        public List<string> GetUsers(string name, params string[] domain) => null;
+        public IEnumerable<string> GetRoles(string name, string domain = null) => null;
+        public IEnumerable<string> GetUsers(string name, string domain = null) => null;
         public IEnumerable<string> GetDomains(string name)
         {
             return Enumerable.Empty<string>();
         }
 
-        public bool HasLink(string name1, string name2, params string[] domain)
+        public bool HasLink(string name1, string name2, string domain = null)
         {
             if (name1.Equals("alice") && name2.Equals("alice"))
             {
@@ -39,11 +39,11 @@ namespace Casbin.UnitTests.Mock
             return false;
         }
 
-        public void AddLink(string name1, string name2, params string[] domain)
+        public void AddLink(string name1, string name2, string domain = null)
         {
         }
 
-        public void DeleteLink(string name1, string name2, params string[] domain)
+        public void DeleteLink(string name1, string name2, string domain = null)
         {
         }
 

@@ -16,7 +16,7 @@ namespace Casbin.Extensions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<string> GetRolesForUser(this IEnforcer enforcer, string name,  string domain = null)
+        public static IEnumerable<string> GetRolesForUser(this IEnforcer enforcer, string name,  string domain = null)
         {
             return domain is null
                 ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
@@ -32,7 +32,7 @@ namespace Casbin.Extensions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<string> GetUsersForRole(this IEnforcer enforcer, string name, string domain = null)
+        public static IEnumerable<string> GetUsersForRole(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
                 ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
@@ -581,7 +581,7 @@ namespace Casbin.Extensions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static List<string> GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain)
+        public static IEnumerable<string> GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain)
         {
             return enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
         }

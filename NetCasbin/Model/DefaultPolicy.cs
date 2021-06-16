@@ -4,7 +4,6 @@ using System.Linq;
 #if !NET45
 using Microsoft.Extensions.Logging;
 #endif
-using Casbin.Rbac;
 using Casbin.Util;
 
 namespace Casbin.Model
@@ -84,47 +83,6 @@ namespace Casbin.Model
             {
                 assertion.BuildRoleLinks();
             }
-        }
-
-        /// <summary>
-        /// Provides incremental build the role inheritance relation.
-        /// </summary>
-        /// <param name="roleManager"></param>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="policyType"></param>
-        /// <param name="rule"></param>
-        [Obsolete("Use overload instead.")]
-        public void BuildIncrementalRoleLink(IRoleManager roleManager, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<string> rule)
-        {
-            BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
-        }
-
-        /// <summary>
-        /// Provides incremental build the role inheritance relations.
-        /// </summary>
-        /// <param name="roleManager"></param>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="policyType"></param>
-        /// <param name="rules"></param>
-        [Obsolete("Use overload instead.")]
-        public void BuildIncrementalRoleLinks(IRoleManager roleManager, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IEnumerable<string>> rules)
-        {
-            BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
-        }
-
-
-        /// <summary>
-        /// Initializes the roles in RBAC.
-        /// </summary>
-        /// <param name="roleManager"></param>
-        [Obsolete("Use overload instead.")]
-        public void BuildRoleLinks(IRoleManager roleManager)
-        {
-            BuildRoleLinks();
         }
 
         public void RefreshPolicyStringSet()
