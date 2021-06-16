@@ -870,7 +870,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
         {
-            return RemoveGroupingPolicy(enforcer, parameters.ToList());
+            return RemoveGroupingPolicy(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -881,7 +881,7 @@ namespace Casbin.Extensions
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveGroupingPolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
-            return RemoveGroupingPolicyAsync(enforcer, parameters.ToList());
+            return RemoveGroupingPolicyAsync(enforcer, parameters as IEnumerable<string>);
         }
 
         /// <summary>

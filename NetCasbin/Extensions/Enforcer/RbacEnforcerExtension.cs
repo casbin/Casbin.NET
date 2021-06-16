@@ -16,7 +16,7 @@ namespace Casbin.Extensions
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static IEnumerable<string> GetRolesForUser(this IEnforcer enforcer, string name,  string domain = null)
+        public static IEnumerable<string> GetRolesForUser(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
                 ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
@@ -47,7 +47,18 @@ namespace Casbin.Extensions
         /// <param name="enforcer"></param>
         /// <param name="names"></param>
         /// <returns></returns>
-        public static List<string> GetUsersForRoles(this IEnforcer enforcer, string[] names)
+        public static IEnumerable<string> GetUsersForRoles(this IEnforcer enforcer, params string[] names)
+        {
+            return enforcer.GetUsersForRoles(names as IEnumerable<string>);
+        }
+
+        /// <summary>
+        /// Gets the users that has roles.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="names"></param>
+        /// <returns></returns>
+        public static IEnumerable<string> GetUsersForRoles(this IEnforcer enforcer, IEnumerable<string> names)
         {
             var userIds = new List<string>();
             foreach (string name in names)
@@ -57,7 +68,6 @@ namespace Casbin.Extensions
             }
             return userIds;
         }
-
         #endregion
 
         #region Has roles or users
@@ -79,7 +89,6 @@ namespace Casbin.Extensions
         #endregion
 
         #region Add roles or users
-
         /// <summary>
         /// Adds a role for a user.
         /// </summary>
@@ -282,9 +291,9 @@ namespace Casbin.Extensions
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public static bool HasPermissionForUser(this IEnforcer enforcer, string user, List<string> permission)
+        public static bool HasPermissionForUser(this IEnforcer enforcer, string user, params string[] permission)
         {
-            return HasPermissionForUser(enforcer, user, permission.ToArray());
+            return HasPermissionForUser(enforcer, user, permission as IEnumerable<string>);
         }
 
         /// <summary>
@@ -294,7 +303,7 @@ namespace Casbin.Extensions
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public static bool HasPermissionForUser(this IEnforcer enforcer, string user, params string[] permission)
+        public static bool HasPermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
         {
             var parameters = new List<string>
             {
@@ -314,35 +323,10 @@ namespace Casbin.Extensions
         /// <param name="enforcer"></param>
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public static bool AddPermissionForUser(this IEnforcer enforcer, string user, List<string> permission)
-        {
-            return AddPermissionForUser(enforcer, user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// Adds multiple permissions for a user or role.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user, List<string> permission)
-        {
-            return AddPermissionForUserAsync(enforcer, user, permission.ToArray());
-        }
-
-        /// <summary>
-        /// Adds a permission for a user or role.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="user">User or role</param>
-        /// <param name="permission"></param>
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
         public static bool AddPermissionForUser(this IEnforcer enforcer, string user, params string[] permission)
         {
-            var parameters = new[] {user}.Concat(permission);
-            return enforcer.AddPolicy(parameters.ToList());
+            return AddPermissionForUser(enforcer, user, permission as IEnumerable<string>);
         }
 
         /// <summary>
@@ -354,35 +338,37 @@ namespace Casbin.Extensions
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
         public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user, params string[] permission)
         {
-            var parameters = new[] {user}.Concat(permission);
-            return enforcer.AddPolicyAsync(parameters.ToList());
+            return AddPermissionForUserAsync(enforcer, user, permission as IEnumerable<string>);
         }
 
+        /// <summary>
+        /// Adds a permission for a user or role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="user">User or role</param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
+        public static bool AddPermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        {
+            var parameters = new[] {user}.Concat(permission);
+            return enforcer.AddPolicy(parameters);
+        }
+
+        /// <summary>
+        /// Adds multiple permissions for a user or role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="user">User or role</param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
+        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        {
+            var parameters = new[] {user}.Concat(permission);
+            return enforcer.AddPolicyAsync(parameters);
+        }
         #endregion
 
         #region Delete permissions
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public static bool DeletePermission(this IEnforcer enforcer, List<string> permission)
-        {
-            return DeletePermission(enforcer, permission.ToArray());
-        }
-
-        /// <summary>
-        /// DeletePermission deletes a permission. 
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="permission"></param>
-        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
-        public static Task<bool> DeletePermissionAsync(this IEnforcer enforcer, List<string> permission)
-        {
-            return DeletePermissionAsync(enforcer, permission.ToArray());
-        }
 
         /// <summary>
         /// DeletePermission deletes a permission. 
@@ -406,28 +392,27 @@ namespace Casbin.Extensions
             return enforcer.RemoveFilteredPolicyAsync(1, permission);
         }
 
+        
         /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="user">User or role</param>
         /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public static bool DeletePermissionForUser(this IEnforcer enforcer, string user, List<string> permission)
+        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
+        public static bool DeletePermission(this IEnforcer enforcer, IEnumerable<string> permission)
         {
-            return DeletePermissionForUser(enforcer, user, permission.ToArray());
+            return DeletePermission(enforcer, permission.ToArray());
         }
 
         /// <summary>
-        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// DeletePermission deletes a permission. 
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="user">User or role</param>
         /// <param name="permission"></param>
-        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user, List<string> permission)
+        /// <returns>Returns false if the permission does not exist (aka not affected).</returns>
+        public static Task<bool> DeletePermissionAsync(this IEnforcer enforcer, IEnumerable<string> permission)
         {
-            return DeletePermissionForUserAsync(enforcer, user, permission.ToArray());
+            return DeletePermissionAsync(enforcer, permission.ToArray());
         }
 
         /// <summary>
@@ -439,8 +424,7 @@ namespace Casbin.Extensions
         /// <returns></returns>
         public static bool DeletePermissionForUser(this IEnforcer enforcer, string user, params string[] permission)
         {
-            var parameters = new[] {user}.Concat(permission);
-            return enforcer.RemovePolicy(parameters.ToList());
+            return DeletePermissionForUser(enforcer, user, permission as IEnumerable<string>);
         }
 
         /// <summary>
@@ -452,8 +436,35 @@ namespace Casbin.Extensions
         /// <returns></returns>
         public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user, params string[] permission)
         {
+            return DeletePermissionForUserAsync(enforcer, user, permission as IEnumerable<string>);
+        }
+
+        
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="user">User or role</param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public static bool DeletePermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        {
             var parameters = new[] {user}.Concat(permission);
-            return enforcer.RemovePolicyAsync(parameters.ToList());
+            return enforcer.RemovePolicy(parameters);
+        }
+
+        /// <summary>
+        /// DeletePermissionForUser deletes a permission for a user or role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="user">User or role</param>
+        /// <param name="permission"></param>
+        /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
+        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        {
+            var parameters = new[] {user}.Concat(permission);
+            return enforcer.RemovePolicyAsync(parameters);
+
         }
 
         /// <summary>
@@ -551,7 +562,7 @@ namespace Casbin.Extensions
 
         public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer, params string[] permission)
         {
-            return GetImplicitUsersForPermission(enforcer, (IEnumerable<string>) permission);
+            return GetImplicitUsersForPermission(enforcer, permission as IEnumerable<string>);
         }
 
         public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer, IEnumerable<string> permissions)
