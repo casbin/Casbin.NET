@@ -42,63 +42,6 @@ namespace Casbin
         public bool IsFiltered { get; }
 
         /// <summary>
-        /// LoadModel reloads the model from the model CONF file. Because the policy is
-        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
-        /// calling LoadPolicy().
-        /// </summary>
-        public void LoadModel();
-
-        /// <summary>
-        /// Manually rebuilds the role inheritance relations.
-        /// </summary>
-        public void BuildRoleLinks();
-
-        #region Policy Management
-
-        /// <summary>
-        /// Reloads the policy from file/database.
-        /// </summary>
-        public void LoadPolicy();
-
-        /// <summary>
-        /// Reloads the policy from file/database.
-        /// </summary>
-        public Task LoadPolicyAsync();
-
-        /// <summary>
-        /// Reloads a filtered policy from file/database.
-        /// </summary>
-        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
-        /// <returns></returns>
-        public bool LoadFilteredPolicy(Filter filter);
-
-        /// <summary>
-        /// Reloads a filtered policy from file/database.
-        /// </summary>
-        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
-        /// <returns></returns>
-        public Task<bool> LoadFilteredPolicyAsync(Filter filter);
-
-        /// <summary>
-        /// Saves the current policy (usually after changed with Casbin API)
-        /// back to file/database.
-        /// </summary>
-        public void SavePolicy();
-
-        /// <summary>
-        /// Saves the current policy (usually after changed with Casbin API)
-        /// back to file/database.
-        /// </summary>
-        public Task SavePolicyAsync();
-
-        /// <summary>
-        /// Clears all policy.
-        /// </summary>
-        public void ClearPolicy();
-
-        #endregion
-
-        /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>

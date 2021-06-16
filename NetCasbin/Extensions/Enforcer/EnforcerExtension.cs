@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
@@ -194,6 +196,170 @@ namespace Casbin.Extensions
             return enforcer;
         }
         #endregion
+
+        #region Poilcy management
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public static void LoadPolicy(this IEnforcer enforcer)
+        {
+            if (enforcer.Adapter is null)
+            {
+                return;
+            }
+
+            enforcer.ClearPolicy();
+            enforcer.Adapter.LoadPolicy(enforcer.Model);
+            enforcer.Model.RefreshPolicyStringSet();
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+        }
+
+        /// <summary>
+        /// Reloads the policy from file/database.
+        /// </summary>
+        public static async Task LoadPolicyAsync(this IEnforcer enforcer)
+        {
+            if (enforcer.Adapter is null)
+            {
+                return;
+            }
+            enforcer.ClearPolicy();
+            await enforcer.Adapter.LoadPolicyAsync(enforcer.Model);
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+        }
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public static bool LoadFilteredPolicy(this IEnforcer enforcer, Filter filter)
+        {
+            if (enforcer.Adapter is not IFilteredAdapter filteredAdapter)
+            {
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
+            }
+            enforcer.ClearPolicy();
+            filteredAdapter.LoadFilteredPolicy(enforcer.Model, filter);
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public static async Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, Filter filter)
+        {
+            if (enforcer.Adapter is not IFilteredAdapter filteredAdapter)
+            {
+                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
+            }
+            enforcer.ClearPolicy();
+            await filteredAdapter.LoadFilteredPolicyAsync(enforcer.Model, filter);
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+            return true;
+        }
+
+        /// <summary>
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public static void SavePolicy(this IEnforcer enforcer)
+        {
+            if (enforcer.Adapter is null)
+            {
+                return;
+            }
+
+            if (enforcer.IsFiltered)
+            {
+                throw new InvalidOperationException("Cannot save a filtered policy");
+            }
+            enforcer.Adapter.SavePolicy(enforcer.Model);
+            enforcer.Watcher?.Update();
+        }
+
+        /// <summary>
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public static async Task SavePolicyAsync(this IEnforcer enforcer)
+        {
+            if (enforcer.Adapter is null)
+            {
+                return;
+            }
+
+            if (enforcer.IsFiltered)
+            {
+                throw new InvalidOperationException("Cannot save a filtered policy");
+            }
+
+            await enforcer.Adapter.SavePolicyAsync(enforcer.Model);
+            if (enforcer.Watcher is not null)
+            {
+                await enforcer.Watcher.UpdateAsync();
+            }
+        }
+
+        /// <summary>
+        /// Clears all policy.
+        /// </summary>
+        public static void ClearPolicy(this IEnforcer enforcer)
+        {
+            enforcer.Model.ClearPolicy();
+            if (enforcer.AutoCleanEnforceCache)
+            {
+                enforcer.EnforceCache?.Clear();
+#if !NET45
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+#endif
+            }
+#if !NET45
+            enforcer.Logger?.LogInformation("Policy Management, Cleared all policy.");
+#endif
+        }
+        #endregion
+
+        
+        /// <summary>
+        /// LoadModel reloads the model from the model CONF file. Because the policy is
+        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
+        /// calling LoadPolicy().
+        /// </summary>
+        public static void LoadModel(this IEnforcer enforcer)
+        {
+            if (enforcer.ModelPath is null)
+            {
+                return;
+            }
+            enforcer.Model = DefaultModel.CreateFromFile(enforcer.ModelPath);
+        }
+
+        /// <summary>
+        /// Manually rebuilds the role inheritance relations.
+        /// </summary>
+        public static void BuildRoleLinks(this IEnforcer enforcer)
+        {
+            enforcer.RoleManager.Clear();
+            enforcer.Model.BuildRoleLinks(enforcer.RoleManager);
+        }
 
         public static Enforcer AddMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
         {

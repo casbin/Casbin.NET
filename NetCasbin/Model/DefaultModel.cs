@@ -10,7 +10,7 @@ namespace Casbin.Model
 {
     public class DefaultModel : IModel
     {
-        private static readonly IDictionary<string, string> _sectionNameMap = new Dictionary<string, string>() {
+        private static readonly IDictionary<string, string> s_sectionNameMap = new Dictionary<string, string>() {
             { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
             { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName},
             { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName},
@@ -165,7 +165,7 @@ namespace Casbin.Model
 
         private bool LoadAssertion(IConfig config, string section, string key)
         {
-            string sectionName = _sectionNameMap[section];
+            string sectionName = s_sectionNameMap[section];
             string value = config.GetString($"{sectionName}::{key}");
             return AddDef(section, key, value);
         }
@@ -185,9 +185,11 @@ namespace Casbin.Model
             string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.Policy.BuildIncrementalRoleLinks(roleManager, policyOperation, section, policyType, rules);
 
-        public void BuildRoleLinks(IRoleManager roleManager) => PolicyManager.Policy.BuildRoleLinks(roleManager);
+        public void BuildRoleLinks(IRoleManager roleManager)
+            => PolicyManager.Policy.BuildRoleLinks(roleManager);
 
-        public void RefreshPolicyStringSet() => PolicyManager.Policy.RefreshPolicyStringSet();
+        public void RefreshPolicyStringSet()
+            => PolicyManager.Policy.RefreshPolicyStringSet();
 
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
             => PolicyManager.GetPolicy(section, policyType);
