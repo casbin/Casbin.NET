@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Extensions;
@@ -949,6 +950,24 @@ namespace Casbin.UnitTests.ModelTests
                 "view");
 
             Assert.True(result);
+        }
+
+        [Fact]
+        public void TestEnforceWithLazyLoadPolicy()
+        {
+            IModel m = DefaultModel.Create();
+            m.AddDef("r", "r", "sub, obj, act");
+            m.AddDef("p", "p", "sub, obj, act");
+            m.AddDef("e", "e", "some(where (p.eft == allow))");
+            m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+
+            IEnforcer e = DefaultEnforcer.Create(m, a, true);
+            Assert.Empty(e.GetPolicy());
+
+            e = DefaultEnforcer.Create(m, a);
+            Assert.NotEmpty(e.GetPolicy());
         }
     }
 }

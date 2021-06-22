@@ -23,24 +23,27 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath)
-            : this(modelPath, new FileAdapter(policyPath))
+        public Enforcer(string modelPath, string policyPath, bool lazyLoadPolicy = false)
+            : this(modelPath, new FileAdapter(policyPath), lazyLoadPolicy)
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter = null)
-            : this(DefaultModel.CreateFromFile(modelPath), adapter)
+        public Enforcer(string modelPath, IAdapter adapter = null, bool lazyLoadPolicy = false)
+            : this(DefaultModel.CreateFromFile(modelPath), adapter, lazyLoadPolicy)
         {
         }
 
-        public Enforcer(IModel model, IAdapter adapter = null)
+        public Enforcer(IModel model, IAdapter adapter = null, bool lazyLoadPolicy = false)
         {
             this.SetModel(model);
             if (adapter is not null)
             {
                 this.SetAdapter(adapter);
             }
-            this.LoadPolicy();
+            if (lazyLoadPolicy is false)
+            {
+                this.LoadPolicy();
+            }
         }
 
         #region Options
