@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
-using Microsoft.Extensions.Options;
 using NetCasbin;
-using NetCasbin.Caching;
 using static Casbin.Benchmark.TestHelper;
 
 namespace Casbin.Benchmark
@@ -17,6 +14,7 @@ namespace Casbin.Benchmark
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net50)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net60)]
     public class EnforcerWithCacheBenchmark
     {
         private Enforcer NowEnforcer { get; set; }

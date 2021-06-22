@@ -32,11 +32,16 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
+    - name: Setup .NET 6.0.x SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.100-preview.5.21302.13
+
     - name: Check .NET info
       run: dotnet --info
 
     - name: Install dependencies
-      run: nuget restore
+      run: dotnet restore
 
     - name: Build solution
       run: dotnet build -c Release --no-restore
@@ -92,11 +97,16 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
+    - name: Setup .NET 6.0.x SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.100-preview.5.21302.13
+
     - name: Check .NET info
       run: dotnet --info
 
     - name: Install dependencies
-      run: nuget restore
+      run: dotnet restore
 
     - name: Build solution
       run: dotnet build -c Release --no-restore
@@ -157,11 +167,16 @@ jobs:
       with:
         dotnet-version: 5.0.x
 
+    - name: Setup .NET 6.0.x SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.100-preview.5.21302.13
+
     - name: Check .NET info
       run: dotnet --info
 
     - name: Install dependencies
-      run: nuget restore
+      run: dotnet restore
 
     - name: Build solution
       run: dotnet build -c Release --no-restore
