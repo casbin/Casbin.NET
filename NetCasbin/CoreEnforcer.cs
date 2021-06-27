@@ -233,7 +233,10 @@ namespace NetCasbin
 
             ClearPolicy();
             adapter.LoadPolicy(model);
+
             model.RefreshPolicyStringSet();
+            model.SortPoliciesByPriority();
+
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -252,6 +255,10 @@ namespace NetCasbin
 
             ClearPolicy();
             await adapter.LoadPolicyAsync(model);
+
+            model.RefreshPolicyStringSet();
+            model.SortPoliciesByPriority();
+
             if (autoBuildRoleLinks)
             {
                 BuildRoleLinks();
@@ -272,6 +279,9 @@ namespace NetCasbin
             }
 
             filteredAdapter.LoadFilteredPolicy(model, filter);
+
+            model.RefreshPolicyStringSet();
+            model.SortPoliciesByPriority();
 
             if (autoBuildRoleLinks)
             {
@@ -294,6 +304,9 @@ namespace NetCasbin
             }
 
             await filteredAdapter.LoadFilteredPolicyAsync(model, filter);
+
+            model.RefreshPolicyStringSet();
+            model.SortPoliciesByPriority();
 
             if (autoBuildRoleLinks)
             {

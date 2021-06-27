@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
 
@@ -154,6 +153,12 @@ namespace NetCasbin.Model
             {
                 return false;
             }
+
+            if (TryGetPriorityIndex(out int index))
+            {
+                return TryAddPolicyByPriority(rule, index);
+            }
+
             Policy.Add(rule);
             PolicyStringSet.Add(Utility.RuleToString(rule));
             return true;
@@ -183,6 +188,59 @@ namespace NetCasbin.Model
         {
             Policy.Clear();
             PolicyStringSet.Clear();
+        }
+
+        private bool TryAddPolicyByPriority(List<string> rule, int priorityIndex)
+        {
+            if (int.TryParse(rule[priorityIndex], out int priority) is false)
+            {
+                return false;
+            }
+
+            bool LastLessOrEqualPriority(List<string> p)
+            {
+                return int.Parse(p[priorityIndex]) <= priority;
+            }
+
+            int lastIndex = Policy.FindLastIndex(LastLessOrEqualPriority);
+            Policy.Insert(lastIndex + 1, rule);
+            PolicyStringSet.Add(Utility.RuleToString(rule));
+            return true;
+        }
+
+        private bool TryGetPriorityIndex(out int index)
+        {
+            if (Tokens is null)
+            {
+                index = -1;
+                return false;
+            }
+            return Tokens.TryGetValue($"{Key}_priority", out index);
+        }
+
+        internal bool TrySortPoliciesByPriority()
+        {
+            if (TryGetPriorityIndex(out int priorityIndex) is false)
+            {
+                return false;
+            }
+
+            int PolicyComparison(List<string> p1, List<string> p2)
+            {
+                string priorityString1 = p1[priorityIndex];
+                string priorityString2 = p2[priorityIndex];
+
+                if (int.TryParse(priorityString1, out int priority1) is false
+                    || int.TryParse(priorityString2, out int priority2) is false)
+                {
+                    return string.CompareOrdinal(priorityString1, priorityString2);
+                }
+
+                return priority1 - priority2;
+            }
+
+            Policy.Sort(PolicyComparison);
+            return true;
         }
     }
 }
