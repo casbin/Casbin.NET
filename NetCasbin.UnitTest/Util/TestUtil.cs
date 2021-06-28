@@ -25,17 +25,21 @@ namespace NetCasbin.UnitTest.Util
             Assert.Equal(res, e.Enforce(sub, obj, act));
         }
 
-#if !NET452
-        internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
+        internal static async Task TestEnforceAsync(Enforcer e, object sub, object obj, string act, bool res)
         {
-            var myRes = e.EnforceEx(sub, obj, act).Explains.ToList();
-            string message = "Key: " + myRes + ", supposed to be " + res;
-            if (myRes.Count > 0)
-            {
-                Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
-            }
+            Assert.Equal(res, await e.EnforceAsync(sub, obj, act));
         }
-#else
+
+        internal static void TestEnforceWithMatcher(this Enforcer e, string matcher, object sub, object obj, string act, bool res)
+        {
+            Assert.Equal(res, e.EnforceWithMatcher(matcher, sub, obj, act));
+        }
+
+        internal static async Task TestEnforceWithMatcherAsync(this Enforcer e, string matcher, object sub, object obj, string act, bool res)
+        {
+            Assert.Equal(res, await e.EnforceWithMatcherAsync(matcher, sub, obj, act));
+        }
+
         internal static void TestEnforceEx(Enforcer e, object sub, object obj, string act, List<string> res)
         {
             var myRes = e.EnforceEx(sub, obj, act).Item2.ToList();
@@ -45,7 +49,6 @@ namespace NetCasbin.UnitTest.Util
                 Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
             }
         }
-#endif
 
         internal static async Task TestEnforceExAsync(Enforcer e, object sub, object obj, string act, List<string> res)
         {
@@ -57,9 +60,24 @@ namespace NetCasbin.UnitTest.Util
             }
         }
 
-        internal static async Task TestEnforceAsync(Enforcer e, object sub, object obj, string act, bool res)
+        internal static void TestEnforceExWithMatcher(this Enforcer e, string matcher, object sub, object obj, string act, List<string> res)
         {
-            Assert.Equal(res, await e.EnforceAsync(sub, obj, act));
+            var myRes = e.EnforceExWithMatcher(matcher, sub, obj, act).Item2.ToList();
+            string message = "Key: " + myRes + ", supposed to be " + res;
+            if (myRes.Count > 0)
+            {
+                Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
+            }
+        }
+
+        internal static async Task TestEnforceExWithMatcherAsync(this Enforcer e, string matcher, object sub, object obj, string act, List<string> res)
+        {
+            var myRes = (await e.EnforceExWithMatcherAsync(matcher, sub, obj, act)).Item2.ToList();
+            string message = "Key: " + myRes + ", supposed to be " + res;
+            if (myRes.Count > 0)
+            {
+                Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
+            }
         }
 
         internal static void TestEnforceWithoutUsers(Enforcer e, string obj, string act, bool res)
