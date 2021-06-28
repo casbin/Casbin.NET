@@ -131,6 +131,15 @@ namespace NetCasbin.Model
             }
         }
 
+        public void SortPoliciesByPriority()
+        {
+            foreach (Assertion assertion in Model.Values
+                .SelectMany(pair => pair.Values))
+            {
+                assertion.TrySortPoliciesByPriority();
+            }
+        }
+
         public void ClearPolicy()
         {
             if (Model.ContainsKey(PermConstants.Section.PolicySection))
