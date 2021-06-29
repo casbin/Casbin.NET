@@ -18,6 +18,7 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
         internal readonly string _keyMatchCustomModelText = ReadTestFile("keymatch_custom_model.conf");
         internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
+        internal readonly string _priorityExplicitModelText = ReadTestFile("priority_explicit_model.conf");
         internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
         internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
         internal readonly string _rbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
@@ -32,6 +33,7 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _keyMatchPolicyText = ReadTestFile("keymatch_policy.csv");
         internal readonly string _keyMatch2PolicyText = ReadTestFile("keymatch2_policy.csv");
         internal readonly string _priorityPolicyText = ReadTestFile("priority_policy.csv");
+        internal readonly string _priorityExplicitPolicyText = ReadTestFile("priority_explicit_policy.csv");
         internal readonly string _priorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
         internal readonly string _rbacPolicyText = ReadTestFile("rbac_policy.csv");
         internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_policy.csv");
@@ -89,6 +91,11 @@ namespace Casbin.UnitTests.Fixtures
             return GetNewTestModel(_priorityModelText, _priorityPolicyText);
         }
 
+        public IModel GetNewPriorityExplicitTestModel()
+        {
+            return GetNewTestModel(_priorityExplicitModelText, _priorityExplicitPolicyText);
+        }
+
         public IModel GetNewRbacTestModel()
         {
             return GetNewTestModel(_rbacModelText, _rbacPolicyText);
@@ -133,6 +140,7 @@ namespace Casbin.UnitTests.Fixtures
                 fileAdapter.LoadPolicy(model);
             }
             model.RefreshPolicyStringSet();
+            model.SortPoliciesByPriority();
             return model;
         }
 

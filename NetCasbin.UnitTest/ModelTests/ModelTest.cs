@@ -465,6 +465,34 @@ namespace Casbin.UnitTests.ModelTests
         }
 
         [Fact]
+        public void TestPriorityExplicitModel()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewPriorityExplicitTestModel());
+            e.BuildRoleLinks();
+
+            TestEnforce(e, "alice", "data1", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", true);
+            TestEnforce(e, "data1_deny_group", "data1", "read", false);
+            TestEnforce(e, "data1_deny_group", "data1", "write", false);
+            TestEnforce(e, "data2_allow_group", "data2", "read", true);
+            TestEnforce(e, "data2_allow_group", "data2", "write", true);
+
+            // add a higher priority policy
+            e.AddPolicy("1", "bob", "data2", "write", "deny");
+
+            TestEnforce(e, "alice", "data1", "write", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+            TestEnforce(e, "bob", "data2", "read", false);
+            TestEnforce(e, "bob", "data2", "write", false);
+            TestEnforce(e, "data1_deny_group", "data1", "read", false);
+            TestEnforce(e, "data1_deny_group", "data1", "write", false);
+            TestEnforce(e, "data2_allow_group", "data2", "read", true);
+            TestEnforce(e, "data2_allow_group", "data2", "write", true);
+        }
+
+        [Fact]
         public void TestKeyMatch2Model()
         {
             var e = new Enforcer(_testModelFixture.GetNewKeyMatch2TestModel());

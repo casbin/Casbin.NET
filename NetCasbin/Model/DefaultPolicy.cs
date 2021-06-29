@@ -94,6 +94,15 @@ namespace Casbin.Model
             }
         }
 
+        public void SortPoliciesByPriority()
+        {
+            foreach (Assertion assertion in Sections.Values
+                .SelectMany(pair => pair.Values))
+            {
+                assertion.TrySortPoliciesByPriority();
+            }
+        }
+
         public void ClearPolicy()
         {
             if (Sections.ContainsKey(PermConstants.Section.PolicySection))

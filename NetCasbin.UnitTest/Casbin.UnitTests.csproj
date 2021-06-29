@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net5;netcoreapp3.1;net461;net452</TargetFrameworks>
+    <TargetFrameworks>net6;net5;netcoreapp3.1;net461;net452</TargetFrameworks>
     <DebugType>full</DebugType>
     <IsPackable>false</IsPackable>
     <LangVersion>9.0</LangVersion>
@@ -86,6 +86,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="examples\keymatch_policy.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="examples\priority_explicit_model.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="examples\priority_explicit_policy.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="examples\priority_indeterminate_policy.csv">

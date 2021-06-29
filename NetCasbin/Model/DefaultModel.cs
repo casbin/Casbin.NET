@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Casbin.Config;
-using Casbin.Rbac;
 using Casbin.Util;
 
 namespace Casbin.Model
@@ -176,7 +175,6 @@ namespace Casbin.Model
         }
 
         #region IPolicy
-
         public void BuildIncrementalRoleLink(PolicyOperation policyOperation, string section,
             string policyType, IEnumerable<string> rule)
             => PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
@@ -190,6 +188,9 @@ namespace Casbin.Model
 
         public void RefreshPolicyStringSet()
             => PolicyManager.Policy.RefreshPolicyStringSet();
+
+        public void SortPoliciesByPriority()
+            => PolicyManager.Policy.SortPoliciesByPriority();
 
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
             => PolicyManager.GetPolicy(section, policyType);
@@ -225,7 +226,6 @@ namespace Casbin.Model
             => PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
         public void ClearPolicy() => PolicyManager.ClearPolicy();
-
         #endregion
     }
 }

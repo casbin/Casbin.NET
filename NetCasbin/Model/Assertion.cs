@@ -142,6 +142,12 @@ namespace Casbin.Model
             {
                 return false;
             }
+
+            if (TryGetPriorityIndex(out int index))
+            {
+                return TryAddPolicyByPriority(ruleList, index);
+            }
+
             Policy.Add(ruleList);
             PolicyStringSet.Add(Utility.RuleToString(ruleList));
             return true;
@@ -172,6 +178,59 @@ namespace Casbin.Model
         {
             Policy.Clear();
             PolicyStringSet.Clear();
+        }
+
+        private bool TryAddPolicyByPriority(IReadOnlyList<string> rule, int priorityIndex)
+        {
+            if (int.TryParse(rule[priorityIndex], out int priority) is false)
+            {
+                return false;
+            }
+
+            bool LastLessOrEqualPriority(IReadOnlyList<string> p)
+            {
+                return int.Parse(p[priorityIndex]) <= priority;
+            }
+
+            int lastIndex = Policy.FindLastIndex(LastLessOrEqualPriority);
+            Policy.Insert(lastIndex + 1, rule);
+            PolicyStringSet.Add(Utility.RuleToString(rule));
+            return true;
+        }
+
+        private bool TryGetPriorityIndex(out int index)
+        {
+            if (Tokens is null)
+            {
+                index = -1;
+                return false;
+            }
+            return Tokens.TryGetValue($"{Key}_priority", out index);
+        }
+
+        internal bool TrySortPoliciesByPriority()
+        {
+            if (TryGetPriorityIndex(out int priorityIndex) is false)
+            {
+                return false;
+            }
+
+            int PolicyComparison(IReadOnlyList<string> p1, IReadOnlyList<string> p2)
+            {
+                string priorityString1 = p1[priorityIndex];
+                string priorityString2 = p2[priorityIndex];
+
+                if (int.TryParse(priorityString1, out int priority1) is false
+                    || int.TryParse(priorityString2, out int priority2) is false)
+                {
+                    return string.CompareOrdinal(priorityString1, priorityString2);
+                }
+
+                return priority1 - priority2;
+            }
+
+            Policy.Sort(PolicyComparison);
+            return true;
         }
     }
 }

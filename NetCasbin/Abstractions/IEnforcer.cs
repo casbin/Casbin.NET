@@ -13,7 +13,6 @@ namespace Casbin
     /// </summary>
     public interface IEnforcer
     {
-
         #region Options
         public bool Enabled { get; set; }
         public bool EnabledCache { get; set; }
@@ -66,7 +65,6 @@ namespace Casbin
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
 #if !NET45
-
         public (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceEx(params object[] requestValues);
 #else
@@ -87,6 +85,55 @@ namespace Casbin
         public Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
             EnforceExAsync(params object[] requestValues);
 #endif
-    }
 
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public bool EnforceWithMatcher(string matcher, params object[] requestValues);
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public Task<bool> EnforceWithMatcherAsync(string matcher, params object[] requestValues);
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceExWithMatcher(string matcher, params object[] requestValues);
+#else
+        public Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceExWithMatcher(string matcher,params object[] requestValues);
+#endif
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExWithMatcherAsync(string matcher, params object[] requestValues);
+#else
+        public Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExWithMatcherAsync(string matcher,params object[] requestValues);
+#endif
+    }
 }

@@ -916,6 +916,72 @@ namespace Casbin.UnitTests.ModelTests
 #endif
         #endregion
 
+        #region EnforceWithMatcher and EnforceExWithMatcher API
+        [Fact]
+        public void TestEnforceWithMatcherApi()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+            e.TestEnforceWithMatcher(matcher, "alice", "data1", "read", false);
+            e.TestEnforceWithMatcher(matcher, "alice", "data1", "write", false);
+            e.TestEnforceWithMatcher(matcher, "alice", "data2", "read", false);
+            e.TestEnforceWithMatcher(matcher, "alice", "data2", "write", true);
+            e.TestEnforceWithMatcher(matcher, "bob", "data1", "read", true);
+            e.TestEnforceWithMatcher(matcher, "bob", "data1", "write", false);
+            e.TestEnforceWithMatcher(matcher, "bob", "data2", "read", false);
+            e.TestEnforceWithMatcher(matcher, "bob", "data2", "write", false);
+        }
+
+        [Fact]
+        public async Task TestEnforceWithMatcherAsync()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+            await e.TestEnforceWithMatcherAsync(matcher, "alice", "data1", "read", false);
+            await e.TestEnforceWithMatcherAsync(matcher, "alice", "data1", "write", false);
+            await e.TestEnforceWithMatcherAsync(matcher, "alice", "data2", "read", false);
+            await e.TestEnforceWithMatcherAsync(matcher, "alice", "data2", "write", true);
+            await e.TestEnforceWithMatcherAsync(matcher, "bob", "data1", "read", true);
+            await e.TestEnforceWithMatcherAsync(matcher, "bob", "data1", "write", false);
+            await e.TestEnforceWithMatcherAsync(matcher, "bob", "data2", "read", false);
+            await e.TestEnforceWithMatcherAsync(matcher, "bob", "data2", "write", false);
+        }
+
+        [Fact]
+        public void TestEnforceExWithMatcherApi()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+            e.TestEnforceExWithMatcher(matcher, "alice", "data1", "read", new List<string>());
+            e.TestEnforceExWithMatcher(matcher, "alice", "data1", "write", new List<string>());
+            e.TestEnforceExWithMatcher(matcher, "alice", "data2", "read", new List<string>());
+            e.TestEnforceExWithMatcher(matcher, "alice", "data2", "write", new List<string> { "bob", "data2", "write" });
+            e.TestEnforceExWithMatcher(matcher, "bob", "data1", "read", new List<string> { "alice", "data1", "read" });
+            e.TestEnforceExWithMatcher(matcher, "bob", "data1", "write", new List<string>());
+            e.TestEnforceExWithMatcher(matcher, "bob", "data2", "read", new List<string>());
+            e.TestEnforceExWithMatcher(matcher, "bob", "data2", "write", new List<string>());
+        }
+
+        [Fact]
+        public async Task TestEnforceExWithMatcherAsync()
+        {
+            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data1", "read", new List<string>());
+            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data1", "write", new List<string>());
+            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data2", "read", new List<string>());
+            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data2", "write", new List<string> { "bob", "data2", "write" });
+            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "read", new List<string> { "alice", "data1", "read" });
+            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "write", new List<string>());
+            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "read", new List<string>());
+            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "write", new List<string>());
+        }
+        #endregion
+
         [Fact]
         public void TestEnforceWithMultipleRoleManager()
         {

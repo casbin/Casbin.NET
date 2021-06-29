@@ -34,6 +34,8 @@ namespace Casbin
 
         public void RefreshPolicyStringSet();
 
+        public void SortPoliciesByPriority();
+
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType);
 
         public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
