@@ -6,9 +6,9 @@ namespace Casbin
 {
     public interface IExpressionHandler
     {
-        public IDictionary<string, int> RequestTokens { get; }
+        public IReadOnlyDictionary<string, int> RequestTokens { get; }
 
-        public IDictionary<string, int> PolicyTokens { get; }
+        public IReadOnlyDictionary<string, int> PolicyTokens { get; }
 
         public IDictionary<string, Parameter> Parameters { get; } 
 

@@ -90,7 +90,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public bool Enforce(params object[] requestValues)
+        public bool Enforce(EnforceContext context, params object[] requestValues)
         {
             if (Enabled is false)
             {
@@ -99,12 +99,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return InternalEnforce(PolicyManager, requestValues);
+                return InternalEnforce(context, PolicyManager, requestValues);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return InternalEnforce(PolicyManager, requestValues);
+                return InternalEnforce(context, PolicyManager, requestValues);
             }
 
             string key = string.Join("$$", requestValues);
@@ -117,7 +117,7 @@ namespace Casbin
                 return cachedResult;
             }
 
-            bool result  = InternalEnforce(PolicyManager, requestValues);
+            bool result  = InternalEnforce(context, PolicyManager, requestValues);
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
             return result;
@@ -130,7 +130,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public async Task<bool> EnforceAsync(params object[] requestValues)
+        public async Task<bool> EnforceAsync(EnforceContext context, params object[] requestValues)
         {
             if (Enabled is false)
             {
@@ -139,12 +139,12 @@ namespace Casbin
 
             if (EnabledCache is false)
             {
-                return await InternalEnforceAsync(PolicyManager, requestValues);
+                return await InternalEnforceAsync(context, PolicyManager, requestValues);
             }
 
             if (requestValues.Any(requestValue => requestValue is not string))
             {
-                return await InternalEnforceAsync(PolicyManager, requestValues);
+                return await InternalEnforceAsync(context, PolicyManager, requestValues);
             }
 
             string key = string.Join("$$", requestValues);
@@ -159,321 +159,29 @@ namespace Casbin
                 return cachedResult;
             }
 
-            bool result = await InternalEnforceAsync(PolicyManager, requestValues);
+            bool result = await InternalEnforceAsync(context, PolicyManager, requestValues);
 
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
             return result;
         }
 
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
-        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
-            EnforceEx(params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            if (Enabled is false)
-            {
-                return (true, explains);
-            }
-
-            if (EnabledCache is false)
-            {
-                return (InternalEnforce(PolicyManager, requestValues, null, explains), explains);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return (InternalEnforce(PolicyManager, requestValues, null, explains), explains);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-            {
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                return (cachedResult, explains);
-            }
-
-            bool result  = InternalEnforce(PolicyManager, requestValues, null, explains);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            EnforceCache.TrySetResult(requestValues, key, result);
-            return (result, explains);
-        }
-#else
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-        public Tuple<bool, IEnumerable<IEnumerable<string>>>
-            EnforceEx(params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            bool result = InternalEnforce(PolicyManager, requestValues, null, explains);
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
-        }
-#endif
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
-        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
-            EnforceExAsync(params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            if (Enabled is false)
-            {
-                return (true, explains);
-            }
-
-            if (EnabledCache is false)
-            {
-                return (await InternalEnforceAsync(PolicyManager, requestValues, null, explains), explains);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return (await InternalEnforceAsync(PolicyManager, requestValues, null, explains), explains);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-            {
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                return (cachedResult, explains);
-            }
-
-            bool result  = await InternalEnforceAsync(PolicyManager, requestValues, null, explains);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            await EnforceCache.TrySetResultAsync(requestValues, key, result);
-            return (result, explains);
-        }
-#else
-        public async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
-            EnforceExAsync(params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            bool result = await InternalEnforceAsync(PolicyManager, requestValues, null, explains);
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
-        }
-#endif
-
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request.</returns>
-        public bool EnforceWithMatcher(string matcher, params object[] requestValues)
-        {
-            if (Enabled is false)
-            {
-                return true;
-            }
-
-            if (EnabledCache is false)
-            {
-                return InternalEnforce(PolicyManager, requestValues, matcher);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return InternalEnforce(PolicyManager, requestValues, matcher);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-            {
-#if !NET45
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-#endif
-                return cachedResult;
-            }
-
-            bool result = InternalEnforce(PolicyManager, requestValues, matcher);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            EnforceCache.TrySetResult(requestValues, key, result);
-            return result;
-        }
-
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request.</returns>
-        public async Task<bool> EnforceWithMatcherAsync(string matcher, params object[] requestValues)
-        {
-            if (Enabled is false)
-            {
-                return true;
-            }
-
-            if (EnabledCache is false)
-            {
-                return await InternalEnforceAsync(PolicyManager, requestValues, matcher);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return await InternalEnforceAsync(PolicyManager, requestValues, matcher);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            bool? tryGetCachedResult = await EnforceCache.TryGetResultAsync(requestValues, key);
-            if (tryGetCachedResult.HasValue)
-            {
-                bool cachedResult = tryGetCachedResult.Value;
-#if !NET45
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-#endif
-                return cachedResult;
-            }
-
-            bool result = await InternalEnforceAsync(PolicyManager, requestValues, matcher);
-
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            await EnforceCache.TrySetResultAsync(requestValues, key, result);
-            return result;
-        }
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
-        public (bool Result, IEnumerable<IEnumerable<string>> Explains)
-            EnforceExWithMatcher(string matcher, params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            if (Enabled is false)
-            {
-                return (true, explains);
-            }
-
-            if (EnabledCache is false)
-            {
-                return (InternalEnforce(PolicyManager, requestValues, matcher, explains), explains);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return (InternalEnforce(PolicyManager, requestValues, matcher, explains), explains);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-            {
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                return (cachedResult, explains);
-            }
-
-            bool result = InternalEnforce(PolicyManager, requestValues, matcher, explains);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            EnforceCache.TrySetResult(requestValues, key, result);
-            return (result, explains);
-        }
-#else
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-        public Tuple<bool, IEnumerable<IEnumerable<string>>>
-            EnforceExWithMatcher(string matcher, params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            bool result = InternalEnforce(PolicyManager, requestValues, matcher, explains);
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
-        }
-#endif
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
-        public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
-            EnforceExWithMatcherAsync(string matcher, params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            if (Enabled is false)
-            {
-                return (true, explains);
-            }
-
-            if (EnabledCache is false)
-            {
-                return (await InternalEnforceAsync(PolicyManager, requestValues, matcher, explains), explains);
-            }
-
-            if (requestValues.Any(requestValue => requestValue is not string))
-            {
-                return (await InternalEnforceAsync(PolicyManager, requestValues, matcher, explains), explains);
-            }
-
-            string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-            {
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
-                return (cachedResult, explains);
-            }
-
-            bool result = await InternalEnforceAsync(PolicyManager, requestValues, matcher, explains);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-            await EnforceCache.TrySetResultAsync(requestValues, key, result);
-            return (result, explains);
-        }
-#else
-        public async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
-            EnforceExWithMatcherAsync(string matcher, params object[] requestValues)
-        {
-            var explains = new List<IEnumerable<string>>();
-            bool result = await InternalEnforceAsync(PolicyManager, requestValues, matcher, explains);
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
-        }
-#endif
-
-        private async Task<bool> InternalEnforceAsync(IPolicyManager policyManager, IReadOnlyList<object> requestValues,
-            string matcher = null, ICollection<IEnumerable<string>> explains = null)
+        private async Task<bool> InternalEnforceAsync(EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
         {
             if (policyManager.IsSynchronized)
             {
-                return await Task.Run(() => InternalEnforce(requestValues, matcher, explains));
+                return await Task.Run(() => InternalEnforce(context, requestValues));
             }
-            return InternalEnforce(policyManager, requestValues, matcher, explains);
+            return InternalEnforce(context, policyManager, requestValues);
         }
 
-        private bool InternalEnforce(IPolicyManager policyManager, IReadOnlyList<object> requestValues,
-            string matcher = null, ICollection<IEnumerable<string>> explains = null)
+        private bool InternalEnforce(EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
         {
+            policyManager.StartRead();
+
             try
             {
-                policyManager.StartRead();
-                return InternalEnforce(requestValues, matcher, explains);
+                return InternalEnforce(context, requestValues);
             }
             finally
             {
@@ -481,22 +189,23 @@ namespace Casbin
             }
         }
 
-        private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
+        private bool InternalEnforce(EnforceContext context, IReadOnlyList<object> requestValues)
         {
-            bool explain = explains is not null;
-            string effect = Model.Sections[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
-            var policyList = Model.Sections[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
-            int policyCount = Model.Sections[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
-            string expressionString = matcher is not null
-                ? Utility.EscapeAssertion(matcher)
-                : Model.Sections[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+            string expressionString = context.Matcher;
+            string effect = context.Effect;
+            var policyList = context.Policies;
+            int policyCount = policyList.Count;
 
-            int requestTokenCount = ExpressionHandler.RequestTokens.Count;
+            bool explain = context.Explain;
+            var explanations = context.Explanations;
+
+            int requestTokenCount = context.RequestTokens.Count;
             if (requestTokenCount != requestValues.Count)
             {
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Count}.");
             }
-            int policyTokenCount = ExpressionHandler.PolicyTokens.Count;
+
+            int policyTokenCount = context.PolicyTokens.Count;
 
             ExpressionHandler.SetRequestParameters(requestValues);
 
@@ -507,7 +216,7 @@ namespace Casbin
             bool isChainEffector = chainEffector is not null;
             if (isChainEffector)
             {
-                chainEffector.StartChain(effect);
+                chainEffector.StartChain(context.Effect);
 
                 if (policyCount is not 0)
                 {
@@ -549,7 +258,7 @@ namespace Casbin
 
                         if (explain && chainEffector.HitPolicy)
                         {
-                            explains.Add(policyValues);
+                            explanations.Add(policyValues);
                         }
 
                         if (chainResult is false || chainEffector.CanChain is false)
@@ -578,14 +287,14 @@ namespace Casbin
 
                     if (explain && chainEffector.HitPolicy)
                     {
-                        explains.Add(policyValues);
+                        explanations.Add(policyValues);
                     }
                 }
 
 #if !NET45
                 if (explain)
                 {
-                    Logger?.LogEnforceResult(requestValues, finalResult, explains);
+                    Logger?.LogEnforceResult(requestValues, finalResult, explanations);
                 }
                 else
                 {
@@ -667,13 +376,13 @@ namespace Casbin
 
             if (explain && hitPolicyIndex is not -1)
             {
-                explains.Add(policyList[hitPolicyIndex]);
+                explanations.Add(policyList[hitPolicyIndex]);
             }
 
 #if !NET45
             if (explain)
             {
-                Logger?.LogEnforceResult(requestValues, finalResult, explains);
+                Logger?.LogEnforceResult(requestValues, finalResult, explanations);
             }
             else
             {
@@ -688,7 +397,7 @@ namespace Casbin
             return expressionResult ? PolicyEffect.Allow : PolicyEffect.Indeterminate;
         }
 
-        private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
+        private static string RewriteEval(string expressionString, IReadOnlyDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
         {
             if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
             {

@@ -24,5 +24,10 @@ namespace Casbin.Extensions
         {
             return model.Sections[PermConstants.Section.RoleSection][roleType].RoleManager;
         }
+
+        internal static Assertion GetRequiredAssertion(this IModel model, string section, string type)
+        {
+            return model.PolicyManager.Policy.GetRequiredAssertion(section, type);
+        }
     }
 }

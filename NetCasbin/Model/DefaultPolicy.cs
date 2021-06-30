@@ -41,7 +41,7 @@ namespace Casbin.Model
                 return;
             }
 
-            Assertion assertion = GetExistAssertion(section, policyType);
+            Assertion assertion = GetRequiredAssertion(section, policyType);
             assertion.BuildIncrementalRoleLink(policyOperation, rule);
         }
 
@@ -60,7 +60,7 @@ namespace Casbin.Model
                 return;
             }
 
-            Assertion assertion = GetExistAssertion(section, policyType);
+            Assertion assertion = GetRequiredAssertion(section, policyType);
             assertion.BuildIncrementalRoleLinks(policyOperation, rules);
         }
 
@@ -161,20 +161,20 @@ namespace Casbin.Model
 
         public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
         {
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             return assertion.Contains(rule);
         }
 
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
             return ruleArray.Length == 0 || ruleArray.Any(assertion.Contains);
         }
 
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
         {
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             return assertion.TryAddPolicy(rule);
         }
 
@@ -185,7 +185,7 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(rules));
             }
 
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (ruleArray.Length == 0)
@@ -202,7 +202,7 @@ namespace Casbin.Model
 
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
         {
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             return assertion.TryRemovePolicy(rule);
         }
 
@@ -213,7 +213,7 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(rules));
             }
 
-            var assertion = GetExistAssertion(section, policyType);
+            var assertion = GetRequiredAssertion(section, policyType);
             var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
             if (ruleArray.Length == 0)
@@ -297,30 +297,38 @@ namespace Casbin.Model
             return values;
         }
 
-        internal Assertion GetExistAssertion(string section, string policyType)
+        public Assertion GetRequiredAssertion(string section, string policyType)
         {
-            bool exist = TryGetExistAssertion(section, policyType, out var assertion);
-            if (!exist)
+            bool exist = TryGetAssertion(section, policyType, out Assertion assertion);
+            if (exist is false)
             {
                 throw new ArgumentException($"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
             }
             return assertion;
         }
 
-        private bool TryGetExistAssertion(string section, string policyType, out Assertion returnAssertion)
+        private bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
         {
-            if (Sections[section].TryGetValue(policyType, out var assertion))
+            if (Sections.TryGetValue(section, out Dictionary<string, Assertion> aessertions) is false)
             {
-                if (assertion is null)
-                {
-                    returnAssertion = default;
-                    return false;
-                }
-                returnAssertion = assertion;
-                return true;
+                returnAssertion = default;
+                return false;
             }
-            returnAssertion = default;
-            return false;
+
+            if (aessertions.TryGetValue(policyType, out Assertion assertion) is false)
+            {
+                returnAssertion = default;
+                return false;
+            }
+
+            if (assertion is null)
+            {
+                returnAssertion = default;
+                return false;
+            }
+
+            returnAssertion = assertion;
+            return true;
         }
     }
 }
