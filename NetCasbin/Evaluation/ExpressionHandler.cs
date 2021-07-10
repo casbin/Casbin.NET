@@ -42,9 +42,9 @@ namespace Casbin.Evaluation
             _orderedParameters = new Parameter[parametersCount];
         }
 
-        public IDictionary<string, int> RequestTokens { get; }
+        public IReadOnlyDictionary<string, int> RequestTokens { get; }
 
-        public IDictionary<string, int> PolicyTokens { get; }
+        public IReadOnlyDictionary<string, int> PolicyTokens { get; }
 
         public IDictionary<string, Parameter> Parameters { get; }
             = new Dictionary<string, Parameter>();

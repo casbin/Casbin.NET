@@ -17,7 +17,7 @@ namespace Casbin.Model
 
         public string Value { get; internal set;  }
 
-        public IDictionary<string, int> Tokens { get; internal set;  }
+        public IReadOnlyDictionary<string, int> Tokens { get; internal set; }
 
         public IRoleManager RoleManager { get; internal set; }
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Casbin.Evaluation;
@@ -197,6 +198,22 @@ namespace Casbin.Extensions
         }
         #endregion
 
+        #region Model management
+        /// <summary>
+        /// LoadModel reloads the model from the model CONF file. Because the policy is
+        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
+        /// calling LoadPolicy().
+        /// </summary>
+        public static void LoadModel(this IEnforcer enforcer)
+        {
+            if (enforcer.ModelPath is null)
+            {
+                return;
+            }
+            enforcer.Model = DefaultModel.CreateFromFile(enforcer.ModelPath);
+        }
+        #endregion
+
         #region Poilcy management
         /// <summary>
         /// Reloads the policy from file/database.
@@ -337,21 +354,7 @@ namespace Casbin.Extensions
         }
         #endregion
 
-        
-        /// <summary>
-        /// LoadModel reloads the model from the model CONF file. Because the policy is
-        /// Attached to a model, so the policy is invalidated and needs to be reloaded by
-        /// calling LoadPolicy().
-        /// </summary>
-        public static void LoadModel(this IEnforcer enforcer)
-        {
-            if (enforcer.ModelPath is null)
-            {
-                return;
-            }
-            enforcer.Model = DefaultModel.CreateFromFile(enforcer.ModelPath);
-        }
-
+        #region Role management
         /// <summary>
         /// Manually rebuilds the role inheritance relations.
         /// </summary>
@@ -384,5 +387,186 @@ namespace Casbin.Extensions
             enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
             return enforcer;
         }
+        #endregion
+
+        #region Enforce Cotext
+        public static EnforceContext CreatContext(this IEnforcer enforcer, bool explain)
+        {
+            return EnforceContext.Create(enforcer, explain);
+        }
+
+        public static EnforceContext CreatContext(this IEnforcer enforcer,
+            string requestType = PermConstants.DefaultRequestType,
+            string policyType = PermConstants.DefaultPolicyType,
+            string effectType = PermConstants.DefaultPolicyEffectType,
+            string matcherType = PermConstants.DefaultMatcherType,
+            bool explain = false)
+        {
+            return EnforceContext.Create(enforcer, requestType, policyType, effectType, matcherType, explain);
+        }
+
+        public static EnforceContext CreatContextWithMatcher(this IEnforcer enforcer, string matcher, bool explain)
+        {
+            return EnforceContext.CreatWithMatcher(enforcer, matcher, explain);
+        }
+
+        public static EnforceContext CreatContextWithMatcher(this IEnforcer enforcer,
+            string matcher,
+            string requestType = PermConstants.DefaultRequestType,
+            string policyType = PermConstants.DefaultPolicyType,
+            string effectType = PermConstants.DefaultPolicyEffectType,
+            bool explain = false)
+        {
+            return EnforceContext.CreatWithMatcher(enforcer, matcher, requestType, policyType, effectType, explain);
+        }
+        #endregion
+
+        #region Enforce extensions
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public static bool Enforce(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext();
+            return enforcer.Enforce(context, requestValues);
+        }
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+        public static Task<bool> EnforceAsync(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext();
+            return enforcer.EnforceAsync(context, requestValues);
+        }
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceEx(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext(true);
+            return (enforcer.Enforce(context, requestValues), context.Explanations);
+        }
+#else
+        public static Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceEx(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext(true);
+            bool result = enforcer.Enforce(context, requestValues);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
+        }
+#endif
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public async static Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext(true);
+            return (await enforcer.EnforceAsync(context, requestValues), context.Explanations);
+        }
+#else
+        public async static Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContext(true);
+            bool result = await enforcer.EnforceAsync(context, requestValues);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
+        }
+#endif
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public static bool EnforceWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher);
+            return enforcer.Enforce(context, requestValues);
+        }
+
+        /// <summary>
+        /// Decides whether a "subject" can access a "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request.</returns>
+        public static Task<bool> EnforceWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher);
+            return enforcer.EnforceAsync(context, requestValues);
+        }
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+            EnforceExWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            return (enforcer.Enforce(context, requestValues), context.Explanations);
+        }
+#else
+        public static Tuple<bool, IEnumerable<IEnumerable<string>>>
+            EnforceExWithMatcher(this IEnforcer enforcer, string matcher,params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            bool result = enforcer.Enforce(context, requestValues);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
+        }
+#endif
+
+        /// <summary>
+        /// Explains enforcement by informing matched rules
+        /// </summary>
+        /// <param name="matcher">The custom matcher.</param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the request and explains.</returns>
+#if !NET45
+        public async static Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+            EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            return (await enforcer.EnforceAsync(context, requestValues), context.Explanations);
+        }
+#else
+        public async static Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+            EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher,params object[] requestValues)
+        {
+            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            bool result = await enforcer.EnforceAsync(context, requestValues);
+            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
+        }
+#endif
+        #endregion
     }
 }

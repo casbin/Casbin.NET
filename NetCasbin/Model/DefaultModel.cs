@@ -111,11 +111,12 @@ namespace Casbin.Model
 
                 if (tokens.Length != 0)
                 {
-                    assertion.Tokens = new Dictionary<string, int>();
+                    var tokenDic = new Dictionary<string, int>();
                     for (int i = 0; i < tokens.Length; i++)
                     {
-                        assertion.Tokens.Add($"{key}_{tokens[i]}", i);
+                        tokenDic.Add($"{key}_{tokens[i]}", i);
                     }
+                    assertion.Tokens = tokenDic;
                 }
             }
             else
@@ -226,6 +227,8 @@ namespace Casbin.Model
             => PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
         public void ClearPolicy() => PolicyManager.ClearPolicy();
+
+        public Assertion GetRequiredAssertion(string section, string type) => PolicyManager.Policy.GetRequiredAssertion(section, type);
         #endregion
     }
 }

@@ -7,6 +7,8 @@ namespace Casbin
    {
         public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
+        public Assertion GetRequiredAssertion(string section, string type);
+
         /// <summary>
         /// Provides incremental build the role inheritance relation.
         /// </summary>
