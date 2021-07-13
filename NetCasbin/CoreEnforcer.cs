@@ -825,64 +825,6 @@ namespace NetCasbin
             return Task.FromResult(InternalEnforce(requestValues, matcher, explains));
         }
 
-        private class EnforcerVariables
-        {
-            public EnforcerVariables(
-                string effect,
-                bool explain,
-                string expressionString,
-                bool hasEval,
-                IList<List<string>> policyList,
-                int policyCount,
-                int policyTokenCount,
-                int requestTokenCount)
-            {
-                this.Effect = effect;
-                this.Explain = explain;
-                this.ExpressionString = expressionString;
-                this.HasEval = hasEval;
-                this.PolicyList = policyList;
-                this.PolicyCount = policyCount;
-                this.PolicyTokenCount = policyTokenCount;
-                this.RequestTokenCount = requestTokenCount;
-            }
-
-            internal bool Explain { get; }
-            internal string Effect { get; }
-            internal int PolicyCount { get; }
-            internal IList<List<string>> PolicyList { get; }
-            internal int PolicyTokenCount { get; }
-            internal string ExpressionString { get; }
-            internal int RequestTokenCount { get; }
-            internal bool HasEval { get; }
-        }
-
-        private EnforcerVariables GetEnforcerVariables(
-            string matcher,
-            ICollection<IEnumerable<string>> explains)
-        {
-            var explain = explains is not null;
-            var effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
-            var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
-            var policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
-
-            var expressionString = matcher is not null
-                ? Utility.EscapeAssertion(matcher)
-                : model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
-
-            var hasEval = Utility.HasEval(expressionString);
-
-            return new EnforcerVariables(
-                effect,
-                explain,
-                expressionString,
-                hasEval,
-                policyList,
-                policyCount,
-                ExpressionHandler.PolicyTokens.Count,
-                ExpressionHandler.RequestTokens.Count);
-        }
-
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
@@ -894,11 +836,12 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
         {
-            EnforcerVariables enforcerVariables = GetEnforcerVariables(matcher, explains);
-
-            if (enforcerVariables.RequestTokenCount != requestValues.Count)
+            EnforcerVariableStorage variableStorage =
+                EnforcerVariableStorage.Init(matcher, explains, model, ExpressionHandler);
+            
+            if (variableStorage.RequestTokenCount != requestValues.Count)
             {
-                throw new ArgumentException($"Invalid request size: expected {enforcerVariables.RequestTokenCount}, got {requestValues.Count}.");
+                throw new ArgumentException($"Invalid request size: expected {variableStorage.RequestTokenCount}, got {requestValues.Count}.");
             }
 
             ExpressionHandler.SetRequestParameters(requestValues);
@@ -907,35 +850,35 @@ namespace NetCasbin
             IChainEffector chainEffector = _effector as IChainEffector;
             if (chainEffector is not null)
             {
-                return ProcessChainEffector(enforcerVariables, finalResult, requestValues, explains);
+                return ProcessChainEffector(variableStorage, finalResult, requestValues, explains);
             }
 
             int hitPolicyIndex;
-            if (enforcerVariables.PolicyCount != 0)
+            if (variableStorage.PolicyCount != 0)
             {
-                Effect.Effect[] policyEffects = new Effect.Effect[enforcerVariables.PolicyCount];
+                Effect.Effect[] policyEffects = new Effect.Effect[variableStorage.PolicyCount];
 
-                for (int i = 0; i < enforcerVariables.PolicyCount; i++)
+                for (int i = 0; i < variableStorage.PolicyCount; i++)
                 {
-                    IReadOnlyList<string> policyValues = enforcerVariables.PolicyList[i];
+                    IReadOnlyList<string> policyValues = variableStorage.PolicyList[i];
 
-                    if (enforcerVariables.PolicyTokenCount != policyValues.Count)
+                    if (variableStorage.PolicyTokenCount != policyValues.Count)
                     {
-                        throw new ArgumentException($"Invalid policy size: expected {enforcerVariables.PolicyTokenCount}, got {policyValues.Count}.");
+                        throw new ArgumentException($"Invalid policy size: expected {variableStorage.PolicyTokenCount}, got {policyValues.Count}.");
                     }
 
                     ExpressionHandler.SetPolicyParameters(policyValues);
 
                     bool expressionResult;
 
-                    if (enforcerVariables.HasEval)
+                    if (variableStorage.HasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(enforcerVariables.ExpressionString, ExpressionHandler.PolicyTokens, policyValues);
+                        string expressionStringWithRule = RewriteEval(variableStorage.ExpressionString, ExpressionHandler.PolicyTokens, policyValues);
                         expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                     }
                     else
                     {
-                        expressionResult = ExpressionHandler.Invoke(enforcerVariables.ExpressionString, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(variableStorage.ExpressionString, requestValues);
                     }
 
                     var nowEffect = GetEffect(expressionResult);
@@ -959,34 +902,34 @@ namespace NetCasbin
 
                     policyEffects[i] = nowEffect;
 
-                    if (enforcerVariables.Effect.Equals(PermConstants.PolicyEffect.Priority))
+                    if (variableStorage.Effect.Equals(PermConstants.PolicyEffect.Priority))
                     {
                         break;
                     }
                 }
 
-                finalResult = _effector.MergeEffects(enforcerVariables.Effect, policyEffects, null, out hitPolicyIndex);
+                finalResult = _effector.MergeEffects(variableStorage.Effect, policyEffects, null, out hitPolicyIndex);
             }
             else
             {
-                if (enforcerVariables.HasEval)
+                if (variableStorage.HasEval)
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, enforcerVariables.PolicyTokenCount).ToArray();
+                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, variableStorage.PolicyTokenCount).ToArray();
                 ExpressionHandler.SetPolicyParameters(policyValues);
-                var nowEffect = GetEffect(ExpressionHandler.Invoke(enforcerVariables.ExpressionString, requestValues));
-                finalResult = _effector.MergeEffects(enforcerVariables.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
+                var nowEffect = GetEffect(ExpressionHandler.Invoke(variableStorage.ExpressionString, requestValues));
+                finalResult = _effector.MergeEffects(variableStorage.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
             }
 
-            if (enforcerVariables.Explain && hitPolicyIndex is not -1)
+            if (variableStorage.Explain && hitPolicyIndex is not -1)
             {
-                explains.Add(enforcerVariables.PolicyList[hitPolicyIndex]);
+                explains.Add(variableStorage.PolicyList[hitPolicyIndex]);
             }
 
 #if !NET45
-            if (enforcerVariables.Explain)
+            if (variableStorage.Explain)
             {
                 Logger?.LogEnforceResult(requestValues, finalResult, explains);
             }
@@ -998,7 +941,7 @@ namespace NetCasbin
             return finalResult;
         }
 
-        private bool ProcessChainEffector(EnforcerVariables enforcerVariables,
+        private bool ProcessChainEffector(EnforcerVariableStorage enforcerVariables,
             bool finalResult = false,
             IReadOnlyList<object> requestValues = null,
             ICollection<IEnumerable<string>> explains = null,
@@ -1302,6 +1245,68 @@ namespace NetCasbin
             return finalResult;
         }
 
+        private class EnforcerVariableStorage
+        {
+            private EnforcerVariableStorage() { }
+            private EnforcerVariableStorage(
+                string effect,
+                bool explain,
+                string expressionString,
+                bool hasEval,
+                IList<List<string>> policyList,
+                int policyCount,
+                int policyTokenCount,
+                int requestTokenCount)
+            {
+                this.Effect = effect;
+                this.Explain = explain;
+                this.ExpressionString = expressionString;
+                this.HasEval = hasEval;
+                this.PolicyList = policyList;
+                this.PolicyCount = policyCount;
+                this.PolicyTokenCount = policyTokenCount;
+                this.RequestTokenCount = requestTokenCount;
+            }
+
+            public static EnforcerVariableStorage Init(
+                string matcher,
+                ICollection<IEnumerable<string>> explains,
+                Model.Model model,
+                IExpressionHandler ExpressionHandler)
+            {
+                var explain = explains is not null;
+                var effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
+                var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
+                var policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
+
+                var expressionString = matcher is not null
+                    ? Utility.EscapeAssertion(matcher)
+                    : model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
+
+                var hasEval = Utility.HasEval(expressionString);
+
+                return new EnforcerVariableStorage(
+                    effect,
+                    explain,
+                    expressionString,
+                    hasEval,
+                    policyList,
+                    policyCount,
+                    ExpressionHandler.PolicyTokens.Count,
+                    ExpressionHandler.RequestTokens.Count);
+            }
+
+            #region Properties
+            internal bool Explain { get; }
+            internal string Effect { get; }
+            internal int PolicyCount { get; }
+            internal IList<List<string>> PolicyList { get; }
+            internal int PolicyTokenCount { get; }
+            internal string ExpressionString { get; }
+            internal int RequestTokenCount { get; }
+            internal bool HasEval { get; }
+            #endregion
+        }
 
         private static Effect.Effect GetEffect(bool expressionResult)
         {
