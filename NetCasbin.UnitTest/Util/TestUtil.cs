@@ -22,6 +22,8 @@ namespace NetCasbin.UnitTest.Util
 
         internal static void TestEnforce(Enforcer e, object sub, object obj, string act, bool res)
         {
+            var explains = e.EnforceEx(sub, obj, act);
+
             Assert.Equal(res, e.Enforce(sub, obj, act));
         }
 
