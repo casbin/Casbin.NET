@@ -19,6 +19,8 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _keyMatchCustomModelText = ReadTestFile("keymatch_custom_model.conf");
         internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
         internal readonly string _priorityExplicitModelText = ReadTestFile("priority_explicit_model.conf");
+        internal readonly string _priorityExplicitDenyOverrideModelText = ReadTestFile("priority_explicit_deny_override_model.conf");
+
         internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
         internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
         internal readonly string _rbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
@@ -34,6 +36,7 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _keyMatch2PolicyText = ReadTestFile("keymatch2_policy.csv");
         internal readonly string _priorityPolicyText = ReadTestFile("priority_policy.csv");
         internal readonly string _priorityExplicitPolicyText = ReadTestFile("priority_explicit_policy.csv");
+        internal readonly string _priorityExplicitDenyOverridePolicyText = ReadTestFile("priority_explicit_deny_override_policy.csv");
         internal readonly string _priorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
         internal readonly string _rbacPolicyText = ReadTestFile("rbac_policy.csv");
         internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_policy.csv");
@@ -97,6 +100,11 @@ namespace NetCasbin.UnitTest.Fixtures
             return GetNewTestModel(_priorityExplicitModelText, _priorityExplicitPolicyText);
         }
 
+        public Model.Model GetNewPriorityExplicitDenyOverrideModel()
+        {
+            return GetNewTestModel(_priorityExplicitDenyOverrideModelText, _priorityExplicitDenyOverridePolicyText);
+        }
+        
         public Model.Model GetNewRbacTestModel()
         {
             return GetNewTestModel(_rbacModelText, _rbacPolicyText);

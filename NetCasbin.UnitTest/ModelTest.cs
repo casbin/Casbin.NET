@@ -495,6 +495,31 @@ namespace NetCasbin.UnitTest
         }
 
         [Fact]
+        public void TestPriorityExplicitDenyOverrideModel()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewPriorityExplicitDenyOverrideModel());
+            e.BuildRoleLinks();
+
+            TestEnforce(e, "alice", "data2", "write", true);
+            TestEnforce(e, "bob", "data2", "read", true);
+
+            //adding a new group, simulating behaviour when two different groups are added to the same person
+            e.AddPolicy("10", "data2_deny_group_new", "data2", "write", "deny");
+            e.AddGroupingPolicy("alice", "data2_deny_group_new");
+
+            TestEnforce(e, "alice", "data2", "write", false);
+            TestEnforce(e, "bob", "data2", "read", true);
+
+            //adding higher priority policy for alice, to override group policies
+            e.AddPolicy("1", "alice", "data2", "write", "allow");
+            TestEnforce(e, "alice", "data2", "write", true);
+
+            //adding deny policy for alice for the same obj, to ensure that if there is at least one deny, final result will be deny
+            e.AddPolicy("1", "alice", "data2", "write", "deny");
+            TestEnforce(e, "alice", "data2", "write", false);
+        }
+
+        [Fact]
         public void TestKeyMatch2Model()
         {
             var e = new Enforcer(_testModelFixture.GetNewKeyMatch2TestModel());

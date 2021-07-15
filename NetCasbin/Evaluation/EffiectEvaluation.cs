@@ -64,6 +64,20 @@ namespace NetCasbin.Evaluation
                     }
                     break;
 
+                case PolicyEffectType.PriorityDenyOverride:
+                    switch (effect)
+                    {
+                        case Effect.Effect.Allow:
+                            result = true;
+                            hitPolicy = true;
+                            return false; 
+                        case Effect.Effect.Deny:
+                            result = false;
+                            hitPolicy = true;
+                            return true;
+                    }
+                    break;
+
                 case PolicyEffectType.Custom:
                     // TODO: Support custom policy effect.
                     break;

@@ -6,6 +6,7 @@
         AllowOverride,
         AllowAndDeny,
         DenyOverride,
-        Priority
+        Priority,
+        PriorityDenyOverride
     }
 }

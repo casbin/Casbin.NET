@@ -72,6 +72,7 @@ namespace NetCasbin.Effect
             PermConstants.PolicyEffect.DenyOverride => PolicyEffectType.DenyOverride,
             PermConstants.PolicyEffect.AllowAndDeny => PolicyEffectType.AllowAndDeny,
             PermConstants.PolicyEffect.Priority => PolicyEffectType.Priority,
+            PermConstants.PolicyEffect.PriorityDenyOverride => PolicyEffectType.PriorityDenyOverride,
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
 
