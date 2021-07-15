@@ -15,7 +15,6 @@ using NetCasbin.Rbac;
 using NetCasbin.Util;
 using NetCasbin.Extensions;
 using NetCasbin.Caching;
-using static NetCasbin.Effect.Effect;
 
 namespace NetCasbin
 {
@@ -837,48 +836,56 @@ namespace NetCasbin
         /// <returns>Whether to allow the request.</returns>
         private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
         {
-            EnforcerVariableStorage variableStorage = EnforcerVariableStorage.Init(matcher, explains, model, ExpressionHandler);
-            
-            if (variableStorage.RequestTokenCount != requestValues.Count)
+            EnforceContext context = EnforceContext.Create(model, matcher, explains is not null);
+
+            if (context.RequestTokens.Count != requestValues.Count)
             {
-                throw new ArgumentException($"Invalid request size: expected {variableStorage.RequestTokenCount}, got {requestValues.Count}.");
+                throw new ArgumentException($"Invalid request size: expected {context.RequestTokens.Count}, got {requestValues.Count}.");
             }
 
             ExpressionHandler.SetRequestParameters(requestValues);
 
             IChainEffector chainEffector = _effector as IChainEffector;
+            PolicyEffectType effectType = chainEffector.PolicyEffectType;
+
             if (chainEffector is not null)
             {
-                return ProcessChainEffector(variableStorage, requestValues, explains);
+                return InternalEnforceWithChainEffector(context, chainEffector, requestValues, explains);
+            }
+
+            if (effectType is PolicyEffectType.PriorityDenyOverride)
+            {
+                ThrowHelper.ThrowNotSupportException($"Only {nameof(IChainEffector)} support {nameof(PolicyEffectType.PriorityDenyOverride)} policy effect expression.");
             }
 
             bool finalResult = false;
             int hitPolicyIndex;
-            if (variableStorage.PolicyCount != 0)
+            int policyCount = context.Policies.Count;
+            if (policyCount != 0)
             {
-                Effect.Effect[] policyEffects = new Effect.Effect[variableStorage.PolicyCount];
+                Effect.Effect[] policyEffects = new Effect.Effect[policyCount];
 
-                for (int i = 0; i < variableStorage.PolicyCount; i++)
+                for (int i = 0; i < context.Policies.Count; i++)
                 {
-                    IReadOnlyList<string> policyValues = variableStorage.PolicyList[i];
+                    IReadOnlyList<string> policyValues = context.Policies[i];
 
-                    if (variableStorage.PolicyTokenCount != policyValues.Count)
+                    if (context.PolicyTokens.Count != policyValues.Count)
                     {
-                        throw new ArgumentException($"Invalid policy size: expected {variableStorage.PolicyTokenCount}, got {policyValues.Count}.");
+                        throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
                     }
 
                     ExpressionHandler.SetPolicyParameters(policyValues);
 
                     bool expressionResult;
 
-                    if (variableStorage.HasEval)
+                    if (context.HasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(variableStorage.ExpressionString, ExpressionHandler.PolicyTokens, policyValues);
+                        string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
                         expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                     }
                     else
                     {
-                        expressionResult = ExpressionHandler.Invoke(variableStorage.ExpressionString, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(context.Matcher, requestValues);
                     }
 
                     var nowEffect = GetEffect(expressionResult);
@@ -902,34 +909,34 @@ namespace NetCasbin
 
                     policyEffects[i] = nowEffect;
 
-                    if (variableStorage.Effect.Equals(PermConstants.PolicyEffect.Priority))
+                    if (context.Effect.Equals(PermConstants.PolicyEffect.Priority))
                     {
                         break;
                     }
                 }
 
-                finalResult = _effector.MergeEffects(variableStorage.Effect, policyEffects, null, out hitPolicyIndex);
+                finalResult = _effector.MergeEffects(context.Effect, policyEffects, null, out hitPolicyIndex);
             }
             else
             {
-                if (variableStorage.HasEval)
+                if (context.HasEval)
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, variableStorage.PolicyTokenCount).ToArray();
+                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
                 ExpressionHandler.SetPolicyParameters(policyValues);
-                var nowEffect = GetEffect(ExpressionHandler.Invoke(variableStorage.ExpressionString, requestValues));
-                finalResult = _effector.MergeEffects(variableStorage.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
+                Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
+                finalResult = _effector.MergeEffects(context.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
             }
 
-            if (variableStorage.Explain && hitPolicyIndex is not -1)
+            if (context.Explain && hitPolicyIndex is not -1)
             {
-                explains.Add(variableStorage.PolicyList[hitPolicyIndex]);
+                explains.Add(context.Policies[hitPolicyIndex]);
             }
 
 #if !NET45
-            if (variableStorage.Explain)
+            if (context.Explain)
             {
                 Logger?.LogEnforceResult(requestValues, finalResult, explains);
             }
@@ -945,202 +952,123 @@ namespace NetCasbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act). Works specifically with IChainEffector
         /// </summary>
-        /// <param name="enforcerVariables">Storage of enforcer variables</param>
+        /// <param name="context">Storage of enforcer variables</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, can be class instances if ABAC is used.</param>
         /// <param name="explains">Collection of matched policy explains</param>
         /// <param name="maxPriority">Index of maxPriority to filter out lower tier policies</param>
         /// <returns>Whether to allow the request.</returns>
-        private bool ProcessChainEffector(
-            EnforcerVariableStorage enforcerVariables,
+        private bool InternalEnforceWithChainEffector(
+            EnforceContext context,
+            IChainEffector chainEffector,
             IReadOnlyList<object> requestValues = null,
             ICollection<IEnumerable<string>> explains = null,
+            PolicyEffectType effectType = PolicyEffectType.Custom,
             int maxPriority = int.MaxValue)
         {
             bool result = false;
-            IChainEffector chainEffector = _effector as IChainEffector;
-            bool isChainEffector = chainEffector is not null;
-            if (isChainEffector)
+            chainEffector.StartChain(context.Effect);
+
+            bool hasPriority = context.PolicyAssertion.TryGetPriorityIndex(out int priorityIndex);
+
+            if (context.Policies.Count is not 0)
             {
-                chainEffector.StartChain(enforcerVariables.Effect);
-
-                var priorityPropertyIndex = GetExplicitPriorityPropertyIndex(enforcerVariables);
-
-                if (enforcerVariables.PolicyCount is not 0)
+                IEnumerable<IReadOnlyList<string>> policies = context.Policies;
+                if (hasPriority && chainEffector.PolicyEffectType is PolicyEffectType.PriorityDenyOverride)
                 {
-                    IEnumerable<List<string>> policyList = enforcerVariables.PolicyList;
-                    if (enforcerVariables.Effect.Equals(PermConstants.PolicyEffect.PriorityDenyOverride)) {
-                        policyList = policyList
-                            .Where(t => maxPriority == int.MaxValue || int.Parse(t[priorityPropertyIndex]) == maxPriority);
-                    }
-
-                    foreach (var policyValues in policyList)
-                    {
-                        if (enforcerVariables.PolicyTokenCount != policyValues.Count)
-                        {
-                            throw new ArgumentException($"Invalid policy size: expected {enforcerVariables.PolicyTokenCount}, got {policyValues.Count}.");
-                        }
-
-                        ExpressionHandler.SetPolicyParameters(policyValues);
-
-                        bool expressionResult;
-
-                        if (enforcerVariables.HasEval)
-                        {
-                            string expressionStringWithRule = RewriteEval(enforcerVariables.ExpressionString, ExpressionHandler.PolicyTokens, policyValues);
-                            expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
-                        }
-                        else
-                        {
-                            expressionResult = ExpressionHandler.Invoke(enforcerVariables.ExpressionString, requestValues);
-                        }
-
-                        var nowEffect = GetEffect(expressionResult);
-
-                        if (enforcerVariables.Effect.Equals(PermConstants.PolicyEffect.PriorityDenyOverride)
-                                && nowEffect == Effect.Effect.Allow
-                                && maxPriority == int.MaxValue)
-                        {
-                            return ProcessChainEffector(enforcerVariables, requestValues, explains, int.Parse(policyValues[priorityPropertyIndex]));
-                        }
-
-                        if (nowEffect is not Effect.Effect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
-                        {
-                            string policyEffect = parameter.Value as string;
-                            nowEffect = policyEffect switch
-                            {
-                                "allow" => Effect.Effect.Allow,
-                                "deny" => Effect.Effect.Deny,
-                                _ => Effect.Effect.Indeterminate
-                            };
-                        }
-
-                        bool chainResult = chainEffector.TryChain(nowEffect);
-
-                        if (enforcerVariables.Explain && chainEffector.HitPolicy)
-                        {
-                            explains.Add(policyValues);
-                        }
-
-                        if (chainResult is false || chainEffector.CanChain is false)
-                        {
-                            break;
-                        }
-                    }
-
-                    result = chainEffector.Result;
+                    policies = policies.Where(t => maxPriority == int.MaxValue || int.Parse(t[priorityIndex]) == maxPriority);
                 }
-                else
+
+                foreach (IReadOnlyList<string> policyValues in policies)
                 {
-                    if (enforcerVariables.HasEval)
+                    if (context.PolicyTokens.Count != policyValues.Count)
                     {
-                        throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                        throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
                     }
 
-                    IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, enforcerVariables.PolicyTokenCount).ToArray();
                     ExpressionHandler.SetPolicyParameters(policyValues);
-                    var nowEffect = GetEffect(ExpressionHandler.Invoke(enforcerVariables.ExpressionString, requestValues));
 
-                    if (chainEffector.TryChain(nowEffect))
+                    bool expressionResult;
+
+                    if (context.HasEval)
                     {
-                        result = chainEffector.Result;
+                        string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
+                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
+                    }
+                    else
+                    {
+                        expressionResult = ExpressionHandler.Invoke(context.Matcher, requestValues);
                     }
 
-                    if (enforcerVariables.Explain && chainEffector.HitPolicy)
+                    var nowEffect = GetEffect(expressionResult);
+
+                    if (context.Effect.Equals(PermConstants.PolicyEffect.PriorityDenyOverride)
+                            && nowEffect == Effect.Effect.Allow
+                            && maxPriority == int.MaxValue)
+                    {
+                        return InternalEnforceWithChainEffector(context, chainEffector, requestValues, explains, effectType,
+                            int.Parse(policyValues[priorityIndex]));
+                    }
+
+                    if (nowEffect is not Effect.Effect.Indeterminate
+                        && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                    {
+                        string policyEffect = parameter.Value as string;
+                        nowEffect = policyEffect switch
+                        {
+                            "allow" => Effect.Effect.Allow,
+                            "deny" => Effect.Effect.Deny,
+                            _ => Effect.Effect.Indeterminate
+                        };
+                    }
+
+                    bool chainResult = chainEffector.TryChain(nowEffect);
+
+                    if (context.Explain && chainEffector.HitPolicy)
                     {
                         explains.Add(policyValues);
                     }
+
+                    if (chainResult is false || chainEffector.CanChain is false)
+                    {
+                        break;
+                    }
                 }
+
+                result = chainEffector.Result;
+            }
+            else
+            {
+                if (context.HasEval)
+                {
+                    throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                }
+
+                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
+                ExpressionHandler.SetPolicyParameters(policyValues);
+                Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
+
+                if (chainEffector.TryChain(nowEffect))
+                {
+                    result = chainEffector.Result;
+                }
+
+                if (context.Explain && chainEffector.HitPolicy)
+                {
+                    explains.Add(policyValues);
+                }
+            }
 
 #if !NET45
-                if (enforcerVariables.Explain)
-                {
-                    Logger?.LogEnforceResult(requestValues, result, explains);
-                }
-                else
-                {
-                    Logger?.LogEnforceResult(requestValues, result);
-                }
+            if (context.Explain)
+            {
+                Logger?.LogEnforceResult(requestValues, result, explains);
+            }
+            else
+            {
+                Logger?.LogEnforceResult(requestValues, result);
+            }
 #endif
-                return result;
-            }
             return result;
-        }
-
-        private int GetExplicitPriorityPropertyIndex(EnforcerVariableStorage enforcerVariables)
-        {
-            int priorityPropertyIndex = 0;
-            if (!model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Tokens.TryGetValue("p_priority", out priorityPropertyIndex))
-            {
-                if (enforcerVariables.Effect.Equals(PermConstants.PolicyEffect.PriorityDenyOverride))
-                {
-                    throw new ArgumentException("Configuration file is missing explicit priority value");
-                }                
-            }
-
-            return priorityPropertyIndex;
-        }
-
-        private class EnforcerVariableStorage
-        {
-            private EnforcerVariableStorage() { }
-            private EnforcerVariableStorage(
-                string effect,
-                bool explain,
-                string expressionString,
-                bool hasEval,
-                IList<List<string>> policyList,
-                int policyCount,
-                int policyTokenCount,
-                int requestTokenCount)
-            {
-                Effect = effect;
-                Explain = explain;
-                ExpressionString = expressionString;
-                HasEval = hasEval;
-                PolicyList = policyList;
-                PolicyCount = policyCount;
-                PolicyTokenCount = policyTokenCount;
-                RequestTokenCount = requestTokenCount;
-            }
-
-            public static EnforcerVariableStorage Init(
-                string matcher,
-                ICollection<IEnumerable<string>> explains,
-                Model.Model model,
-                IExpressionHandler ExpressionHandler)
-            {
-                var explain = explains is not null;
-                var effect = model.Model[PermConstants.Section.PolicyEffectSection][PermConstants.DefaultPolicyEffectType].Value;
-                var policyList = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy;
-                var policyCount = model.Model[PermConstants.Section.PolicySection][PermConstants.DefaultPolicyType].Policy.Count;
-
-                var expressionString = matcher is not null
-                    ? Utility.EscapeAssertion(matcher)
-                    : model.Model[PermConstants.Section.MatcherSection][PermConstants.DefaultMatcherType].Value;
-
-                var hasEval = Utility.HasEval(expressionString);
-
-                return new EnforcerVariableStorage(
-                    effect,
-                    explain,
-                    expressionString,
-                    hasEval,
-                    policyList,
-                    policyCount,
-                    ExpressionHandler.PolicyTokens.Count,
-                    ExpressionHandler.RequestTokens.Count);
-            }
-
-            #region Properties
-            internal bool Explain { get; }
-            internal string Effect { get; }
-            internal int PolicyCount { get; }
-            internal IList<List<string>> PolicyList { get; }
-            internal int PolicyTokenCount { get; }
-            internal string ExpressionString { get; }
-            internal int RequestTokenCount { get; }
-            internal bool HasEval { get; }
-            #endregion
         }
 
         private static Effect.Effect GetEffect(bool expressionResult)
@@ -1148,7 +1076,7 @@ namespace NetCasbin
             return expressionResult ? Effect.Effect.Allow : Effect.Effect.Indeterminate;
         }
 
-        private static string RewriteEval(string expressionString, IDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
+        private static string RewriteEval(string expressionString, IReadOnlyDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
         {
             if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
             {

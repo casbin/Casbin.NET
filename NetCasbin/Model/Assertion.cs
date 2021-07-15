@@ -16,7 +16,7 @@ namespace NetCasbin.Model
 
         public string Value { set; get; }
 
-        public IDictionary<string, int> Tokens { set; get; }
+        public IReadOnlyDictionary<string, int> Tokens { set; get; }
 
         public IRoleManager RoleManager { get; internal set; }
 
@@ -208,7 +208,7 @@ namespace NetCasbin.Model
             return true;
         }
 
-        private bool TryGetPriorityIndex(out int index)
+        internal bool TryGetPriorityIndex(out int index)
         {
             if (Tokens is null)
             {
