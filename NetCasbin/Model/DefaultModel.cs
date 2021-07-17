@@ -121,7 +121,7 @@ namespace Casbin.Model
             }
             else
             {
-                assertion.Value = Utility.RemoveComments(Utility.EscapeAssertion(assertion.Value));
+                assertion.Value = StringUtil.RemoveComments(StringUtil.EscapeAssertion(assertion.Value));
             }
 
             if (Sections.ContainsKey(section) is false)

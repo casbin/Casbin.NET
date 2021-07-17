@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Casbin.Model;
+using Casbin.Util;
 
 namespace Casbin
 {
@@ -87,7 +88,7 @@ namespace Casbin
                 policyTokens: policyAssertion.Tokens,
                 policies: policyAssertion.Policy,
                 effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
-                matcher: Util.Utility.EscapeAssertion(matcher),
+                matcher: StringUtil.EscapeAssertion(matcher),
                 explain: explain
             );
         }

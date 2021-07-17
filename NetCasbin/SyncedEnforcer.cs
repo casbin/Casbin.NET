@@ -10,7 +10,7 @@ namespace Casbin
     {
         public static IEnforcer Create(IAdapter adapter = null)
         {
-            return new Enforcer(Model.SyncedModelExtension.Create(), adapter);
+            return new Enforcer(SyncedModel.Create(), adapter);
         }
 
         public static IEnforcer Create(string modelPath, string policyPath)

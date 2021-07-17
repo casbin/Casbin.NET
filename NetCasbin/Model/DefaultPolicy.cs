@@ -291,9 +291,7 @@ namespace Casbin.Model
         {
             var values = section[policyType].Policy
                 .Select(rule => rule[fieldIndex])
-                .ToList();
-
-            Utility.ArrayRemoveDuplicates(values);
+                .Distinct().ToList();
             return values;
         }
 

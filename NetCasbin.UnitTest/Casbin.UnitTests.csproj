@@ -5,6 +5,11 @@
     <DebugType>full</DebugType>
     <IsPackable>false</IsPackable>
     <LangVersion>9.0</LangVersion>
+    <EnforceCodeStyleInBuild>false</EnforceCodeStyleInBuild>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|net6|AnyCPU'">
+    <Optimize>false</Optimize>
   </PropertyGroup>
 
   <ItemGroup>

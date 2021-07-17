@@ -3,7 +3,7 @@ using System.IO;
 
 namespace Casbin.Model
 {
-    public static class SyncedModelExtension
+    public static class SyncedModel
     {
         /// <summary>
         /// Creates a synced model.
@@ -31,7 +31,7 @@ namespace Casbin.Model
                 throw new FileNotFoundException("Can not find the model file.");
             }
 
-            var model = Create();
+            IModel model = Create();
             model.LoadModelFromFile(path);
             return model;
         }
@@ -48,7 +48,7 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(text));
             }
 
-            var model = Create();
+            IModel model = Create();
             model.LoadModelFromText(text);
             return model;
         }

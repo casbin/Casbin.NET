@@ -3,7 +3,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Extensions;
 using Casbin.Rbac;
-using Casbin.UnitTests.Extensions;
 using Casbin.Util;
 using Xunit;
 

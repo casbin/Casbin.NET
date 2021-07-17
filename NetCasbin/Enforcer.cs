@@ -212,7 +212,7 @@ namespace Casbin
 
             ExpressionHandler.SetRequestParameters(requestValues);
 
-            bool hasEval = Utility.HasEval(expressionString);
+            bool hasEval = StringUtil.HasEval(expressionString);
 
             bool finalResult = false;
             IChainEffector chainEffector = Effector as IChainEffector;
@@ -402,7 +402,7 @@ namespace Casbin
 
         private static string RewriteEval(string expressionString, IReadOnlyDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
         {
-            if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
+            if (StringUtil.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
             {
                 return expressionString;
             }
@@ -414,10 +414,10 @@ namespace Casbin
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
-                rules[ruleName] = Utility.EscapeAssertion(policyValues[ruleIndex]);
+                rules[ruleName] = StringUtil.EscapeAssertion(policyValues[ruleIndex]);
             }
 
-            expressionString = Utility.ReplaceEval(expressionString, rules);
+            expressionString = StringUtil.ReplaceEval(expressionString, rules);
             return expressionString;
         }
 
