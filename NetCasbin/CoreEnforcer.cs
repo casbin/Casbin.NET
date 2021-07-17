@@ -832,11 +832,11 @@ namespace NetCasbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <param name="matcher">The custom matcher.</param>
-        /// <param name="explains"></param>
+        /// <param name="explains">Collection of matched policy explains</param>
         /// <returns>Whether to allow the request.</returns>
         private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
         {
-            EnforceContext context = EnforceContext.Create(model, matcher, explains is not null);
+            var context = EnforceContext.Create(model, matcher, explains is not null);
 
             if (context.RequestTokens.Count != requestValues.Count)
             {
@@ -955,34 +955,41 @@ namespace NetCasbin
         /// <param name="context">Storage of enforcer variables</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, can be class instances if ABAC is used.</param>
         /// <param name="explains">Collection of matched policy explains</param>
-        /// <param name="maxPriority">Index of maxPriority to filter out lower tier policies</param>
         /// <returns>Whether to allow the request.</returns>
         private bool InternalEnforceWithChainEffector(
             EnforceContext context,
             IChainEffector chainEffector,
             IReadOnlyList<object> requestValues = null,
-            ICollection<IEnumerable<string>> explains = null,
-            PolicyEffectType effectType = PolicyEffectType.Custom,
-            int maxPriority = int.MaxValue)
+            ICollection<IEnumerable<string>> explains = null)
         {
-            bool result = false;
+            bool finalResult = false;
             chainEffector.StartChain(context.Effect);
 
             bool hasPriority = context.PolicyAssertion.TryGetPriorityIndex(out int priorityIndex);
+            bool isPriorityDenyOverrideEfffet = chainEffector.PolicyEffectType is PolicyEffectType.PriorityDenyOverride;
+            int? priority = null;
+            var nowEffect = Effect.Effect.Indeterminate;
 
             if (context.Policies.Count is not 0)
             {
-                IEnumerable<IReadOnlyList<string>> policies = context.Policies;
-                if (hasPriority && chainEffector.PolicyEffectType is PolicyEffectType.PriorityDenyOverride)
-                {
-                    policies = policies.Where(t => maxPriority == int.MaxValue || int.Parse(t[priorityIndex]) == maxPriority);
-                }
-
-                foreach (IReadOnlyList<string> policyValues in policies)
+                foreach (IReadOnlyList<string> policyValues in context.Policies)
                 {
                     if (context.PolicyTokens.Count != policyValues.Count)
                     {
                         throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
+                    }
+
+                    if (hasPriority && isPriorityDenyOverrideEfffet)
+                    {
+                        if (int.TryParse(policyValues[priorityIndex], out int nowPriority))
+                        {
+                            if (priority.HasValue && nowPriority != priority.Value
+                                && nowEffect is not Effect.Effect.Indeterminate)
+                            {
+                                break;
+                            }
+                            priority = nowPriority;
+                        }
                     }
 
                     ExpressionHandler.SetPolicyParameters(policyValues);
@@ -999,15 +1006,7 @@ namespace NetCasbin
                         expressionResult = ExpressionHandler.Invoke(context.Matcher, requestValues);
                     }
 
-                    var nowEffect = GetEffect(expressionResult);
-
-                    if (context.Effect.Equals(PermConstants.PolicyEffect.PriorityDenyOverride)
-                            && nowEffect == Effect.Effect.Allow
-                            && maxPriority == int.MaxValue)
-                    {
-                        return InternalEnforceWithChainEffector(context, chainEffector, requestValues, explains, effectType,
-                            int.Parse(policyValues[priorityIndex]));
-                    }
+                    nowEffect = GetEffect(expressionResult);
 
                     if (nowEffect is not Effect.Effect.Indeterminate
                         && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
@@ -1034,7 +1033,7 @@ namespace NetCasbin
                     }
                 }
 
-                result = chainEffector.Result;
+                finalResult = chainEffector.Result;
             }
             else
             {
@@ -1045,11 +1044,11 @@ namespace NetCasbin
 
                 IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
                 ExpressionHandler.SetPolicyParameters(policyValues);
-                Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
+                nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
 
                 if (chainEffector.TryChain(nowEffect))
                 {
-                    result = chainEffector.Result;
+                    finalResult = chainEffector.Result;
                 }
 
                 if (context.Explain && chainEffector.HitPolicy)
@@ -1061,14 +1060,14 @@ namespace NetCasbin
 #if !NET45
             if (context.Explain)
             {
-                Logger?.LogEnforceResult(requestValues, result, explains);
+                Logger?.LogEnforceResult(requestValues, finalResult, explains);
             }
             else
             {
-                Logger?.LogEnforceResult(requestValues, result);
+                Logger?.LogEnforceResult(requestValues, finalResult);
             }
 #endif
-            return result;
+            return finalResult;
         }
 
         private static Effect.Effect GetEffect(bool expressionResult)
