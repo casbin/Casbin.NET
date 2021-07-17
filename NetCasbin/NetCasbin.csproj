@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net6;net5;netcoreapp3.1;netstandard2.1;netstandard2.0;net461;net45;</TargetFrameworks>
@@ -9,6 +9,7 @@
   <PropertyGroup>
     <PackageId>Casbin.NET</PackageId>
     <PackageIcon>casbin.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Description>Casbin.NET is a powerful and efficient open-source access control library for .NET (C#) projects. It provides support for enforcing authorization based on various access control models.</Description>
     <Authors>Casbin, Zhikui H</Authors>
     <Product>Casbin.NET</Product>
@@ -54,6 +55,7 @@
 
   <ItemGroup>
     <None Include="casbin.png" Pack="true" Visible="false" PackagePath="" />
+    <None Include="../README.md" Pack="true" Visible="false" PackagePath=""/>
   </ItemGroup>
 
 </Project>
