@@ -503,27 +503,32 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "alice", "data2", "write", true);
             TestEnforce(e, "bob", "data2", "read", true);
 
-            // adding a new group, simulating behaviour when two different groups are added to the same person
+            // adding a new group, simulating behaviour when two different groups are added to the same person.
             e.AddPolicy("10", "data2_deny_group_new", "data2", "write", "deny");
             e.AddGroupingPolicy("alice", "data2_deny_group_new");
 
             TestEnforce(e, "alice", "data2", "write", false);
             TestEnforce(e, "bob", "data2", "read", true);
 
-            // adding higher priority policy for alice, to override group policies
+            // expected enforcement result should be true,
+            // as there is a policy with a lower rank 10, that produces allow result.
             e.AddPolicy("5", "alice", "data2", "write", "allow");
             TestEnforce(e, "alice", "data2", "write", true);
 
             // adding deny policy for alice for the same obj,
-            // to ensure that if there is at least one deny, final result will be deny
+            // to ensure that if there is at least one deny, final result will be deny.
             e.AddPolicy("5", "alice", "data2", "write", "deny");
             TestEnforce(e, "alice", "data2", "write", false);
 
-            //adding higher priority policy for alice, to override group policies again
-            e.AddPolicy("1", "alice", "data2", "write", "allow");
+            // adding higher fake higher priority policy for alice,
+            // expected enforcement result should be true (ignore this policy).
+            e.AddPolicy("2", "alice", "data2", "write", "allow");
+            TestEnforce(e, "alice", "data2", "write", true);
+            e.AddPolicy("1", "fake-subject", "fake-object", "very-fake-action", "allow");
             TestEnforce(e, "alice", "data2", "write", true);
 
-            //adding higher priority policy for alice, to override group policies again
+            // adding higher (less of 0) priority policy for alice,
+            // to override group policies again.
             e.AddPolicy("-1", "alice", "data2", "write", "deny");
             TestEnforce(e, "alice", "data2", "write", false);
         }
