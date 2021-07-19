@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
-using Casbin.Model;
 
-namespace Casbin
+namespace Casbin.Model
 {
    public interface IPolicy
    {

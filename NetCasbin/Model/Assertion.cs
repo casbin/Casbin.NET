@@ -11,23 +11,29 @@ namespace Casbin.Model
     /// Represents an expression in a section of the model.
     /// For example: r = sub, obj, act
     /// </summary>
-    public class Assertion
+    public class Assertion : IReadOnlyAssertion
     {
+        private List<IReadOnlyList<string>> _policy;
+
         public string Key { get; internal set; }
 
-        public string Value { get; internal set;  }
+        public string Value { get; internal set; }
 
         public IReadOnlyDictionary<string, int> Tokens { get; internal set; }
 
         public IRoleManager RoleManager { get; internal set; }
 
-        public List<IReadOnlyList<string>> Policy { get; internal set; }
+        public IReadOnlyList<IReadOnlyList<string>> Policy
+        {
+            get => _policy;
+            internal set => _policy = value as List<IReadOnlyList<string>> ?? value.ToList();
+        }
 
         internal HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {
-            Policy = new List<IReadOnlyList<string>>();
+            _policy = new List<IReadOnlyList<string>>();
             PolicyStringSet = new HashSet<string>();
             RoleManager = new DefaultRoleManager(10);
         }
@@ -148,7 +154,7 @@ namespace Casbin.Model
                 return TryAddPolicyByPriority(ruleList, index);
             }
 
-            Policy.Add(ruleList);
+            _policy.Add(ruleList);
             PolicyStringSet.Add(Utility.RuleToString(ruleList));
             return true;
         }
@@ -167,7 +173,7 @@ namespace Casbin.Model
                 {
                     continue;
                 }
-                Policy.RemoveAt(i);
+                _policy.RemoveAt(i);
                 PolicyStringSet.Remove(Utility.RuleToString(ruleList));
                 break;
             }
@@ -176,7 +182,7 @@ namespace Casbin.Model
 
         internal void ClearPolicy()
         {
-            Policy.Clear();
+            _policy.Clear();
             PolicyStringSet.Clear();
         }
 
@@ -192,8 +198,8 @@ namespace Casbin.Model
                 return int.Parse(p[priorityIndex]) <= priority;
             }
 
-            int lastIndex = Policy.FindLastIndex(LastLessOrEqualPriority);
-            Policy.Insert(lastIndex + 1, rule);
+            int lastIndex = _policy.FindLastIndex(LastLessOrEqualPriority);
+            _policy.Insert(lastIndex + 1, rule);
             PolicyStringSet.Add(Utility.RuleToString(rule));
             return true;
         }
@@ -229,7 +235,7 @@ namespace Casbin.Model
                 return priority1 - priority2;
             }
 
-            Policy.Sort(PolicyComparison);
+            _policy.Sort(PolicyComparison);
             return true;
         }
     }

@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using DynamicExpresso;
 
-namespace Casbin
+namespace Casbin.Evaluation
 {
     public interface IExpressionHandler
     {
-        public IReadOnlyDictionary<string, int> RequestTokens { get; }
+        public EnforceContext EnforceContext { get; }
 
-        public IReadOnlyDictionary<string, int> PolicyTokens { get; }
+        public IDictionary<string, Parameter> Parameters { get; }
 
-        public IDictionary<string, Parameter> Parameters { get; } 
+        public void SetEnforceContext(ref EnforceContext context);
 
         public void SetFunction(string name, Delegate function);
 

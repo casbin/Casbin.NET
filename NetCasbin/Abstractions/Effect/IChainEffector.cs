@@ -1,6 +1,4 @@
-﻿using Casbin.Effect;
-
-namespace Casbin
+﻿namespace Casbin.Effect
 {
     public interface IChainEffector
     {

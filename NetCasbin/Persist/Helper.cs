@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Casbin.Model;
 
 namespace Casbin.Persist
 {
@@ -35,7 +36,7 @@ namespace Casbin.Persist
                 var content = tokens.Skip(1).ToList();
                 if (!model.HasPolicy(sec, key, content))
                 {
-                    policy.Policy.Add(content);
+                    policy.TryAddPolicy(content);
                 }
             }
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Casbin.Model;
 using Casbin.Util;
 
@@ -6,25 +7,26 @@ namespace Casbin
 {
     public readonly struct EnforceContext
     {
-        public EnforceContext(IReadOnlyDictionary<string, int> requestTokens,
-            IReadOnlyDictionary<string, int> policyTokens,
+        public EnforceContext(
+            Assertion requestAssertion, Assertion policyAssertion,
             IReadOnlyList<IReadOnlyList<string>> policies,
-            string effect, string matcher, bool explain)
+            string effect, string matcher,
+            bool hasEval, bool explain)
         {
-            RequestTokens = requestTokens;
-            PolicyTokens = policyTokens;
-            Policies = policies;
+            RequestAssertion = requestAssertion;
+            PolicyAssertion = policyAssertion;
             Effect = effect;
             Matcher = matcher;
+            HasEval = hasEval;
             Explain = explain;
             Explanations = explain ? new List<IEnumerable<string>>() : null;
         }
 
-        public IReadOnlyDictionary<string, int> RequestTokens { get; }
-        public IReadOnlyDictionary<string, int> PolicyTokens { get; }
-        public IReadOnlyList<IReadOnlyList<string>> Policies { get; }
+        public IReadOnlyAssertion RequestAssertion { get; }
+        public IReadOnlyAssertion PolicyAssertion { get; }
         public string Effect { get; }
         public string Matcher { get; }
+        public bool HasEval { get; }
         public bool Explain { get; }
         public List<IEnumerable<string>> Explanations { get; }
 
@@ -49,14 +51,18 @@ namespace Casbin
             bool explain = false)
         {
             IModel model = enforcer.Model;
+            string matcher = model.GetRequiredAssertion(PermConstants.Section.MatcherSection, matcherType).Value;
+            bool hasEval = StringUtil.HasEval(matcher);
+            Assertion requestAssertion = model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType);
             Assertion policyAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicySection, policyType);
             return new EnforceContext
             (
-                requestTokens: model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType).Tokens,
-                policyTokens: policyAssertion.Tokens,
+                requestAssertion: requestAssertion,
+                policyAssertion: policyAssertion,
                 policies: policyAssertion.Policy,
                 effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
-                matcher: model.GetRequiredAssertion(PermConstants.Section.MatcherSection, matcherType).Value,
+                matcher: matcher,
+                hasEval: hasEval,
                 explain: explain
             );
         }
@@ -81,14 +87,18 @@ namespace Casbin
             bool explain = false)
         {
             IModel model = enforcer.Model;
+            matcher = StringUtil.EscapeAssertion(matcher);
+            bool hasEval = StringUtil.HasEval(matcher);
+            Assertion requestAssertion = model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType);
             Assertion policyAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicySection, policyType);
             return new EnforceContext
             (
-                requestTokens: model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType).Tokens,
-                policyTokens: policyAssertion.Tokens,
+                requestAssertion: requestAssertion,
+                policyAssertion: policyAssertion,
                 policies: policyAssertion.Policy,
                 effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
-                matcher: StringUtil.EscapeAssertion(matcher),
+                matcher: matcher,
+                hasEval: hasEval,
                 explain: explain
             );
         }

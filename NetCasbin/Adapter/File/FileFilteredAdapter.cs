@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Casbin.Model;
 using Casbin.Persist;
 
 namespace Casbin.Adapter.File

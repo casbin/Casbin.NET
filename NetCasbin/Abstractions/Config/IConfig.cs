@@ -1,4 +1,4 @@
-﻿namespace Casbin
+﻿namespace Casbin.Config
 {
     public interface IConfig
     {
