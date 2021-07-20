@@ -984,7 +984,7 @@ namespace NetCasbin
                         if (int.TryParse(policyValues[priorityIndex], out int nowPriority))
                         {
                             if (priority.HasValue && nowPriority != priority.Value
-                                && nowEffect is not Effect.Effect.Indeterminate)
+                                && chainEffector.HitPolicyCount > 0)
                             {
                                 break;
                             }

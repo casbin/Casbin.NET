@@ -82,6 +82,8 @@ namespace NetCasbin.Effect
 
         public bool HitPolicy { get; private set; }
 
+        public int HitPolicyCount { get; private set; }
+
         public bool CanChain { get; private set; }
 
         public string EffectExpression { get; private set; }
@@ -94,6 +96,7 @@ namespace NetCasbin.Effect
             PolicyEffectType = ParsePolicyEffectType(EffectExpression);
             CanChain = true;
             Result = false;
+            HitPolicyCount = 0;
         }
 
         public bool Chain(Effect effect)
@@ -111,11 +114,13 @@ namespace NetCasbin.Effect
                 CanChain = false;
                 Result = result;
                 HitPolicy = hitPolicy;
+                HitPolicyCount = hitPolicy ? ++HitPolicyCount : HitPolicyCount;
                 return true;
             }
 
             Result = result;
             HitPolicy = hitPolicy;
+            HitPolicyCount = hitPolicy ? ++HitPolicyCount : HitPolicyCount;
             return true;
         }
 
@@ -134,11 +139,13 @@ namespace NetCasbin.Effect
                 CanChain = false;
                 Result = result;
                 HitPolicy = hitPolicy;
+                HitPolicyCount = hitPolicy ? ++HitPolicyCount : HitPolicyCount;
                 return true;
             }
 
             Result = result;
             HitPolicy = hitPolicy;
+            HitPolicyCount = hitPolicy ? ++HitPolicyCount : HitPolicyCount;
             return true;
         }
 
