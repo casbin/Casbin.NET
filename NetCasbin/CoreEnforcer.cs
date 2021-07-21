@@ -843,7 +843,7 @@ namespace NetCasbin
                 throw new ArgumentException($"Invalid request size: expected {context.RequestTokens.Count}, got {requestValues.Count}.");
             }
 
-            ExpressionHandler.SetRequestParameters(requestValues);
+            ExpressionHandler.SetRequest(requestValues);
 
             IChainEffector chainEffector = _effector as IChainEffector;
             PolicyEffectType effectType = chainEffector.PolicyEffectType;
@@ -874,18 +874,18 @@ namespace NetCasbin
                         throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
                     }
 
-                    ExpressionHandler.SetPolicyParameters(policyValues);
+                    ExpressionHandler.SetPolicy(policyValues);
 
                     bool expressionResult;
 
                     if (context.HasEval)
                     {
                         string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
-                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule);
                     }
                     else
                     {
-                        expressionResult = ExpressionHandler.Invoke(context.Matcher, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(context.Matcher);
                     }
 
                     var nowEffect = GetEffect(expressionResult);
@@ -896,9 +896,9 @@ namespace NetCasbin
                         continue;
                     }
 
-                    if (ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                    if (ExpressionHandler.PolicyTokens.TryGetValue("p_eft", out int index))
                     {
-                        string policyEffect = parameter.Value as string;
+                        string policyEffect = policyValues[index];
                         nowEffect = policyEffect switch
                         {
                             "allow" => Effect.Effect.Allow,
@@ -925,8 +925,8 @@ namespace NetCasbin
                 }
 
                 IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
-                ExpressionHandler.SetPolicyParameters(policyValues);
-                Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
+                ExpressionHandler.SetPolicy(policyValues);
+                Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher));
                 finalResult = _effector.MergeEffects(context.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
             }
 
@@ -992,26 +992,26 @@ namespace NetCasbin
                         }
                     }
 
-                    ExpressionHandler.SetPolicyParameters(policyValues);
+                    ExpressionHandler.SetPolicy(policyValues);
 
                     bool expressionResult;
 
                     if (context.HasEval)
                     {
                         string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
-                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule);
                     }
                     else
                     {
-                        expressionResult = ExpressionHandler.Invoke(context.Matcher, requestValues);
+                        expressionResult = ExpressionHandler.Invoke(context.Matcher);
                     }
 
                     nowEffect = GetEffect(expressionResult);
 
                     if (nowEffect is not Effect.Effect.Indeterminate
-                        && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                        && ExpressionHandler.PolicyTokens.TryGetValue("p_eft", out int index))
                     {
-                        string policyEffect = parameter.Value as string;
+                        string policyEffect = policyValues[index];
                         nowEffect = policyEffect switch
                         {
                             "allow" => Effect.Effect.Allow,
@@ -1043,8 +1043,8 @@ namespace NetCasbin
                 }
 
                 IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
-                ExpressionHandler.SetPolicyParameters(policyValues);
-                nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher, requestValues));
+                ExpressionHandler.SetPolicy(policyValues);
+                nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher));
 
                 if (chainEffector.TryChain(nowEffect))
                 {
