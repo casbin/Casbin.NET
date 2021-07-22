@@ -10,6 +10,8 @@ namespace NetCasbin.Abstractions
 
         public bool HitPolicy { get; }
 
+        public int HitPolicyCount { get; }
+
         public string EffectExpression { get; }
 
         public PolicyEffectType PolicyEffectType { get; }
