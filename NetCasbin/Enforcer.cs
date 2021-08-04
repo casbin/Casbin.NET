@@ -10,6 +10,7 @@ using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.Util;
+using Casbin.Evaluation;
 #if !NET45
 using Microsoft.Extensions.Logging;
 #endif
@@ -175,10 +176,10 @@ namespace Casbin
             {
                 return await Task.Run(() => InternalEnforce(context, requestValues));
             }
-            return InternalEnforce(context, policyManager, requestValues);
+            return InternalEnforce(in context, policyManager, requestValues);
         }
 
-        private bool InternalEnforce(EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
+        private bool InternalEnforce(in EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
         {
             policyManager.StartRead();
 
@@ -195,24 +196,25 @@ namespace Casbin
         private bool InternalEnforce(EnforceContext context, IReadOnlyList<object> requestValues)
         {
             string expressionString = context.Matcher;
+            bool hasEval = context.HasEval;
+
             string effect = context.Effect;
-            var policyList = context.Policies;
+            var policyList = context.PolicyAssertion.Policy;
             int policyCount = policyList.Count;
 
             bool explain = context.Explain;
             var explanations = context.Explanations;
 
-            int requestTokenCount = context.RequestTokens.Count;
+            int requestTokenCount = context.RequestAssertion.Tokens.Count;
             if (requestTokenCount != requestValues.Count)
             {
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Count}.");
             }
 
-            int policyTokenCount = context.PolicyTokens.Count;
+            int policyTokenCount = context.PolicyAssertion.Tokens.Count;
 
+            ExpressionHandler.SetEnforceContext(ref context);
             ExpressionHandler.SetRequestParameters(requestValues);
-
-            bool hasEval = StringUtil.HasEval(expressionString);
 
             bool finalResult = false;
             IChainEffector chainEffector = Effector as IChainEffector;
@@ -236,7 +238,7 @@ namespace Casbin
 
                         if (hasEval)
                         {
-                            string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                            string expressionStringWithRule = RewriteEval(expressionString, context.PolicyAssertion.Tokens, policyValues);
                             expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                         }
                         else
@@ -246,9 +248,10 @@ namespace Casbin
 
                         var nowEffect = GetEffect(expressionResult);
 
-                        if (nowEffect is not PolicyEffect.Indeterminate && ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
+                        if (nowEffect is not PolicyEffect.Indeterminate
+                            && context.PolicyAssertion.TryGetTokenIndex("eft", out int index))
                         {
-                            string policyEffect = parameter.Value as string;
+                            string policyEffect = policyValues[index];
                             nowEffect = policyEffect switch
                             {
                                 "allow" => PolicyEffect.Allow,
@@ -327,7 +330,7 @@ namespace Casbin
 
                     if (hasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(expressionString, ExpressionHandler.PolicyTokens, policyValues);
+                        string expressionStringWithRule = RewriteEval(expressionString, context.PolicyAssertion.Tokens, policyValues);
                         expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
                     }
                     else

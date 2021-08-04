@@ -1,4 +1,5 @@
-﻿using Casbin.Persist;
+﻿using Casbin.Model;
+using Casbin.Persist;
 
 namespace Casbin.Extensions
 {

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Casbin.Model;
 
 namespace Casbin.Persist
 {

@@ -1,4 +1,4 @@
-﻿namespace Casbin
+﻿namespace Casbin.Model
 {
     public interface IModel : IPolicy
     {

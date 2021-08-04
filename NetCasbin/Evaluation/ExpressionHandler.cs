@@ -18,36 +18,22 @@ namespace Casbin.Evaluation
         private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
         private readonly IModel _model;
         private Interpreter _interpreter;
-        private readonly Parameter[] _orderedParameters;
+        private Parameter[] _orderedParameters;
 
-        public ExpressionHandler(IModel model,
-            string requestType = PermConstants.DefaultRequestType,
-            string policyType = PermConstants.DefaultPolicyType)
+        private IReadOnlyDictionary<string, int> _requestTokenDic;
+        private IEnumerable<string> _requestTokens;
+        private IReadOnlyDictionary<string, int> _policyTokenDic;
+        private IEnumerable<string> _policyTokens;
+
+        public ExpressionHandler(IModel model)
         {
             _model = model;
-            int parametersCount = 0;
-
-            if (model.Sections.ContainsKey(PermConstants.Section.RequestSection))
-            {
-                RequestTokens = model.Sections[PermConstants.Section.RequestSection][requestType].Tokens;
-                parametersCount += RequestTokens.Count;
-            }
-
-            if (model.Sections.ContainsKey(PermConstants.Section.PolicySection))
-            {
-                PolicyTokens = model.Sections[PermConstants.Section.PolicySection][policyType].Tokens;
-                parametersCount += PolicyTokens.Count;
-            }
-
-            _orderedParameters = new Parameter[parametersCount];
         }
-
-        public IReadOnlyDictionary<string, int> RequestTokens { get; }
-
-        public IReadOnlyDictionary<string, int> PolicyTokens { get; }
 
         public IDictionary<string, Parameter> Parameters { get; }
             = new Dictionary<string, Parameter>();
+
+        public EnforceContext EnforceContext { get; private set; }
 
         public void SetFunction(string name, Delegate function)
         {
@@ -65,7 +51,22 @@ namespace Casbin.Evaluation
             SetGFunctions(interpreter);
         }
 
-        
+
+        public void SetEnforceContext(ref EnforceContext context)
+        {
+            EnforceContext = context;
+            int parametersCount = 0;
+
+            _requestTokenDic = context.RequestAssertion.Tokens;
+            _requestTokens = _requestTokenDic.Keys;
+            _policyTokenDic = context.PolicyAssertion.Tokens;
+            _policyTokens = _policyTokenDic.Keys;
+
+            parametersCount += _requestTokenDic.Count;
+            parametersCount += _policyTokenDic.Count;
+            _orderedParameters = new Parameter[parametersCount];
+        }
+
         public void EnsureCreated(string expressionString, IReadOnlyList<object> requestValues)
         {
             if (_expressionCache.ContainsKey(expressionString))
@@ -80,7 +81,7 @@ namespace Casbin.Evaluation
 
             Lambda expression = CreateExpression(expressionString, requestValues);
 
-            if (RequestTokens.Count is 3 && PolicyTokens.Count is 3
+            if (_requestTokenDic.Count is 3 && _policyTokenDic.Count is 3
                 && CheckRequestValuesOnlyString(requestValues))
             {
                 _onlyStringFuncCache[expressionString] =
@@ -119,9 +120,9 @@ namespace Casbin.Evaluation
 
         public void SetRequestParameters(IReadOnlyList<object> requestValues)
         {
-            foreach (string token in RequestTokens.Keys)
+            foreach (string token in _requestTokens)
             {
-                object requestValue = requestValues?[RequestTokens[token]];
+                object requestValue = requestValues?[_requestTokenDic[token]];
 
                 if (Parameters.ContainsKey(token))
                 {
@@ -135,16 +136,16 @@ namespace Casbin.Evaluation
                     Parameters.Add(token, new Parameter(token, requestValue ?? string.Empty));
                 }
 
-                _orderedParameters[RequestTokens[token]] = Parameters[token];
+                _orderedParameters[_requestTokenDic[token]] = Parameters[token];
             }
         }
 
         public void SetPolicyParameters(IReadOnlyList<string> policyValues = null)
         {
-            int requestCount = RequestTokens.Count;
-            foreach (string token in PolicyTokens.Keys)
+            int requestCount = _requestTokenDic.Count;
+            foreach (string token in _policyTokens)
             {
-                string policyValue = policyValues?[PolicyTokens[token]];
+                string policyValue = policyValues?[_policyTokenDic[token]];
 
                 if (Parameters.ContainsKey(token))
                 {
@@ -158,7 +159,7 @@ namespace Casbin.Evaluation
                     Parameters.Add(token, new Parameter(token, policyValue ?? string.Empty));
                 }
 
-                _orderedParameters[PolicyTokens[token] + requestCount] = Parameters[token];
+                _orderedParameters[_policyTokenDic[token] + requestCount] = Parameters[token];
             }
         }
 
@@ -221,7 +222,7 @@ namespace Casbin.Evaluation
 
         private bool CheckRequestValuesOnlyString(IReadOnlyCollection<object> requestValues)
         {
-            int count = RequestTokens.Count;
+            int count = _requestTokenDic.Count;
 
             if (requestValues.Count != count)
             {

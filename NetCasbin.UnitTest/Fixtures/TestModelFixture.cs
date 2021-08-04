@@ -51,6 +51,10 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
         internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
 
+        // https://github.com/casbin/Casbin.NET/issues/134
+        internal readonly string _multipleTypeModelText = ReadTestFile("multiple_type_model.conf");
+        internal readonly string _multipleTypePolicyText = ReadTestFile("multiple_type_policy.csv");
+
         public IModel GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
@@ -114,6 +118,11 @@ namespace Casbin.UnitTests.Fixtures
         public IModel GetNewRbacWithResourceRoleTestModel()
         {
             return GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
+        }
+
+        public IModel GetNewMultipleTypeTestModel()
+        {
+            return GetNewTestModel(_multipleTypeModelText, _multipleTypePolicyText);
         }
 
         public static IModel GetNewTestModel(string modelText)

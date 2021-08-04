@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Casbin.Model;
 
 namespace Casbin.Persist
 {

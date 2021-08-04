@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Casbin.Persist;
 
-namespace Casbin
+namespace Casbin.Model
 {
     public interface IPolicyManager
     {

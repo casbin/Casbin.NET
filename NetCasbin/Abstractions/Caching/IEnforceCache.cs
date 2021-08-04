@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace Casbin
+namespace Casbin.Caching
 {
     public interface IEnforceCache<out TOptions> : IEnforceCache
     {

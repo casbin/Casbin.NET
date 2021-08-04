@@ -6,6 +6,8 @@
         public const string PolicySeparatorString = ", "; // include a white space
 
         public const string DefaultRequestType = "r";
+        public const string RequestType2 = "r2";
+        public const string RequestType3 = "r3";
 
         public const string DefaultPolicyType = "p";
         public const string PolicyType2 = "p2";
@@ -20,7 +22,12 @@
         public const string GroupingPolicyType3 = RoleType3;
 
         public const string DefaultMatcherType = "m";
+        public const string MatcherType2 = "m2";
+        public const string MatcherType3 = "m3";
+
         public const string DefaultPolicyEffectType = "e";
+        public const string PolicyEffectType2 = "e2";
+        public const string PolicyEffectType3 = "e3";
 
         public static class Section
         {

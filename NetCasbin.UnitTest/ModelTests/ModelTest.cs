@@ -522,6 +522,49 @@ namespace Casbin.UnitTests.ModelTests
             TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
         }
 
+        [Fact]
+        public void TestMultipleTypeModel()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewMultipleTypeTestModel());
+            e.BuildRoleLinks();
+
+            // Use default types
+            EnforceContext context = e.CreatContext();
+
+            Assert.True(e.Enforce(context, "alice", "data1", "read"));
+            Assert.False(e.Enforce(context, "alice", "data1", "write"));
+
+            Assert.True(e.Enforce(context, "bob", "data2", "read"));
+            Assert.False(e.Enforce(context, "bob", "data2", "write"));
+
+            // Use r2 p2 and m2 type
+            context = e.CreatContext
+            (
+                PermConstants.RequestType2,
+                PermConstants.PolicyType2,
+                PermConstants.DefaultPolicyEffectType,
+                PermConstants.MatcherType2
+            );
+
+            Assert.True(e.Enforce(context, "alice", "domain1", "data2", "read"));
+            Assert.False(e.Enforce(context, "alice", "domain1", "data2", "write"));
+
+            Assert.True(e.Enforce(context, "bob", "domain1", "data1", "read"));
+            Assert.False(e.Enforce(context, "bob", "domain1", "data1", "write"));
+
+            // Use r_custom p_custom and m_custom type
+            context = e.CreatContext
+            (
+                PermConstants.RequestType3,
+                PermConstants.PolicyType3,
+                PermConstants.DefaultPolicyEffectType,
+                PermConstants.MatcherType3
+            );
+
+            Assert.True(e.Enforce(context, new { Age = 30 }, "data2", "read"));
+            Assert.False(e.Enforce(context, new { Age = 70 }, "data2", "read"));
+        }
+
         public class TestResource
         {
             public TestResource(string name, string owner)
