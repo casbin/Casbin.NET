@@ -66,6 +66,7 @@ namespace Casbin.Effect
             PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
             PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
             PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
+            PermConstants.PolicyEffect.PriorityDenyOverride => EffectExpressionType.PriorityDenyOverride,
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
 
@@ -74,6 +75,8 @@ namespace Casbin.Effect
         public bool Result { get; private set; }
 
         public bool HitPolicy { get; private set; }
+
+        public int HitPolicyCount { get; private set; }
 
         public bool CanChain { get; private set; }
 
@@ -87,6 +90,7 @@ namespace Casbin.Effect
             EffectExpressionType = ParseEffectExpressionType(EffectExpression);
             CanChain = true;
             Result = false;
+            HitPolicyCount = 0;
         }
 
         public bool Chain(PolicyEffect effect)
@@ -127,11 +131,19 @@ namespace Casbin.Effect
                 CanChain = false;
                 Result = result;
                 HitPolicy = hitPolicy;
+                if (hitPolicy)
+                {
+                    HitPolicyCount++;
+                }
                 return true;
             }
 
             Result = result;
             HitPolicy = hitPolicy;
+            if (hitPolicy)
+            {
+                HitPolicyCount++;
+            }
             return true;
         }
 

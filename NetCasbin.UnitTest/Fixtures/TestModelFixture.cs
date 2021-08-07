@@ -55,6 +55,10 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _multipleTypeModelText = ReadTestFile("multiple_type_model.conf");
         internal readonly string _multipleTypePolicyText = ReadTestFile("multiple_type_policy.csv");
 
+        // https://github.com/casbin/Casbin.NET/issues/188
+        internal readonly string _priorityExplicitDenyOverrideModelText = ReadTestFile("priority_explicit_deny_override_model.conf");
+        internal readonly string _priorityExplicitDenyOverridePolicyText = ReadTestFile("priority_explicit_deny_override_policy.csv");
+
         public IModel GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
@@ -98,6 +102,11 @@ namespace Casbin.UnitTests.Fixtures
         public IModel GetNewPriorityExplicitTestModel()
         {
             return GetNewTestModel(_priorityExplicitModelText, _priorityExplicitPolicyText);
+        }
+
+        public IModel GetNewPriorityExplicitDenyOverrideModel()
+        {
+            return GetNewTestModel(_priorityExplicitDenyOverrideModelText, _priorityExplicitDenyOverridePolicyText);
         }
 
         public IModel GetNewRbacTestModel()

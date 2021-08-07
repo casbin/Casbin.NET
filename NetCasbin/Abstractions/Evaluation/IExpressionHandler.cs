@@ -10,7 +10,7 @@ namespace Casbin.Evaluation
 
         public IDictionary<string, Parameter> Parameters { get; }
 
-        public void SetEnforceContext(ref EnforceContext context);
+        public void SetEnforceContext(in EnforceContext context);
 
         public void SetFunction(string name, Delegate function);
 
