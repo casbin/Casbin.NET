@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net6;net5;netcoreapp3.1;net461;net452</TargetFrameworks>
+    <TargetFrameworks>net5;netcoreapp3.1;net461;net452</TargetFrameworks>
     <DebugType>full</DebugType>
     <IsPackable>false</IsPackable>
     <LangVersion>9.0</LangVersion>
@@ -146,6 +146,12 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="examples\rbac_with_domains_model.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="examples\rbac_with_domains_pattern_model.conf">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="examples\rbac_with_domains_pattern_policy.csv">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="examples\rbac_with_domains_policy.csv">

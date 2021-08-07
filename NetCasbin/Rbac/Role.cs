@@ -54,9 +54,11 @@ namespace NetCasbin.Rbac
             }
         }
 
-        public bool HasRole(string name, int hierarchyLevel, Func<string, string, bool> matchingFunc = null)
+        public bool HasRole(string name, int hierarchyLevel, string domain,
+            Func<string, string, bool> matchingFunc = null,
+            Func<string, string, bool> domainMatchingFunc = null)
         {
-            if (HasDirectRole(name, matchingFunc))
+            if (HasDirectRole(name, domain, matchingFunc, domainMatchingFunc))
             {
                 return true;
             }
@@ -71,10 +73,12 @@ namespace NetCasbin.Rbac
                 return false;
             }
 
-            return _roles.Value.Values.Any(role => role.HasRole(name, hierarchyLevel - 1));
+            return _roles.Value.Values.Any(role => role.HasRole(name, hierarchyLevel - 1, domain, matchingFunc, domainMatchingFunc));
         }
 
-        public bool HasDirectRole(string name, Func<string, string, bool> matchingFunc = null)
+        public bool HasDirectRole(string name, string domain,
+            Func<string, string, bool> matchingFunc = null,
+            Func<string, string, bool> domainMatchingFunc = null)
         {
             if (_roles.IsValueCreated is false)
             {
@@ -83,13 +87,29 @@ namespace NetCasbin.Rbac
 
             if (matchingFunc is null)
             {
-                return _roles.Value.ContainsKey(name);
+                if (_roles.Value.TryGetValue(name, out Role _) is false)
+                {
+                    return false;
+                }
+
+                // TODO: unused domainMatchingFunc
+
+                return true;
             }
 
-            
-            foreach (var role in _roles.Value.Values)
+            foreach (Role role in _roles.Value.Values)
             {
-                if (name == role.Name || matchingFunc(role.Name, name) && role.Name != name)
+                if (domainMatchingFunc is not null && domainMatchingFunc(role.Domain, domain) is false)
+                {
+                    return false;
+                }
+
+                if (name == role.Name)
+                {
+                    return true;
+                }
+
+                if (role.Name != name && matchingFunc(role.Name, name))
                 {
                     return true;
                 }

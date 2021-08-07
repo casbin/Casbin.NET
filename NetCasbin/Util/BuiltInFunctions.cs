@@ -13,7 +13,7 @@ namespace NetCasbin.Util
         private static readonly Regex s_keyMatch2Regex = new Regex(@":[^/]+");
         private static readonly Regex s_keyMatch3Regex = new Regex(@"\{[^/]+\}");
         private static readonly Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
-        private delegate bool GFunction(string subject1, string subject2, string domain = null);
+        internal delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to RESTful path),
@@ -194,7 +194,7 @@ namespace NetCasbin.Util
         /// <param name="name">The name of the g(_, _) function, can be "g", "g2", ..</param>
         /// <param name="roleManager">The role manager used by the function.</param>
         /// <returns>The function.</returns>
-        internal static Delegate GenerateGFunction(string name, IRoleManager roleManager)
+        internal static GFunction GenerateGFunction(string name, IRoleManager roleManager)
         {
             var resultCache = new Dictionary<string, bool>();
 
@@ -229,7 +229,8 @@ namespace NetCasbin.Util
                 resultCache[cacheKey] = result;
                 return result;
             }
-            return (GFunction) GFunction;
+
+            return GFunction;
         }
     }
 }

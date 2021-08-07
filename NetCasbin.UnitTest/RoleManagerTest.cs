@@ -238,5 +238,7 @@ namespace NetCasbin.UnitTest
             TestDomainRole(roleManager, "/book/1", "book_group", "domain1", true);
             TestDomainRole(roleManager, "/book/2", "book_group", "domain1", true);
         }
+
+
     }
 }

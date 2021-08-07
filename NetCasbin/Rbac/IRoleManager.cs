@@ -81,5 +81,14 @@ namespace NetCasbin.Rbac
         /// Clears all stored data and resets the role manager to the initial state.
         /// </summary>
         public void Clear();
+
+        /// <summary>
+        /// Build relationship of links if has matching func or domain matching func.
+        /// </summary>
+        /// <param name="name1"></param>
+        /// <param name="name2"></param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public void BuildRelationship(string name1, string name2, string domain = null);
     }
 }
