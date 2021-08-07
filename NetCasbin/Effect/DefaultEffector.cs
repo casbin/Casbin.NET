@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using Casbin.Evaluation;
+using Casbin.Extensions;
 
 namespace Casbin.Effect
 {
@@ -13,27 +15,14 @@ namespace Casbin.Effect
         /// </summary>
         /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
-        /// <param name="results"></param>
+        /// <param name="matches"></param>
         /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        public bool MergeEffects(string effectExpression, PolicyEffect[] effects, float[] results, out int hitPolicyIndex)
+        public PolicyEffect MergeEffects(string effectExpression, IReadOnlyList<PolicyEffect> effects, IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
         {
-            return MergeEffects(effectExpression, effects.AsSpan(), results.AsSpan(), out hitPolicyIndex);
-        }
-
-
-        /// <summary>
-        /// Merges all matching results collected by the enforcer into a single decision.
-        /// </summary>
-        /// <param name="effectExpression"></param>
-        /// <param name="effects"></param>
-        /// <param name="results"></param>
-        /// <param name="hitPolicyIndex"></param>
-        /// <returns></returns>
-        private bool MergeEffects(string effectExpression, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
-        {
-            PolicyEffectType = ParseEffectExpressionType(effectExpression);
-            return MergeEffects(PolicyEffectType, effects, results, out hitPolicyIndex);
+            EffectExpressionType effectExpressionType = ParseEffectExpressionType(effectExpression);
+            bool? result = MergeEffects(effectExpressionType, effects, matches, policyIndex, policyCount, out hitPolicyIndex);
+            return result.ToPolicyEffect();
         }
 
         /// <summary>
@@ -41,14 +30,17 @@ namespace Casbin.Effect
         /// </summary>
         /// <param name="effectExpressionType"></param>
         /// <param name="effects"></param>
-        /// <param name="results"></param>
+        /// <param name="matches"></param>
         /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        private bool MergeEffects(EffectExpressionType effectExpressionType, Span<PolicyEffect> effects, Span<float> results, out int hitPolicyIndex)
+        private static bool? MergeEffects(EffectExpressionType effectExpressionType, IReadOnlyList<PolicyEffect> effects,
+            IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
         {
-            bool finalResult = false;
             hitPolicyIndex = -1;
-            for (int index = 0; index < effects.Length; index++)
+            int effectCount = policyIndex + 1;
+            bool finalResult = false;
+
+            for (int index = 0; index < effectCount; index++)
             {
                 if (EffectEvaluator.TryEvaluate(effects[index] , effectExpressionType,
                     ref finalResult, out bool hitPolicy))
@@ -61,7 +53,11 @@ namespace Casbin.Effect
                 }
             }
 
-            return finalResult;
+            if (effectCount == policyCount)
+            {
+                return finalResult;
+            }
+            return null;
         }
 
         public static EffectExpressionType ParseEffectExpressionType(string effectExpression) => effectExpression switch
@@ -83,12 +79,12 @@ namespace Casbin.Effect
 
         public string EffectExpression { get; private set; }
 
-        public EffectExpressionType PolicyEffectType { get; private set; }
+        public EffectExpressionType EffectExpressionType { get; private set; }
 
         public void StartChain(string effectExpression)
         {
             EffectExpression = effectExpression ?? throw new ArgumentNullException(nameof(effectExpression));
-            PolicyEffectType = ParseEffectExpressionType(EffectExpression);
+            EffectExpressionType = ParseEffectExpressionType(EffectExpression);
             CanChain = true;
             Result = false;
         }
@@ -102,7 +98,7 @@ namespace Casbin.Effect
 
             bool result = Result;
 
-            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType,
+            if (EffectEvaluator.TryEvaluate(effect, EffectExpressionType,
                 ref result, out bool hitPolicy))
             {
                 CanChain = false;
@@ -125,7 +121,7 @@ namespace Casbin.Effect
             }
 
             bool result = Result;
-            if (EffectEvaluator.TryEvaluate(effect, PolicyEffectType,
+            if (EffectEvaluator.TryEvaluate(effect, EffectExpressionType,
                 ref result, out bool hitPolicy))
             {
                 CanChain = false;
