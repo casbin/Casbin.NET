@@ -116,7 +116,7 @@ namespace Casbin
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
 #if !NET45
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                LogEnforceResult(context, requestValues, cachedResult, true);
 #endif
                 return cachedResult;
             }
@@ -124,6 +124,10 @@ namespace Casbin
             bool result  = InternalEnforce(context, PolicyManager, requestValues);
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
+
+#if !NET45
+            LogEnforceResult(context, requestValues, result);
+#endif
             return result;
         }
 
@@ -158,15 +162,19 @@ namespace Casbin
             {
                 bool cachedResult = tryGetCachedResult.Value;
 #if !NET45
-                Logger?.LogEnforceCachedResult(requestValues, cachedResult);
+                LogEnforceResult(context, requestValues, cachedResult, true);
 #endif
                 return cachedResult;
             }
 
             bool result = await InternalEnforceAsync(context, PolicyManager, requestValues);
-
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
+
+#if !NET45
+            LogEnforceResult(context, requestValues, result);
+#endif
+
             return result;
         }
 
@@ -196,207 +204,202 @@ namespace Casbin
         private bool InternalEnforce(EnforceContext context, IReadOnlyList<object> requestValues)
         {
             string expressionString = context.Matcher;
-            bool hasEval = context.HasEval;
-
-            string effect = context.Effect;
             var policyList = context.PolicyAssertion.Policy;
             int policyCount = policyList.Count;
-
-            bool explain = context.Explain;
-            var explanations = context.Explanations;
-
             int requestTokenCount = context.RequestAssertion.Tokens.Count;
             if (requestTokenCount != requestValues.Count)
             {
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {requestValues.Count}.");
             }
-
-            int policyTokenCount = context.PolicyAssertion.Tokens.Count;
-
             ExpressionHandler.SetEnforceContext(ref context);
             ExpressionHandler.SetRequestParameters(requestValues);
 
-            bool finalResult = false;
             IChainEffector chainEffector = Effector as IChainEffector;
             bool isChainEffector = chainEffector is not null;
+            bool expressionResult;
+            bool? nowResult = null;
+
+            PolicyEffect[] policyEffects = null;
             if (isChainEffector)
             {
                 chainEffector.StartChain(context.Effect);
-
-                if (policyCount is not 0)
-                {
-                    foreach (IReadOnlyList<string> policyValues in policyList)
-                    {
-                        if (policyTokenCount != policyValues.Count)
-                        {
-                            throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
-                        }
-
-                        ExpressionHandler.SetPolicyParameters(policyValues);
-
-                        bool expressionResult;
-
-                        if (hasEval)
-                        {
-                            string expressionStringWithRule = RewriteEval(expressionString, context.PolicyAssertion.Tokens, policyValues);
-                            expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
-                        }
-                        else
-                        {
-                            expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
-                        }
-
-                        var nowEffect = GetEffect(expressionResult);
-
-                        if (nowEffect is not PolicyEffect.Indeterminate
-                            && context.PolicyAssertion.TryGetTokenIndex("eft", out int index))
-                        {
-                            string policyEffect = policyValues[index];
-                            nowEffect = policyEffect switch
-                            {
-                                "allow" => PolicyEffect.Allow,
-                                "deny" => PolicyEffect.Deny,
-                                _ => PolicyEffect.Indeterminate
-                            };
-                        }
-
-                        bool chainResult = chainEffector.TryChain(nowEffect);
-
-                        if (explain && chainEffector.HitPolicy)
-                        {
-                            explanations.Add(policyValues);
-                        }
-
-                        if (chainResult is false || chainEffector.CanChain is false)
-                        {
-                            break;
-                        }
-                    }
-
-                    finalResult = chainEffector.Result;
-                }
-                else
-                {
-                    if (hasEval)
-                    {
-                        throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
-                    }
-
-                    IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
-                    ExpressionHandler.SetPolicyParameters(policyValues);
-                    var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
-
-                    if (chainEffector.TryChain(nowEffect))
-                    {
-                        finalResult = chainEffector.Result;
-                    }
-
-                    if (explain && chainEffector.HitPolicy)
-                    {
-                        explanations.Add(policyValues);
-                    }
-                }
-
-#if !NET45
-                if (explain)
-                {
-                    Logger?.LogEnforceResult(requestValues, finalResult, explanations);
-                }
-                else
-                {
-                    Logger?.LogEnforceResult(requestValues, finalResult);
-                }
-#endif
-                return finalResult;
+            }
+            else
+            {
+                policyEffects = new PolicyEffect[policyCount];
             }
 
-            int hitPolicyIndex;
             if (policyCount != 0)
             {
-                PolicyEffect[] policyEffects = new PolicyEffect[policyCount];
-
-                for (int i = 0; i < policyCount; i++)
+                for (int policyIndex = 0; policyIndex < policyCount; policyIndex++)
                 {
-                    IReadOnlyList<string> policyValues = policyList[i];
+                    IReadOnlyList<string> policyValues = policyList[policyIndex];
+                    string actualExpressionString = HandleBeforeExpression(context, expressionString, policyValues, policyCount);
+                    expressionResult = ExpressionHandler.Invoke(actualExpressionString, requestValues);
 
-                    if (policyTokenCount != policyValues.Count)
-                    {
-                        throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
-                    }
+                    bool determined = isChainEffector
+                        ? HandleExpressionResult(context, expressionResult, chainEffector, policyValues, policyCount, out nowResult)
+                        : HandleExpressionResult(context, expressionResult, Effector, policyEffects, policyValues, policyIndex, policyCount, out nowResult);
 
-                    ExpressionHandler.SetPolicyParameters(policyValues);
-
-                    bool expressionResult;
-
-                    if (hasEval)
-                    {
-                        string expressionStringWithRule = RewriteEval(expressionString, context.PolicyAssertion.Tokens, policyValues);
-                        expressionResult = ExpressionHandler.Invoke(expressionStringWithRule, requestValues);
-                    }
-                    else
-                    {
-                        expressionResult = ExpressionHandler.Invoke(expressionString, requestValues);
-                    }
-
-                    var nowEffect = GetEffect(expressionResult);
-
-                    if (nowEffect is PolicyEffect.Indeterminate)
-                    {
-                        policyEffects[i] = nowEffect;
-                        continue;
-                    }
-
-                    if (ExpressionHandler.Parameters.TryGetValue("p_eft", out Parameter parameter))
-                    {
-                        string policyEffect = parameter.Value as string;
-                        nowEffect = policyEffect switch
-                        {
-                            "allow" => PolicyEffect.Allow,
-                            "deny" => PolicyEffect.Deny,
-                            _ => PolicyEffect.Indeterminate
-                        };
-                    }
-
-                    policyEffects[i] = nowEffect;
-
-                    if (effect.Equals(PermConstants.PolicyEffect.Priority))
+                    if (determined)
                     {
                         break;
                     }
                 }
-
-                finalResult = Effector.MergeEffects(effect, policyEffects, null, out hitPolicyIndex);
             }
             else
             {
-                if (hasEval)
+                string actualExpressionString = HandleBeforeExpression(context, expressionString, null, policyCount);
+                expressionResult = ExpressionHandler.Invoke(actualExpressionString, requestValues);
+
+                _ = isChainEffector
+                    ? HandleExpressionResult(context, expressionResult, chainEffector, null, policyCount, out nowResult)
+                    : HandleExpressionResult(context, expressionResult, Effector, policyEffects, null, 0, policyCount, out nowResult);
+            }
+            bool finalResult = nowResult ?? false;
+            return finalResult;
+        }
+
+        private string HandleBeforeExpression(in EnforceContext context, string expressionString, IReadOnlyList<string> policyValues, int policyCount)
+        {
+            int policyTokenCount = context.PolicyAssertion.Tokens.Count;
+
+            if (policyCount is 0)
+            {
+                if (context.HasEval)
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
-                ExpressionHandler.SetPolicyParameters(policyValues);
-                var nowEffect = GetEffect(ExpressionHandler.Invoke(expressionString, requestValues));
-                finalResult = Effector.MergeEffects(effect, new[] { nowEffect }, null, out hitPolicyIndex);
+                IReadOnlyList<string> tempPolicyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
+                ExpressionHandler.SetPolicyParameters(tempPolicyValues);
+                return expressionString;
             }
 
-            if (explain && hitPolicyIndex is not -1)
+            if (policyTokenCount != policyValues.Count)
             {
-                explanations.Add(policyList[hitPolicyIndex]);
+                throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policyValues.Count}.");
             }
+
+            ExpressionHandler.SetPolicyParameters(policyValues);
+
+            if (context.HasEval)
+            {
+                expressionString = RewriteEval(expressionString, context.PolicyAssertion.Tokens, policyValues);
+            }
+            return expressionString;
+        }
+
+        private static bool HandleExpressionResult(in EnforceContext context, bool expressionResult, IEffector effector, PolicyEffect[] policyEffects,
+            IReadOnlyList<string> policyValues, int policyIndex, int policyCount, out bool? nowResult)
+        {
+            PolicyEffect nowEffect;
+            if (policyCount is 0)
+            {
+                nowEffect = GetEffect(expressionResult);
+                nowEffect = effector.MergeEffects(context.Effect, new[] { nowEffect }, null, policyIndex, policyCount, out _);
+                bool finalResult = nowEffect.ToNullableBool() ?? false;
+                nowResult = finalResult;
+                return true;
+            }
+
+            nowEffect = GetEffect(expressionResult);
+
+            if (nowEffect is not PolicyEffect.Indeterminate && context.PolicyAssertion.TryGetTokenIndex("eft", out int index))
+            {
+                string policyEffect = policyValues[index];
+                nowEffect = policyEffect switch
+                {
+                    "allow" => PolicyEffect.Allow,
+                    "deny" => PolicyEffect.Deny,
+                    _ => PolicyEffect.Indeterminate
+                };
+            }
+
+            policyEffects[policyIndex] = nowEffect;
+            nowEffect = effector.MergeEffects(context.Effect, policyEffects, null, policyIndex, policyCount, out int hitPolicyIndex);
+            nowResult = nowEffect.ToNullableBool();
+
+            if (context.Explain && hitPolicyIndex is not -1)
+            {
+                context.Explanations.Add(policyValues);
+            }
+
+            if (nowResult is not null)
+            {
+                return true;
+            }
+
+            nowResult = false;
+            return false;
+        }
+
+        private static bool HandleExpressionResult(in EnforceContext context, bool expressionResult, IChainEffector chainEffector,
+            IReadOnlyList<string> policyValues, int policyCount, out bool? nowResult)
+        {
+            PolicyEffect nowEffect;
+            if (policyCount is 0)
+            {
+                nowEffect = GetEffect(expressionResult);
+
+                if (chainEffector.TryChain(nowEffect))
+                {
+                    nowResult = chainEffector.Result;
+                    return true;
+                }
+
+                nowResult = false;
+                return true;
+            }
+
+            nowEffect = GetEffect(expressionResult);
+
+            if (nowEffect is not PolicyEffect.Indeterminate && context.PolicyAssertion.TryGetTokenIndex("eft", out int index))
+            {
+                string policyEffect = policyValues[index];
+                nowEffect = policyEffect switch
+                {
+                    "allow" => PolicyEffect.Allow,
+                    "deny" => PolicyEffect.Deny,
+                    _ => PolicyEffect.Indeterminate
+                };
+            }
+
+            bool chainResult = chainEffector.TryChain(nowEffect);
+
+            if (context.Explain && chainEffector.HitPolicy)
+            {
+                context.Explanations.Add(policyValues);
+            }
+
+            if (chainResult is false || chainEffector.CanChain is false)
+            {
+                nowResult = chainEffector.Result;
+                return true;
+            }
+
+            nowResult = chainEffector.Result;
+            return false;
+        }
 
 #if !NET45
-            if (explain)
+        private void LogEnforceResult(in EnforceContext context, IReadOnlyList<object> requestValues, bool finalResult, bool cachedResult = false)
+        {
+            if (cachedResult)
             {
-                Logger?.LogEnforceResult(requestValues, finalResult, explanations);
+                Logger?.LogEnforceCachedResult(requestValues, finalResult);
+                return;
             }
-            else
+
+            if (context.Explain)
             {
-                Logger?.LogEnforceResult(requestValues, finalResult);
+                Logger?.LogEnforceResult(requestValues, finalResult, context.Explanations);
+                return;
             }
-#endif
-            return finalResult;
+
+            Logger?.LogEnforceResult(requestValues, finalResult);
         }
+#endif
 
         private static PolicyEffect GetEffect(bool expressionResult)
         {

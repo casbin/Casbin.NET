@@ -10,7 +10,7 @@
 
         public string EffectExpression { get; }
 
-        public EffectExpressionType PolicyEffectType { get; }
+        public EffectExpressionType EffectExpressionType { get; }
 
         public void StartChain(string policyEffect);
 
