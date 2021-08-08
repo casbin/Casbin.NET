@@ -51,8 +51,7 @@ namespace Casbin.Evaluation
             SetGFunctions(interpreter);
         }
 
-
-        public void SetEnforceContext(ref EnforceContext context)
+        public void SetEnforceContext(in EnforceContext context)
         {
             EnforceContext = context;
             int parametersCount = 0;

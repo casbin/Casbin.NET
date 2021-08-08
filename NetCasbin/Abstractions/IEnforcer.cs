@@ -49,8 +49,8 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public bool Enforce(EnforceContext context, params object[] requestValues);
-
+        public bool Enforce(in EnforceContext context, params object[] requestValues);
+         
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
@@ -59,6 +59,5 @@ namespace Casbin
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public Task<bool> EnforceAsync(EnforceContext context, params object[] requestValues);
-
     }
 }

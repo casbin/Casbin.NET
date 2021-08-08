@@ -8,6 +8,8 @@
 
         public bool HitPolicy { get; }
 
+        public int HitPolicyCount { get; }
+
         public string EffectExpression { get; }
 
         public EffectExpressionType EffectExpressionType { get; }
