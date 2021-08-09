@@ -11,6 +11,7 @@ using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.Util;
 using Casbin.Evaluation;
+using System.Runtime.CompilerServices;
 #if !NET45
 using Microsoft.Extensions.Logging;
 #endif
@@ -245,7 +246,7 @@ namespace Casbin
             return session.EnforceResult;
         }
 
-        private EnforceSession HandleInitialRequest(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private ref EnforceSession HandleInitialRequest(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
         {
             session.ExpressionString = context.Matcher;
             session.PolicyCount = context.PolicyAssertion.Policy.Count;
@@ -271,10 +272,10 @@ namespace Casbin
             session.EffectExpressionType = chainEffector?.EffectExpressionType ?? DefaultEffector.ParseEffectExpressionType(session.ExpressionString);
             session.HasPriority = context.PolicyAssertion.TryGetTokenIndex("priority", out int priorityIndex);
             session.PriorityIndex = priorityIndex;
-            return session;
+            return ref session;
         }
 
-        private EnforceSession HandleBeforeExpression(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private ref EnforceSession HandleBeforeExpression(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
         {
             int policyTokenCount = context.PolicyAssertion.Tokens.Count;
 
@@ -287,7 +288,7 @@ namespace Casbin
 
                 IReadOnlyList<string> tempPolicyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
                 ExpressionHandler.SetPolicyParameters(tempPolicyValues);
-                return session;
+                return ref session;
             }
 
             if (policyTokenCount != session.PolicyValues.Count)
@@ -321,10 +322,10 @@ namespace Casbin
                 session.ExpressionString = RewriteEval(session.ExpressionString, context.PolicyAssertion.Tokens, session.PolicyValues);
             }
 
-            return session;
+            return ref session;
         }
 
-        private static EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
+        private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
         {
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)
@@ -333,7 +334,7 @@ namespace Casbin
                 nowEffect = effector.MergeEffects(context.Effect, new[] { nowEffect }, null, session.PolicyIndex, session.PolicyCount, out _);
                 bool finalResult = nowEffect.ToNullableBool() ?? false;
                 session.DetermineResult(finalResult);
-                return session;
+                return ref session;
             }
 
             IReadOnlyList<string> policyValues = session.PolicyValues;
@@ -361,14 +362,14 @@ namespace Casbin
             if (nowEffect is not PolicyEffect.Indeterminate)
             {
                 session.DetermineResult(nowEffect.ToNullableBool() ?? false);
-                return session;
+                return ref session;
             }
 
             session.EnforceResult = false;
-            return session;
+            return ref session;
         }
 
-        private static EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
         {
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)
@@ -378,11 +379,11 @@ namespace Casbin
                 if (chainEffector.TryChain(nowEffect))
                 {
                     session.DetermineResult(chainEffector.Result);
-                    return session;
+                    return ref session;
                 }
 
                 session.DetermineResult(false);
-                return session;
+                return ref session;
             }
 
             IReadOnlyList<string> policyValues = session.PolicyValues;
@@ -409,11 +410,11 @@ namespace Casbin
             if (chainResult is false || chainEffector.CanChain is false)
             {
                 session.DetermineResult(chainEffector.Result);
-                return session;
+                return ref session;
             }
 
             session.EnforceResult = chainEffector.Result;
-            return session;
+            return ref session;
         }
 
 #if !NET45
@@ -435,6 +436,7 @@ namespace Casbin
         }
 #endif
 
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static PolicyEffect GetEffect(bool expressionResult)
         {
             return expressionResult ? PolicyEffect.Allow : PolicyEffect.Indeterminate;
