@@ -10,15 +10,15 @@ using Casbin.Util;
 
 namespace Casbin.Adapter.File
 {
-    public class FileAdapter : IAdapter
+    public class FileAdapter : IEpochAdapter
     {
-        protected readonly string filePath;
+        protected readonly string _filePath;
         private readonly bool _readOnly;
         private readonly StreamReader _byteArrayInputStream;
 
         public FileAdapter(string filePath)
         {
-            this.filePath = filePath;
+            _filePath = filePath;
         }
 
         public FileAdapter(Stream inputStream)
@@ -36,10 +36,10 @@ namespace Casbin.Adapter.File
 
         public void LoadPolicy(IModel model)
         {
-            if (!string.IsNullOrWhiteSpace(filePath))
+            if (!string.IsNullOrWhiteSpace(_filePath))
             {
                 using (var sr = new StreamReader(new FileStream(
-                    filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
+                    _filePath, FileMode.Open, FileAccess.Read, FileShare.Read)))
                 {
                     LoadPolicyData(model, Helper.LoadPolicyLine, sr);
                 }
@@ -53,10 +53,10 @@ namespace Casbin.Adapter.File
 
         public async Task LoadPolicyAsync(IModel model)
         {
-            if (!string.IsNullOrWhiteSpace(filePath))
+            if (!string.IsNullOrWhiteSpace(_filePath))
             {
                 using (var sr = new StreamReader(new FileStream(
-                    filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
+                    _filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite)))
                 {
                     await LoadPolicyDataAsync(model, Helper.LoadPolicyLine, sr);
                 }
@@ -75,7 +75,7 @@ namespace Casbin.Adapter.File
                 throw new Exception("Policy file can not write, because use inputStream is readOnly");
             }
 
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(_filePath))
             {
                 throw new ArgumentException("Invalid file path, file path cannot be empty");
             }
@@ -91,7 +91,7 @@ namespace Casbin.Adapter.File
                 throw new Exception("Policy file can not write, because use inputStream is readOnly");
             }
 
-            if (string.IsNullOrWhiteSpace(filePath))
+            if (string.IsNullOrWhiteSpace(_filePath))
             {
                 throw new ArgumentException("Invalid file path, file path cannot be empty");
             }
@@ -143,7 +143,7 @@ namespace Casbin.Adapter.File
 
         private void SavePolicyFile(string text)
         {
-            System.IO.File.WriteAllText(filePath, text, Encoding.UTF8);
+            System.IO.File.WriteAllText(_filePath, text, Encoding.UTF8);
         }
 
         private async Task SavePolicyFileAsync(string text)
@@ -151,22 +151,11 @@ namespace Casbin.Adapter.File
             text = text ?? string.Empty;
             var content = Encoding.UTF8.GetBytes(text);
             using (var fs = new FileStream(
-                   filePath, FileMode.Create, FileAccess.Write,
+                   _filePath, FileMode.Create, FileAccess.Write,
                    FileShare.None, bufferSize: 4096, useAsync: true))
             {
                 await fs.WriteAsync(content, 0, content.Length);
             }
         }
-
-        public void AddPolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public void RemovePolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public void AddPolicy(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public Task AddPolicyAsync(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public void RemovePolicy(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public Task RemovePolicyAsync(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
-        public Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
     }
 }

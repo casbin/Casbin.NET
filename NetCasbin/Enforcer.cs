@@ -28,12 +28,12 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter = null, bool lazyLoadPolicy = false)
+        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null, bool lazyLoadPolicy = false)
             : this(DefaultModel.CreateFromFile(modelPath), adapter, lazyLoadPolicy)
         {
         }
 
-        public Enforcer(IModel model, IAdapter adapter = null, bool lazyLoadPolicy = false)
+        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, bool lazyLoadPolicy = false)
         {
             this.SetModel(model);
             if (adapter is not null)
@@ -67,7 +67,7 @@ namespace Casbin
             get => Model?.PolicyManager;
             set => Model.SetPolicyManager(value);
         }
-        public IAdapter Adapter
+        public IReadOnlyAdapter Adapter
         {
             get => PolicyManager?.Adapter;
             set => PolicyManager.SetAdapter(value);

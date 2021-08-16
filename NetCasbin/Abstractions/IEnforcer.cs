@@ -28,7 +28,7 @@ namespace Casbin
         public IEffector Effector { get; set; }
         public IModel Model { get; set; }
         public IPolicyManager PolicyManager { get; set; }
-        public IAdapter Adapter { get; set; }
+        public IReadOnlyAdapter Adapter { get; set; }
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; }
         public IEnforceCache EnforceCache { get; set; }

@@ -8,7 +8,7 @@ namespace Casbin.Model
     {
         public bool IsSynchronized { get; }
 
-        public IAdapter Adapter { get; set; }
+        public IReadOnlyAdapter Adapter { get; set; }
 
         public bool HasAdapter { get; }
 
@@ -37,6 +37,10 @@ namespace Casbin.Model
 
         public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex);
 
+        public bool LoadPolicy();
+
+        public bool SavePolicy();
+
         public bool HasPolicy(string section, string policyType, IEnumerable<string> rule);
 
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
@@ -50,6 +54,8 @@ namespace Casbin.Model
         public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
         public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
+
+        public bool SavePolicyAsync();
 
         public Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule);
 

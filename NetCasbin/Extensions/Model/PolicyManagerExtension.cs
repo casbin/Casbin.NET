@@ -5,7 +5,7 @@ namespace Casbin.Extensions
 {
     public static class PolicyManagerExtension
     {
-        public static IPolicyManager SetAdapter(this IPolicyManager policyManager, IAdapter adapter)
+        public static IPolicyManager SetAdapter(this IPolicyManager policyManager, IReadOnlyAdapter adapter)
         {
             policyManager.Adapter = adapter;
             return policyManager;

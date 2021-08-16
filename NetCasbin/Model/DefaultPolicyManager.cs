@@ -8,7 +8,11 @@ namespace Casbin.Model
 {
     public class DefaultPolicyManager : IPolicyManager
     {
-        public DefaultPolicyManager(IPolicy policy, IAdapter adapter = null)
+        private ISingleAdapter _singleAdapter;
+        private IBatchAdapter _batchAdapter;
+        private IEpochAdapter _epochAdapter;
+
+        public DefaultPolicyManager(IPolicy policy, IReadOnlyAdapter adapter = null)
         {
             Policy = policy;
             if (adapter is not null)
@@ -18,9 +22,19 @@ namespace Casbin.Model
         }
 
         public virtual bool IsSynchronized => false;
-        public bool AutoSave { get; set; }
-        public IAdapter Adapter { get; set; }
         public bool HasAdapter => Adapter is null;
+        public bool AutoSave { get; set; }
+        public IReadOnlyAdapter Adapter
+        {
+            get => _epochAdapter;
+            set
+            {
+                _singleAdapter = value as ISingleAdapter;
+                _batchAdapter = value as IBatchAdapter;
+                _epochAdapter = value as IEpochAdapter;
+            }
+        }
+
         public IPolicy Policy { get; set; }
 
         public static IPolicyManager Create()
@@ -165,14 +179,7 @@ namespace Casbin.Model
                     return Policy.AddPolicy(section, policyType, ruleArray);
                 }
 
-                try
-                {
-                    Adapter.AddPolicy(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
+                _singleAdapter?.AddPolicy(section, policyType, ruleArray);
 
                 return Policy.AddPolicy(section, policyType, ruleArray);
             }
@@ -198,14 +205,7 @@ namespace Casbin.Model
                     return Policy.AddPolicies(section, policyType, rulesArray);
                 }
 
-                try
-                {
-                    Adapter.AddPolicies(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
+                _batchAdapter?.AddPolicies(section, policyType, rulesArray);
 
                 return Policy.AddPolicies(section, policyType, rulesArray);
             }
@@ -231,14 +231,7 @@ namespace Casbin.Model
                     return Policy.RemovePolicy(section, policyType, ruleArray);
                 }
 
-                try
-                {
-                    Adapter.RemovePolicy(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
+                _singleAdapter?.RemovePolicy(section, policyType, ruleArray);
 
                 return Policy.RemovePolicy(section, policyType, ruleArray);
             }
@@ -264,14 +257,7 @@ namespace Casbin.Model
                     return Policy.RemovePolicies(section, policyType, rulesArray);
                 }
 
-                try
-                {
-                    Adapter.RemovePolicies(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
+                _batchAdapter?.RemovePolicies(section, policyType, rulesArray);
 
                 return Policy.RemovePolicies(section, policyType, rulesArray);
             }
@@ -295,14 +281,7 @@ namespace Casbin.Model
                     return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 }
 
-                try
-                {
-                    Adapter.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
-                }
+                _batchAdapter?.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
                 return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
@@ -328,13 +307,9 @@ namespace Casbin.Model
                     return Policy.AddPolicy(section, policyType, ruleArray);
                 }
 
-                try
+                if (_singleAdapter is not null)
                 {
-                    await Adapter.AddPolicyAsync(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
+                    await _singleAdapter.AddPolicyAsync(section, policyType, ruleArray);
                 }
 
                 return Policy.AddPolicy(section, policyType, ruleArray);
@@ -361,13 +336,9 @@ namespace Casbin.Model
                     return Policy.AddPolicies(section, policyType, rulesArray);
                 }
 
-                try
+                if (_batchAdapter is not null)
                 {
-                    await Adapter.AddPoliciesAsync(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
+                    await _batchAdapter.AddPoliciesAsync(section, policyType, rulesArray);
                 }
 
                 return Policy.AddPolicies(section, policyType, rulesArray);
@@ -394,13 +365,9 @@ namespace Casbin.Model
                     return Policy.RemovePolicy(section, policyType, ruleArray);
                 }
 
-                try
+                if (_singleAdapter is not null)
                 {
-                    await Adapter.RemovePolicyAsync(section, policyType, ruleArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
+                    await _singleAdapter.RemovePolicyAsync(section, policyType, ruleArray);
                 }
 
                 return Policy.RemovePolicy(section, policyType, ruleArray);
@@ -427,13 +394,9 @@ namespace Casbin.Model
                     return Policy.RemovePolicies(section, policyType, rulesArray);
                 }
 
-                try
+                if (_batchAdapter is not null)
                 {
-                    await Adapter.RemovePoliciesAsync(section, policyType, rulesArray);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
+                    await _batchAdapter.RemovePoliciesAsync(section, policyType, rulesArray);
                 }
 
                 return Policy.RemovePolicies(section, policyType, rulesArray);
@@ -458,13 +421,9 @@ namespace Casbin.Model
                     return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 }
 
-                try
+                if (_batchAdapter is not null)
                 {
-                    await Adapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
-                }
-                catch (NotImplementedException)
-                {
-                    // error intentionally ignored
+                    await _batchAdapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
                 }
 
                 return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
@@ -487,5 +446,9 @@ namespace Casbin.Model
                 EndRead();
             }
         }
+
+        public bool LoadPolicy() => throw new NotImplementedException();
+        public bool SavePolicy() => throw new NotImplementedException();
+        public bool SavePolicyAsync() => throw new NotImplementedException();
     }
 }

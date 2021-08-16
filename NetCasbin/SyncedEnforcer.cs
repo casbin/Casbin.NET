@@ -8,7 +8,7 @@ namespace Casbin
 {
     public static class SyncedEnforcer
     {
-        public static IEnforcer Create(IAdapter adapter = null)
+        public static IEnforcer Create(IReadOnlyAdapter adapter = null)
         {
             return new Enforcer(SyncedModel.Create(), adapter);
         }
@@ -18,13 +18,13 @@ namespace Casbin
             return Create(modelPath, new FileAdapter(policyPath));
         }
 
-        public static IEnforcer Create(string modelPath, IAdapter adapter = null)
+        public static IEnforcer Create(string modelPath, IReadOnlyAdapter adapter = null)
         {
             IModel model = DefaultModel.CreateFromFile(modelPath);
             return Create(model, adapter);
         }
 
-        public static IEnforcer Create(IModel model, IAdapter adapter = null)
+        public static IEnforcer Create(IModel model, IReadOnlyAdapter adapter = null)
         {
             model = model.ReplacePolicyManager(ReaderWriterPolicyManager.Create());
             return DefaultEnforcer.Create(model, adapter);
