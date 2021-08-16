@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Casbin.Model;
 
@@ -6,32 +7,32 @@ namespace Casbin.Persist
 {
     public interface IAdapter
     {
-        void LoadPolicy(IModel model);
+        public void LoadPolicy(IModel model, CancellationToken cancellationToken = default);
 
-        Task LoadPolicyAsync(IModel model);
+        public Task LoadPolicyAsync(IModel model, CancellationToken cancellationToken = default);
 
-        void SavePolicy(IModel model);
+        public void SavePolicy(IModel model, CancellationToken cancellationToken = default);
 
-        Task SavePolicyAsync(IModel model);
+        public Task SavePolicyAsync(IModel model, CancellationToken cancellationToken = default);
 
-        void AddPolicy(string section, string policyType, IEnumerable<string> rule);
+        public void AddPolicy(string section, string policyType, IEnumerable<string> rule, CancellationToken cancellationToken = default);
 
-        Task AddPolicyAsync(string section, string policyType, IEnumerable<string> rule);
+        public Task AddPolicyAsync(string section, string policyType, IEnumerable<string> rule, CancellationToken cancellationToken = default);
 
-        void AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public void AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default);
 
-        Task AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public Task AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default);
 
-        void RemovePolicy(string section, string policyType, IEnumerable<string> rule);
+        public void RemovePolicy(string section, string policyType, IEnumerable<string> rule, CancellationToken cancellationToken = default);
 
-        Task RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule);
+        public Task RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule, CancellationToken cancellationToken = default);
 
-        void RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public void RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default);
 
-        Task RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public Task RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default);
 
-        void RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
+        public void RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues);
 
-        Task RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues);
+        public Task RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues);
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Casbin.Persist;
 
@@ -18,6 +19,7 @@ namespace Casbin.Model
         }
 
         public virtual bool IsSynchronized => false;
+        public CancellationToken CancellationToken { get; set; }
         public bool AutoSave { get; set; }
         public IAdapter Adapter { get; set; }
         public bool HasAdapter => Adapter is null;
@@ -167,7 +169,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    Adapter.AddPolicy(section, policyType, ruleArray);
+                    Adapter.AddPolicy(section, policyType, ruleArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -200,7 +202,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    Adapter.AddPolicies(section, policyType, rulesArray);
+                    Adapter.AddPolicies(section, policyType, rulesArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -233,7 +235,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    Adapter.RemovePolicy(section, policyType, ruleArray);
+                    Adapter.RemovePolicy(section, policyType, ruleArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -266,7 +268,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    Adapter.RemovePolicies(section, policyType, rulesArray);
+                    Adapter.RemovePolicies(section, policyType, rulesArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -363,7 +365,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    await Adapter.AddPoliciesAsync(section, policyType, rulesArray);
+                    await Adapter.AddPoliciesAsync(section, policyType, rulesArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -396,7 +398,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    await Adapter.RemovePolicyAsync(section, policyType, ruleArray);
+                    await Adapter.RemovePolicyAsync(section, policyType, ruleArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {
@@ -429,7 +431,7 @@ namespace Casbin.Model
 
                 try
                 {
-                    await Adapter.RemovePoliciesAsync(section, policyType, rulesArray);
+                    await Adapter.RemovePoliciesAsync(section, policyType, rulesArray, CancellationToken);
                 }
                 catch (NotImplementedException)
                 {

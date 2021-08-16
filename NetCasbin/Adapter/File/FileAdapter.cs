@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
@@ -34,7 +35,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public void LoadPolicy(IModel model)
+        public void LoadPolicy(IModel model, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrWhiteSpace(filePath))
             {
@@ -51,7 +52,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public async Task LoadPolicyAsync(IModel model)
+        public async Task LoadPolicyAsync(IModel model, CancellationToken cancellationToken = default)
         {
             if (!string.IsNullOrWhiteSpace(filePath))
             {
@@ -68,7 +69,7 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public void SavePolicy(IModel model)
+        public void SavePolicy(IModel model, CancellationToken cancellationToken = default)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {
@@ -84,7 +85,7 @@ namespace Casbin.Adapter.File
             SavePolicyFile(string.Join("\n", policy));
         }
 
-        public async Task SavePolicyAsync(IModel model)
+        public async Task SavePolicyAsync(IModel model, CancellationToken cancellationToken = default)
         {
             if (_byteArrayInputStream != null && _readOnly)
             {
@@ -158,14 +159,14 @@ namespace Casbin.Adapter.File
             }
         }
 
-        public void AddPolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public void RemovePolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules) => throw new NotImplementedException();
-        public void AddPolicy(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public Task AddPolicyAsync(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public void RemovePolicy(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
-        public Task RemovePolicyAsync(string sec, string ptype, IEnumerable<string> rule) => throw new NotImplementedException();
+        public void AddPolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task AddPoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public void RemovePolicies(string sec, string ptype, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task RemovePoliciesAsync(string sec, string ptype, IEnumerable<IEnumerable<string>> rules, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public void AddPolicy(string sec, string ptype, IEnumerable<string> rule, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task AddPolicyAsync(string sec, string ptype, IEnumerable<string> rule, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public void RemovePolicy(string sec, string ptype, IEnumerable<string> rule, CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        public Task RemovePolicyAsync(string sec, string ptype, IEnumerable<string> rule, CancellationToken cancellationToken = default) => throw new NotImplementedException();
         public void RemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
         public Task RemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues) => throw new NotImplementedException();
     }
