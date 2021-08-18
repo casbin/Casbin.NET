@@ -23,6 +23,8 @@ namespace Casbin
         internal bool ExpressionResult { get; set; }
 
         internal bool IsChainEffector { get; set; }
+        internal IEffectChain effectChain { get; set; }
+
         internal bool HasPriority { get; set; }
         internal int PriorityIndex { get; set; }
         internal int? Priority { get; set; }
