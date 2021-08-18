@@ -50,5 +50,9 @@ namespace NetCasbin.UnitTest.Mock
         public void Clear()
         {
         }
+
+        public void BuildRelationship(string name1, string name2, string domain = null)
+        {
+        }
     }
 }

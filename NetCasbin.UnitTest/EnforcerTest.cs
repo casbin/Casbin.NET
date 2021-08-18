@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using NetCasbin.Extensions;
@@ -7,6 +8,7 @@ using NetCasbin.Persist.FileAdapter;
 using NetCasbin.Rbac;
 using NetCasbin.UnitTest.Fixtures;
 using NetCasbin.UnitTest.Mock;
+using NetCasbin.Util;
 using Xunit;
 using Xunit.Abstractions;
 using static NetCasbin.UnitTest.Util.TestUtil;
@@ -1017,6 +1019,25 @@ namespace NetCasbin.UnitTest
                 "view");
 
             Assert.True(result);
+        }
+
+        [Fact]
+        public void TestEnforceWithDomainsPattern()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithDomainsPatternModelText,
+                _testModelFixture._rbacWithDomainsPatternPolicyText));
+
+            var rm = new DefaultRoleManager(10);
+            rm.AddDomainMatchingFunc(BuiltInFunctions.KeyMatch);
+            e.SetRoleManager(rm);
+            e.BuildRoleLinks();
+
+            bool result = e.Enforce("user||1", "tenant||1", "menu||2", "*");
+            Assert.True(result);
+
+            result = e.Enforce("user||1", "tenant||2", "menu||2", "*");
+            Assert.False(result);
         }
     }
 }

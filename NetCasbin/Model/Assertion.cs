@@ -34,7 +34,7 @@ namespace NetCasbin.Model
         public void RefreshPolicyStringSet()
         {
             PolicyStringSet.Clear();
-            foreach (var rule in Policy)
+            foreach (List<string> rule in Policy)
             {
                 PolicyStringSet.Add(Utility.RuleToString(rule));
             }
@@ -59,7 +59,7 @@ namespace NetCasbin.Model
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            foreach (var rule in rules)
+            foreach (IEnumerable<string> rule in rules)
             {
                 BuildRoleLink(count, policyOperation, rule);
             }
@@ -68,12 +68,12 @@ namespace NetCasbin.Model
         public void BuildRoleLinks()
         {
             int count = Value.Count(c => c is '_');
-            if (count < 2)
+            if (count < 2 || count > 3)
             {
-                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at the range 2 to 3.");
             }
 
-            foreach (var rule in Policy)
+            foreach (List<string> rule in Policy)
             {
                 BuildRoleLink(count, PolicyOperation.PolicyAdd, rule);
             }
@@ -82,7 +82,7 @@ namespace NetCasbin.Model
         private void BuildRoleLink(int groupPolicyCount,
             PolicyOperation policyOperation, IEnumerable<string> rule)
         {
-            var roleManager = RoleManager;
+            IRoleManager roleManager = RoleManager;
             List<string> ruleEnum = rule as List<string> ?? rule.ToList();
             int ruleCount = ruleEnum.Count;
 
@@ -107,14 +107,8 @@ namespace NetCasbin.Model
                         case 3:
                             roleManager.AddLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
                             break;
-                        case 4:
-                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum[2], ruleEnum[3]);
-                            break;
                         default:
-                            roleManager.AddLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
-                            break;
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
                     break;
                 case PolicyOperation.PolicyRemove:
@@ -126,20 +120,34 @@ namespace NetCasbin.Model
                         case 3:
                             roleManager.DeleteLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
                             break;
-                        case 4:
-                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum[2], ruleEnum[3]);
-                            break;
                         default:
-                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1],
-                                ruleEnum.GetRange(2, groupPolicyCount - 2).ToArray());
-                            break;
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);
             }
 
+            switch (policyOperation)
+            {
+                case PolicyOperation.PolicyAdd:
+                    switch (groupPolicyCount)
+                    {
+                        case 2:
+                            roleManager.BuildRelationship(ruleEnum[0], ruleEnum[1]);
+                            break;
+                        case 3:
+                            roleManager.BuildRelationship(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
+                    }
+                    break;
+                case PolicyOperation.PolicyRemove:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);
+            }
         }
 
         internal bool Contains(IEnumerable<string> rule)
@@ -172,7 +180,7 @@ namespace NetCasbin.Model
             }
             for (int i = 0; i < Policy.Count; i++)
             {
-                var ruleInPolicy = Policy[i];
+                List<string> ruleInPolicy = Policy[i];
                 if (!Utility.ArrayEquals(rule, ruleInPolicy))
                 {
                     continue;

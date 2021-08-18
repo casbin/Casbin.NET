@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 
 namespace NetCasbin.Rbac
@@ -141,7 +142,7 @@ namespace NetCasbin.Rbac
                 return roles.ContainsKey(name);
             }
 
-            foreach (var role in roles)
+            foreach (KeyValuePair<string, Role> role in roles)
             {
                 if (MatchingFunc(name, role.Key))
                 {
@@ -169,12 +170,12 @@ namespace NetCasbin.Rbac
 
             if (HasPattern is false)
             {
-                return roles.TryGetValue(name, out var role)
+                return roles.TryGetValue(name, out Role role)
                     ? role.GetRoles() : Enumerable.Empty<string>();
             }
 
             var rolesNames = new List<string>();
-            foreach (var role in roles)
+            foreach (KeyValuePair<string, Role> role in roles)
             {
                 if (MatchingFunc(name, role.Key))
                 {
@@ -219,9 +220,9 @@ namespace NetCasbin.Rbac
             }
 
             var userNames = new List<string>();
-            foreach (var role in roles)
+            foreach (KeyValuePair<string, Role> role in roles)
             {
-                if (role.Value.HasDirectRole(name))
+                if (role.Value.HasDirectRole(name, domain))
                 {
                     userNames.Add(role.Key);
                 }
@@ -244,7 +245,10 @@ namespace NetCasbin.Rbac
 
             foreach (string matchDomain in GetPatternDomains(domain))
             {
-                if (HasLinkInDomain(name1, name2, matchDomain))
+                bool hasLink = HasLinkInDomain(name1, name2, matchDomain);
+                Debug.WriteLine("HasLink: {0}, {1}, {2} => {3}", name1, name2, matchDomain, hasLink);
+
+                if (hasLink)
                 {
                     return true;
                 }
@@ -270,18 +274,18 @@ namespace NetCasbin.Rbac
 
             if (HasPattern is false)
             {
-                return roles.TryGetValue(name1, out var role1) is not false
-                       && role1.HasRole(name2, _maxHierarchyLevel);
+                return roles.TryGetValue(name1, out Role role1) is not false
+                       && role1.HasRole(name2, _maxHierarchyLevel, domain, null, DomainMatchingFunc);
             }
 
-            foreach (var role in roles)
+            foreach (KeyValuePair<string, Role> role in roles)
             {
                 if (MatchingFunc(name1, role.Key) is false)
                 {
                     continue;
                 }
 
-                if (role.Value.HasRole(name2, _maxHierarchyLevel, MatchingFunc))
+                if (role.Value.HasRole(name2, _maxHierarchyLevel, domain, MatchingFunc, DomainMatchingFunc))
                 {
                     return true;
                 }
@@ -292,16 +296,6 @@ namespace NetCasbin.Rbac
         private void AddLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
-            if (HasDomainPattern)
-            {
-                foreach (string matchDomain in GetPatternDomains(domain))
-                {
-                    AddLinkInDomain(name1, name2, matchDomain);
-                }
-                _cachedAllDomains = null;
-                return;
-            }
-            _cachedAllDomains = null;
             AddLinkInDomain(name1, name2, domain);
         }
 
@@ -313,29 +307,8 @@ namespace NetCasbin.Rbac
 
             Role role1 = roles.GetOrAdd(name1, new Role(name1, domain));
             Role role2 = roles.GetOrAdd(name2, new Role(name2, domain));
+
             role1.AddRole(role2);
-
-            if (HasPattern is false)
-            {
-                return;
-            }
-
-            foreach (var role in roles)
-            {
-                string name = role.Key;
-                if (name == name1 || name == name2)
-                {
-                    return;
-                }
-                if (MatchingFunc(name, name1) || MatchingFunc(name1, name))
-                {
-                    role.Value.AddRole(role1);
-                }
-                if (MatchingFunc(name, name2) || MatchingFunc(name2, name))
-                {
-                    role2.AddRole(role.Value);
-                }
-            }
         }
 
         private void DeleteLink(string name1, string name2, string domain = null)
@@ -355,8 +328,8 @@ namespace NetCasbin.Rbac
                 }
             }
 
-            if (roles.TryGetValue(name1, out var role1) is false
-                || roles.TryGetValue(name2, out var role2) is false)
+            if (roles.TryGetValue(name1, out Role role1) is false
+                || roles.TryGetValue(name2, out Role role2) is false)
             {
                 ThrowHelper.ThrowOneOfNamesNotFoundException();
                 return;
@@ -370,6 +343,74 @@ namespace NetCasbin.Rbac
             _defaultRoles.Clear();
             _allDomains[_defaultDomain] = _defaultRoles;
             _cachedAllDomains = null;
+        }
+
+        public void BuildRelationship(string name1, string name2, string domain = null)
+        {
+            domain ??= _defaultDomain;
+            ConcurrentDictionary<string, Role> roles = domain == _defaultDomain
+                ? _defaultRoles
+                : _allDomains.GetOrAdd(domain, new ConcurrentDictionary<string, Role>());
+
+            Role role1 = roles.GetOrAdd(name1, new Role(name1, domain));
+            Role role2 = roles.GetOrAdd(name2, new Role(name2, domain));
+
+            if (HasDomainPattern)
+            {
+                foreach (string matchDomain in GetPatternDomains(domain))
+                {
+                    if (domain == matchDomain)
+                    {
+                        continue;
+                    }
+                    BuildRelationshipInDomain(name1, name2, role1, role2, matchDomain);
+                }
+                _cachedAllDomains = null;
+                return;
+            }
+            _cachedAllDomains = null;
+            return;
+        }
+
+        private void BuildRelationshipInDomain(string name1, string name2, Role role1, Role role2, string domain)
+        {
+            ConcurrentDictionary<string, Role> roles = domain == _defaultDomain
+                ? _defaultRoles
+                : _allDomains.GetOrAdd(domain, new ConcurrentDictionary<string, Role>());
+
+            if (HasPattern is false)
+            {
+                foreach (KeyValuePair<string, Role> role in roles)
+                {
+                    string name = role.Key;
+                    if (name == name1)
+                    {
+                        role1.AddRole(role.Value);
+                    }
+                    if (name == name2)
+                    {
+                        role2.AddRole(role.Value);
+                    }
+                }
+                return;
+            }
+
+            foreach (KeyValuePair<string, Role> role in roles)
+            {
+                string name = role.Key;
+                if (name == name1 || name == name2)
+                {
+                    return;
+                }
+                if (MatchingFunc(name, name1) || MatchingFunc(name1, name))
+                {
+                    role.Value.AddRole(role1);
+                }
+                if (MatchingFunc(name, name2) || MatchingFunc(name2, name))
+                {
+                    role2.AddRole(role.Value);
+                }
+            }
         }
 
         private IEnumerable<string> GetPatternDomains(string domain)

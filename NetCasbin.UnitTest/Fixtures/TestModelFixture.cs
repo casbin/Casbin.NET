@@ -54,6 +54,9 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
         internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
 
+        // https://github.com/casbin/Casbin.NET/issues/202
+        internal readonly string _rbacWithDomainsPatternModelText = ReadTestFile("rbac_with_domains_pattern_model.conf");
+        internal readonly string _rbacWithDomainsPatternPolicyText = ReadTestFile("rbac_with_domains_pattern_policy.csv");
 
         public Model.Model GetNewAbacModel()
         {

@@ -1,0 +1,22 @@
+p, role||1, *, menu||1, *
+p, role||2, *, menu||2, *
+p, role||3, *, menu||3, *
+p, role||4, *, menu||4, *
+g, role||5, role||1, *
+g, role||5, role||2, *
+g, role||5, role||3, *
+g, role||5, role||4, *
+
+p, role||6, *, menu||5, *
+p, role||7, *, menu||6, *
+p, role||8, *, menu||7, *
+p, role||9, *, menu||8, *
+g, role||10, role||6, *
+g, role||10, role||7, *
+g, role||10, role||8, *
+g, role||10, role||9, *
+
+g, user||1, role||5, tenant||1
+g, user||2, role||10, tenant||2
+g, user||3, role||5, tenant||1
+g, user||4, role||10, tenant||2
