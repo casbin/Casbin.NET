@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>net6;net5;netcoreapp3.1;netstandard2.1;netstandard2.0;net461;net45;</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
-    <LangVersion>9.0</LangVersion>
+    <LangVersion>10.0</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -30,7 +30,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0-preview.7.21377.19" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5'">
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.16" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
@@ -55,10 +55,6 @@
 
   <ItemGroup>
     <None Include="casbin.png" Pack="true" Visible="false" PackagePath="" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Abstractions\Rbac\" />
   </ItemGroup>
 
 </Project>
