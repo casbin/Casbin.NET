@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using DynamicExpresso;
 
-namespace NetCasbin.Abstractions
+namespace NetCasbin.Evaluation
 {
     internal interface IExpressionHandler
     {
@@ -16,12 +16,10 @@ namespace NetCasbin.Abstractions
 
         public void SetGFunctions();
 
-        public void EnsureCreated(string expressionString, IReadOnlyList<object> requestValues);
+        public bool Invoke(string expressionString);
 
-        public bool Invoke(string expressionString, IReadOnlyList<object> requestValues);
+        public void SetRequest(IReadOnlyList<object> requestValues);
 
-        public void SetRequestParameters(IReadOnlyList<object> requestValues);
-
-        public void SetPolicyParameters(IReadOnlyList<string> policyValues);
+        public void SetPolicy(IReadOnlyList<string> policyValues);
     }
 }
