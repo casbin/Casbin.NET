@@ -220,11 +220,11 @@ namespace Casbin
                     session.PolicyValues = policyValues;
                     session.PolicyIndex = policyIndex;
 
-                    session = HandleBeforeExpression(in context, ref session, chainEffector);
+                    session = HandleBeforeExpression(in context, ref session);
                     session.ExpressionResult = ExpressionHandler.Invoke(session.ExpressionString, requestValues);
 
                     session = session.IsChainEffector
-                        ? HandleExpressionResult(in context, ref session, chainEffector)
+                        ? HandleExpressionResult(in context, ref session)
                         : HandleExpressionResult(in context, ref session, Effector);
 
                     if (session.Determined)
@@ -235,11 +235,11 @@ namespace Casbin
             }
             else
             {
-                session = HandleBeforeExpression(in context,ref session, chainEffector);
+                session = HandleBeforeExpression(in context,ref session);
                 session.ExpressionResult = ExpressionHandler.Invoke(session.ExpressionString, requestValues);
 
                 session = session.IsChainEffector
-                    ? HandleExpressionResult(in context, ref session, chainEffector)
+                    ? HandleExpressionResult(in context, ref session)
                     : HandleExpressionResult(in context, ref session, Effector);
             }
 
@@ -262,21 +262,22 @@ namespace Casbin
 
             if (session.IsChainEffector)
             {
-                chainEffector.StartChain(context.Effect);
+                session.effectChain = chainEffector.CreateChain(context.Effect);
             }
             else
             {
                 session.PolicyEffects = new PolicyEffect[session.PolicyCount];
             }
 
-            session.EffectExpressionType = chainEffector?.EffectExpressionType ?? DefaultEffector.ParseEffectExpressionType(session.ExpressionString);
+            session.EffectExpressionType = session.effectChain?.EffectExpressionType ?? DefaultEffector.ParseEffectExpressionType(session.ExpressionString);
             session.HasPriority = context.PolicyAssertion.TryGetTokenIndex("priority", out int priorityIndex);
             session.PriorityIndex = priorityIndex;
             return ref session;
         }
 
-        private ref EnforceSession HandleBeforeExpression(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private ref EnforceSession HandleBeforeExpression(in EnforceContext context, ref EnforceSession session)
         {
+            IEffectChain effectChain = session.effectChain;
             int policyTokenCount = context.PolicyAssertion.Tokens.Count;
 
             if (session.PolicyCount is 0)
@@ -306,9 +307,9 @@ namespace Casbin
                 if (int.TryParse(session.PolicyValues[session.PriorityIndex], out int nowPriority))
                 {
                     if (session.Priority.HasValue && nowPriority != session.Priority.Value
-                        && chainEffector.HitPolicyCount > 0)
+                        && effectChain.HitPolicyCount > 0)
                     {
-                        session.DetermineResult(chainEffector.Result);
+                        session.DetermineResult(effectChain.Result);
                     }
                     session.Priority = nowPriority;
                 }
@@ -324,6 +325,7 @@ namespace Casbin
 
             return ref session;
         }
+
 
         private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
         {
@@ -369,16 +371,18 @@ namespace Casbin
             return ref session;
         }
 
-        private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session)
         {
+            IEffectChain effectChain = session.effectChain;
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)
             {
                 nowEffect = GetEffect(session.ExpressionResult);
 
-                if (chainEffector.TryChain(nowEffect))
+
+                if (effectChain.TryChain(nowEffect))
                 {
-                    session.DetermineResult(chainEffector.Result);
+                    session.DetermineResult(effectChain.Result);
                     return ref session;
                 }
 
@@ -400,20 +404,20 @@ namespace Casbin
                 };
             }
 
-            bool chainResult = chainEffector.TryChain(nowEffect);
+            bool chainResult = effectChain.TryChain(nowEffect);
 
-            if (context.Explain && chainEffector.HitPolicy)
+            if (context.Explain && effectChain.HitPolicy)
             {
                 context.Explanations.Add(policyValues);
             }
 
-            if (chainResult is false || chainEffector.CanChain is false)
+            if (chainResult is false || effectChain.CanChain is false)
             {
-                session.DetermineResult(chainEffector.Result);
+                session.DetermineResult(effectChain.Result);
                 return ref session;
             }
 
-            session.EnforceResult = chainEffector.Result;
+            session.EnforceResult = effectChain.Result;
             return ref session;
         }
 
