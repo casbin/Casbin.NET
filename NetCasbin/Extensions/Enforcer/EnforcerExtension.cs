@@ -130,7 +130,7 @@ namespace Casbin.Extensions
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="adapter"></param>
-        public static IEnforcer SetAdapter(this IEnforcer enforcer, IAdapter adapter)
+        public static IEnforcer SetAdapter(this IEnforcer enforcer, IReadOnlyAdapter adapter)
         {
             enforcer.Adapter = adapter;
             return enforcer;
@@ -306,11 +306,18 @@ namespace Casbin.Extensions
                 return;
             }
 
+            if (enforcer.Adapter is not IEpochAdapter adapter)
+            {
+                throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
+            }
+
             if (enforcer.IsFiltered)
             {
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
-            enforcer.Adapter.SavePolicy(enforcer.Model);
+
+            adapter.SavePolicy(enforcer.Model);
+
             enforcer.Watcher?.Update();
         }
 
@@ -325,12 +332,18 @@ namespace Casbin.Extensions
                 return;
             }
 
+            if (enforcer.Adapter is not IEpochAdapter adapter)
+            {
+                throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
+            }
+
             if (enforcer.IsFiltered)
             {
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
 
-            await enforcer.Adapter.SavePolicyAsync(enforcer.Model);
+            await adapter.SavePolicyAsync(enforcer.Model);
+
             if (enforcer.Watcher is not null)
             {
                 await enforcer.Watcher.UpdateAsync();

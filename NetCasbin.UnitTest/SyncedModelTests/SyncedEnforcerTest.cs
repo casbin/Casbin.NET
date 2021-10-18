@@ -34,7 +34,7 @@ namespace Casbin.UnitTests.SyncedModelTests
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+            FileAdapter a = new FileAdapter("examples/keymatch_policy.csv");
 
             var e = SyncedEnforcer.Create(m, a);
 
@@ -95,7 +95,7 @@ namespace Casbin.UnitTests.SyncedModelTests
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+            FileAdapter a = new FileAdapter("examples/keymatch_policy.csv");
 
             var e = SyncedEnforcer.Create(m, a);
 
@@ -156,7 +156,7 @@ namespace Casbin.UnitTests.SyncedModelTests
             m.AddDef("e", "e", "!some(where (p.eft == deny))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+            FileAdapter a = new FileAdapter("examples/keymatch_policy.csv");
 
             var e = SyncedEnforcer.Create(m, a);
 
@@ -574,7 +574,7 @@ namespace Casbin.UnitTests.SyncedModelTests
         [Fact]
         public void TestInitWithAdapter()
         {
-            IAdapter adapter = new FileAdapter("examples/basic_policy.csv");
+            FileAdapter adapter = new FileAdapter("examples/basic_policy.csv");
             var e = SyncedEnforcer.Create("examples/basic_model.conf", adapter);
 
             TestEnforce(e, "alice", "data1", "read", true);
@@ -650,7 +650,7 @@ namespace Casbin.UnitTests.SyncedModelTests
 
             TestEnforce(e, "alice", "data1", "read", false);
 
-            IAdapter a = new FileAdapter("examples/basic_policy.csv");
+            FileAdapter a = new FileAdapter("examples/basic_policy.csv");
             e.SetAdapter(a);
             e.LoadPolicy();
 
@@ -664,7 +664,7 @@ namespace Casbin.UnitTests.SyncedModelTests
 
             await TestEnforceAsync(e, "alice", "data1", "read", false);
 
-            IAdapter a = new FileAdapter("examples/basic_policy_for_async_adapter_test.csv");
+            FileAdapter a = new FileAdapter("examples/basic_policy_for_async_adapter_test.csv");
             e.SetAdapter(a);
             await e.LoadPolicyAsync();
 
@@ -682,7 +682,7 @@ namespace Casbin.UnitTests.SyncedModelTests
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+            FileAdapter a = new FileAdapter("examples/keymatch_policy.csv");
 
             e.SetModel(m);
             e.SetAdapter(a);
@@ -702,7 +702,7 @@ namespace Casbin.UnitTests.SyncedModelTests
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            IAdapter a = new FileAdapter("examples/keymatch_policy.csv");
+            FileAdapter a = new FileAdapter("examples/keymatch_policy.csv");
 
             e.SetModel(m);
             e.SetAdapter(a);
@@ -724,7 +724,7 @@ namespace Casbin.UnitTests.SyncedModelTests
 
             using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                IAdapter a = new FileAdapter(fs);
+                FileAdapter a = new FileAdapter(fs);
                 e.SetModel(m);
                 e.SetAdapter(a);
                 e.LoadPolicy();
@@ -746,7 +746,7 @@ namespace Casbin.UnitTests.SyncedModelTests
 
             using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
             {
-                IAdapter a = new FileAdapter(fs);
+                FileAdapter a = new FileAdapter(fs);
                 e.SetModel(m);
                 e.SetAdapter(a);
                 await e.LoadPolicyAsync();
