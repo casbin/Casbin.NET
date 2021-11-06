@@ -4,6 +4,7 @@ using System.Net.Sockets;
 
 namespace Casbin.Extensions
 {
+    // ReSharper disable once InconsistentNaming
     public static class IPAddressExtension
     {
         public static bool Match(this IPAddress matchIpAddress, IPAddress ipAddress, byte matchCidr)

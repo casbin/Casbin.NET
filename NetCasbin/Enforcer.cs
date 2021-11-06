@@ -75,7 +75,7 @@ namespace Casbin
         }
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; } = new DefaultRoleManager(10);
-        public IEnforceCache EnforceCache { get; set; }
+        public IEnforceCache EnforceCache { get; set; } = new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
         public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET45
         public ILogger Logger { get; set; }
@@ -86,11 +86,11 @@ namespace Casbin
         public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
 
         #region Enforce method
-
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
@@ -112,7 +112,6 @@ namespace Casbin
             }
 
             string key = string.Join("$$", requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
 #if !NET45
@@ -122,9 +121,7 @@ namespace Casbin
             }
 
             bool result  = InternalEnforce(context, PolicyManager, requestValues);
-            EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             EnforceCache.TrySetResult(requestValues, key, result);
-
 #if !NET45
             LogEnforceResult(context, requestValues, result);
 #endif
@@ -135,6 +132,7 @@ namespace Casbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
+        /// <param name="context">Enforce context</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
@@ -262,14 +260,14 @@ namespace Casbin
 
             if (session.IsChainEffector)
             {
-                session.effectChain = chainEffector.CreateChain(context.Effect);
+                session.EffectChain = chainEffector.CreateChain(context.Effect);
             }
             else
             {
                 session.PolicyEffects = new PolicyEffect[session.PolicyCount];
             }
 
-            session.EffectExpressionType = session.effectChain?.EffectExpressionType ?? DefaultEffector.ParseEffectExpressionType(session.ExpressionString);
+            session.EffectExpressionType = session.EffectChain?.EffectExpressionType ?? DefaultEffector.ParseEffectExpressionType(session.ExpressionString);
             session.HasPriority = context.PolicyAssertion.TryGetTokenIndex("priority", out int priorityIndex);
             session.PriorityIndex = priorityIndex;
             return ref session;
@@ -277,7 +275,7 @@ namespace Casbin
 
         private ref EnforceSession HandleBeforeExpression(in EnforceContext context, ref EnforceSession session)
         {
-            IEffectChain effectChain = session.effectChain;
+            IEffectChain effectChain = session.EffectChain;
             int policyTokenCount = context.PolicyAssertion.Tokens.Count;
 
             if (session.PolicyCount is 0)
@@ -373,12 +371,11 @@ namespace Casbin
 
         private static ref EnforceSession HandleExpressionResult(in EnforceContext context, ref EnforceSession session)
         {
-            IEffectChain effectChain = session.effectChain;
+            IEffectChain effectChain = session.EffectChain;
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)
             {
                 nowEffect = GetEffect(session.ExpressionResult);
-
 
                 if (effectChain.TryChain(nowEffect))
                 {

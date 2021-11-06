@@ -7,8 +7,7 @@ namespace Casbin
     public readonly struct EnforceContext
     {
         public EnforceContext(
-            Assertion requestAssertion, Assertion policyAssertion,
-            IReadOnlyList<IReadOnlyList<string>> policies,
+            IReadOnlyAssertion requestAssertion, IReadOnlyAssertion policyAssertion,
             string effect, string matcher,
             bool hasEval, bool explain)
         {
@@ -58,7 +57,6 @@ namespace Casbin
             (
                 requestAssertion: requestAssertion,
                 policyAssertion: policyAssertion,
-                policies: policyAssertion.Policy,
                 effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
                 matcher: matcher,
                 hasEval: hasEval,
@@ -66,9 +64,9 @@ namespace Casbin
             );
         }
 
-        public static EnforceContext CreatWithMatcher(IEnforcer enforcer, string matcher, bool explain)
+        public static EnforceContext CreateWithMatcher(IEnforcer enforcer, string matcher, bool explain)
         {
-            return CreatWithMatcher(
+            return CreateWithMatcher(
                 enforcer,
                 matcher,
                 PermConstants.DefaultRequestType,
@@ -77,7 +75,7 @@ namespace Casbin
                 explain);
         }
 
-        public static EnforceContext CreatWithMatcher(
+        public static EnforceContext CreateWithMatcher(
             IEnforcer enforcer,
             string matcher,
             string requestType = PermConstants.DefaultRequestType,
@@ -94,7 +92,6 @@ namespace Casbin
             (
                 requestAssertion: requestAssertion,
                 policyAssertion: policyAssertion,
-                policies: policyAssertion.Policy,
                 effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
                 matcher: matcher,
                 hasEval: hasEval,

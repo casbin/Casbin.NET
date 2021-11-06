@@ -568,7 +568,7 @@ namespace Casbin.UnitTests.ModelTests
             e.BuildRoleLinks();
 
             // Use default types
-            EnforceContext context = e.CreatContext();
+            EnforceContext context = e.CreateContext();
 
             Assert.True(e.Enforce(context, "alice", "data1", "read"));
             Assert.False(e.Enforce(context, "alice", "data1", "write"));
@@ -577,7 +577,7 @@ namespace Casbin.UnitTests.ModelTests
             Assert.False(e.Enforce(context, "bob", "data2", "write"));
 
             // Use r2 p2 and m2 type
-            context = e.CreatContext
+            context = e.CreateContext
             (
                 PermConstants.RequestType2,
                 PermConstants.PolicyType2,
@@ -592,7 +592,7 @@ namespace Casbin.UnitTests.ModelTests
             Assert.False(e.Enforce(context, "bob", "domain1", "data1", "write"));
 
             // Use r3 p3 and m3 type
-            context = e.CreatContext
+            context = e.CreateContext
             (
                 PermConstants.RequestType3,
                 PermConstants.PolicyType3,

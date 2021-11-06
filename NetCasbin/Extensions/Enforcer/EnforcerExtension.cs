@@ -405,12 +405,12 @@ namespace Casbin.Extensions
         #endregion
 
         #region Enforce Cotext
-        public static EnforceContext CreatContext(this IEnforcer enforcer, bool explain)
+        public static EnforceContext CreateContext(this IEnforcer enforcer, bool explain)
         {
             return EnforceContext.Create(enforcer, explain);
         }
 
-        public static EnforceContext CreatContext(this IEnforcer enforcer,
+        public static EnforceContext CreateContext(this IEnforcer enforcer,
             string requestType = PermConstants.DefaultRequestType,
             string policyType = PermConstants.DefaultPolicyType,
             string effectType = PermConstants.DefaultPolicyEffectType,
@@ -420,50 +420,54 @@ namespace Casbin.Extensions
             return EnforceContext.Create(enforcer, requestType, policyType, effectType, matcherType, explain);
         }
 
-        public static EnforceContext CreatContextWithMatcher(this IEnforcer enforcer, string matcher, bool explain)
+        public static EnforceContext CreateContextWithMatcher(this IEnforcer enforcer, string matcher, bool explain)
         {
-            return EnforceContext.CreatWithMatcher(enforcer, matcher, explain);
+            return EnforceContext.CreateWithMatcher(enforcer, matcher, explain);
         }
 
-        public static EnforceContext CreatContextWithMatcher(this IEnforcer enforcer,
+        public static EnforceContext CreateContextWithMatcher(this IEnforcer enforcer,
             string matcher,
             string requestType = PermConstants.DefaultRequestType,
             string policyType = PermConstants.DefaultPolicyType,
             string effectType = PermConstants.DefaultPolicyEffectType,
             bool explain = false)
         {
-            return EnforceContext.CreatWithMatcher(enforcer, matcher, requestType, policyType, effectType, explain);
+            return EnforceContext.CreateWithMatcher(enforcer, matcher, requestType, policyType, effectType, explain);
         }
         #endregion
 
         #region Enforce extensions
+
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
         public static bool Enforce(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext();
+            EnforceContext context = enforcer.CreateContext();
             return enforcer.Enforce(context, requestValues);
         }
 
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
         public static Task<bool> EnforceAsync(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext();
+            EnforceContext context = enforcer.CreateContext();
             return enforcer.EnforceAsync(context, requestValues);
         }
 
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
@@ -471,14 +475,14 @@ namespace Casbin.Extensions
         public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceEx(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext(true);
+            EnforceContext context = enforcer.CreateContext(true);
             return (enforcer.Enforce(context, requestValues), context.Explanations);
         }
 #else
         public static Tuple<bool, IEnumerable<IEnumerable<string>>>
             EnforceEx(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext(true);
+            EnforceContext context = enforcer.CreateContext(true);
             bool result = enforcer.Enforce(context, requestValues);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
         }
@@ -487,21 +491,22 @@ namespace Casbin.Extensions
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
 #if !NET45
-        public async static Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext(true);
+            EnforceContext context = enforcer.CreateContext(true);
             return (await enforcer.EnforceAsync(context, requestValues), context.Explanations);
         }
 #else
-        public async static Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+        public static async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
             EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContext(true);
+            EnforceContext context = enforcer.CreateContext(true);
             bool result = await enforcer.EnforceAsync(context, requestValues);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
         }
@@ -511,13 +516,14 @@ namespace Casbin.Extensions
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public static bool EnforceWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
             return enforcer.Enforce(context, requestValues);
         }
 
@@ -525,19 +531,21 @@ namespace Casbin.Extensions
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public static Task<bool> EnforceWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
             return enforcer.EnforceAsync(context, requestValues);
         }
 
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
@@ -546,14 +554,14 @@ namespace Casbin.Extensions
         public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceExWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
             return (enforcer.Enforce(context, requestValues), context.Explanations);
         }
 #else
         public static Tuple<bool, IEnumerable<IEnumerable<string>>>
             EnforceExWithMatcher(this IEnforcer enforcer, string matcher,params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
             bool result = enforcer.Enforce(context, requestValues);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
         }
@@ -562,22 +570,23 @@ namespace Casbin.Extensions
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
+        /// <param name="enforcer">The enforce instance</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
 #if !NET45
-        public async static Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
             return (await enforcer.EnforceAsync(context, requestValues), context.Explanations);
         }
 #else
-        public async static Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
+        public static async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
             EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher,params object[] requestValues)
         {
-            EnforceContext context = enforcer.CreatContextWithMatcher(matcher, true);
+            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
             bool result = await enforcer.EnforceAsync(context, requestValues);
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
         }
