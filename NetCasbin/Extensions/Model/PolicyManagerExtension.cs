@@ -1,7 +1,7 @@
 ﻿using Casbin.Model;
 using Casbin.Persist;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class PolicyManagerExtension
     {

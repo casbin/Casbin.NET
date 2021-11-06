@@ -1,8 +1,7 @@
-﻿using System;
-using Casbin.Model;
+﻿using Casbin.Model;
 using Casbin.Rbac;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class ModelExtension
     {

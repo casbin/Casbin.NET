@@ -1,5 +1,4 @@
-﻿using Casbin.Extensions;
-using Casbin.UnitTests.Fixtures;
+﻿using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
 using Xunit;
 using Xunit.Abstractions;

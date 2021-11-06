@@ -1,5 +1,4 @@
-﻿using Casbin.Extensions;
-using Casbin.Rbac;
+﻿using Casbin.Rbac;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
 

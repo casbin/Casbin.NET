@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Casbin.Rbac;
 using Casbin.Util;
-using Casbin.Extensions;
 
 namespace Casbin.Model
 {

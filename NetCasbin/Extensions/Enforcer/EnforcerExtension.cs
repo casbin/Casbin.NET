@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Casbin.Caching;
 using Casbin.Effect;
@@ -12,7 +11,7 @@ using Casbin.Rbac;
 using Microsoft.Extensions.Logging;
 #endif
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class EnforcerExtension
     {

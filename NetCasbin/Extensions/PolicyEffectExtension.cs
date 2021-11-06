@@ -1,6 +1,6 @@
 ﻿using Casbin.Effect;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     internal static class PolicyEffectExtension
     {

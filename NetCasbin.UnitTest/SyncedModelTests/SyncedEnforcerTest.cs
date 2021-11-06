@@ -2,9 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
-using Casbin.Extensions;
 using Casbin.Model;
-using Casbin.Persist;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
 using Xunit;

@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 #endif
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     internal static class InternalEnforcerExtension
     {

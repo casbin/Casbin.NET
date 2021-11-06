@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class RbacEnforcerExtension
     {

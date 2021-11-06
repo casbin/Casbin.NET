@@ -1,7 +1,7 @@
 ﻿using System;
 using Casbin.Rbac;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class RoleMangerExtension
     {

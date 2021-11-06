@@ -1,5 +1,4 @@
 ﻿using System.Threading.Tasks;
-using Casbin.Extensions;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
 using Xunit;

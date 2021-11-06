@@ -2,7 +2,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     // ReSharper disable once InconsistentNaming
     public static class IPAddressExtension

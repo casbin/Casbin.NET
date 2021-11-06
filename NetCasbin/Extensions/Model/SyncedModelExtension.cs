@@ -1,6 +1,6 @@
 ﻿using Casbin.Model;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class SyncedModelExtension
     {

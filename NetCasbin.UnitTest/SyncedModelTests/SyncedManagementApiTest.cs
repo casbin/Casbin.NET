@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Casbin.Extensions;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;

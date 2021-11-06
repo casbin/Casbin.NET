@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using Casbin.Evaluation;
-using Casbin.Extensions;
 
 namespace Casbin.Effect
 {

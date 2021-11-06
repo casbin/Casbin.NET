@@ -1,11 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
-using Casbin.Extensions;
 using Casbin.Model;
-using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;

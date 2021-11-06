@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using Casbin.Extensions;
 using Casbin.Rbac;
 using Casbin.Util;
 using Xunit;

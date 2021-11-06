@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     internal static class EnumerableExtension
     {

@@ -1,9 +1,9 @@
-﻿using System.Collections.Generic;
+﻿#if !NET45
+using System.Collections.Generic;
 using System.Linq;
-#if !NET45
 using Microsoft.Extensions.Logging;
 
-namespace Casbin.Extensions
+namespace Casbin
 {
     public static class LoggerExtension
     {

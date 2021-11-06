@@ -1,6 +1,4 @@
-﻿using System.IO;
-using Casbin.Adapter.File;
-using Casbin.Extensions;
+﻿using Casbin.Adapter.File;
 using Casbin.Model;
 using Casbin.Persist;
 

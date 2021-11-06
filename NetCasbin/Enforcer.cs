@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Caching;
 using Casbin.Effect;
-using Casbin.Extensions;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
