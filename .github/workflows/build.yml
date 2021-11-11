@@ -70,12 +70,21 @@ jobs:
         run: |
             New-Item -Path .\.sonar\scanner -ItemType Directory
             dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+
+      - name: Analyze with SonarCloud
+        uses: sonarsource/sonarcloud-github-action@master
+        with:
+          args: >
+            -Dsonar.cs.opencover.reportPaths=${{ GITHUB.WORKSPACE }}/**/*.opencover.xml
+            -Dsonar.cs.vstest.reportsPaths=${{ GITHUB.WORKSPACE }}/**/*.trx
+            -Dsonar.exclusions=**/obj/**,**/*.dll,**/NetCasbin.UnitTest/**,**/Casbin.Benchmark/**
+            -Dsonar.verbose=true
   
-      - name: fix code coverage paths
-        working-directory: ./coverage
-        run: |
-          sed -i 's@'${{ GITHUB.WORKSPACE }}'@/github/workspace/@g' lcov.info
-          sed -i 's@'${{ GITHUB.WORKSPACE }}'@/github/workspace/@g' sonar-cloud-reporter.xml
+      #- name: fix code coverage paths
+      #  working-directory: ./coverage
+      #  run: |
+      #    sed -i 's@'${{ GITHUB.WORKSPACE }}'@/github/workspace/@g' lcov.info
+      #    sed -i 's@'${{ GITHUB.WORKSPACE }}'@/github/workspace/@g' sonar-cloud-reporter.xml
 
       - name: Install dependencies
         run: dotnet restore
@@ -93,7 +102,7 @@ jobs:
   
       - name: Test solution
         run: dotnet test -c Release --no-restore --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
-             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover -f net5
+             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
   
       - name: Upload coverage
         if: github.repository_owner == 'casbin' && github.event_name == 'push'
