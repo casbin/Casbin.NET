@@ -74,8 +74,8 @@ jobs:
       - name: fix code coverage paths
         working-directory: ./coverage
         run: |
-          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' lcov.info
-          sed -i 's@'$GITHUB_WORKSPACE'@/github/workspace/@g' sonar-cloud-reporter.xml
+          sed -i 's@'${{ GITHUB_WORKSPACE }}'@/github/workspace/@g' lcov.info
+          sed -i 's@'${{ GITHUB_WORKSPACE }}'@/github/workspace/@g' sonar-cloud-reporter.xml
 
       - name: Install dependencies
         run: dotnet restore
