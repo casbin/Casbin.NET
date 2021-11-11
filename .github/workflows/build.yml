@@ -78,11 +78,11 @@ jobs:
         shell: powershell
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"Leonardo-Ferreira_Casbin.NET" /o:"leonardo-ferreira" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet test --logger trx --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5
+          dotnet test -c Release --logger trx --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
   
       - name: Test solution
-        run: dotnet test -c Release --no-build --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
+        run: dotnet test -c Release --no-build --no-restore --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
   
       - name: Upload coverage
