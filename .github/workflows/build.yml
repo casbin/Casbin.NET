@@ -17,57 +17,61 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
-      with:
-        fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
-    - name: Setup .NET Core 3.1.x SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 3.1.x
+      - name: Setup .NET Core 3.1.x SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 3.1.x
 
-    - name: Setup .NET 5.0.x SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
+      - name: Setup .NET 5.0.x SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 5.0.x
 
-    - name: Setup .NET 6.0.x SDK
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 6.0.x
+      - name: Setup .NET 6.0.x SDK
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: 6.0.x
 
-    - name: Check .NET info
-      run: dotnet --info
+      - name: Check .NET info
+        run: dotnet --info
 
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 1.11
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.11
+      
       - uses: actions/checkout@v2
-      with:
+        with:
           fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
-    - name: Cache SonarCloud packages
-      uses: actions/cache@v1
-      with:
-        path: ~\sonar\cache
-        key: ${{ runner.os }}-sonar
-        restore-keys: ${{ runner.os }}-sonar
-    - name: Cache SonarCloud scanner
-      id: cache-sonar-scanner
-      uses: actions/cache@v1
-      with:
-        path: .\.sonar\scanner
-        key: ${{ runner.os }}-sonar-scanner
-        restore-keys: ${{ runner.os }}-sonar-scanner
-    - name: Install SonarCloud scanner
-      if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
-      shell: powershell
-      run: |
-          New-Item -Path .\.sonar\scanner -ItemType Directory
-          dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
 
-    - name: Test For Sonarcloud
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v1
+        with:
+          path: ~\sonar\cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Cache SonarCloud scanner
+        id: cache-sonar-scanner
+        uses: actions/cache@v1
+        with:
+          path: .\.sonar\scanner
+          key: ${{ runner.os }}-sonar-scanner
+          restore-keys: ${{ runner.os }}-sonar-scanner
+
+      - name: Install SonarCloud scanner
+        if: steps.cache-sonar-scanner.outputs.cache-hit != 'true'
+        shell: powershell
+        run: |
+            New-Item -Path .\.sonar\scanner -ItemType Directory
+            dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
+  
+      - name: Test For Sonarcloud
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -76,39 +80,39 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"Leonardo-Ferreira_Casbin.NET" /o:"leonardo-ferreira" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
           dotnet test --logger trx --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-
-    - name: Test solution
+  
+      - name: Test solution
         run: dotnet test -c Release --no-build --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
-
-    - name: Upload coverage
-      if: github.repository_owner == 'casbin' && github.event_name == 'push'
-      run: |
-        dotnet tool install coveralls.net --version 2.0.0-beta0002 --tool-path tools;
-        $CommitAuthor = git show -s --pretty=format:"%cn";
-        echo "Coomit author is: $CommitAuthor";
-        $CommitAuthorEmail = git show -s --pretty=format:"%ce";
-        echo "Coomit author email is: $CommitAuthorEmail";
-        $CommitMessage = git show -s --pretty=format:"%s";
-        echo "Coomit message is: $CommitMessage";
-        cp test-results/**/*.opencover.xml test-results
-        tools/csmacnz.Coveralls --opencover -i test-results/coverage.opencover.xml --repoToken $env:COVERALLS_REPO_TOKEN `
-        --commitId $env:SHA --commitBranch $env:REF --commitAuthor "$CommitAuthor" `
-        --commitEmail "$CommitAuthorEmail" --commitMessage "$CommitMessage" `
-        --jobId $env:RUN_NUMBER --serviceName github-actions  --useRelativePaths;
-
-        if($LastExitCode -ne 0)
-        {
-            Write-Warning -Message "Can not upload coverage, laat exit code is ${LastExitCode}."
-            $LastExitCode = 0;
-        }
-
-    - name: Upload test results artefacts
-      if: github.repository_owner == 'casbin' && github.event_name == 'push'
-      uses: actions/upload-artifact@v1.0.0
-      with:
-        name: "drop-ci-test-results"
-        path: './test-results'
+  
+      - name: Upload coverage
+        if: github.repository_owner == 'casbin' && github.event_name == 'push'
+        run: |
+          dotnet tool install coveralls.net --version 2.0.0-beta0002 --tool-path tools;
+          $CommitAuthor = git show -s --pretty=format:"%cn";
+          echo "Coomit author is: $CommitAuthor";
+          $CommitAuthorEmail = git show -s --pretty=format:"%ce";
+          echo "Coomit author email is: $CommitAuthorEmail";
+          $CommitMessage = git show -s --pretty=format:"%s";
+          echo "Coomit message is: $CommitMessage";
+          cp test-results/**/*.opencover.xml test-results
+          tools/csmacnz.Coveralls --opencover -i test-results/coverage.opencover.xml --repoToken $env:COVERALLS_REPO_TOKEN `
+          --commitId $env:SHA --commitBranch $env:REF --commitAuthor "$CommitAuthor" `
+          --commitEmail "$CommitAuthorEmail" --commitMessage "$CommitMessage" `
+          --jobId $env:RUN_NUMBER --serviceName github-actions  --useRelativePaths;
+  
+          if($LastExitCode -ne 0)
+          {
+              Write-Warning -Message "Can not upload coverage, laat exit code is ${LastExitCode}."
+              $LastExitCode = 0;
+          }
+  
+      - name: Upload test results artefacts
+        if: github.repository_owner == 'casbin' && github.event_name == 'push'
+        uses: actions/upload-artifact@v1.0.0
+        with:
+          name: "drop-ci-test-results"
+          path: './test-results'
 
   benchmark:
     runs-on: windows-latest
