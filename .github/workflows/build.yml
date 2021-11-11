@@ -70,15 +70,6 @@ jobs:
         run: |
             New-Item -Path .\.sonar\scanner -ItemType Directory
             dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-
-      - name: Analyze with SonarCloud
-        uses: sonarsource/sonarcloud-github-action@master
-        with:
-          args: >
-            -Dsonar.cs.opencover.reportPaths=${{ GITHUB.WORKSPACE }}/**/*.opencover.xml
-            -Dsonar.cs.vstest.reportsPaths=${{ GITHUB.WORKSPACE }}/**/*.trx
-            -Dsonar.exclusions=**/obj/**,**/*.dll,**/NetCasbin.UnitTest/**,**/Casbin.Benchmark/**
-            -Dsonar.verbose=true
   
       #- name: fix code coverage paths
       #  working-directory: ./coverage
@@ -101,7 +92,7 @@ jobs:
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
   
       - name: Test solution
-        run: dotnet test -c Release --no-restore --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
+        run: dotnet test -c Release --no-restore -f net5 --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
              -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
   
       - name: Upload coverage
