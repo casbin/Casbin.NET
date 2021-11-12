@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Options;
 #endif
 
@@ -13,7 +13,7 @@ namespace Casbin.Caching
         private readonly ReaderWriterLockSlim _lockSlim = new();
         private Dictionary<string, bool> _memoryCache = new();
 
-#if !NET45
+#if !NET452
         public ReaderWriterEnforceCache(IOptions<ReaderWriterEnforceCacheOptions> options)
         {
             if (options?.Value is not null)
@@ -95,7 +95,7 @@ namespace Casbin.Caching
             _memoryCache = new Dictionary<string, bool>();
         }
 
-#if !NET45
+#if !NET452
         public Task ClearAsync()
         {
             Clear();

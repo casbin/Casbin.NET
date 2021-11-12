@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -358,7 +358,7 @@ namespace Casbin
             if (enforcer.AutoCleanEnforceCache)
             {
                 enforcer.EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
@@ -374,7 +374,7 @@ namespace Casbin
             if (enforcer.AutoCleanEnforceCache && enforcer.EnforceCache is not null)
             {
                 await enforcer.EnforceCache.ClearAsync();
-#if !NET45
+#if !NET452
                 enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }

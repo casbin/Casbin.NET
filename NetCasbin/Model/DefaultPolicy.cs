@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
 using Casbin.Util;
@@ -12,7 +12,7 @@ namespace Casbin.Model
     {
         public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
-#if !NET45
+#if !NET452
         internal ILogger Logger { get; set; }
 #endif
 
