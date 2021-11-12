@@ -5,7 +5,7 @@ using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
 namespace Casbin
@@ -33,7 +33,7 @@ namespace Casbin
         public IRoleManager RoleManager { get; set; }
         public IEnforceCache EnforceCache { get; set; }
         public IExpressionHandler ExpressionHandler { get; set; }
-#if !NET45
+#if !NET452
         public ILogger Logger { get; set; }
 #endif
         #endregion

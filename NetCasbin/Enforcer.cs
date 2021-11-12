@@ -11,7 +11,7 @@ using Casbin.Rbac;
 using Casbin.Util;
 using Casbin.Evaluation;
 using System.Runtime.CompilerServices;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -76,7 +76,7 @@ namespace Casbin
         public IRoleManager RoleManager { get; set; } = new DefaultRoleManager(10);
         public IEnforceCache EnforceCache { get; set; } = new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
         public IExpressionHandler ExpressionHandler { get; set; }
-#if !NET45
+#if !NET452
         public ILogger Logger { get; set; }
 #endif
         #endregion
@@ -113,7 +113,7 @@ namespace Casbin
             string key = string.Join("$$", requestValues);
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
-#if !NET45
+#if !NET452
                 LogEnforceResult(context, requestValues, cachedResult, true);
 #endif
                 return cachedResult;
@@ -121,7 +121,7 @@ namespace Casbin
 
             bool result  = InternalEnforce(context, PolicyManager, requestValues);
             EnforceCache.TrySetResult(requestValues, key, result);
-#if !NET45
+#if !NET452
             LogEnforceResult(context, requestValues, result);
 #endif
             return result;
@@ -158,7 +158,7 @@ namespace Casbin
             if (tryGetCachedResult.HasValue)
             {
                 bool cachedResult = tryGetCachedResult.Value;
-#if !NET45
+#if !NET452
                 LogEnforceResult(context, requestValues, cachedResult, true);
 #endif
                 return cachedResult;
@@ -168,7 +168,7 @@ namespace Casbin
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
 
-#if !NET45
+#if !NET452
             LogEnforceResult(context, requestValues, result);
 #endif
 
@@ -417,7 +417,7 @@ namespace Casbin
             return ref session;
         }
 
-#if !NET45
+#if !NET452
         private void LogEnforceResult(in EnforceContext context, IReadOnlyList<object> requestValues, bool finalResult, bool cachedResult = false)
         {
             if (cachedResult)

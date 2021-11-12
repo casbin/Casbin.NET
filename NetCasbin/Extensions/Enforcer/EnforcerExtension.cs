@@ -7,7 +7,7 @@ using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -117,7 +117,7 @@ namespace Casbin
             if (enforcer.AutoCleanEnforceCache)
             {
                 enforcer.EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
@@ -358,11 +358,11 @@ namespace Casbin
             if (enforcer.AutoCleanEnforceCache)
             {
                 enforcer.EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
-#if !NET45
+#if !NET452
             enforcer.Logger?.LogInformation("Policy Management, Cleared all policy.");
 #endif
         }
@@ -470,7 +470,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceEx(this IEnforcer enforcer, params object[] requestValues)
         {
@@ -494,7 +494,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
         {
@@ -549,7 +549,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceExWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {
@@ -574,7 +574,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
         {

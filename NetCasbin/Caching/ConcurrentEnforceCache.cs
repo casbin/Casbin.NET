@@ -35,7 +35,7 @@ namespace Casbin.Caching
             _memoryCache.Clear();
         }
 
-#if !NET45
+#if !NET452
         public Task ClearAsync()
         {
             Clear();
