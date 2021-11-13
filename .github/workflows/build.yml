@@ -1,6 +1,6 @@
 name: Build
 
-on: [push, pull_request]
+on: [push, pull_request, workflow_dispatch]
 
 env:
   SHA: ${{ GITHUB.SHA }}
@@ -88,12 +88,8 @@ jobs:
         run: |
           .\.sonar\scanner\dotnet-sonarscanner begin /k:"casbin_Casbin.NET" /o:"casbin" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.cs.opencover.reportsPaths="${{ GITHUB.WORKSPACE }}\**\coverage*.opencover.xml" /d:sonar.cs.vstest.reportsPaths="${{ GITHUB.WORKSPACE }}\**\*.trx" /d:sonar.verbose=true
           dotnet build -c Release --no-restore
-          dotnet test -c Release --logger trx --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5
+          dotnet test -c Release --logger trx -r test-results --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5 -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
-  
-      - name: Test solution
-        run: dotnet test -c Release --no-restore -f net5 --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
-             -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
   
       - name: Upload coverage
         if: github.repository_owner == 'casbin' && github.event_name == 'push'
