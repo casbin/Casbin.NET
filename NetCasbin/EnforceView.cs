@@ -10,7 +10,6 @@ namespace Casbin
     public class EnforceView
     {
         public IReadOnlyAssertion RequestAssertion { get; private set; }
-
         public IReadOnlyAssertion PolicyAssertion { get; private set; }
         public bool HasPriority { get; private set; }
         public int PriorityIndex { get; private set; }

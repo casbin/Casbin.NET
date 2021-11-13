@@ -311,7 +311,7 @@ namespace Casbin
             {
                 enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, rule);
-                enforcer.ExpressionHandler.SetGFunctions();
+                enforcer.Model.ExpressionHandler.SetGFunctions();
             }
 
             NotifyPolicyChanged(enforcer);
@@ -324,7 +324,7 @@ namespace Casbin
             {
                 enforcer.PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, rule);
-                enforcer.ExpressionHandler.SetGFunctions();
+                enforcer.Model.ExpressionHandler.SetGFunctions();
             }
             await NotifyPolicyChangedAsync(enforcer);
         }
@@ -336,7 +336,7 @@ namespace Casbin
             {
                 enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
-                enforcer.ExpressionHandler.SetGFunctions();
+                enforcer.Model.ExpressionHandler.SetGFunctions();
             }
             NotifyPolicyChanged(enforcer);
         }
@@ -348,7 +348,7 @@ namespace Casbin
             {
                 enforcer.PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
-                enforcer.ExpressionHandler.SetGFunctions();
+                enforcer.Model.ExpressionHandler.SetGFunctions();
             }
             await NotifyPolicyChangedAsync(enforcer);
         }

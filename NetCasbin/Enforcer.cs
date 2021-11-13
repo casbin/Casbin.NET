@@ -75,7 +75,6 @@ namespace Casbin
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; } = new DefaultRoleManager(10);
         public IEnforceCache EnforceCache { get; set; } = new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
-        public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET452
         public ILogger Logger { get; set; }
 #endif
@@ -95,9 +94,9 @@ namespace Casbin
         /// <returns>Whether to allow the request.</returns>
         public bool Enforce(EnforceContext context, params object[] requestValues)
         {
-            if (context.HandleCached)
+            if (context.HandleOptionAndCached)
             {
-                return InternalEnforce(ref context, PolicyManager, requestValues);
+                return InternalEnforce(in context, PolicyManager, requestValues);
             }
 
             if (Enabled is false)
@@ -119,7 +118,7 @@ namespace Casbin
                 }
             }
 
-            bool result = InternalEnforce(ref context, PolicyManager, requestValues);
+            bool result = InternalEnforce(in context, PolicyManager, requestValues);
 
             if (useCache)
             {
@@ -141,7 +140,7 @@ namespace Casbin
         /// <returns>Whether to allow the request.</returns>
         public async Task<bool> EnforceAsync(EnforceContext context, params object[] requestValues)
         {
-            if (context.HandleCached)
+            if (context.HandleOptionAndCached)
             {
                 return await InternalEnforceAsync(context, PolicyManager, requestValues);
             }
@@ -165,8 +164,8 @@ namespace Casbin
                     return cachedResult.Value;
                 }
             }
-            
-            context.HandleCached = true;
+
+            context.HandleOptionAndCached = true;
             bool result = await InternalEnforceAsync(context, PolicyManager, requestValues);
 
             if (useCache)
@@ -181,16 +180,16 @@ namespace Casbin
 
         private Task<bool> InternalEnforceAsync(EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
         {
-            bool CallInFunc() => InternalEnforce(ref context, policyManager, requestValues);
+            bool CallInFunc() => InternalEnforce(in context, policyManager, requestValues);
             return policyManager.IsSynchronized ? Task.Run(CallInFunc) : Task.FromResult(CallInFunc());
         }
 
-        private bool InternalEnforce(ref EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
+        private bool InternalEnforce(in EnforceContext context, IPolicyManager policyManager, IReadOnlyList<object> requestValues)
         {
             policyManager.StartRead();
             try
             {
-                return InternalEnforce(ref context, requestValues);
+                return InternalEnforce(in context, requestValues);
             }
             finally
             {
@@ -198,16 +197,14 @@ namespace Casbin
             }
         }
 
-        private bool InternalEnforce(ref EnforceContext context, IReadOnlyList<object> requestValues)
+        private bool InternalEnforce(in EnforceContext context, IReadOnlyList<object> requestValues)
         {
             var session = new EnforceSession();
             var policyList = context.View.PolicyAssertion.Policy;
             session.RequestValues = requestValues;
             IChainEffector chainEffector = Effector as IChainEffector;
             session.IsChainEffector = chainEffector is not null;
-
-            context = HandleInitialRequest(ref context, ref session, chainEffector);
-
+            HandleInitialRequest(in context, ref session, chainEffector);
             if (session.PolicyCount != 0)
             {
                 for (int policyIndex = 0; policyIndex < session.PolicyCount; policyIndex++)
@@ -216,12 +213,17 @@ namespace Casbin
                     session.PolicyValues = policyValues;
                     session.PolicyIndex = policyIndex;
 
-                    context = HandleBeforeExpression(ref context, ref session);
-                    session.ExpressionResult = ExpressionHandler.Invoke(session.ExpressionString, requestValues);
+                    HandleBeforeExpression(in context, ref session);
+                    session.ExpressionResult = Model.ExpressionHandler.Invoke(session.ExpressionString, requestValues);
 
-                    context = session.IsChainEffector
-                        ? HandleExpressionResult(ref context, ref session)
-                        : HandleExpressionResult(ref context, ref session, Effector);
+                    if (session.IsChainEffector)
+                    {
+                        HandleExpressionResult(in context, ref session);
+                    }
+                    else
+                    {
+                        HandleExpressionResult(in context, ref session, Effector);
+                    }
 
                     if (session.Determined)
                     {
@@ -231,18 +233,22 @@ namespace Casbin
             }
             else
             {
-                context = HandleBeforeExpression(ref context, ref session);
-                session.ExpressionResult = ExpressionHandler.Invoke(session.ExpressionString, requestValues);
+                HandleBeforeExpression(in context, ref session);
+                session.ExpressionResult = Model.ExpressionHandler.Invoke(session.ExpressionString, requestValues);
 
-                context = session.IsChainEffector
-                    ? HandleExpressionResult(ref context, ref session)
-                    : HandleExpressionResult(ref context, ref session, Effector);
+                if (session.IsChainEffector)
+                {
+                    HandleExpressionResult(in context, ref session);
+                }
+                else
+                {
+                    HandleExpressionResult(in context, ref session, Effector);
+                }
             }
-
             return session.EnforceResult;
         }
 
-        private ref EnforceContext HandleInitialRequest(ref EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private void HandleInitialRequest(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
         {
             session.ExpressionString = context.View.Matcher;
             session.PolicyCount = context.View.PolicyAssertion.Policy.Count;
@@ -253,8 +259,8 @@ namespace Casbin
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {session.RequestValues.Count}.");
             }
 
-            ExpressionHandler.SetEnforceContext(in context);
-            ExpressionHandler.SetRequestParameters(session.RequestValues);
+            Model.ExpressionHandler.SetEnforceContext(in context);
+            Model.ExpressionHandler.SetRequestParameters(session.RequestValues);
 
             if (session.IsChainEffector)
             {
@@ -264,11 +270,9 @@ namespace Casbin
             {
                 session.PolicyEffects = new PolicyEffect[session.PolicyCount];
             }
-
-            return ref context;
         }
 
-        private ref EnforceContext HandleBeforeExpression(ref EnforceContext context, ref EnforceSession session)
+        private void HandleBeforeExpression(in EnforceContext context, ref EnforceSession session)
         {
             IEffectChain effectChain = session.EffectChain;
             int policyTokenCount = context.View.PolicyAssertion.Tokens.Count;
@@ -281,8 +285,8 @@ namespace Casbin
                 }
 
                 IReadOnlyList<string> tempPolicyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
-                ExpressionHandler.SetPolicyParameters(tempPolicyValues);
-                return ref context;
+                Model.ExpressionHandler.SetPolicyParameters(tempPolicyValues);
+                return;
             }
 
             if (policyTokenCount != session.PolicyValues.Count)
@@ -308,19 +312,19 @@ namespace Casbin
                 }
             }
 
-            ExpressionHandler.SetPolicyParameters(session.PolicyValues);
+            Model.ExpressionHandler.SetPolicyParameters(session.PolicyValues);
 
-            if (context.View.HasEval)
+            if (context.View.HasEval is false)
             {
-                session.ExpressionString = context.View.Matcher;
-                session.ExpressionString = RewriteEval(session.ExpressionString, context.View.PolicyAssertion.Tokens, session.PolicyValues);
+                return;
             }
 
-            return ref context;
+            session.ExpressionString = context.View.Matcher;
+            session.ExpressionString = RewriteEval(session.ExpressionString, context.View.PolicyAssertion.Tokens, session.PolicyValues);
         }
 
 
-        private static ref EnforceContext HandleExpressionResult(ref EnforceContext context, ref EnforceSession session, IEffector effector)
+        private void HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
         {
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)
@@ -329,7 +333,6 @@ namespace Casbin
                 nowEffect = effector.MergeEffects(context.View.Effect, new[] { nowEffect }, null, session.PolicyIndex, session.PolicyCount, out _);
                 bool finalResult = nowEffect.ToNullableBool() ?? false;
                 session.DetermineResult(finalResult);
-                return ref context;
             }
 
             IReadOnlyList<string> policyValues = session.PolicyValues;
@@ -357,14 +360,12 @@ namespace Casbin
             if (nowEffect is not PolicyEffect.Indeterminate)
             {
                 session.DetermineResult(nowEffect.ToNullableBool() ?? false);
-                return ref context;
             }
 
             session.EnforceResult = false;
-            return ref context;
         }
 
-        private static ref EnforceContext HandleExpressionResult(ref EnforceContext context, ref EnforceSession session)
+        private static void HandleExpressionResult(in EnforceContext context, ref EnforceSession session)
         {
             IEffectChain effectChain = session.EffectChain;
             PolicyEffect nowEffect;
@@ -375,11 +376,9 @@ namespace Casbin
                 if (effectChain.TryChain(nowEffect))
                 {
                     session.DetermineResult(effectChain.Result);
-                    return ref context;
                 }
 
                 session.DetermineResult(false);
-                return ref context;
             }
 
             IReadOnlyList<string> policyValues = session.PolicyValues;
@@ -406,11 +405,9 @@ namespace Casbin
             if (chainResult is false || effectChain.CanChain is false)
             {
                 session.DetermineResult(effectChain.Result);
-                return ref context;
             }
 
             session.EnforceResult = effectChain.Result;
-            return ref context;
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]

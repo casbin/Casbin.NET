@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Casbin.Model;
 
 namespace Casbin
 {
@@ -7,14 +8,15 @@ namespace Casbin
         internal EnforceContext(EnforceView view, bool explain = false)
         {
             View = view;
-            HandleCached = false;
+            HandleOptionAndCached = false;
 
             Explain = explain;
             Explanations = explain ? new List<IEnumerable<string>>() : null;
         }
 
         public EnforceView View { get; }
-        public bool HandleCached { get; internal set; }
+        public bool HandleOptionAndCached { get; internal set; }
+
         public bool Explain { get; }
         public List<IEnumerable<string>> Explanations { get; }
 
@@ -38,8 +40,15 @@ namespace Casbin
             string matcherType = PermConstants.DefaultMatcherType,
             bool explain = false)
         {
-            return new EnforceContext(EnforceView.Create(enforcer.Model,
-                requestType, policyType, effectType, matcherType), explain);
+            IModel model = enforcer.Model;
+            string name = string.Concat(requestType, policyType, effectType, matcherType);
+            if (model.EnforceViewCache.TryGet(name, out EnforceView view))
+            {
+                return new EnforceContext(view, explain);
+            }
+            view = EnforceView.Create(model, requestType, policyType, effectType, matcherType);
+            _ = model.EnforceViewCache.TryAdd(name, view);
+            return new EnforceContext(view, explain);
         }
 
         public static EnforceContext CreateWithMatcher(IEnforcer enforcer, string matcher, bool explain)

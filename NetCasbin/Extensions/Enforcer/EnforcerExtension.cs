@@ -115,7 +115,6 @@ namespace Casbin
                 model = model.ToSyncModel();
             }
             enforcer.Model = model;
-            enforcer.ExpressionHandler = new ExpressionHandler(model);
             if (enforcer.AutoCleanEnforceCache)
             {
                 enforcer.EnforceCache?.Clear();
@@ -164,7 +163,7 @@ namespace Casbin
         {
             enforcer.RoleManager = roleManager;
             enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
-            enforcer.ExpressionHandler.SetGFunctions();
+            enforcer.Model.ExpressionHandler.SetGFunctions();
             return enforcer;
         }
 
@@ -468,7 +467,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext();
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -511,7 +510,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext();
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)
@@ -553,7 +552,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext(true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -584,7 +583,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext(true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -626,7 +625,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext(true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)
@@ -658,7 +657,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContext(true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)
@@ -700,7 +699,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -745,7 +744,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)
@@ -788,7 +787,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -820,7 +819,7 @@ namespace Casbin
             }
 
            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = enforcer.Enforce(context, requestValues);
 
             if (useCache)
@@ -863,7 +862,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)
@@ -895,7 +894,7 @@ namespace Casbin
             }
 
             EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleCached = true;
+            context.HandleOptionAndCached = true;
             bool result  = await enforcer.EnforceAsync(context, requestValues);
 
             if (useCache)

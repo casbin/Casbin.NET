@@ -32,8 +32,6 @@ namespace Casbin
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; }
         public IEnforceCache EnforceCache { get; set; }
-
-        public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET452
         public ILogger Logger { get; set; }
 #endif
