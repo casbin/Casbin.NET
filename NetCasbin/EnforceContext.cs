@@ -1,30 +1,20 @@
 ﻿using System.Collections.Generic;
-using Casbin.Model;
-using Casbin.Util;
 
 namespace Casbin
 {
-    public readonly struct EnforceContext
+    public struct EnforceContext
     {
-        public EnforceContext(
-            IReadOnlyAssertion requestAssertion, IReadOnlyAssertion policyAssertion,
-            string effect, string matcher,
-            bool hasEval, bool explain)
+        internal EnforceContext(EnforceView view, bool explain = false)
         {
-            RequestAssertion = requestAssertion;
-            PolicyAssertion = policyAssertion;
-            Effect = effect;
-            Matcher = matcher;
-            HasEval = hasEval;
+            View = view;
+            HandleCached = false;
+
             Explain = explain;
             Explanations = explain ? new List<IEnumerable<string>>() : null;
         }
 
-        public IReadOnlyAssertion RequestAssertion { get; }
-        public IReadOnlyAssertion PolicyAssertion { get; }
-        public string Effect { get; }
-        public string Matcher { get; }
-        public bool HasEval { get; }
+        public EnforceView View { get; }
+        public bool HandleCached { get; internal set; }
         public bool Explain { get; }
         public List<IEnumerable<string>> Explanations { get; }
 
@@ -32,11 +22,11 @@ namespace Casbin
         {
             return Create(
                 enforcer,
-                requestType: PermConstants.DefaultRequestType,
-                policyType: PermConstants.DefaultPolicyType,
-                effectType: PermConstants.DefaultPolicyEffectType,
-                matcherType: PermConstants.DefaultMatcherType,
-                explain: explain
+                PermConstants.DefaultRequestType,
+                PermConstants.DefaultPolicyType,
+                PermConstants.DefaultPolicyEffectType,
+                PermConstants.DefaultMatcherType,
+                explain
             );
         }
 
@@ -48,20 +38,8 @@ namespace Casbin
             string matcherType = PermConstants.DefaultMatcherType,
             bool explain = false)
         {
-            IModel model = enforcer.Model;
-            string matcher = model.GetRequiredAssertion(PermConstants.Section.MatcherSection, matcherType).Value;
-            bool hasEval = StringUtil.HasEval(matcher);
-            Assertion requestAssertion = model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType);
-            Assertion policyAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicySection, policyType);
-            return new EnforceContext
-            (
-                requestAssertion: requestAssertion,
-                policyAssertion: policyAssertion,
-                effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
-                matcher: matcher,
-                hasEval: hasEval,
-                explain: explain
-            );
+            return new EnforceContext(EnforceView.Create(enforcer.Model,
+                requestType, policyType, effectType, matcherType), explain);
         }
 
         public static EnforceContext CreateWithMatcher(IEnforcer enforcer, string matcher, bool explain)
@@ -83,20 +61,8 @@ namespace Casbin
             string effectType = PermConstants.DefaultPolicyEffectType,
             bool explain = false)
         {
-            IModel model = enforcer.Model;
-            matcher = StringUtil.EscapeAssertion(matcher);
-            bool hasEval = StringUtil.HasEval(matcher);
-            Assertion requestAssertion = model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType);
-            Assertion policyAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicySection, policyType);
-            return new EnforceContext
-            (
-                requestAssertion: requestAssertion,
-                policyAssertion: policyAssertion,
-                effect: model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType).Value,
-                matcher: matcher,
-                hasEval: hasEval,
-                explain: explain
-            );
+            return new EnforceContext(EnforceView.CreateWithMatcher(enforcer.Model,
+                matcher, requestType, policyType, effectType), explain);
         }
     }
 }

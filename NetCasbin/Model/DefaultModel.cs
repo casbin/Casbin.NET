@@ -121,6 +121,7 @@ namespace Casbin.Model
             }
             else
             {
+                // ReSharper disable once InvokeAsExtensionMethod
                 assertion.Value = StringUtil.RemoveComments(StringUtil.EscapeAssertion(assertion.Value));
             }
 

@@ -56,9 +56,9 @@ namespace Casbin.Evaluation
             EnforceContext = context;
             int parametersCount = 0;
 
-            _requestTokenDic = context.RequestAssertion.Tokens;
+            _requestTokenDic = context.View.RequestAssertion.Tokens;
             _requestTokens = _requestTokenDic.Keys;
-            _policyTokenDic = context.PolicyAssertion.Tokens;
+            _policyTokenDic = context.View.PolicyAssertion.Tokens;
             _policyTokens = _policyTokenDic.Keys;
 
             parametersCount += _requestTokenDic.Count;
@@ -97,8 +97,8 @@ namespace Casbin.Evaluation
 
             if (_expressionCache.TryGetValue(expressionString, out var lambda))
             {
-                var expressionResult = lambda.Invoke(_orderedParameters);
-                return expressionResult is bool result && result;
+                object expressionResult = lambda.Invoke(_orderedParameters);
+                return expressionResult is true;
             }
 
             if (_onlyStringFuncCache.TryGetValue(
