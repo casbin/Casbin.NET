@@ -1070,7 +1070,7 @@ namespace Casbin
         /// <param name="function">The function.</param>
         public static void AddFunction(this IEnforcer enforcer, string name, Delegate function)
         {
-            enforcer.ExpressionHandler.SetFunction(name, function);
+            enforcer.Model.ExpressionHandler.SetFunction(name, function);
         }
 
         /// <summary>

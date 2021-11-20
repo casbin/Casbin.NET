@@ -32,7 +32,6 @@ namespace Casbin
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; }
         public IEnforceCache EnforceCache { get; set; }
-        public IExpressionHandler ExpressionHandler { get; set; }
 #if !NET452
         public ILogger Logger { get; set; }
 #endif
@@ -50,7 +49,7 @@ namespace Casbin
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
-        public bool Enforce(in EnforceContext context, params object[] requestValues);
+        public bool Enforce(EnforceContext context, params object[] requestValues);
 
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
