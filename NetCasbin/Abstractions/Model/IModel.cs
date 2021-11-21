@@ -15,7 +15,7 @@ namespace Casbin.Model
 
         public IExpressionHandler ExpressionHandler { get; }
 
-         IPolicyManager PolicyManager { get; set; }
+        public IPolicyManager PolicyManager { get; set; }
 
         public void LoadModelFromFile(string path);
 

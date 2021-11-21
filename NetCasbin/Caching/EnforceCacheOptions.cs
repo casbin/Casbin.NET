@@ -2,7 +2,7 @@
 
 namespace Casbin.Caching
 {
-    public class ReaderWriterEnforceCacheOptions
+    public class EnforceCacheOptions
     {
         public TimeSpan WaitTimeOut { get; set; } = TimeSpan.FromMilliseconds(50);
     }

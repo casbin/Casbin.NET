@@ -5,7 +5,7 @@ namespace Casbin
 {
     public struct EnforceContext
     {
-        internal EnforceContext(EnforceView view, bool explain = false)
+        private EnforceContext(EnforceView view, bool explain = false)
         {
             View = view;
             HandleOptionAndCached = false;

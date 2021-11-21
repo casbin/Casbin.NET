@@ -6,31 +6,6 @@ namespace Casbin.UnitTests.UtilTests
 {
     public class StringUtilTest
     {
-        public static IEnumerable<object[]> EscapeAssertionTestData = new[]
-        {
-            new object[] {"r_attr.value == p_attr", "r.attr.value == p.attr"},
-            new object[] {"r_attp.value || p_attr", "r.attp.value || p.attr"},
-            new object[] {"r_attp.value &&p_attr", "r.attp.value &&p.attr"},
-            new object[] {"r_attp.value >p_attr", "r.attp.value >p.attr"},
-            new object[] {"r_attp.value <p_attr", "r.attp.value <p.attr"},
-            new object[] {"r_attp.value -p_attr", "r.attp.value -p.attr"},
-            new object[] {"r_attp.value +p_attr", "r.attp.value +p.attr"},
-            new object[] {"r_attp.value *p_attr", "r.attp.value *p.attr"},
-            new object[] {"r_attp.value /p_attr", "r.attp.value /p.attr"},
-            new object[] {"!r_attp.value /p_attr", "!r.attp.value /p.attr"},
-            new object[] {"g(r_sub, p_sub) == p_attr", "g(r.sub, p.sub) == p.attr"},
-            new object[] {"g(r_sub,p_sub) == p_attr", "g(r.sub,p.sub) == p.attr"},
-            new object[] {"(r_attp.value || p_attr)p_u", "(r.attp.value || p.attr)p.u"}
-        };
-
-        [Theory]
-        [MemberData(nameof(EscapeAssertionTestData))]
-        public void TestEscapeAssertion(string except, string actual)
-        {
-            Assert.Equal(except, StringUtil.EscapeAssertion(actual));
-
-        }
-
         public static IEnumerable<object[]> RemoveCommentsTestData = new[]
         {
             new object[] {"r.act == p.act", "r.act == p.act # comments" },

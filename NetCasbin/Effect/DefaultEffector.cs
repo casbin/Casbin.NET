@@ -7,7 +7,7 @@ namespace Casbin.Effect
     /// <summary>
     /// DefaultEffector is default effector for Casbin.
     /// </summary>
-    public class DefaultEffector : IEffector, IChainEffector
+    public class DefaultEffector : IEffector, IChainEffector<EffectChain>
     {
         /// <summary>
         /// Merges all matching results collected by the enforcer into a single decision.
@@ -71,10 +71,8 @@ namespace Casbin.Effect
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
 
-        public IEffectChain CreateChain(string effectExpression)
-            => new EffectChain(effectExpression);
+        public EffectChain CreateChain(string effectExpression) => new(effectExpression);
 
-        public IEffectChain CreateChain(string effectExpression, EffectExpressionType effectExpressionType)
-            => new EffectChain(effectExpression, effectExpressionType);
+        public EffectChain CreateChain(string effectExpression, EffectExpressionType effectExpressionType) => new(effectExpression, effectExpressionType);
     }
 }

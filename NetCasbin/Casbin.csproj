@@ -21,8 +21,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Casbin.csproj.DotSettings" />
     <None Remove="casbin.snk" />
+    <None Remove="Casbin.csproj.DotSettings" />
   </ItemGroup>
 
   <ItemGroup>
@@ -38,20 +38,29 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18" />
-  </ItemGroup>
-
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18" />
+    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup>

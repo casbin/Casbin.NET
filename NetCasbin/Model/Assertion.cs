@@ -12,7 +12,7 @@ namespace Casbin.Model
     /// </summary>
     public class Assertion : IReadOnlyAssertion
     {
-        private List<IReadOnlyList<string>> _policy;
+        private List<IPolicyValues> _policy;
 
         public string Key { get; internal set; }
 
@@ -22,17 +22,17 @@ namespace Casbin.Model
 
         public IRoleManager RoleManager { get; internal set; }
 
-        public IReadOnlyList<IReadOnlyList<string>> Policy
+        public IReadOnlyList<IPolicyValues> Policy
         {
             get => _policy;
-            internal set => _policy = value as List<IReadOnlyList<string>> ?? value.ToList();
+            internal set => _policy = value as List<IPolicyValues> ?? value.ToList();
         }
 
         internal HashSet<string> PolicyStringSet { get; }
 
         public Assertion()
         {
-            _policy = new List<IReadOnlyList<string>>();
+            _policy = new List<IPolicyValues>();
             PolicyStringSet = new HashSet<string>();
             RoleManager = new DefaultRoleManager(10);
         }
@@ -79,7 +79,7 @@ namespace Casbin.Model
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            foreach (IEnumerable<string> rule in Policy)
+            foreach (IPolicyValues rule in Policy)
             {
                 BuildRoleLink(count, PolicyOperation.PolicyAdd, rule);
             }
@@ -153,7 +153,7 @@ namespace Casbin.Model
                 return TryAddPolicyByPriority(ruleList, index);
             }
 
-            _policy.Add(ruleList);
+            _policy.Add(Model.Policy.CreateOnlyString(ruleList));
             PolicyStringSet.Add(Utility.RuleToString(ruleList));
             return true;
         }
@@ -198,7 +198,7 @@ namespace Casbin.Model
             }
 
             int lastIndex = _policy.FindLastIndex(LastLessOrEqualPriority);
-            _policy.Insert(lastIndex + 1, rule);
+            _policy.Insert(lastIndex + 1, Model.Policy.CreateOnlyString(rule));
             PolicyStringSet.Add(Utility.RuleToString(rule));
             return true;
         }
@@ -210,7 +210,7 @@ namespace Casbin.Model
                 index = -1;
                 return false;
             }
-            return Tokens.TryGetValue($"{Key}_priority", out index);
+            return Tokens.TryGetValue("priority", out index);
         }
 
         internal bool TrySortPoliciesByPriority()
@@ -220,7 +220,7 @@ namespace Casbin.Model
                 return false;
             }
 
-            int PolicyComparison(IReadOnlyList<string> p1, IReadOnlyList<string> p2)
+            int PolicyComparison(IPolicyValues p1, IPolicyValues p2)
             {
                 string priorityString1 = p1[priorityIndex];
                 string priorityString2 = p2[priorityIndex];

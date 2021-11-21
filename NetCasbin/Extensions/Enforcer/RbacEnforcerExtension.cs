@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Casbin.Model;
 
 namespace Casbin
 {
@@ -370,7 +372,7 @@ namespace Casbin
         #region Delete permissions
 
         /// <summary>
-        /// DeletePermission deletes a permission. 
+        /// DeletePermission deletes a permission.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="permission"></param>
@@ -381,7 +383,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// DeletePermission deletes a permission. 
+        /// DeletePermission deletes a permission.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="permission"></param>
@@ -391,9 +393,9 @@ namespace Casbin
             return enforcer.RemoveFilteredPolicyAsync(1, permission);
         }
 
-        
+
         /// <summary>
-        /// DeletePermission deletes a permission. 
+        /// DeletePermission deletes a permission.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="permission"></param>
@@ -404,7 +406,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// DeletePermission deletes a permission. 
+        /// DeletePermission deletes a permission.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="permission"></param>
@@ -438,7 +440,7 @@ namespace Casbin
             return DeletePermissionForUserAsync(enforcer, user, permission as IEnumerable<string>);
         }
 
-        
+
         /// <summary>
         /// DeletePermissionForUser deletes a permission for a user or role.
         /// </summary>
@@ -467,7 +469,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
+        /// DeletePermissionsForUser deletes permissions for a user or role.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user">User or role</param>
@@ -478,7 +480,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// DeletePermissionsForUser deletes permissions for a user or role. 
+        /// DeletePermissionsForUser deletes permissions for a user or role.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user">User or role</param>
@@ -535,7 +537,7 @@ namespace Casbin
 
         /// <summary>
         /// <para>Gets implicit permissions for a user or role.</para>
-        /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para> 
+        /// <para>Compared to GetPermissionsForUser(), this function retrieves permissions for inherited roles.</para>
         /// <para>For example:</para>
         /// <para>p, admin, data1, read</para>
         /// <para>p, alice, data2, read</para>
@@ -569,9 +571,64 @@ namespace Casbin
             var policySubjects = enforcer.GetAllSubjects();
             var groupInherit = enforcer.InternalGetValuesForFieldInPolicyAllTypes("g", 1);
             var groupSubjects = enforcer.InternalGetValuesForFieldInPolicyAllTypes("g", 0);
-            return policySubjects.Concat(groupSubjects).Distinct()
-                .Where(subject => enforcer.Enforce(new[]{subject}.Concat(permissions).Cast<object>().ToArray()))
-                .Except(groupInherit);
+
+            string[] permissionList = permissions as string[] ?? permissions.ToArray();
+            if (Request.SupportGeneric(permissionList.Length + 1) is false)
+            {
+                return policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject => enforcer.Enforce(Request.Create(new[]{subject}.Concat(permissionList).Cast<object>().ToArray())))
+                    .Except(groupInherit);
+            }
+
+            var users = (permissionList.Length + 1) switch
+            {
+                2 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0]))
+                    .Except(groupInherit),
+                3 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1]))
+                    .Except(groupInherit),
+                4 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2]))
+                    .Except(groupInherit),
+                5 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3]))
+                    .Except(groupInherit),
+                6 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4]))
+                    .Except(groupInherit),
+                7 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5]))
+                    .Except(groupInherit),
+                8 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5], permissionList[6]))
+                    .Except(groupInherit),
+                9 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7]))
+                    .Except(groupInherit),
+                10 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
+                        permissionList[8]))
+                    .Except(groupInherit),
+                11 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
+                        permissionList[8], permissionList[9]))
+                    .Except(groupInherit),
+                12 => policySubjects.Concat(groupSubjects).Distinct()
+                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                        permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
+                        permissionList[8], permissionList[9], permissionList[10]))
+                    .Except(groupInherit),
+                _ => throw new InvalidOperationException("The length of permissions is invalid")
+            };
+            return users;
         }
 
         #endregion
@@ -585,7 +642,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="name"></param>
@@ -597,7 +654,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user">User or role</param>
@@ -609,7 +666,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user"></param>
@@ -622,7 +679,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user"></param>
@@ -635,7 +692,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user"></param>
@@ -648,7 +705,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user"></param>

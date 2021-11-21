@@ -2,28 +2,16 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-#if !NET452
-using Microsoft.Extensions.Options;
-#endif
+using Casbin.Model;
 
 namespace Casbin.Caching
 {
-    public class ReaderWriterEnforceCache : IEnforceCache<ReaderWriterEnforceCacheOptions>
+    public class EnforceCache : IEnforceCache
     {
         private readonly ReaderWriterLockSlim _lockSlim = new();
         private Dictionary<string, bool> _memoryCache = new();
 
-#if !NET452
-        public ReaderWriterEnforceCache(IOptions<ReaderWriterEnforceCacheOptions> options)
-        {
-            if (options?.Value is not null)
-            {
-                CacheOptions = options.Value;
-            }
-        }
-#endif
-
-        public ReaderWriterEnforceCache(ReaderWriterEnforceCacheOptions options)
+        public EnforceCache(EnforceCacheOptions options)
         {
             if (options is not null)
             {
@@ -31,13 +19,20 @@ namespace Casbin.Caching
             }
         }
 
-        public ReaderWriterEnforceCacheOptions CacheOptions { get; } = new();
+        public EnforceCacheOptions CacheOptions { get; } = new();
 
-        public bool TryGetResult(IReadOnlyList<object> requestValues, string key, out bool result)
+        public bool TryGetResult<TRequest>(in TRequest requestValues, out bool result)
+            where TRequest : IRequestValues
         {
             if (requestValues is null)
             {
                 throw new ArgumentNullException(nameof(requestValues));
+            }
+
+            if (Request.TryGetStringKey(requestValues, out string key) is false)
+            {
+                result = false;
+                return false;
             }
 
             if (_lockSlim.TryEnterReadLock(CacheOptions.WaitTimeOut) is false)
@@ -56,17 +51,24 @@ namespace Casbin.Caching
             }
         }
 
-        public Task<bool?> TryGetResultAsync(IReadOnlyList<object> requestValues, string key)
+        public Task<bool?> TryGetResultAsync<TRequest>(in TRequest requestValues)
+            where TRequest : IRequestValues
         {
-            return TryGetResult(requestValues, key, out bool result)
+            return TryGetResult(requestValues, out bool result)
                 ? Task.FromResult((bool?) result) : Task.FromResult((bool?) null);
         }
 
-        public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result)
+        public bool TrySetResult<TRequest>(in TRequest requestValues, bool result)
+            where TRequest : IRequestValues
         {
             if (requestValues is null)
             {
                 throw new ArgumentNullException(nameof(requestValues));
+            }
+
+            if (Request.TryGetStringKey(requestValues, out string key) is false)
+            {
+                return false;
             }
 
             if (_lockSlim.TryEnterWriteLock(CacheOptions.WaitTimeOut) is false)
@@ -85,9 +87,10 @@ namespace Casbin.Caching
             }
         }
 
-        public Task<bool> TrySetResultAsync(IReadOnlyList<object> requestValues, string key, bool result)
+        public Task<bool> TrySetResultAsync<TRequest>(in TRequest requestValues, bool result)
+            where TRequest : IRequestValues
         {
-            return Task.FromResult(TrySetResult(requestValues, key, result));
+            return Task.FromResult(TrySetResult(requestValues, result));
         }
 
         public void Clear()

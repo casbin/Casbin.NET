@@ -56,11 +56,11 @@
 
         public static class PolicyEffect
         {
-            public const string AllowOverride = "some(where (p_eft == allow))";
-            public const string DenyOverride = "!some(where (p_eft == deny))";
-            public const string AllowAndDeny = "some(where (p_eft == allow)) && !some(where (p_eft == deny))";
-            public const string Priority = "priority(p_eft) || deny";
-            public const string PriorityDenyOverride = "priority(p_eft) && !some(where (p_eft == deny))";
+            public const string AllowOverride = "some(where (p.eft == allow))";
+            public const string DenyOverride = "!some(where (p.eft == deny))";
+            public const string AllowAndDeny = "some(where (p.eft == allow)) && !some(where (p.eft == deny))";
+            public const string Priority = "priority(p.eft) || deny";
+            public const string PriorityDenyOverride = "priority(p.eft) && !some(where (p.eft == deny))";
         }
     }
 }

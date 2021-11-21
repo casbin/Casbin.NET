@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using Casbin.Caching;
 using Casbin.Effect;
@@ -13,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Casbin
 {
-    public static class EnforcerExtension
+    public static partial class EnforcerExtension
     {
         #region Set options
         /// <summary>
@@ -117,7 +118,7 @@ namespace Casbin
             {
                 enforcer.EnforceCache?.Clear();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
             }
             return enforcer;
@@ -356,11 +357,11 @@ namespace Casbin
             {
                 enforcer.EnforceCache?.Clear();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
             }
 #if !NET452
-            enforcer.Logger?.LogInformation("Policy Management, Cleared all policy.");
+            enforcer.Logger?.LogInformation("Policy Management, Cleared all policy");
 #endif
         }
         #endregion
@@ -433,482 +434,17 @@ namespace Casbin
 
         #region Enforce extensions
 
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-        public static bool Enforce(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return true;
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-#if !NET452
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult);
-#endif
-                    return cachedResult;
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext();
-            context.HandleOptionAndCached = true;
-            bool result = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-#if !NET452
-            enforcer.LogEnforceResult(context, requestValues, result);
-#endif
-            return result;
-        }
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-        public static async Task<bool> EnforceAsync(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return true;
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-#if !NET452
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult.Value);
-#endif
-                    return cachedResult.Value;
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext();
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-#if !NET452
-            enforcer.LogEnforceResult(context, requestValues, result);
-#endif
-            return result;
-        }
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET452
-        public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
-            EnforceEx(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return (true, Array.Empty<IEnumerable<string>>());
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult);
-                    return (cachedResult, Array.Empty<IEnumerable<string>>());
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext(true);
-            context.HandleOptionAndCached = true;
-            bool result  = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-            enforcer.LogEnforceResult(context, requestValues, result);
-            return (result, context.Explanations);
-        }
-#else
-        public static Tuple<bool, IEnumerable<IEnumerable<string>>>
-            EnforceEx(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return new Tuple<bool, IEnumerable<IEnumerable<string>>>(true, new IEnumerable<string>[]{});
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-                    return new Tuple<bool, IEnumerable<IEnumerable<string>>>(cachedResult, new IEnumerable<string>[]{});
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext(true);
-            context.HandleOptionAndCached = true;
-            bool result  = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
-        }
-#endif
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET452
-        public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
-            EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return (true, Array.Empty<IEnumerable<string>>());
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult.Value);
-                    return (cachedResult.Value, Array.Empty<IEnumerable<string>>());
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext(true);
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-            enforcer.LogEnforceResult(context, requestValues, result);
-            return (result, context.Explanations);
-        }
-#else
-        public static async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
-            EnforceExAsync(this IEnforcer enforcer, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return new Tuple<bool, IEnumerable<IEnumerable<string>>>(true, new IEnumerable<string>[]{});
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-                    return new Tuple<bool, IEnumerable<IEnumerable<string>>>(cachedResult.Value, new IEnumerable<string>[]{});
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContext(true);
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
-        }
-#endif
-
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request.</returns>
-        public static bool EnforceWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return true;
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-#if !NET452
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult);
-#endif
-                    return cachedResult;
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
-            context.HandleOptionAndCached = true;
-            bool result = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-#if !NET452
-            enforcer.LogEnforceResult(context, requestValues, result);
-#endif
-            return result;
-        }
-
-        /// <summary>
-        /// Decides whether a "subject" can access a "object" with the operation
-        /// "action", input parameters are usually: (sub, obj, act).
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request.</returns>
-        public static async Task<bool> EnforceWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return true;
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-#if !NET452
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult.Value);
-#endif
-                    return cachedResult.Value;
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-#if !NET452
-            enforcer.LogEnforceResult(context, requestValues, result);
-#endif
-            return result;
-        }
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET452
-        public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
-            EnforceExWithMatcher(this IEnforcer enforcer, string matcher, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return (true, Array.Empty<IEnumerable<string>>());
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult);
-                    return (cachedResult, Array.Empty<IEnumerable<string>>());
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleOptionAndCached = true;
-            bool result  = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-
-            enforcer.LogEnforceResult(context, requestValues, result);
-            return (result, context.Explanations);
-        }
-#else
-        public static Tuple<bool, IEnumerable<IEnumerable<string>>>
-            EnforceExWithMatcher(this IEnforcer enforcer, string matcher,params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return new Tuple<bool, IEnumerable<IEnumerable<string>>>(true, new IEnumerable<string>[]{});
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                if (enforcer.EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
-                {
-                    return new Tuple<bool, IEnumerable<IEnumerable<string>>>(cachedResult, new IEnumerable<string>[]{});
-                }
-            }
-
-           EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleOptionAndCached = true;
-            bool result  = enforcer.Enforce(context, requestValues);
-
-            if (useCache)
-            {
-                enforcer.EnforceCache.TrySetResult(requestValues, key, result);
-            }
-
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
-        }
-#endif
-
-        /// <summary>
-        /// Explains enforcement by informing matched rules
-        /// </summary>
-        /// <param name="enforcer">The enforce instance</param>
-        /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
-        /// can be class instances if ABAC is used.</param>
-        /// <returns>Whether to allow the request and explains.</returns>
-#if !NET452
-        public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
-            EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher, params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return (true, Array.Empty<IEnumerable<string>>());
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-                    enforcer.LogEnforceCachedResult(requestValues, cachedResult.Value);
-                    return (cachedResult.Value, Array.Empty<IEnumerable<string>>());
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-            enforcer.LogEnforceResult(context, requestValues, result);
-            return (result, context.Explanations);
-        }
-#else
-        public static async Task<Tuple<bool, IEnumerable<IEnumerable<string>>>>
-            EnforceExWithMatcherAsync(this IEnforcer enforcer, string matcher,params object[] requestValues)
-        {
-            if (enforcer.Enabled is false)
-            {
-                return new Tuple<bool, IEnumerable<IEnumerable<string>>>(true, new IEnumerable<string>[]{});
-            }
-
-            bool useCache = enforcer.EnabledCache && requestValues.Any(requestValue => requestValue is not string) is false;
-            string key = string.Empty;
-            if (useCache)
-            {
-                key = string.Join("$$", requestValues);
-                bool? cachedResult = await enforcer.EnforceCache.TryGetResultAsync(requestValues, key);
-                if (cachedResult.HasValue)
-                {
-                    return new Tuple<bool, IEnumerable<IEnumerable<string>>>(cachedResult.Value, new IEnumerable<string>[]{});
-                }
-            }
-
-            EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
-            context.HandleOptionAndCached = true;
-            bool result  = await enforcer.EnforceAsync(context, requestValues);
-
-            if (useCache)
-            {
-                await enforcer.EnforceCache.TrySetResultAsync(requestValues, key, result);
-            }
-
-            return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, context.Explanations);
-        }
-#endif
         #endregion
 
 #if !NET452
-        internal static void LogEnforceCachedResult(this IEnforcer enforcer, IReadOnlyList<object> requestValues, bool finalResult)
+        internal static void LogEnforceCachedResult<TRequest>(this IEnforcer enforcer, TRequest requestValues, bool finalResult)
+            where TRequest : IRequestValues
         {
             enforcer.Logger?.LogEnforceCachedResult(requestValues, finalResult);
         }
 
-        internal static void LogEnforceResult(this IEnforcer enforcer, in EnforceContext context, IReadOnlyList<object> requestValues, bool finalResult)
+        internal static void LogEnforceResult<TRequest>(this IEnforcer enforcer, in EnforceContext context, TRequest requestValues, bool finalResult)
+            where TRequest : IRequestValues
         {
             if (context.Explain)
             {

@@ -163,7 +163,7 @@ namespace Casbin.Model
                 return null;
             }
 
-            var newPolicy = new List<IReadOnlyList<string>>();
+            var newPolicy = new List<IPolicyValues>();
             List<IEnumerable<string>> effectPolicies = null;
 
             Assertion assertion = Sections[section][policyType];

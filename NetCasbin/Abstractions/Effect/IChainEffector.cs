@@ -1,9 +1,9 @@
 ﻿namespace Casbin.Effect
 {
-    public interface IChainEffector
+    public interface IChainEffector<out TChain> where TChain : IEffectChain
     {
-        public IEffectChain CreateChain(string policyEffect);
+        public TChain CreateChain(string policyEffect);
 
-        public IEffectChain CreateChain(string policyEffect, EffectExpressionType effectExpressionType);
+        public TChain CreateChain(string policyEffect, EffectExpressionType effectExpressionType);
     }
 }

@@ -3,7 +3,7 @@ using Casbin.Evaluation;
 
 namespace Casbin.Effect
 {
-    internal struct EffectChain : IEffectChain
+    public struct EffectChain : IEffectChain
     {
         public EffectChain(string effectExpression)
         {

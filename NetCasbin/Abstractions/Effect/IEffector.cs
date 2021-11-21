@@ -13,7 +13,9 @@ namespace Casbin.Effect
         /// <param name="effectExpression">The expression of [policy_effect].</param>
         /// <param name="effects">The effects of all matched rules.</param>
         /// <param name="results">The matcher results of all matched rules.</param>
+        /// <param name="policyCount"></param>
         /// <param name="hitPolicyIndex"></param>
+        /// <param name="policyIndex"></param>
         /// <returns>The final effect.</returns>
         PolicyEffect MergeEffects(string effectExpression, IReadOnlyList<PolicyEffect>  effects, IReadOnlyList<float> results, int policyIndex, int policyCount, out int hitPolicyIndex);
     }

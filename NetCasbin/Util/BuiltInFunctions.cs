@@ -9,9 +9,9 @@ namespace Casbin.Util
 {
     public static class BuiltInFunctions
     {
-        private static readonly Regex s_keyMatch2Regex = new Regex(@":[^/]+");
-        private static readonly Regex s_keyMatch3Regex = new Regex(@"\{[^/]+\}");
-        private static readonly Regex s_keyMatch4Regex = new Regex(@"\{([^/]+)\}");
+        private static readonly Regex s_keyMatch2Regex = new(@":[^/]+");
+        private static readonly Regex s_keyMatch3Regex = new(@"\{[^/]+\}");
+        private static readonly Regex s_keyMatch4Regex = new(@"\{([^/]+)\}");
         private delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
