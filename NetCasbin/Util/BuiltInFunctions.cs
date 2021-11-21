@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Net;
 using System.Text.RegularExpressions;
+using Casbin.Caching;
 using Casbin.Rbac;
 
 namespace Casbin.Util
@@ -189,42 +190,20 @@ namespace Casbin.Util
         /// <summary>
         /// GenerateGFunction is the factory method of the g(_, _) function.
         /// </summary>
-        /// <param name="name">The name of the g(_, _) function, can be "g", "g2", ..</param>
         /// <param name="roleManager">The role manager used by the function.</param>
+        /// <param name="cache">Result cache</param>
         /// <returns>The function.</returns>
-        internal static Delegate GenerateGFunction(string name, IRoleManager roleManager)
+        internal static Delegate GenerateGFunction(IRoleManager roleManager, IGFunctionCache cache)
         {
-            var resultCache = new Dictionary<string, bool>();
-
-            bool GFunction(string subject1, string subject2, string domain = null)
+            bool GFunction(string name1, string name2, string domain = null)
             {
-                bool hasDomain = domain is not null;
-
-                string cacheKey = hasDomain
-                    ? string.Join(";", subject1, subject2, domain)
-                    : string.Join(";", subject1, subject2);
-
-                if (resultCache.TryGetValue(cacheKey, out bool result))
+                if (cache.TryGet(name1, name2, out bool result, domain))
                 {
                     return result;
                 }
 
-                if (roleManager == null)
-                {
-                    result = subject1.Equals(subject2);
-                    resultCache[cacheKey] = result;
-                    return result;
-                }
-
-                if (!string.IsNullOrEmpty(domain))
-                {
-                    result = roleManager.HasLink(subject1, subject2, domain);
-                    resultCache[cacheKey] = result;
-                    return result;
-                }
-
-                result = roleManager.HasLink(subject1, subject2);
-                resultCache[cacheKey] = result;
+                result = roleManager.HasLink(name1, name2, domain);
+                cache.Set(name1, name2, result, domain);
                 return result;
             }
             return (GFunction) GFunction;

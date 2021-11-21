@@ -30,7 +30,9 @@ namespace Casbin.Effect
         /// <param name="effectExpressionType"></param>
         /// <param name="effects"></param>
         /// <param name="matches"></param>
+        /// <param name="policyCount"></param>
         /// <param name="hitPolicyIndex"></param>
+        /// <param name="policyIndex"></param>
         /// <returns></returns>
         private static bool? MergeEffects(EffectExpressionType effectExpressionType, IReadOnlyList<PolicyEffect> effects,
             IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
@@ -69,6 +71,10 @@ namespace Casbin.Effect
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
 
-        public IEffectChain CreateChain(string effectExpression) => new EffectChain(effectExpression);
+        public IEffectChain CreateChain(string effectExpression)
+            => new EffectChain(effectExpression);
+
+        public IEffectChain CreateChain(string effectExpression, EffectExpressionType effectExpressionType)
+            => new EffectChain(effectExpression, effectExpressionType);
     }
 }

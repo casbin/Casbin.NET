@@ -17,6 +17,18 @@ namespace Casbin.Effect
             HitPolicyCount = 0;
         }
 
+        public EffectChain(string effectExpression, EffectExpressionType effectExpressionType)
+        {
+            EffectExpression = effectExpression;
+            EffectExpressionType = effectExpressionType;
+
+            CanChain = true;
+            Result = false;
+
+            HitPolicy = false;
+            HitPolicyCount = 0;
+        }
+
         public bool Result { get; private set; }
 
         public bool HitPolicy { get; private set; }
@@ -25,9 +37,9 @@ namespace Casbin.Effect
 
         public bool CanChain { get; private set; }
 
-        public string EffectExpression { get; private set; }
+        public string EffectExpression { get; }
 
-        public EffectExpressionType EffectExpressionType { get; private set; }
+        public EffectExpressionType EffectExpressionType { get; }
 
         public bool Chain(PolicyEffect effect)
         {

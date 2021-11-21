@@ -3,7 +3,7 @@ using Casbin.Effect;
 
 namespace Casbin;
 
-internal ref struct EnforceSession
+public ref struct EnforceSession
 {
     internal IReadOnlyList<object> RequestValues { get; set; }
     internal IReadOnlyList<string> PolicyValues { get; set; }

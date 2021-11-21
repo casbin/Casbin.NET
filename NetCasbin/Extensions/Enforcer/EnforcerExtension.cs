@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Mime;
 using System.Threading.Tasks;
 using Casbin.Caching;
 using Casbin.Effect;
-using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
@@ -163,7 +161,6 @@ namespace Casbin
         {
             enforcer.RoleManager = roleManager;
             enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
-            enforcer.Model.ExpressionHandler.SetGFunctions();
             return enforcer;
         }
 
@@ -175,11 +172,10 @@ namespace Casbin
         /// <param name="roleManager"></param>
         public static IEnforcer SetRoleManager(this IEnforcer enforcer, string roleType, IRoleManager roleManager)
         {
-            Assertion assertion = enforcer.Model.Sections[PermConstants.Section.RoleSection][roleType];
-            assertion.RoleManager = roleManager;
+            enforcer.Model.SetRoleManager(roleType, roleManager);
             if (enforcer.AutoBuildRoleLinks)
             {
-                assertion.BuildRoleLinks();
+                enforcer.Model.BuildRoleLinks();
             }
             if (enforcer.AutoCleanEnforceCache)
             {
@@ -375,7 +371,6 @@ namespace Casbin
         /// </summary>
         public static void BuildRoleLinks(this IEnforcer enforcer)
         {
-            enforcer.RoleManager.Clear();
             enforcer.Model.BuildRoleLinks();
         }
 
