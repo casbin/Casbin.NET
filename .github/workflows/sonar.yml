@@ -3,11 +3,10 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types: [opened, synchronize, reopened]
   pull_request_target:
     types: [labeled]
 jobs:
+  if: contains(github.event.pull_request.labels.*.name, 'sonarcloud analysis pending')
   build:
     name: Build
     runs-on: windows-latest
@@ -63,3 +62,9 @@ jobs:
           dotnet build -c Release
           dotnet test -c Release --logger trx -r test-results --collect:"XPlat Code Coverage" /p:CollectCoverage=true /p:CoverletOutputFormat=opencover -f net5 -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+      - name: Remove sonarcloud trigger label
+        uses: actions/checkout@v2
+        uses: actions-ecosystem/action-remove-labels@v1
+          with:
+            labels: |
+              sonarcloud analysis pending
