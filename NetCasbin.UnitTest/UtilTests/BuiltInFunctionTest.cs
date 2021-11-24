@@ -23,9 +23,9 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(ipMatchTestData))]
-        public void TestIPMatch(string key1, string key2, bool exceptResult)
+        public void TestIPMatch(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.IPMatch(key1, key2));
         }
 
@@ -44,9 +44,9 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(regexMatchTestData))]
-        public void TestRegexMatch(string key1, string key2, bool exceptResult)
+        public void TestRegexMatch(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.RegexMatch(key1, key2));
         }
 
@@ -65,9 +65,9 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(keyMatchTestData))]
-        public void TestKeyMatch(string key1, string key2, bool exceptResult)
+        public void TestKeyMatch(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.KeyMatch(key1, key2));
         }
 
@@ -105,9 +105,9 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(KeyMatch2TestData))]
-        public void TestKeyMatch2(string key1, string key2, bool exceptResult)
+        public void TestKeyMatch2(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.KeyMatch2(key1, key2));
         }
 
@@ -141,9 +141,9 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(KeyMatch3TestData))]
-        public void TestKeyMatch3(string key1, string key2, bool exceptResult)
+        public void TestKeyMatch3(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.KeyMatch3(key1, key2));
         }
 
@@ -166,10 +166,58 @@ namespace Casbin.UnitTests.UtilTests
 
         [Theory]
         [MemberData(nameof(KeyMatch4TestData))]
-        public void TestKeyMatch4(string key1, string key2, bool exceptResult)
+        public void TestKeyMatch4(string key1, string key2, bool expectedResult)
         {
-            Assert.Equal(exceptResult,
+            Assert.Equal(expectedResult,
                 BuiltInFunctions.KeyMatch4(key1, key2));
+        }
+
+        public static IEnumerable<object[]> GlobMatchTestData = new[]
+        {
+            new object[] {"/foo", "/foo", true},
+            new object[] {"/foo", "/foo*", true},
+            new object[] {"/foo", "/foo/*", false},
+            new object[] {"/foo/bar", "/foo", false},
+            new object[] {"/foo/bar", "/foo*", false},
+            new object[] {"/foo/bar", "/foo/*", true},
+            new object[] {"/foobar", "/foo", false},
+            new object[] {"/foobar", "/foo*", true},
+            new object[] {"/foobar", "/foo/*", false},
+            new object[] {"/foo", "*/foo", true},
+            new object[] {"/foo", "*/foo*", true},
+            new object[] {"/foo", "*/foo/*", false},
+            new object[] {"/foo/bar", "*/foo", false},
+            new object[] {"/foo/bar", "*/foo*", false},
+            new object[] {"/foo/bar", "*/foo/*", true},
+            new object[] {"/foobar", "*/foo", false},
+            new object[] {"/foobar", "*/foo*", true},
+            new object[] {"/foobar", "*/foo/*", false},
+            new object[] {"/prefix/foo", "*/foo", false},
+            new object[] {"/prefix/foo", "*/foo*", false},
+            new object[] {"/prefix/foo", "*/foo/*", false},
+            new object[] {"/prefix/foo/bar", "*/foo", false},
+            new object[] {"/prefix/foo/bar", "*/foo*", false},
+            new object[] {"/prefix/foo/bar", "*/foo/*", false},
+            new object[] {"/prefix/foobar", "*/foo", false},
+            new object[] {"/prefix/foobar", "*/foo*", false},
+            new object[] {"/prefix/foobar", "*/foo/*", false},
+            new object[] {"/prefix/subprefix/foo", "*/foo", false},
+            new object[] {"/prefix/subprefix/foo", "*/foo*", false},
+            new object[] {"/prefix/subprefix/foo", "*/foo/*", false},
+            new object[] {"/prefix/subprefix/foo/bar", "*/foo", false},
+            new object[] {"/prefix/subprefix/foo/bar", "*/foo*", false},
+            new object[] {"/prefix/subprefix/foo/bar", "*/foo/*", false},
+            new object[] {"/prefix/subprefix/foobar", "*/foo", false},
+            new object[] {"/prefix/subprefix/foobar", "*/foo*", false},
+            new object[] {"/prefix/subprefix/foobar", "*/foo/*", false},
+        };
+
+        [Theory]
+        [MemberData(nameof(GlobMatchTestData))]
+        public void TestGlobMatch(string key1, string key2, bool expectedResult)
+        {
+            Assert.Equal(expectedResult,
+                BuiltInFunctions.GlobMatch(key1, key2));
         }
     }
 }

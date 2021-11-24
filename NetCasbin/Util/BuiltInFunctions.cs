@@ -4,6 +4,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using Casbin.Caching;
 using Casbin.Rbac;
+using DotNet.Globbing;
 
 namespace Casbin.Util
 {
@@ -185,6 +186,17 @@ namespace Casbin.Util
         public static bool RegexMatch(string key1, string key2)
         {
             return Regex.Match(key1, key2).Success;
+        }
+
+        /// <summary>
+        /// Determines whether key1 matches the globbing pattern of key2
+        /// </summary>
+        /// <param name="key1">The keyword to match</param>
+        /// <param name="key2">The Globbing pattern</param>
+        /// <returns>Whether key1 matches key2.</returns>
+        public static bool GlobMatch(string key1, string key2)
+        {
+            return Glob.Parse(key2).IsMatch(key1);
         }
 
         /// <summary>

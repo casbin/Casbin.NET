@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Casbin.Util;
 using Casbin.Util.Function;
 
 namespace Casbin.Model
@@ -20,12 +21,13 @@ namespace Casbin.Model
                 FunctionDict = new Dictionary<string, Delegate>()
             };
 
-            map.AddFunction("keyMatch",  new KeyMatchFunc());
+            map.AddFunction("keyMatch", new KeyMatchFunc());
             map.AddFunction("keyMatch2", new KeyMatch2Func());
             map.AddFunction("keyMatch3", new KeyMatch3Func());
             map.AddFunction("keyMatch4", new KeyMatch4Func());
             map.AddFunction("regexMatch", new RegexMatchFunc());
             map.AddFunction("ipMatch", new IPMatchFunc());
+            map.AddFunction("globMatch", BuiltInFunctions.GlobMatch);
             return map;
         }
     }
