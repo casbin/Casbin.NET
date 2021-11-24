@@ -3,8 +3,10 @@ on:
   push:
     branches:
       - master
-  pull_request_target:
+  pull_request:
     types: [opened, synchronize, reopened]
+  pull_request_target:
+    types: [labeled]
 jobs:
   build:
     name: Build
