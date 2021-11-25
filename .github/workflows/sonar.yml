@@ -65,6 +65,6 @@ jobs:
       - name: Remove sonarcloud trigger label
         uses: actions/checkout@v2
         uses: actions-ecosystem/action-remove-labels@v1
-          with:
-            labels: |
-              sonarcloud analysis pending
+        with:
+          labels: |
+            sonarcloud analysis pending
