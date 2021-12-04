@@ -152,9 +152,9 @@ namespace Casbin.UnitTests.Fixtures
         private static IModel LoadModelFromMemory(IModel model, string policy)
         {
             model.ClearPolicy();
-            using (MemoryStream ms = new MemoryStream(Encoding.UTF8.GetBytes(policy)))
+            using (MemoryStream ms = new(Encoding.UTF8.GetBytes(policy)))
             {
-                FileAdapter fileAdapter = new FileAdapter(ms);
+                FileAdapter fileAdapter = new(ms);
                 fileAdapter.LoadPolicy(model);
             }
             model.RefreshPolicyStringSet();

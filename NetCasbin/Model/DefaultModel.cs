@@ -5,6 +5,7 @@ using System.Linq;
 using Casbin.Caching;
 using Casbin.Config;
 using Casbin.Evaluation;
+using Casbin.Rbac;
 using Casbin.Util;
 
 namespace Casbin.Model
@@ -35,7 +36,9 @@ namespace Casbin.Model
 
         public IEnforceViewCache EnforceViewCache { get; } = new EnforceViewCache();
 
-        public IExpressionHandler ExpressionHandler { get; private set; }
+        public IExpressionHandler ExpressionHandler { get; } = new ExpressionHandler();
+
+        public IGFunctionCachePool GFunctionCachePool { get; }  = new GFunctionCachePool();
 
         /// <summary>
         /// Creates a default model.
@@ -44,7 +47,6 @@ namespace Casbin.Model
         public static IModel Create()
         {
             DefaultModel model = new(DefaultPolicyManager.Create());
-            model.ExpressionHandler = new ExpressionHandler(model);
             return model;
         }
 
@@ -146,7 +148,118 @@ namespace Casbin.Model
                 Sections[section].Add(key, assertion);
             }
 
+            if (section.Equals(PermConstants.Section.RoleSection))
+            {
+                ExpressionHandler.SetFunction(key, BuiltInFunctions.GenerateGFunction(
+                    assertion.RoleManager, GFunctionCachePool.GetCache(key)));
+            }
             return true;
+        }
+        
+        public void SetRoleManager(string roleType, IRoleManager roleManager)
+        {
+            Assertion assertion = GetRequiredAssertion(PermConstants.Section.RoleSection, roleType);
+            assertion.RoleManager = roleManager;
+
+            GFunctionCachePool.Clear(roleType);
+            ExpressionHandler.SetFunction(roleType, BuiltInFunctions.GenerateGFunction(
+                assertion.RoleManager, GFunctionCachePool.GetCache(roleType)));
+        }
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="rule"></param>
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<string> rule)
+        {
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetRequiredAssertion(section, roleType);
+            assertion.BuildIncrementalRoleLink(policyOperation, rule);
+
+            GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="rules"></param>
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<IEnumerable<string>> rules)
+        {
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetRequiredAssertion(section, roleType);
+            assertion.BuildIncrementalRoleLinks(policyOperation, rules);
+
+            GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
+        /// Initializes the roles in RBAC.
+        /// </summary>
+        public void BuildRoleLinks(string roleType = null)
+        {
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            if (roleType is not null)
+            {
+                Assertion assertion = GetRequiredAssertion(PermConstants.Section.RoleSection, roleType);
+                assertion.RoleManager.Clear();
+                assertion.BuildRoleLinks();
+                GFunctionCachePool.Clear(roleType);
+                return;
+            }
+
+            foreach (var pair in Sections[PermConstants.Section.RoleSection])
+            {
+                string name = pair.Key;
+                Assertion assertion = pair.Value;
+
+                assertion.RoleManager.Clear();
+                assertion.BuildRoleLinks();
+                GFunctionCachePool.Clear(name);
+            }
+
+            foreach (var pair in Sections[PermConstants.Section.RoleSection])
+            {
+                Assertion assertion = pair.Value;
+                assertion.BuildRoleLinks();
+            }
+        }
+
+        public void RefreshPolicyStringSet()
+        {
+            foreach (Assertion assertion in Sections.Values
+                .SelectMany(pair => pair.Values))
+            {
+                assertion.RefreshPolicyStringSet();
+            }
+        }
+
+        public void SortPoliciesByPriority()
+        {
+            foreach (Assertion assertion in Sections.Values
+                .SelectMany(pair => pair.Values))
+            {
+                assertion.TrySortPoliciesByPriority();
+            }
         }
 
         private void LoadModel(IConfig config)
@@ -185,23 +298,6 @@ namespace Casbin.Model
         }
 
         #region IPolicy
-        public void BuildIncrementalRoleLink(PolicyOperation policyOperation, string section,
-            string policyType, IEnumerable<string> rule)
-            => PolicyManager.Policy.BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
-
-        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation, string section,
-            string policyType, IEnumerable<IEnumerable<string>> rules)
-            => PolicyManager.Policy.BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
-
-        public void BuildRoleLinks()
-            => PolicyManager.Policy.BuildRoleLinks();
-
-        public void RefreshPolicyStringSet()
-            => PolicyManager.Policy.RefreshPolicyStringSet();
-
-        public void SortPoliciesByPriority()
-            => PolicyManager.Policy.SortPoliciesByPriority();
-
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
             => PolicyManager.GetPolicy(section, policyType);
 

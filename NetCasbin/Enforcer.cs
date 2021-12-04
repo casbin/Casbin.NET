@@ -214,7 +214,7 @@ namespace Casbin
                     session.PolicyIndex = policyIndex;
 
                     HandleBeforeExpression(in context, ref session);
-                    session.ExpressionResult = Model.ExpressionHandler.Invoke(session.ExpressionString, requestValues);
+                    session.ExpressionResult = Model.ExpressionHandler.Invoke(in context, ref session);
 
                     if (session.IsChainEffector)
                     {
@@ -234,7 +234,7 @@ namespace Casbin
             else
             {
                 HandleBeforeExpression(in context, ref session);
-                session.ExpressionResult = Model.ExpressionHandler.Invoke(session.ExpressionString, requestValues);
+                session.ExpressionResult = Model.ExpressionHandler.Invoke(in context, ref session);
 
                 if (session.IsChainEffector)
                 {
@@ -248,7 +248,7 @@ namespace Casbin
             return session.EnforceResult;
         }
 
-        private void HandleInitialRequest(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
+        private static void HandleInitialRequest(in EnforceContext context, ref EnforceSession session, IChainEffector chainEffector)
         {
             session.ExpressionString = context.View.Matcher;
             session.PolicyCount = context.View.PolicyAssertion.Policy.Count;
@@ -258,13 +258,10 @@ namespace Casbin
             {
                 throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {session.RequestValues.Count}.");
             }
-
-            Model.ExpressionHandler.SetEnforceContext(in context);
-            Model.ExpressionHandler.SetRequestParameters(session.RequestValues);
-
+            
             if (session.IsChainEffector)
             {
-                session.EffectChain = chainEffector.CreateChain(context.View.Effect);
+                session.EffectChain = chainEffector.CreateChain(context.View.Effect, context.View.EffectExpressionType);
             }
             else
             {
@@ -272,7 +269,7 @@ namespace Casbin
             }
         }
 
-        private void HandleBeforeExpression(in EnforceContext context, ref EnforceSession session)
+        private static void HandleBeforeExpression(in EnforceContext context, ref EnforceSession session)
         {
             IEffectChain effectChain = session.EffectChain;
             int policyTokenCount = context.View.PolicyAssertion.Tokens.Count;
@@ -284,8 +281,7 @@ namespace Casbin
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> tempPolicyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
-                Model.ExpressionHandler.SetPolicyParameters(tempPolicyValues);
+                session.PolicyValues = Enumerable.Repeat(string.Empty, policyTokenCount).ToArray();
                 return;
             }
 
@@ -312,8 +308,6 @@ namespace Casbin
                 }
             }
 
-            Model.ExpressionHandler.SetPolicyParameters(session.PolicyValues);
-
             if (context.View.HasEval is false)
             {
                 return;
@@ -324,7 +318,7 @@ namespace Casbin
         }
 
 
-        private void HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
+        private static void HandleExpressionResult(in EnforceContext context, ref EnforceSession session, IEffector effector)
         {
             PolicyEffect nowEffect;
             if (session.PolicyCount is 0)

@@ -8,7 +8,7 @@ namespace Casbin.Model
         private readonly ReaderWriterPolicyManagerOptions _options;
         private readonly ReaderWriterLockSlim _lockSlim = new();
 
-        public ReaderWriterPolicyManager(IPolicy policy, IAdapter adapter = null)
+        public ReaderWriterPolicyManager(IPolicy policy, IReadOnlyAdapter adapter = null)
             : base(policy, adapter)
         {
             _options = new ReaderWriterPolicyManagerOptions();

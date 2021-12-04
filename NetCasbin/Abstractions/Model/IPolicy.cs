@@ -8,35 +8,6 @@ namespace Casbin.Model
 
         public Assertion GetRequiredAssertion(string section, string type);
 
-        /// <summary>
-        /// Provides incremental build the role inheritance relation.
-        /// </summary>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="policyType"></param>
-        /// <param name="rule"></param>
-        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<string> rule);
-
-        /// <summary>
-        /// Provides incremental build the role inheritance relations.
-        /// </summary>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="policyType"></param>
-        /// <param name="rules"></param>
-        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IEnumerable<string>> rules);
-
-        /// <summary>
-        /// Initializes the roles in RBAC.
-        /// </summary>
-        public void BuildRoleLinks();
-
-        public void RefreshPolicyStringSet();
-
-        public void SortPoliciesByPriority();
-
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType);
 
         public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,

@@ -1,234 +1,392 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Casbin.Caching;
 using Casbin.Model;
 using Casbin.Util;
 using DynamicExpresso;
 
-namespace Casbin.Evaluation
+namespace Casbin.Evaluation;
+
+internal class ExpressionHandler : IExpressionHandler
 {
-    public class ExpressionHandler : IExpressionHandler
+    private readonly IDictionary<Type, IExpressionCache> _cachePool = new Dictionary<Type, IExpressionCache>();
+    private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
+    private readonly Interpreter _interpreter;
+
+    public ExpressionHandler()
     {
-        private readonly IDictionary<string, Lambda> _expressionCache
-            = new Dictionary<string, Lambda>();
+        _interpreter = CreateInterpreter();
+    }
 
-        private readonly IDictionary<string, Func<string, string, string, string, string, string, bool>> _onlyStringFuncCache
-            = new Dictionary<string, Func<string, string, string, string, string, string, bool>>();
+    public IDictionary<string, Parameter> Parameters { get; }
+        = new Dictionary<string, Parameter>();
 
-        private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
-        private readonly IModel _model;
-        private Interpreter _interpreter;
-        private Parameter[] _orderedParameters;
+    public void SetFunction(string name, Delegate function)
+    {
+        ClearCache();
+        _interpreter.SetFunction(name, function);
+    }
 
-        private IReadOnlyDictionary<string, int> _requestTokenDic;
-        private IEnumerable<string> _requestTokens;
-        private IReadOnlyDictionary<string, int> _policyTokenDic;
-        private IEnumerable<string> _policyTokens;
-
-        public ExpressionHandler(IModel model)
+    public bool Invoke(in EnforceContext context, ref EnforceSession session)
+    {
+        if (CheckRequestValuesOnlyString(session.RequestValues))
         {
-            _model = model;
+            return InvokeOnlyString(in context, ref session);
         }
 
-        public IDictionary<string, Parameter> Parameters { get; }
-            = new Dictionary<string, Parameter>();
-
-        public EnforceContext EnforceContext { get; private set; }
-
-        public void SetFunction(string name, Delegate function)
+        Parameter[] parameters = GetParameters(in context, ref session);
+        object expressionResult = GetLambda(in context, ref session).Invoke(parameters);
+        return expressionResult is true;
+    }
+    
+    private Lambda GetLambda(in EnforceContext context, ref EnforceSession session)
+    {
+        string expressionString = session.ExpressionString;
+        Type type = typeof(Lambda);
+        if (_cachePool.TryGetValue(type, out IExpressionCache cache) is false)
         {
-            _expressionCache.Clear();
-            _onlyStringFuncCache.Clear();
-            var interpreter = GetInterpreter();
-            interpreter.SetFunction(name, function);
+            cache = new ExpressionCache();
+            _cachePool[type] = cache;
         }
 
-        public void SetGFunctions()
+        var cacheImpl = (ExpressionCache)cache;
+        if (cacheImpl.TryGet(expressionString, out Lambda func))
         {
-            _expressionCache.Clear();
-            _onlyStringFuncCache.Clear();
-            var interpreter = GetInterpreter();
-            SetGFunctions(interpreter);
+            return func;
         }
 
-        public void SetEnforceContext(in EnforceContext context)
+        Lambda lambda = CreateExpression(in context, ref session);
+        cacheImpl.Set(expressionString, lambda);
+        return lambda;
+    }
+
+    private TFunc GetFunc<TFunc>(in EnforceContext context, ref EnforceSession session) where TFunc : Delegate
+    {
+        string expressionString = session.ExpressionString;
+        Type type = typeof(TFunc);
+        if (_cachePool.TryGetValue(type, out IExpressionCache cache) is false)
         {
-            EnforceContext = context;
-            int parametersCount = 0;
-
-            _requestTokenDic = context.View.RequestAssertion.Tokens;
-            _requestTokens = _requestTokenDic.Keys;
-            _policyTokenDic = context.View.PolicyAssertion.Tokens;
-            _policyTokens = _policyTokenDic.Keys;
-
-            parametersCount += _requestTokenDic.Count;
-            parametersCount += _policyTokenDic.Count;
-            _orderedParameters = new Parameter[parametersCount];
+            cache = new ExpressionCache<TFunc>();
+            _cachePool[type] = cache;
         }
 
-        public void EnsureCreated(string expressionString, IReadOnlyList<object> requestValues)
+        var cacheImpl = (IExpressionCache<TFunc>)cache;
+        if (cacheImpl.TryGet(expressionString, out TFunc func))
         {
-            if (_expressionCache.ContainsKey(expressionString))
-            {
-                return;
-            }
-
-            if (_onlyStringFuncCache.ContainsKey(expressionString))
-            {
-                return;
-            }
-
-            Lambda expression = CreateExpression(expressionString, requestValues);
-
-            if (_requestTokenDic.Count is 3 && _policyTokenDic.Count is 3
-                && CheckRequestValuesOnlyString(requestValues))
-            {
-                _onlyStringFuncCache[expressionString] =
-                    expression.Compile<Func<string, string, string, string, string, string, bool>>();
-                return;
-            }
-
-            _expressionCache[expressionString] = expression;
+            return func;
         }
 
-        public bool Invoke(string expressionString, IReadOnlyList<object> requestValues)
+        Lambda expression = CreateExpression(in context, ref session);
+        func = expression.Compile<TFunc>();
+        cacheImpl.Set(expressionString, func);
+        return func;
+    }
+
+    private void ClearCache()
+    {
+        foreach (IExpressionCache cache in _cachePool.Values)
         {
-            EnsureCreated(expressionString, requestValues);
-
-            if (_expressionCache.TryGetValue(expressionString, out var lambda))
-            {
-                object expressionResult = lambda.Invoke(_orderedParameters);
-                return expressionResult is true;
-            }
-
-            if (_onlyStringFuncCache.TryGetValue(
-                expressionString, out var func) is false)
-            {
-                throw new ArgumentException($"Can not find expression of the expression string {expressionString}");
-            }
-
-            var parameters = _orderedParameters;
-            return func(
-                parameters[0].Value as string,
-                parameters[1].Value as string,
-                parameters[2].Value as string,
-                parameters[3].Value as string,
-                parameters[4].Value as string,
-                parameters[5].Value as  string);
-        }
-
-        public void SetRequestParameters(IReadOnlyList<object> requestValues)
-        {
-            foreach (string token in _requestTokens)
-            {
-                object requestValue = requestValues?[_requestTokenDic[token]];
-
-                if (Parameters.ContainsKey(token))
-                {
-                    if (requestValue is not null)
-                    {
-                        Parameters[token] = new Parameter(token, requestValue);
-                    }
-                }
-                else
-                {
-                    Parameters.Add(token, new Parameter(token, requestValue ?? string.Empty));
-                }
-
-                _orderedParameters[_requestTokenDic[token]] = Parameters[token];
-            }
-        }
-
-        public void SetPolicyParameters(IReadOnlyList<string> policyValues = null)
-        {
-            int requestCount = _requestTokenDic.Count;
-            foreach (string token in _policyTokens)
-            {
-                string policyValue = policyValues?[_policyTokenDic[token]];
-
-                if (Parameters.ContainsKey(token))
-                {
-                    if (policyValue is not null)
-                    {
-                        Parameters[token] = new Parameter(token, policyValue);
-                    }
-                }
-                else
-                {
-                    Parameters.Add(token, new Parameter(token, policyValue ?? string.Empty));
-                }
-
-                _orderedParameters[_policyTokenDic[token] + requestCount] = Parameters[token];
-            }
-        }
-
-        private Lambda CreateExpression(string expressionString, IReadOnlyList<object> requestValues)
-        {
-            Parameter[] parameterArray = GetParameters(requestValues);
-            Interpreter interpreter = GetInterpreter();
-            return interpreter.Parse(expressionString, parameterArray);;
-        }
-
-        private Parameter[] GetParameters(IReadOnlyList<object> requestValues = null)
-        {
-            SetRequestParameters(requestValues);
-            SetPolicyParameters();
-            return _orderedParameters;
-        }
-
-        private Interpreter GetInterpreter()
-        {
-            if (_interpreter is not null)
-            {
-                return _interpreter;
-            }
-
-            _interpreter = CreateInterpreter();
-            return _interpreter;
-        }
-
-
-        private Interpreter CreateInterpreter()
-        {
-            var interpreter = new Interpreter();
-            SetFunctions(interpreter);
-            SetGFunctions(interpreter);
-            return interpreter;
-        }
-
-        private void SetFunctions(Interpreter interpreter)
-        {
-            foreach (KeyValuePair<string, Delegate> functionKeyValue in _functionMap.FunctionDict)
-            {
-                interpreter.SetFunction(functionKeyValue.Key, functionKeyValue.Value);
-            }
-        }
-
-        private void SetGFunctions(Interpreter interpreter)
-        {
-            if (_model.Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            foreach (KeyValuePair<string, Assertion> assertionKeyValue in _model.Sections[PermConstants.Section.RoleSection])
-            {
-                string key = assertionKeyValue.Key;
-                Assertion assertion = assertionKeyValue.Value;
-                interpreter.SetFunction(key, BuiltInFunctions.GenerateGFunction(key, assertion.RoleManager));
-            }
-        }
-
-        private bool CheckRequestValuesOnlyString(IReadOnlyCollection<object> requestValues)
-        {
-            int count = _requestTokenDic.Count;
-
-            if (requestValues.Count != count)
-            {
-                throw new ArgumentException("Request values count should equal to request tokens.");
-            }
-
-            return requestValues.All(value => value is string);
+            cache?.Clear();
         }
     }
+
+    private Lambda CreateExpression(in EnforceContext context, ref EnforceSession session)
+    {
+        Parameter[] parameters = GetParameters(in context, ref session);
+        return _interpreter.Parse(session.ExpressionString, parameters);
+    }
+
+    private static Parameter[] GetParameters(in EnforceContext context, ref EnforceSession session)
+    {
+        IReadOnlyDictionary<string, int> requestTokens = context.View.RequestAssertion.Tokens;
+        IReadOnlyList<string> requestTokenKeys = context.View.RequestTokens;
+        int requestCount = requestTokenKeys.Count;
+
+        IReadOnlyDictionary<string, int> policyTokens = context.View.PolicyAssertion.Tokens;
+        IReadOnlyList<string> policyTokenKeys = context.View.PolicyTokens;
+        int policyCount = policyTokenKeys.Count;
+
+        var parameters = new Parameter[requestCount + policyCount];
+
+        IReadOnlyList<object> requestValues = session.RequestValues;
+        foreach (string token in requestTokenKeys)
+        {
+            int index = requestTokens[token];
+            parameters[index] = new Parameter(token,  requestValues[index]);
+        }
+
+        IReadOnlyList<string> policyValues = session.PolicyValues;
+        foreach (string token in policyTokenKeys)
+        {
+            int index = policyTokens[token];
+            parameters[index + requestCount] = new Parameter(token,  policyValues[index]);
+        }
+        return parameters;
+    }
+
+    private Interpreter CreateInterpreter()
+    {
+        var interpreter = new Interpreter();
+        // TODO: Auto deconstruct can not support .NET 4.5.2
+        foreach (KeyValuePair<string, Delegate> functionKeyValue in _functionMap.FunctionDict)
+        {
+            interpreter.SetFunction(functionKeyValue.Key, functionKeyValue.Value);
+        }
+        return interpreter;
+    }
+
+    private static bool CheckRequestValuesOnlyString(IEnumerable<object> requestValues)
+    {
+        return requestValues.All(value => value is string);
+    }
+
+    #region Generic
+    public bool InvokeOnlyString(in EnforceContext context, ref EnforceSession session)
+    {
+        bool result;
+        int policyTokenCount = context.View.PolicyTokens.Count;
+        int requestTokenCount = context.View.RequestTokens.Count;
+        var requestValues = session.RequestValues;
+        var policyValues = session.PolicyValues; 
+
+        if (requestTokenCount is 0)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<bool>>(in context, ref session)(),
+
+                1 => GetFunc<Func<string, bool>>(in context, ref session)
+                    (policyValues[0]),
+
+                2 => GetFunc<Func<string, string, bool>>(in context, ref session)
+                    (policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, bool>>(in context, ref session)
+                    (policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, bool>>(in context, ref session)
+                    (policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if (requestTokenCount is 1)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, bool>>(in context, ref session)
+                    (requestValues[0] as string),
+
+                1 => GetFunc<Func<string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if(requestTokenCount is 2)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string),
+
+                1 => GetFunc<Func<string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if (requestTokenCount is 3)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string),
+
+                1 => GetFunc<Func<string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if (requestTokenCount is 4)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string),
+
+                1 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if (requestTokenCount is 5)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string),
+
+                1 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[1] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else if (requestTokenCount is 6)
+        {
+            result = policyTokenCount switch
+            {
+                0 => GetFunc<Func<string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string),
+
+                1 => GetFunc<Func<string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0]),
+
+                2 => GetFunc<Func<string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0], policyValues[1]),
+
+                3 => GetFunc<Func<string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0], policyValues[1], policyValues[2]),
+
+                4 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3]),
+
+                5 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4]),
+
+                6 => GetFunc<Func<string, string, string, string, string, string, string, string, string, string, string, string, bool>>(in context, ref session)
+                    (requestValues[0] as string, requestValues[0] as string, requestValues[2] as string, requestValues[3] as string, requestValues[4] as string, requestValues[5] as string,
+                    policyValues[0], policyValues[1], policyValues[2], policyValues[3], policyValues[4], policyValues[5]),
+
+                _ => Invoke(in context, ref session)
+            };
+        }
+        else
+        {
+            result = Invoke(in context, ref session);
+        }
+
+        return result;
+    }
+    #endregion
 }
