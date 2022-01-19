@@ -111,7 +111,7 @@ namespace NetCasbin.Persist.FileAdapter
             return policy;
         }
 
-        private static void LoadPolicyData(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
+        private static void LoadPolicyData(Model.Model model, Action<string, Model.Model> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {
@@ -120,7 +120,7 @@ namespace NetCasbin.Persist.FileAdapter
             }
         }
 
-        private async Task LoadPolicyDataAsync(Model.Model model, Helper.LoadPolicyLineHandler<string, Model.Model> handler, StreamReader inputStream)
+        private async Task LoadPolicyDataAsync(Model.Model model, Action<string, Model.Model> handler, StreamReader inputStream)
         {
             while (!inputStream.EndOfStream)
             {
