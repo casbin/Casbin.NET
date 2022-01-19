@@ -337,27 +337,32 @@ namespace NetCasbin.Model
         internal Assertion GetExistAssertion(string section, string policyType)
         {
             bool exist = TryGetExistAssertion(section, policyType, out var assertion);
-            if (!exist)
+            if (exist is false)
             {
                 throw new ArgumentException($"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
             }
             return assertion;
         }
 
-        private bool TryGetExistAssertion(string section, string policyType, out Assertion returnAssertion)
+        internal bool TryGetExistAssertion(string section, string policyType, out Assertion returnAssertion)
         {
-            if (Model[section].TryGetValue(policyType, out var assertion))
+            if (Model.TryGetValue(section, out var assertions) is false)
             {
-                if (assertion is null)
-                {
-                    returnAssertion = default;
-                    return false;
-                }
-                returnAssertion = assertion;
-                return true;
+                returnAssertion = default;
+                return false;
             }
-            returnAssertion = default;
-            return false;
+            if (assertions.TryGetValue(policyType, out var assertion) is false)
+            {
+                returnAssertion = default;
+                return false;
+            }
+            if (assertion is null)
+            {
+                returnAssertion = default;
+                return false;
+            }
+            returnAssertion = assertion;
+            return true;
         }
     }
 }
