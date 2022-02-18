@@ -1,13 +1,9 @@
-﻿using System.Collections.Generic;
-using Casbin.Effect;
+﻿using Casbin.Effect;
 
 namespace Casbin;
 
 public ref struct EnforceSession
 {
-    internal IReadOnlyList<object> RequestValues { get; set; }
-    internal IReadOnlyList<string> PolicyValues { get; set; }
-
     internal string ExpressionString { get; set; }
 
     internal int PolicyIndex { get; set; }
@@ -20,9 +16,8 @@ public ref struct EnforceSession
     internal bool EnforceResult { get; set; }
 
     internal bool ExpressionResult { get; set; }
-
+    
     internal bool IsChainEffector { get; set; }
-    internal IEffectChain EffectChain { get; set; }
 
     internal int? Priority { get; set; }
 

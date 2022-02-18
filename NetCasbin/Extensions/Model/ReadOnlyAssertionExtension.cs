@@ -6,7 +6,7 @@ namespace Casbin
     {
         public static bool TryGetTokenIndex(this IReadOnlyAssertion assertion, string tokenName, out int index)
         {
-            return assertion.Tokens.TryGetValue($"{assertion.Key}_{tokenName}", out index);
+            return assertion.Tokens.TryGetValue(tokenName, out index);
         }
     }
 }

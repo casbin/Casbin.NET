@@ -1,7 +1,7 @@
 using DynamicExpresso;
 using Xunit;
 
-namespace Casbin.UnitTests
+namespace Casbin.UnitTests.UtilTests
 {
     public class UtilityTest
     {

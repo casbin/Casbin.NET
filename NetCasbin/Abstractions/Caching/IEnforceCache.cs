@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
+using Casbin.Model;
 
 namespace Casbin.Caching
 {
-    public interface IEnforceCache<out TOptions> : IEnforceCache
-    {
-        public TOptions CacheOptions { get; }
-    }
-
     public interface IEnforceCache
     {
-        public bool TryGetResult(IReadOnlyList<object> requestValues, string key, out bool result);
+        public bool TryGetResult<TRequest>(in TRequest requestValues, out bool result)
+            where TRequest : IRequestValues;
 
-        public Task<bool?> TryGetResultAsync(IReadOnlyList<object> requestValues, string key);
+        public Task<bool?> TryGetResultAsync<TRequest>(in TRequest requestValues)
+            where TRequest : IRequestValues;
 
-        public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result);
+        public bool TrySetResult<TRequest>(in TRequest requestValues, bool result)
+            where TRequest : IRequestValues;
 
-        public Task<bool> TrySetResultAsync(IReadOnlyList<object> requestValues, string key, bool result);
+        public Task<bool> TrySetResultAsync<TRequest>(in TRequest requestValues, bool result)
+            where TRequest : IRequestValues;
 
         public void Clear();
 

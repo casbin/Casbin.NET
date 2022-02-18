@@ -1,0 +1,14 @@
+p, data1_admin, data1, read
+p, data2_admin, data2, read
+
+p2, data1_admin, domain1, data1, read
+p2, data2_admin, domain1, data2, read
+
+p3, r3.sub.Age > 18 && r3.sub.Age < 60, data2, read, allow
+p3, r3.sub.Age > 60 && r3.sub.Age < 100, data2, read, deny
+
+g, alice, data1_admin
+g, bob, data2_admin
+
+g2, bob, data1_admin, domain1
+g2, alice, data2_admin, domain1

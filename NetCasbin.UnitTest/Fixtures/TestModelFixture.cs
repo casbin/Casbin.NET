@@ -59,6 +59,9 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _priorityExplicitDenyOverrideModelText = ReadTestFile("priority_explicit_deny_override_model.conf");
         internal readonly string _priorityExplicitDenyOverridePolicyText = ReadTestFile("priority_explicit_deny_override_policy.csv");
 
+        // https://github.com/casbin/Casbin.NET/issues/229
+        internal readonly string _supportCountModelText = ReadTestFile("support_count_model.conf");
+
         public IModel GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
@@ -146,7 +149,7 @@ namespace Casbin.UnitTests.Fixtures
 
         public static string GetTestFile(string fileName)
         {
-            return Path.Combine("examples", fileName);
+            return Path.Combine("Examples", fileName);
         }
 
         private static IModel LoadModelFromMemory(IModel model, string policy)

@@ -6,35 +6,7 @@ namespace Casbin.Util
 {
     internal static class StringUtil
     {
-        private static readonly Regex s_escapeRegex = new(@"(\|| |=|\)|\(|&|<|>|,|\+|-|!|\*|\/)((r|p)[0-9]*)\.");
         private static readonly Regex s_evalRegex = new(@"\beval\((?<rule>[^)]*)\)");
-
-        /// <summary>
-        /// EscapeAssertion escapes the dots in the assertion,
-        /// because the expression evaluation doesn't support such variable names.
-        /// </summary>
-        /// <param name="s">The value of the matcher and effect assertions.</param>
-        /// <returns>The escaped value.</returns>
-        internal static string EscapeAssertion(string str)
-        {
-            if (str.StartsWith(PermConstants.DefaultRequestType, StringComparison.Ordinal)
-                || str.StartsWith(PermConstants.DefaultPolicyType, StringComparison.Ordinal))
-            {
-                str = str.ReplaceFirst('.', '_');
-            }
-            str = s_escapeRegex.Replace(str, m => m.Value.ReplaceFirst('.', '_')) ;
-            return str;
-        }
-
-        private static string ReplaceFirst(this string str, char oldChar, char newChar)
-        {
-            int position = str.IndexOf(oldChar.ToString(), StringComparison.Ordinal);
-            if (position is -1)
-            {
-                return str;
-            }
-            return string.Concat(str.Substring(0, position), newChar, str.Substring(position + 1));
-        }
 
         /// <summary>
         /// Removes the comments starting with # in the text.

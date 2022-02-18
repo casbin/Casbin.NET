@@ -124,7 +124,7 @@ namespace Casbin.Model
                     var tokenDic = new Dictionary<string, int>();
                     for (int i = 0; i < tokens.Length; i++)
                     {
-                        tokenDic.Add($"{key}_{tokens[i]}", i);
+                        tokenDic.Add(tokens[i], i);
                     }
                     assertion.Tokens = tokenDic;
                 }
@@ -132,7 +132,7 @@ namespace Casbin.Model
             else
             {
                 // ReSharper disable once InvokeAsExtensionMethod
-                assertion.Value = StringUtil.RemoveComments(StringUtil.EscapeAssertion(assertion.Value));
+                assertion.Value = StringUtil.RemoveComments(assertion.Value);
             }
 
             if (Sections.ContainsKey(section) is false)

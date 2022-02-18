@@ -19,27 +19,42 @@ namespace Casbin.UnitTests.Util
             return values.ToList();
         }
 
-        internal static void TestEnforce(IEnforcer e, object sub, object obj, string act, bool res)
+        internal static void TestEnforceWithoutUsers<T1, T2>(IEnforcer e, T1 obj, T2 act, bool res)
+        {
+            Assert.Equal(res, e.Enforce(obj, act));
+        }
+
+        internal static async Task TestEnforceWithoutUsersAsync<T1, T2>(IEnforcer e, T1 obj, T2 act, bool res)
+        {
+            Assert.Equal(res, await e.EnforceAsync(obj, act));
+        }
+
+        internal static void TestEnforce<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, bool res)
         {
             Assert.Equal(res, e.Enforce(sub, obj, act));
         }
 
-        internal static async Task TestEnforceAsync(IEnforcer e, object sub, object obj, string act, bool res)
+        internal static async Task TestEnforceAsync<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, bool res)
         {
             Assert.Equal(res, await e.EnforceAsync(sub, obj, act));
         }
 
-        internal static void TestEnforceWithMatcher(this IEnforcer e, string matcher, object sub, object obj, string act, bool res)
+        internal static void TestDomainEnforce<T1, T2, T3, T4>(IEnforcer e, T1 sub, T2 dom, T3 obj, T4 act, bool res)
+        {
+            Assert.Equal(res, e.Enforce(sub, dom, obj, act));
+        }
+
+        internal static void TestEnforceWithMatcher<T1, T2, T3>(this IEnforcer e, string matcher, T1 sub, T2 obj, T3 act, bool res)
         {
             Assert.Equal(res, e.EnforceWithMatcher(matcher, sub, obj, act));
         }
 
-        internal static async Task TestEnforceWithMatcherAsync(this IEnforcer e, string matcher, object sub, object obj, string act, bool res)
+        internal static async Task TestEnforceWithMatcherAsync<T1, T2, T3>(this IEnforcer e, string matcher, T1 sub, T2 obj, T3 act, bool res)
         {
             Assert.Equal(res, await e.EnforceWithMatcherAsync(matcher, sub, obj, act));
         }
 
-        internal static void TestEnforceEx(IEnforcer e, object sub, object obj, string act, List<string> res)
+        internal static void TestEnforceEx<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, List<string> res)
         {
             var myRes = e.EnforceEx(sub, obj, act).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
@@ -49,7 +64,7 @@ namespace Casbin.UnitTests.Util
             }
         }
 
-        internal static async Task TestEnforceExAsync(IEnforcer e, object sub, object obj, string act, List<string> res)
+        internal static async Task TestEnforceExAsync<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, List<string> res)
         {
             var myRes = (await e.EnforceExAsync(sub, obj, act)).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
@@ -59,7 +74,7 @@ namespace Casbin.UnitTests.Util
             }
         }
 
-        internal static void TestEnforceExWithMatcher(this IEnforcer e, string matcher, object sub, object obj, string act, List<string> res)
+        internal static void TestEnforceExWithMatcher<T1, T2, T3>(this IEnforcer e, string matcher, T1 sub, T2 obj, T3 act, List<string> res)
         {
             var myRes = e.EnforceExWithMatcher(matcher, sub, obj, act).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
@@ -69,7 +84,7 @@ namespace Casbin.UnitTests.Util
             }
         }
 
-        internal static async Task TestEnforceExWithMatcherAsync(this IEnforcer e, string matcher, object sub, object obj, string act, List<string> res)
+        internal static async Task TestEnforceExWithMatcherAsync<T1, T2, T3>(this IEnforcer e, string matcher, T1 sub, T2 obj, T3 act, List<string> res)
         {
             var myRes = (await e.EnforceExWithMatcherAsync(matcher, sub, obj, act)).Item2.ToList();
             string message = "Key: " + myRes + ", supposed to be " + res;
@@ -77,21 +92,6 @@ namespace Casbin.UnitTests.Util
             {
                 Assert.True(Utility.SetEquals(res, myRes[0].ToList()), message);
             }
-        }
-
-        internal static void TestEnforceWithoutUsers(IEnforcer e, string obj, string act, bool res)
-        {
-            Assert.Equal(res, e.Enforce(obj, act));
-        }
-
-        internal static async Task TestEnforceWithoutUsersAsync(IEnforcer e, string obj, string act, bool res)
-        {
-            Assert.Equal(res, await e.EnforceAsync(obj, act));
-        }
-
-        internal static void TestDomainEnforce(IEnforcer e, string sub, string dom, string obj, string act, bool res)
-        {
-            Assert.Equal(res, e.Enforce(sub, dom, obj, act));
         }
 
         internal static void TestGetPolicy(IEnforcer e, List<List<string>> res)

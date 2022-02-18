@@ -1,0 +1,1 @@
+p, domain1, r.sub.Role == "admin", r.obj.Name == "admin_panel", view
