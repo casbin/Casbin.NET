@@ -6,9 +6,9 @@ namespace Casbin
 {
     public static class ManagementEnforcerExtension
     {
-        #region "p" (Policy) Management
+        #region "p" (Store) Management
 
-        #region Get Policy Items (sub, obj, act)
+        #region Get Store Items (sub, obj, act)
 
         /// <summary>
         /// Gets the list of subjects that show up in the current policy.
@@ -98,7 +98,7 @@ namespace Casbin
 
         #endregion
 
-        #region Get Policy
+        #region Get Store
 
         /// <summary>
         /// Gets all the authorization rules in the policy.
@@ -145,9 +145,9 @@ namespace Casbin
             return enforcer.InternalGetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex, fieldValues);
         }
 
-        #endregion End of "p" (Policy) Management
+        #endregion End of "p" (Store) Management
 
-        #region Has Policy
+        #region Has Store
 
         /// <summary>
         /// Determines whether an authorization rule exists.
@@ -197,7 +197,7 @@ namespace Casbin
 
         #endregion
 
-        #region Add Policy
+        #region Add Store
 
         /// <summary>
         /// Adds an authorization rule to the current policy. If the rule
@@ -363,7 +363,7 @@ namespace Casbin
 
         #endregion
 
-        #region Remove Policy
+        #region Remove Store
 
         /// <summary>
         /// Removes an authorization rule from the current policy.
@@ -556,11 +556,11 @@ namespace Casbin
 
         #endregion
 
-        #endregion // End of "p" (Policy) Management
+        #endregion // End of "p" (Store) Management
 
-        #region "g" (Grouping/Role Policy) Management
+        #region "g" (Grouping/Role Store) Management
 
-        #region Get Grouping/Role Policy Items (role)
+        #region Get Grouping/Role Store Items (role)
 
         /// <summary>
         /// Gets the list of roles that show up in the current policy.
@@ -593,7 +593,7 @@ namespace Casbin
 
         #endregion
 
-        #region Has Grouping/Role Policy
+        #region Has Grouping/Role Store
 
         /// <summary>
         /// Determines whether a role inheritance rule exists.
@@ -645,7 +645,7 @@ namespace Casbin
 
         #endregion
 
-        #region Get Grouping/Role Policy
+        #region Get Grouping/Role Store
 
         /// <summary>
         /// Gets all the role inheritance rules in the policy.
@@ -694,7 +694,7 @@ namespace Casbin
 
         #endregion
 
-        #region Add Grouping/Role Policy
+        #region Add Grouping/Role Store
         /// <summary>
         /// Adds a role inheritance rule to the current policy. If the
         /// rule already exists, the function returns false and the rule will not be
@@ -859,7 +859,7 @@ namespace Casbin
 
         #endregion
 
-        #region Remove Grouping/Role Policy
+        #region Remove Grouping/Role Store
 
         /// <summary>
         /// Removes a role inheritance rule from the current policy.
@@ -1060,7 +1060,7 @@ namespace Casbin
 
         #endregion
 
-        #endregion // End of "g" (Grouping/Role Policy) Management
+        #endregion // End of "g" (Grouping/Role Store) Management
 
         /// <summary>
         /// Adds a customized function.

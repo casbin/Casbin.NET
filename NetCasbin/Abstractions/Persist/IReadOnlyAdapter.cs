@@ -5,8 +5,8 @@ namespace Casbin.Persist
 {
     public interface IReadOnlyAdapter
     {
-        void LoadPolicy(IModel model);
+        void LoadPolicy(IPolicyStore model);
 
-        Task LoadPolicyAsync(IModel model);
+        Task LoadPolicyAsync(IPolicyStore model);
     }
 }

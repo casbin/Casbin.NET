@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Persist;
@@ -8,13 +9,15 @@ namespace Casbin.Model
 {
     public class DefaultPolicyManager : IPolicyManager
     {
-        private ISingleAdapter _singleAdapter;
-        private IBatchAdapter _batchAdapter;
-        private IEpochAdapter _epochAdapter;
+        protected ISingleAdapter SingleAdapter;
+        protected IBatchAdapter BatchAdapter;
+        protected IEpochAdapter EpochAdapter;
+        protected IFilteredAdapter FilteredAdapter;
 
-        public DefaultPolicyManager(IPolicy policy, IReadOnlyAdapter adapter = null)
+        // ReSharper disable once MemberCanBeProtected.Global
+        public DefaultPolicyManager(IPolicyStore policyStore, IReadOnlyAdapter adapter = null)
         {
-            Policy = policy;
+            PolicyStore = policyStore;
             if (adapter is not null)
             {
                 Adapter = adapter;
@@ -23,23 +26,25 @@ namespace Casbin.Model
 
         public virtual bool IsSynchronized => false;
         public bool HasAdapter => Adapter is null;
+        public Dictionary<string, Dictionary<string, Assertion>> Sections => PolicyStore.Sections;
         public bool AutoSave { get; set; }
+        public IPolicyStore PolicyStore { get; set; }
+
         public IReadOnlyAdapter Adapter
         {
-            get => _epochAdapter;
+            get => EpochAdapter;
             set
             {
-                _singleAdapter = value as ISingleAdapter;
-                _batchAdapter = value as IBatchAdapter;
-                _epochAdapter = value as IEpochAdapter;
+                SingleAdapter = value as ISingleAdapter;
+                BatchAdapter = value as IBatchAdapter;
+                EpochAdapter = value as IEpochAdapter;
+                FilteredAdapter = value as IFilteredAdapter;
             }
         }
 
-        public IPolicy Policy { get; set; }
-
         public static IPolicyManager Create()
         {
-            return new DefaultPolicyManager(DefaultPolicy.Create());
+            return new DefaultPolicyManager(DefaultPolicyStore.Create());
         }
 
         public virtual void StartRead()
@@ -68,6 +73,171 @@ namespace Casbin.Model
             return true;
         }
 
+        public bool LoadPolicy()
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (EpochAdapter is not null)
+                {
+                    EpochAdapter.LoadPolicy(PolicyStore);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public bool LoadFilteredPolicy(Filter filter)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (FilteredAdapter is not null)
+                {
+                    FilteredAdapter.LoadFilteredPolicy(PolicyStore, filter);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public bool SavePolicy()
+        {
+            if (TryStartRead() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (EpochAdapter is not null)
+                {
+                    EpochAdapter.SavePolicy(PolicyStore);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndRead();
+            }
+        }
+
+        public virtual async Task<bool> LoadPolicyAsync()
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (EpochAdapter is not null)
+                {
+                    await EpochAdapter.LoadPolicyAsync(PolicyStore);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndWrite();
+            };
+        }
+        public virtual async Task<bool> LoadFilteredPolicyAsync(Filter filter)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (FilteredAdapter is not null)
+                {
+                    await FilteredAdapter.LoadFilteredPolicyAsync(PolicyStore, filter);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public virtual async Task<bool> SavePolicyAsync()
+        {
+            if (TryStartRead() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (EpochAdapter is not null)
+                {
+                    await EpochAdapter.SavePolicyAsync(PolicyStore);
+                    return true;
+                }
+                return false;
+            }
+            finally
+            {
+                EndRead();
+            }
+        }
+
+        public Assertion GetRequiredAssertion(string section, string type)
+        {
+            if (TryStartRead() is false)
+            {
+                return null;
+            }
+
+            try
+            {
+                return PolicyStore.GetRequiredAssertion(section, type);
+            }
+            finally
+            {
+                EndRead();
+            }
+        }
+
+        public bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
+        {
+            if (TryStartRead() is false)
+            {
+                returnAssertion = null;
+                return false;
+            }
+
+            try
+            {
+                return PolicyStore.TryGetAssertion(section, policyType, out returnAssertion);
+            }
+            finally
+            {
+                EndRead();
+            }
+        }
 
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
         {
@@ -78,7 +248,7 @@ namespace Casbin.Model
 
             try
             {
-                return Policy.GetPolicy(section, policyType);
+                return PolicyStore.GetPolicy(section, policyType);
             }
             finally
             {
@@ -95,7 +265,7 @@ namespace Casbin.Model
 
             try
             {
-                return Policy.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                return PolicyStore.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
             finally
             {
@@ -112,7 +282,7 @@ namespace Casbin.Model
 
             try
             {
-                return Policy.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
+                return PolicyStore.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
             }
             finally
             {
@@ -129,7 +299,7 @@ namespace Casbin.Model
 
             try
             {
-                return Policy.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
+                return PolicyStore.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
             }
             finally
             {
@@ -142,7 +312,7 @@ namespace Casbin.Model
             StartRead();
             try
             {
-                return Policy.HasPolicy(section, policyType, rule);
+                return PolicyStore.HasPolicy(section, policyType, rule);
             }
             finally
             {
@@ -155,7 +325,7 @@ namespace Casbin.Model
             StartRead();
             try
             {
-                return Policy.HasPolicies(section, policyType, rules);
+                return PolicyStore.HasPolicies(section, policyType, rules);
             }
             finally
             {
@@ -173,15 +343,12 @@ namespace Casbin.Model
             try
             {
                 IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.AddPolicy(section, policyType, ruleArray);
+                    return PolicyStore.AddPolicy(section, policyType, ruleArray);
                 }
-
-                _singleAdapter?.AddPolicy(section, policyType, ruleArray);
-
-                return Policy.AddPolicy(section, policyType, ruleArray);
+                SingleAdapter?.AddPolicy(section, policyType, ruleArray);
+                return PolicyStore.AddPolicy(section, policyType, ruleArray);
             }
             finally
             {
@@ -199,15 +366,12 @@ namespace Casbin.Model
             try
             {
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.AddPolicies(section, policyType, rulesArray);
+                    return PolicyStore.AddPolicies(section, policyType, rulesArray);
                 }
-
-                _batchAdapter?.AddPolicies(section, policyType, rulesArray);
-
-                return Policy.AddPolicies(section, policyType, rulesArray);
+                BatchAdapter?.AddPolicies(section, policyType, rulesArray);
+                return PolicyStore.AddPolicies(section, policyType, rulesArray);
             }
             finally
             {
@@ -225,15 +389,12 @@ namespace Casbin.Model
             try
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemovePolicy(section, policyType, ruleArray);
+                    return PolicyStore.RemovePolicy(section, policyType, ruleArray);
                 }
-
-                _singleAdapter?.RemovePolicy(section, policyType, ruleArray);
-
-                return Policy.RemovePolicy(section, policyType, ruleArray);
+                SingleAdapter?.RemovePolicy(section, policyType, ruleArray);
+                return PolicyStore.RemovePolicy(section, policyType, ruleArray);
             }
             finally
             {
@@ -251,15 +412,12 @@ namespace Casbin.Model
             try
             {
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemovePolicies(section, policyType, rulesArray);
+                    return PolicyStore.RemovePolicies(section, policyType, rulesArray);
                 }
-
-                _batchAdapter?.RemovePolicies(section, policyType, rulesArray);
-
-                return Policy.RemovePolicies(section, policyType, rulesArray);
+                BatchAdapter?.RemovePolicies(section, policyType, rulesArray);
+                return PolicyStore.RemovePolicies(section, policyType, rulesArray);
             }
             finally
             {
@@ -278,12 +436,10 @@ namespace Casbin.Model
             {
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                    return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 }
-
-                _batchAdapter?.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-
-                return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                BatchAdapter?.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
             finally
             {
@@ -291,7 +447,7 @@ namespace Casbin.Model
             }
         }
 
-        public async Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        public virtual async Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule)
         {
             if (TryStartWrite() is false)
             {
@@ -301,18 +457,17 @@ namespace Casbin.Model
             try
             {
                 IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.AddPolicy(section, policyType, ruleArray);
+                    return PolicyStore.AddPolicy(section, policyType, ruleArray);
                 }
 
-                if (_singleAdapter is not null)
+                if (SingleAdapter is not null)
                 {
-                    await _singleAdapter.AddPolicyAsync(section, policyType, ruleArray);
+                    await SingleAdapter.AddPolicyAsync(section, policyType, ruleArray);
                 }
 
-                return Policy.AddPolicy(section, policyType, ruleArray);
+                return PolicyStore.AddPolicy(section, policyType, ruleArray);
             }
             finally
             {
@@ -320,7 +475,7 @@ namespace Casbin.Model
             }
         }
 
-        public async Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public virtual async Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -330,18 +485,17 @@ namespace Casbin.Model
             try
             {
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.AddPolicies(section, policyType, rulesArray);
+                    return PolicyStore.AddPolicies(section, policyType, rulesArray);
                 }
 
-                if (_batchAdapter is not null)
+                if (BatchAdapter is not null)
                 {
-                    await _batchAdapter.AddPoliciesAsync(section, policyType, rulesArray);
+                    await BatchAdapter.AddPoliciesAsync(section, policyType, rulesArray);
                 }
 
-                return Policy.AddPolicies(section, policyType, rulesArray);
+                return PolicyStore.AddPolicies(section, policyType, rulesArray);
             }
             finally
             {
@@ -349,7 +503,7 @@ namespace Casbin.Model
             }
         }
 
-        public async Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        public virtual async Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
         {
             if (TryStartWrite() is false)
             {
@@ -359,18 +513,17 @@ namespace Casbin.Model
             try
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemovePolicy(section, policyType, ruleArray);
+                    return PolicyStore.RemovePolicy(section, policyType, ruleArray);
                 }
 
-                if (_singleAdapter is not null)
+                if (SingleAdapter is not null)
                 {
-                    await _singleAdapter.RemovePolicyAsync(section, policyType, ruleArray);
+                    await SingleAdapter.RemovePolicyAsync(section, policyType, ruleArray);
                 }
 
-                return Policy.RemovePolicy(section, policyType, ruleArray);
+                return PolicyStore.RemovePolicy(section, policyType, ruleArray);
             }
             finally
             {
@@ -378,7 +531,7 @@ namespace Casbin.Model
             }
         }
 
-        public async Task<bool> RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public virtual async Task<bool> RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -388,18 +541,17 @@ namespace Casbin.Model
             try
             {
                 var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
-
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemovePolicies(section, policyType, rulesArray);
+                    return PolicyStore.RemovePolicies(section, policyType, rulesArray);
                 }
 
-                if (_batchAdapter is not null)
+                if (BatchAdapter is not null)
                 {
-                    await _batchAdapter.RemovePoliciesAsync(section, policyType, rulesArray);
+                    await BatchAdapter.RemovePoliciesAsync(section, policyType, rulesArray);
                 }
 
-                return Policy.RemovePolicies(section, policyType, rulesArray);
+                return PolicyStore.RemovePolicies(section, policyType, rulesArray);
             }
             finally
             {
@@ -407,7 +559,7 @@ namespace Casbin.Model
             }
         }
 
-        public async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public virtual async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues)
         {
             if (TryStartWrite() is false)
             {
@@ -418,15 +570,15 @@ namespace Casbin.Model
             {
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                    return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 }
 
-                if (_batchAdapter is not null)
+                if (BatchAdapter is not null)
                 {
-                    await _batchAdapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
+                    await BatchAdapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
                 }
 
-                return Policy.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
             finally
             {
@@ -439,16 +591,12 @@ namespace Casbin.Model
             StartRead();
             try
             {
-                Policy.ClearPolicy();
+                PolicyStore.ClearPolicy();
             }
             finally
             {
                 EndRead();
             }
         }
-
-        public bool LoadPolicy() => throw new NotImplementedException();
-        public bool SavePolicy() => throw new NotImplementedException();
-        public bool SavePolicyAsync() => throw new NotImplementedException();
     }
 }

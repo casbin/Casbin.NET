@@ -1,4 +1,7 @@
-﻿using System.Threading;
+﻿using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using Casbin.Persist;
 
 namespace Casbin.Model
@@ -8,21 +11,23 @@ namespace Casbin.Model
         private readonly ReaderWriterPolicyManagerOptions _options;
         private readonly ReaderWriterLockSlim _lockSlim = new();
 
-        public ReaderWriterPolicyManager(IPolicy policy, IReadOnlyAdapter adapter = null)
-            : base(policy, adapter)
+        // ReSharper disable once MemberCanBePrivate.Global
+        public ReaderWriterPolicyManager(IPolicyStore policyStore, IReadOnlyAdapter adapter = null)
+            : base(policyStore, adapter)
         {
             _options = new ReaderWriterPolicyManagerOptions();
         }
 
-        public ReaderWriterPolicyManager(IPolicy policy, ReaderWriterPolicyManagerOptions options, IAdapter adapter = null)
-            : base(policy, adapter)
+        public ReaderWriterPolicyManager(IPolicyStore policyStore, ReaderWriterPolicyManagerOptions options,
+            IAdapter adapter = null)
+            : base(policyStore, adapter)
         {
             _options = options;
         }
 
         public static new IPolicyManager Create()
         {
-            return new ReaderWriterPolicyManager(DefaultPolicy.Create());
+            return new ReaderWriterPolicyManager(DefaultPolicyStore.Create());
         }
 
         public override bool IsSynchronized => true;
@@ -55,6 +60,243 @@ namespace Casbin.Model
         public override bool TryStartWrite()
         {
             return _lockSlim.TryEnterWriteLock(_options.WaitTimeOut);
+        }
+
+        public override Task<bool> LoadPolicyAsync()
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    if (EpochAdapter is not null)
+                    {
+                        EpochAdapter.LoadPolicyAsync(PolicyStore).Wait();
+                        return Task.FromResult(true);
+                    }
+
+                    return Task.FromResult(false);
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<bool> LoadFilteredPolicyAsync(Filter filter)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    if (FilteredAdapter is not null)
+                    {
+                        FilteredAdapter.LoadFilteredPolicyAsync(PolicyStore, filter).Wait();
+                        return Task.FromResult(true);
+                    }
+
+                    return Task.FromResult(false);
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<bool> SavePolicyAsync()
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartRead() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    if (EpochAdapter is not null)
+                    {
+                        EpochAdapter.SavePolicyAsync(PolicyStore).Wait();
+                        return Task.FromResult(true);
+                    }
+
+                    return Task.FromResult(false);
+                }
+                finally
+                {
+                    EndRead();
+                }
+            });
+        }
+
+        public override Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
+                    if (HasAdapter is false || AutoSave is false)
+                    {
+                        return Task.FromResult(PolicyStore.AddPolicy(section, policyType, ruleArray));
+                    }
+
+                    if (SingleAdapter is not null)
+                    {
+                        SingleAdapter.AddPolicyAsync(section, policyType, ruleArray).Wait();
+                    }
+
+                    return Task.FromResult(PolicyStore.AddPolicy(section, policyType, ruleArray));
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<bool> AddPoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
+                    if (HasAdapter is false || AutoSave is false)
+                    {
+                        return Task.FromResult(PolicyStore.AddPolicies(section, policyType, rulesArray));
+                    }
+
+                    if (BatchAdapter is not null)
+                    {
+                        BatchAdapter.AddPoliciesAsync(section, policyType, rulesArray).Wait();
+                    }
+
+                    return Task.FromResult(PolicyStore.AddPolicies(section, policyType, rulesArray));
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    string[] ruleArray = rule as string[] ?? rule.ToArray();
+                    if (HasAdapter is false || AutoSave is false)
+                    {
+                        return Task.FromResult(PolicyStore.RemovePolicy(section, policyType, ruleArray));
+                    }
+
+                    if (SingleAdapter is not null)
+                    {
+                        SingleAdapter.RemovePolicyAsync(section, policyType, ruleArray).Wait();
+                    }
+
+                    return Task.FromResult(PolicyStore.RemovePolicy(section, policyType, ruleArray));
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<bool> RemovePoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult(false);
+                }
+
+                try
+                {
+                    var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
+                    if (HasAdapter is false || AutoSave is false)
+                    {
+                        return Task.FromResult(PolicyStore.RemovePolicies(section, policyType, rulesArray));
+                    }
+
+                    if (BatchAdapter is not null)
+                    {
+                        BatchAdapter.RemovePoliciesAsync(section, policyType, rulesArray).Wait();
+                    }
+
+                    return Task.FromResult(PolicyStore.RemovePolicies(section, policyType, rulesArray));
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
+        }
+
+        public override Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section,
+            string policyType, int fieldIndex, params string[] fieldValues)
+        {
+            return Task.Run(() =>
+            {
+                if (TryStartWrite() is false)
+                {
+                    return Task.FromResult<IEnumerable<IEnumerable<string>>>(null);
+                }
+
+                try
+                {
+                    if (HasAdapter is false || AutoSave is false)
+                    {
+                        return Task.FromResult(PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex,
+                            fieldValues));
+                    }
+
+                    if (BatchAdapter is not null)
+                    {
+                        BatchAdapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues).Wait();
+                    }
+
+                    return Task.FromResult(PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex,
+                        fieldValues));
+                }
+                finally
+                {
+                    EndWrite();
+                }
+            });
         }
     }
 }

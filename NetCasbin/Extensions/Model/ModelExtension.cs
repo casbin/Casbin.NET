@@ -1,7 +1,7 @@
 ﻿using Casbin.Model;
 using Casbin.Rbac;
 
-namespace Casbin
+namespace Casbin.Model
 {
     public static class ModelExtension
     {
@@ -15,7 +15,7 @@ namespace Casbin
         {
             model.SetPolicyManager(policyManager
                     .SetAdapter(model.PolicyManager.Adapter)
-                    .SetPolicy(model.PolicyManager.Policy));
+                    .SetPolicy(model.PolicyManager.PolicyStore));
             return model;
         }
 
@@ -26,7 +26,7 @@ namespace Casbin
 
         internal static IReadOnlyAssertion GetRequiredAssertion(this IModel model, string section, string type)
         {
-            return model.PolicyManager.Policy.GetRequiredAssertion(section, type);
+            return model.PolicyManager.PolicyStore.GetRequiredAssertion(section, type);
         }
     }
 }

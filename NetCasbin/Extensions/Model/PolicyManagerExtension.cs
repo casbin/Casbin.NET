@@ -10,9 +10,9 @@ namespace Casbin.Model
             return policyManager;
         }
 
-        internal static IPolicyManager SetPolicy(this IPolicyManager policyManager, IPolicy policy)
+        internal static IPolicyManager SetPolicy(this IPolicyManager policyManager, IPolicyStore policyStore)
         {
-            policyManager.Policy = policy;
+            policyManager.PolicyStore = policyStore;
             return policyManager;
         }
     }

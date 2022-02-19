@@ -5,7 +5,7 @@ using Casbin.Rbac;
 
 namespace Casbin.Model
 {
-    public interface IModel : IPolicy
+    public interface IModel : IPolicyStore
     {
         public bool IsSynchronized { get; }
 

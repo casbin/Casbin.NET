@@ -518,7 +518,7 @@ namespace Casbin.UnitTests.ModelTests
         }
         #endregion
 
-        #region Policy management
+        #region Store management
         [Fact]
         public void TestReloadPolicy()
         {
@@ -677,7 +677,7 @@ namespace Casbin.UnitTests.ModelTests
         [Fact]
         public async Task TestEnableAutoSaveAsync()
         {
-            var e = SyncedEnforcer.Create("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
+            var e = new Enforcer("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
 
             e.EnableAutoSave(false);
             // Because AutoSave is disabled, the policy change only affects the policy in Casbin enforcer,

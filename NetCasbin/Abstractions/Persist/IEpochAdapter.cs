@@ -5,8 +5,8 @@ namespace Casbin.Persist
 {
     public interface IEpochAdapter : IReadOnlyAdapter
     {
-        void SavePolicy(IModel model);
+        void SavePolicy(IPolicyStore model);
 
-        Task SavePolicyAsync(IModel model);
+        Task SavePolicyAsync(IPolicyStore model);
     }
 }

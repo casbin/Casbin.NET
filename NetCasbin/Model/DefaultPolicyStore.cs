@@ -8,7 +8,7 @@ using Casbin.Util;
 
 namespace Casbin.Model
 {
-    public class DefaultPolicy : IPolicy
+    public class DefaultPolicyStore : IPolicyStore
     {
         public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
@@ -16,14 +16,14 @@ namespace Casbin.Model
         internal ILogger Logger { get; set; }
 #endif
 
-        private DefaultPolicy()
+        private DefaultPolicyStore()
         {
             Sections = new Dictionary<string, Dictionary<string, Assertion>>();
         }
 
-        internal static IPolicy Create()
+        internal static IPolicyStore Create()
         {
-            return new DefaultPolicy();
+            return new DefaultPolicyStore();
         }
 
         public void ClearPolicy()
@@ -228,15 +228,15 @@ namespace Casbin.Model
             return assertion;
         }
 
-        private bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
+        public bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
         {
-            if (Sections.TryGetValue(section, out Dictionary<string, Assertion> aessertions) is false)
+            if (Sections.TryGetValue(section, out Dictionary<string, Assertion> assertions) is false)
             {
                 returnAssertion = default;
                 return false;
             }
 
-            if (aessertions.TryGetValue(policyType, out Assertion assertion) is false)
+            if (assertions.TryGetValue(policyType, out Assertion assertion) is false)
             {
                 returnAssertion = default;
                 return false;

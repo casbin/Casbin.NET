@@ -20,66 +20,65 @@ namespace Casbin.Adapter.File
         {
         }
 
-        public void LoadFilteredPolicy(IModel model, Filter filter)
+        public void LoadFilteredPolicy(IPolicyStore store, Filter filter)
         {
-            if (filter == null)
+            if (filter is null)
             {
-                LoadPolicy(model);
+                LoadPolicy(store);
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(_filePath))
+            if (string.IsNullOrWhiteSpace(FilePath))
             {
-                throw new Exception("invalid file path, file path cannot be empty");
+                throw new InvalidOperationException("invalid file path, file path cannot be empty");
             }
 
-            LoadFilteredPolicyFile(model, filter, Helper.LoadPolicyLine);
-            IsFiltered = true;
+            LoadFilteredPolicyFile(store, filter);
         }
 
-        public async Task LoadFilteredPolicyAsync(IModel model, Filter filter)
+        public Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter)
         {
-            if (filter == null)
+            if (filter is null)
             {
-                await LoadPolicyAsync(model);
-                return;
+                return LoadPolicyAsync(store);
             }
 
-            if (string.IsNullOrWhiteSpace(_filePath))
+            if (string.IsNullOrWhiteSpace(FilePath))
             {
-                throw new Exception("invalid file path, file path cannot be empty");
+                throw new InvalidOperationException("invalid file path, file path cannot be empty");
             }
 
-            await LoadFilteredPolicyFileAsync(model, filter, Helper.LoadPolicyLine);
-            IsFiltered = true;
+            return LoadFilteredPolicyFileAsync(store, filter);
         }
 
-        private void LoadFilteredPolicyFile(IModel model, Filter filter, Action<string, IModel> handler)
+        private void LoadFilteredPolicyFile(IPolicyStore store, Filter filter)
         {
-            var reader = new StreamReader(new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            while (!reader.EndOfStream)
+            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            while (reader.EndOfStream is false)
             {
                 string line = reader.ReadLine()?.Trim();
                 if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
                 {
                     return;
                 }
-                handler(line, model);
+                store.TryLoadPolicyLine(line);
             }
+            IsFiltered = true;
         }
 
-        private async Task LoadFilteredPolicyFileAsync(IModel model, Filter filter, Action<string, IModel> handler)
+        private async Task LoadFilteredPolicyFileAsync(IPolicyStore store, Filter filter)
         {
-            var reader = new StreamReader(new FileStream(_filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            while (!reader.EndOfStream)
+            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            while (reader.EndOfStream is false)
             {
                 string line = (await reader.ReadLineAsync())?.Trim();
                 if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
                 {
                     return;
                 }
-                handler(line, model);
+                store.TryLoadPolicyLine(line);
             }
+            IsFiltered = true;
         }
 
         private static bool FilterLine(string line, Filter filter)
@@ -89,7 +88,7 @@ namespace Casbin.Adapter.File
                 return false;
             }
 
-            var p = line.Split(',');
+            string[] p = line.Split(',');
             if (p.Length == 0)
             {
                 return true;
@@ -111,7 +110,7 @@ namespace Casbin.Adapter.File
 
         private static bool FilterWords(string[] line, IEnumerable<string> filter)
         {
-            var filterArray = filter.ToArray();
+            string[] filterArray = filter.ToArray();
             int length = filterArray.Length;
 
             if (line.Length < length + 1)

@@ -2,11 +2,13 @@
 
 namespace Casbin.Model
 {
-   public interface IPolicy
+   public interface IPolicyStore
    {
         public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
 
         public Assertion GetRequiredAssertion(string section, string type);
+
+        public bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion);
 
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType);
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
@@ -149,7 +150,7 @@ namespace Casbin
                 watcher?.SetUpdateCallback(enforcer.LoadPolicyAsync);
                 return enforcer;
             }
-            watcher?.SetUpdateCallback(enforcer.LoadPolicy);
+            watcher?.SetUpdateCallback(() => enforcer.LoadPolicy());
             return enforcer;
         }
 
@@ -217,37 +218,52 @@ namespace Casbin
         /// <summary>
         /// Reloads the policy from file/database.
         /// </summary>
-        public static void LoadPolicy(this IEnforcer enforcer)
+        public static bool LoadPolicy(this IEnforcer enforcer)
         {
             if (enforcer.Adapter is null)
             {
-                return;
+                return false;
             }
 
             enforcer.ClearPolicy();
-            enforcer.Adapter.LoadPolicy(enforcer.Model);
+            bool result = enforcer.PolicyManager.LoadPolicy();
+            if (result is false)
+            {
+                return false;
+            }
+
             enforcer.Model.RefreshPolicyStringSet();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
+            return true;
         }
 
         /// <summary>
         /// Reloads the policy from file/database.
         /// </summary>
-        public static async Task LoadPolicyAsync(this IEnforcer enforcer)
+        public static async Task<bool> LoadPolicyAsync(this IEnforcer enforcer)
         {
             if (enforcer.Adapter is null)
             {
-                return;
+                return false;
             }
+
             enforcer.ClearPolicy();
-            await enforcer.Adapter.LoadPolicyAsync(enforcer.Model);
+            bool result = await enforcer.PolicyManager.LoadPolicyAsync();
+            Debug.WriteLine("vvv");
+            if (result is false)
+            {
+                return false;
+            }
+
+            enforcer.Model.RefreshPolicyStringSet();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
+            return true;
         }
 
         /// <summary>
@@ -262,13 +278,14 @@ namespace Casbin
             {
                 throw new NotSupportedException("Filtered policies are not supported by this adapter.");
             }
+
             enforcer.ClearPolicy();
-            filteredAdapter.LoadFilteredPolicy(enforcer.Model, filter);
-            if (enforcer.AutoBuildRoleLinks)
+            bool result = enforcer.PolicyManager.LoadFilteredPolicy(filter);
+            if (result && enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
-            return true;
+            return result;
         }
 
         /// <summary>
@@ -283,12 +300,43 @@ namespace Casbin
             {
                 throw new NotSupportedException("Filtered policies are not supported by this adapter.");
             }
+
             enforcer.ClearPolicy();
-            await filteredAdapter.LoadFilteredPolicyAsync(enforcer.Model, filter);
-            if (enforcer.AutoBuildRoleLinks)
+            bool result = await enforcer.PolicyManager.LoadFilteredPolicyAsync(filter);
+            if (result && enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
+            return result;
+        }
+
+        /// <summary>
+        /// Saves the current policy (usually after changed with Casbin API)
+        /// back to file/database.
+        /// </summary>
+        public static bool SavePolicy(this IEnforcer enforcer)
+        {
+            if (enforcer.Adapter is null)
+            {
+                return false;
+            }
+
+            if (enforcer.Adapter is not IEpochAdapter adapter)
+            {
+                throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
+            }
+
+            if (enforcer.IsFiltered)
+            {
+                throw new InvalidOperationException("Cannot save a filtered policy");
+            }
+
+            bool result = enforcer.PolicyManager.SavePolicy();
+            if (result is false)
+            {
+                return false;
+            }
+            enforcer.Watcher?.Update();
             return true;
         }
 
@@ -296,11 +344,11 @@ namespace Casbin
         /// Saves the current policy (usually after changed with Casbin API)
         /// back to file/database.
         /// </summary>
-        public static void SavePolicy(this IEnforcer enforcer)
+        public static async Task<bool> SavePolicyAsync(this IEnforcer enforcer)
         {
             if (enforcer.Adapter is null)
             {
-                return;
+                return false;
             }
 
             if (enforcer.Adapter is not IEpochAdapter adapter)
@@ -313,38 +361,12 @@ namespace Casbin
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
 
-            adapter.SavePolicy(enforcer.Model);
-
-            enforcer.Watcher?.Update();
-        }
-
-        /// <summary>
-        /// Saves the current policy (usually after changed with Casbin API)
-        /// back to file/database.
-        /// </summary>
-        public static async Task SavePolicyAsync(this IEnforcer enforcer)
-        {
-            if (enforcer.Adapter is null)
-            {
-                return;
-            }
-
-            if (enforcer.Adapter is not IEpochAdapter adapter)
-            {
-                throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
-            }
-
-            if (enforcer.IsFiltered)
-            {
-                throw new InvalidOperationException("Cannot save a filtered policy");
-            }
-
-            await adapter.SavePolicyAsync(enforcer.Model);
-
-            if (enforcer.Watcher is not null)
+            bool result = await enforcer.PolicyManager.SavePolicyAsync();
+            if (result && enforcer.Watcher is not null)
             {
                 await enforcer.Watcher.UpdateAsync();
             }
+            return result;
         }
 
         /// <summary>
@@ -361,7 +383,7 @@ namespace Casbin
 #endif
             }
 #if !NET452
-            enforcer.Logger?.LogInformation("Policy Management, Cleared all policy");
+            enforcer.Logger?.LogInformation("Store Management, Cleared all policy");
 #endif
         }
         #endregion

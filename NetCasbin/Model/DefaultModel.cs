@@ -28,7 +28,7 @@ namespace Casbin.Model
         public IPolicyManager PolicyManager { get; set; }
 
         public Dictionary<string, Dictionary<string, Assertion>> Sections
-            => PolicyManager.Policy.Sections;
+            => PolicyManager.PolicyStore.Sections;
 
         public bool IsSynchronized => PolicyManager.IsSynchronized;
 
@@ -155,7 +155,7 @@ namespace Casbin.Model
             }
             return true;
         }
-        
+
         public void SetRoleManager(string roleType, IRoleManager roleManager)
         {
             Assertion assertion = GetRequiredAssertion(PermConstants.Section.RoleSection, roleType);
@@ -297,7 +297,8 @@ namespace Casbin.Model
             return i == 1 ? string.Empty : i.ToString();
         }
 
-        #region IPolicy
+        #region IPolicy Store
+
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
             => PolicyManager.GetPolicy(section, policyType);
 
@@ -333,7 +334,11 @@ namespace Casbin.Model
 
         public void ClearPolicy() => PolicyManager.ClearPolicy();
 
-        public Assertion GetRequiredAssertion(string section, string type) => PolicyManager.Policy.GetRequiredAssertion(section, type);
+        public Assertion GetRequiredAssertion(string section, string type) => PolicyManager.GetRequiredAssertion(section, type);
+
+        public bool TryGetAssertion(string section, string type, out Assertion returnAssertion) =>
+            PolicyManager.TryGetAssertion(section, type, out returnAssertion);
+
         #endregion
     }
 }

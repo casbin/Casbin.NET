@@ -24,7 +24,7 @@ namespace Casbin
             bool result, IEnumerable<IEnumerable<string>> explains)
             where TRequest : IRequestValues
         {
-            logger.LogInformation("Request: {1} ---> {0}\nHit Policy: {2}", result, requestValues,
+            logger.LogInformation("Request: {1} ---> {0}\nHit Store: {2}", result, requestValues,
                 string.Join("\n", explains.Select(explain =>
                     string.Join(", ", explain))));
         }
