@@ -1,3 +1,0 @@
-p, admin, domain1, data1, read
-g, alice, group1
-g2, group1, admin, domain1
