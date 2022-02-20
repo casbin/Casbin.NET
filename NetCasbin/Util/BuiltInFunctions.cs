@@ -137,6 +137,7 @@ namespace Casbin.Util
         /// <param name="ip1">The first argument.</param>
         /// <param name="ip2">The second argument.</param>
         /// <returns>Whether ip1 matches ip2.</returns>
+        // ReSharper disable once InconsistentNaming
         public static bool IPMatch(string ip1, string ip2)
         {
             if (IPAddress.TryParse(ip1, out var ipAddress1) is false)
