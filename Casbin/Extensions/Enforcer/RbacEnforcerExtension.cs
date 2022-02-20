@@ -170,7 +170,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Deletes a role for a user.？《{&
+        /// Deletes a role for a user.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user"></param>

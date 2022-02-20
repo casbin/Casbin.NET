@@ -11,16 +11,16 @@ namespace Casbin.Util
         /// <summary>
         /// Removes the comments starting with # in the text.
         /// </summary>
-        /// <param name="s">a line in the model.</param>
+        /// <param name="line">a line in the model.</param>
         /// <returns>The line without comments.</returns>
-        internal static string RemoveComments(this string str)
+        internal static string RemoveComments(this string line)
         {
-            int pos = str.IndexOf("#", StringComparison.Ordinal);
+            int pos = line.IndexOf("#", StringComparison.Ordinal);
             if (pos is -1)
             {
-                return str;
+                return line;
             }
-            return str.Substring(0, pos).Trim();
+            return line.Substring(0, pos).Trim();
         }
 
         /// <summary>

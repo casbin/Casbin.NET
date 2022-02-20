@@ -15,6 +15,8 @@ namespace Casbin.Effect
         /// <param name="effectExpression"></param>
         /// <param name="effects"></param>
         /// <param name="matches"></param>
+        /// <param name="policyIndex"></param>
+        /// <param name="policyCount"></param>
         /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
         public PolicyEffect MergeEffects(string effectExpression, IReadOnlyList<PolicyEffect> effects, IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
