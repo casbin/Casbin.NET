@@ -53,7 +53,7 @@
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
     <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging" Versiodn="6.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
