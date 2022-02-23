@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net461;net452;</TargetFrameworks>
+    <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net462;net461;net452;</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
     <LangVersion>10.0</LangVersion>
   </PropertyGroup>
@@ -41,47 +41,60 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.4.1"/>
     <PackageReference Include="DotNet.Glob" Version="3.1.3"/>
     <PackageReference Include="System.Memory" Version="4.5.4"/>
     <PackageReference Include="Microsoft.SourceLink.Github" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0-preview.1.22076.8"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Versiodn="6.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
-    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18"/>
-    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.22"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
-    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.11.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
-    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.10.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.10.0"/>
     <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
-    <PackageReference Include="IsExternalInit" Version="1.0.1" PrivateAssets="all"/>
+    <PackageReference Include="IsExternalInit" Version="1.0.2" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup>

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
 using Casbin.Caching;
 using Casbin.Model;
 using DynamicExpresso;
@@ -10,7 +12,7 @@ internal class ExpressionHandler : IExpressionHandler
 {
     public IExpressionCachePool Cache { get; set; } = new ExpressionCachePool();
     private readonly FunctionMap _functionMap = FunctionMap.LoadFunctionMap();
-    private readonly Interpreter _interpreter;
+    private Interpreter _interpreter;
 
     public ExpressionHandler()
     {
@@ -22,8 +24,29 @@ internal class ExpressionHandler : IExpressionHandler
 
     public void SetFunction(string name, Delegate function)
     {
+        List<Identifier> identifiers = new();
+        bool exist = false;
+        foreach (var identifier in _interpreter.Identifiers)
+        {
+            if (identifier.Name == name)
+            {
+                exist = true;
+                continue;
+            }
+            identifiers.Add(identifier);
+        }
+
+        if (exist is false)
+        {
+            _interpreter.SetFunction(name, function);
+            return;
+        }
+
+        var interpreter = new Interpreter();
+        interpreter.SetIdentifiers(identifiers);
+        interpreter.SetFunction(name, function);
+        Interlocked.Exchange(ref _interpreter, interpreter);
         Cache.Clear();
-        _interpreter.SetFunction(name, function);
     }
 
     public bool Invoke<TRequest, TPolicy>(in EnforceContext context, string expressionString, in TRequest request, in TPolicy policy)
