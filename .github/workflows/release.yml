@@ -54,12 +54,12 @@ jobs:
       run: dotnet build -c Release --no-restore
 
     - name: Test solution
-      run: dotnet test -c Release --no-build --no-restore --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
+      run: dotnet test -c Release --no-build --no-restore --verbosity normal --results-directory test-results --collect:"XPlat Code Coverage" `
            -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
 
     - name: Upload coverage
       run: |
-        dotnet tool install coveralls.net --version 2.0.0-beta0002 --tool-path tools;
+        dotnet tool install coveralls.net --version 3.0.0 --tool-path tools;
         $CommitAuthor = git show -s --pretty=format:"%cn";
         echo "Coomit author is: $CommitAuthor";
         $CommitAuthorEmail = git show -s --pretty=format:"%ce";
