@@ -128,6 +128,22 @@ namespace Casbin.Util
 
             return true;
         }
+        /// <summary>
+        /// KeyMatch determines whether key1 matches the pattern of key2 and ignores the parameters in key2.
+        /// For example, "/foo/bar?status=1&amp;type=2" matches "/foo/bar"
+        /// </summary>
+        /// <param name="key1"> The first argument. </param>
+        /// <param name="key2"> The second argument. </param>
+        /// <returns></returns>
+        public static bool KeyMatch5(string key1, string key2)
+        {
+            var key1Span = key1.AsSpan();
+            var key2Span = key2.AsSpan();
+            int index = key1Span.IndexOf('?');
+            return index is -1
+                ? key1Span.Equals(key2Span, StringComparison.Ordinal)
+                : key1Span.Slice(0, index).Equals(key2Span, StringComparison.Ordinal);
+        }
 
         /// <summary>
         /// Determines whether IP address ip1 matches the pattern of IP address ip2,
