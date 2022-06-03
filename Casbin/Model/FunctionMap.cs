@@ -24,6 +24,7 @@ namespace Casbin.Model
             map.AddFunction("keyMatch2", BuiltInFunctions.KeyMatch2);
             map.AddFunction("keyMatch3", BuiltInFunctions.KeyMatch3);
             map.AddFunction("keyMatch4", BuiltInFunctions.KeyMatch4);
+            map.AddFunction("keyMatch5", BuiltInFunctions.KeyMatch5);
             map.AddFunction("regexMatch", BuiltInFunctions.RegexMatch);
             map.AddFunction("ipMatch", BuiltInFunctions.IPMatch);
             map.AddFunction("globMatch", BuiltInFunctions.GlobMatch);

@@ -172,6 +172,24 @@ namespace Casbin.UnitTests.UtilTests
                 BuiltInFunctions.KeyMatch4(key1, key2));
         }
 
+        public static IEnumerable<object[]> KeyMatch5TestData = new[]
+        {
+            new object[] { "/parent/child?status=1&type=2", "/parent/child", true},
+            new object[] { "/parent?status=1&type=2", "/parent/child", false},
+
+            new object[] { "/parent/child/?status=1&type=2", "/parent/child/", true},
+            new object[] { "/parent/child/?status=1&type=2", "/parent/child", false},
+            new object[] { "/parent/child?status=1&type=2", "/parent/child/", false}
+        };
+
+        [Theory]
+        [MemberData(nameof(KeyMatch5TestData))]
+        public void TestKeyMatch5(string key1, string key2, bool expectedResult)
+        {
+            Assert.Equal(expectedResult,
+                BuiltInFunctions.KeyMatch5(key1, key2));
+        }
+
         public static IEnumerable<object[]> GlobMatchTestData = new[]
         {
             new object[] {"/foo", "/foo", true},
