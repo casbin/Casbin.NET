@@ -8,8 +8,8 @@ namespace Casbin.Model
 {
     public class ReaderWriterPolicyManager : DefaultPolicyManager
     {
-        private readonly ReaderWriterPolicyManagerOptions _options;
         private readonly ReaderWriterLockSlim _lockSlim = new();
+        private readonly ReaderWriterPolicyManagerOptions _options;
 
         // ReSharper disable once MemberCanBePrivate.Global
         public ReaderWriterPolicyManager(IPolicyStore policyStore, IReadOnlyAdapter adapter = null)
@@ -25,12 +25,12 @@ namespace Casbin.Model
             _options = options;
         }
 
+        public override bool IsSynchronized => true;
+
         public static new IPolicyManager Create()
         {
             return new ReaderWriterPolicyManager(DefaultPolicyStore.Create());
         }
-
-        public override bool IsSynchronized => true;
 
         public override void StartRead()
         {
@@ -73,13 +73,19 @@ namespace Casbin.Model
 
                 try
                 {
-                    if (EpochAdapter is not null)
+                    if (HasAdapter is false)
                     {
-                        EpochAdapter.LoadPolicyAsync(PolicyStore).Wait();
-                        return Task.FromResult(true);
+                        return Task.FromResult(false);
                     }
 
-                    return Task.FromResult(false);
+                    if (EpochAdapter is null)
+                    {
+                        return Task.FromResult(false);
+                    }
+
+                    PolicyStore.ClearPolicy();
+                    EpochAdapter.LoadPolicyAsync(PolicyStore).Wait();
+                    return Task.FromResult(true);
                 }
                 finally
                 {

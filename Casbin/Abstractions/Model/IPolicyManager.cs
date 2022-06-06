@@ -12,6 +12,8 @@ namespace Casbin.Model
 
         public bool HasAdapter { get; }
 
+        public bool IsFiltered { get; }
+
         public bool AutoSave { get; set; }
 
         public IPolicyStore PolicyStore { get; set; }
@@ -46,8 +48,10 @@ namespace Casbin.Model
 
         public Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule);
 
-        public Task<bool> RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public Task<bool> RemovePoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules);
 
-        public Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues);
+        public Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType,
+            int fieldIndex, params string[] fieldValues);
     }
 }

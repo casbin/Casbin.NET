@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Persist;
@@ -9,10 +8,10 @@ namespace Casbin.Model
 {
     public class DefaultPolicyManager : IPolicyManager
     {
-        protected ISingleAdapter SingleAdapter;
         protected IBatchAdapter BatchAdapter;
         protected IEpochAdapter EpochAdapter;
         protected IFilteredAdapter FilteredAdapter;
+        protected ISingleAdapter SingleAdapter;
 
         // ReSharper disable once MemberCanBeProtected.Global
         public DefaultPolicyManager(IPolicyStore policyStore, IReadOnlyAdapter adapter = null)
@@ -25,9 +24,10 @@ namespace Casbin.Model
         }
 
         public virtual bool IsSynchronized => false;
-        public bool HasAdapter => Adapter is null;
+        public bool HasAdapter => Adapter is not null;
+        public bool IsFiltered => FilteredAdapter is not null && FilteredAdapter.IsFiltered;
         public Dictionary<string, Dictionary<string, Assertion>> Sections => PolicyStore.Sections;
-        public bool AutoSave { get; set; }
+        public bool AutoSave { get; set; } = true;
         public IPolicyStore PolicyStore { get; set; }
 
         public IReadOnlyAdapter Adapter
@@ -40,11 +40,6 @@ namespace Casbin.Model
                 EpochAdapter = value as IEpochAdapter;
                 FilteredAdapter = value as IFilteredAdapter;
             }
-        }
-
-        public static IPolicyManager Create()
-        {
-            return new DefaultPolicyManager(DefaultPolicyStore.Create());
         }
 
         public virtual void StartRead()
@@ -82,12 +77,19 @@ namespace Casbin.Model
 
             try
             {
-                if (EpochAdapter is not null)
+                if (HasAdapter is false)
                 {
-                    EpochAdapter.LoadPolicy(PolicyStore);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                if (EpochAdapter is null)
+                {
+                    return false;
+                }
+
+                PolicyStore.ClearPolicy();
+                EpochAdapter.LoadPolicy(PolicyStore);
+                return true;
             }
             finally
             {
@@ -104,12 +106,13 @@ namespace Casbin.Model
 
             try
             {
-                if (FilteredAdapter is not null)
+                if (FilteredAdapter is null)
                 {
-                    FilteredAdapter.LoadFilteredPolicy(PolicyStore, filter);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                FilteredAdapter.LoadFilteredPolicy(PolicyStore, filter);
+                return true;
             }
             finally
             {
@@ -126,12 +129,23 @@ namespace Casbin.Model
 
             try
             {
-                if (EpochAdapter is not null)
+                if (HasAdapter is false)
                 {
-                    EpochAdapter.SavePolicy(PolicyStore);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                if (EpochAdapter is null)
+                {
+                    throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
+                }
+
+                if (IsFiltered)
+                {
+                    throw new InvalidOperationException("Cannot save filtered policies");
+                }
+
+                EpochAdapter.SavePolicy(PolicyStore);
+                return true;
             }
             finally
             {
@@ -148,18 +162,28 @@ namespace Casbin.Model
 
             try
             {
-                if (EpochAdapter is not null)
+                if (HasAdapter is false)
                 {
-                    await EpochAdapter.LoadPolicyAsync(PolicyStore);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                if (EpochAdapter is null)
+                {
+                    return false;
+                }
+
+                PolicyStore.ClearPolicy();
+                await EpochAdapter.LoadPolicyAsync(PolicyStore);
+                return true;
             }
             finally
             {
                 EndWrite();
-            };
+            }
+
+            ;
         }
+
         public virtual async Task<bool> LoadFilteredPolicyAsync(Filter filter)
         {
             if (TryStartWrite() is false)
@@ -169,12 +193,13 @@ namespace Casbin.Model
 
             try
             {
-                if (FilteredAdapter is not null)
+                if (FilteredAdapter is null)
                 {
-                    await FilteredAdapter.LoadFilteredPolicyAsync(PolicyStore, filter);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                await FilteredAdapter.LoadFilteredPolicyAsync(PolicyStore, filter);
+                return true;
             }
             finally
             {
@@ -191,12 +216,13 @@ namespace Casbin.Model
 
             try
             {
-                if (EpochAdapter is not null)
+                if (EpochAdapter is null)
                 {
-                    await EpochAdapter.SavePolicyAsync(PolicyStore);
-                    return true;
+                    return false;
                 }
-                return false;
+
+                await EpochAdapter.SavePolicyAsync(PolicyStore);
+                return true;
             }
             finally
             {
@@ -256,7 +282,8 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
+            params string[] fieldValues)
         {
             if (TryStartRead() is false)
             {
@@ -347,6 +374,7 @@ namespace Casbin.Model
                 {
                     return PolicyStore.AddPolicy(section, policyType, ruleArray);
                 }
+
                 SingleAdapter?.AddPolicy(section, policyType, ruleArray);
                 return PolicyStore.AddPolicy(section, policyType, ruleArray);
             }
@@ -370,6 +398,7 @@ namespace Casbin.Model
                 {
                     return PolicyStore.AddPolicies(section, policyType, rulesArray);
                 }
+
                 BatchAdapter?.AddPolicies(section, policyType, rulesArray);
                 return PolicyStore.AddPolicies(section, policyType, rulesArray);
             }
@@ -393,6 +422,7 @@ namespace Casbin.Model
                 {
                     return PolicyStore.RemovePolicy(section, policyType, ruleArray);
                 }
+
                 SingleAdapter?.RemovePolicy(section, policyType, ruleArray);
                 return PolicyStore.RemovePolicy(section, policyType, ruleArray);
             }
@@ -416,6 +446,7 @@ namespace Casbin.Model
                 {
                     return PolicyStore.RemovePolicies(section, policyType, rulesArray);
                 }
+
                 BatchAdapter?.RemovePolicies(section, policyType, rulesArray);
                 return PolicyStore.RemovePolicies(section, policyType, rulesArray);
             }
@@ -425,7 +456,8 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
+            params string[] fieldValues)
         {
             if (TryStartWrite() is false)
             {
@@ -438,6 +470,7 @@ namespace Casbin.Model
                 {
                     return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 }
+
                 BatchAdapter?.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
                 return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
             }
@@ -475,7 +508,8 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public virtual async Task<bool> AddPoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -531,7 +565,8 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<bool> RemovePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public virtual async Task<bool> RemovePoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -559,7 +594,8 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public virtual async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section,
+            string policyType, int fieldIndex, params string[] fieldValues)
         {
             if (TryStartWrite() is false)
             {
@@ -598,5 +634,7 @@ namespace Casbin.Model
                 EndRead();
             }
         }
+
+        public static IPolicyManager Create() => new DefaultPolicyManager(DefaultPolicyStore.Create());
     }
 }
