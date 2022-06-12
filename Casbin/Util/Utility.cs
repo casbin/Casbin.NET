@@ -21,10 +21,12 @@ namespace Casbin.Util
             {
                 a = new List<string>();
             }
+
             if (b == null)
             {
                 b = new List<string>();
             }
+
             if (a.Count != b.Count)
             {
                 return false;
@@ -40,6 +42,7 @@ namespace Casbin.Util
                     return false;
                 }
             }
+
             return true;
         }
     }
