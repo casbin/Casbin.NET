@@ -237,5 +237,55 @@ namespace Casbin.Model
             _policy.Sort(PolicyComparison);
             return true;
         }
+
+        private bool TryGetSubjectHierarchyDomainIndex(out int index)
+        {
+            if (Tokens is null)
+            {
+                index = -1;
+                return false;
+            }
+            return Tokens.TryGetValue("dom", out index);
+        }
+
+        private bool TryGetSubjectHierarchySubjectIndex(out int index)
+        {
+            if (Tokens is null)
+            {
+                index = -1;
+                return false;
+            }
+            return Tokens.TryGetValue("sub", out index);
+        }
+
+
+        internal bool TrySortPoliciesBySubjectHierarchy(Dictionary<string, int> subjectHierarchyMap, Func<string, string, string> nameFormatter)
+        {
+            if(TryGetSubjectHierarchyDomainIndex(out int domainIndex) is false)
+            {
+                domainIndex = -1;
+            }
+            if (TryGetSubjectHierarchySubjectIndex(out int subjectIndex) is false)
+            {
+                return false;
+            }
+
+
+            int PolicyComparison(IPolicyValues p1, IPolicyValues p2)
+            {
+                string domain1 = "", domain2 = "";
+                if(domainIndex != -1)
+                {
+                    domain1 = p1[domainIndex];
+                    domain2 = p2[domainIndex];
+                }
+                string name1 = nameFormatter(domain1, p1[subjectIndex]);
+                string name2 = nameFormatter(domain2, p2[subjectIndex]);
+
+                return subjectHierarchyMap[name1] - subjectHierarchyMap[name2];
+            }
+            _policy.Sort(PolicyComparison);
+            return true;
+        }
     }
 }

@@ -4,6 +4,7 @@
     {
         public const char PolicySeparatorChar = ',';
         public const string PolicySeparatorString = ", "; // include a white space
+        public const string SubjectPrioritySeparatorString = "::";
 
         public const string DefaultRequestType = "r";
         public const string RequestType2 = "r2";
@@ -60,6 +61,7 @@
             public const string DenyOverride = "!some(where (p.eft == deny))";
             public const string AllowAndDeny = "some(where (p.eft == allow)) && !some(where (p.eft == deny))";
             public const string Priority = "priority(p.eft) || deny";
+            public const string SubjectPriority = "subjectPriority(p.eft) || deny";
             public const string PriorityDenyOverride = "priority(p.eft) && !some(where (p.eft == deny))";
         }
     }

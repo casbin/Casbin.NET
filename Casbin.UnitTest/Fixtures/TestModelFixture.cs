@@ -42,6 +42,10 @@ namespace Casbin.UnitTests.Fixtures
         internal readonly string _rbacWithHierarchyPolicyText = ReadTestFile("rbac_with_hierarchy_policy.csv");
         internal readonly string _rbacWithHierarchyWithDomainsPolicyText = ReadTestFile("rbac_with_hierarchy_with_domains_policy.csv");
         internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_policy.csv");
+        internal readonly string _subjectPriorityModelText = ReadTestFile("subject_priority_model.conf");
+        internal readonly string _subjectPriorityPolicyText = ReadTestFile("subject_priority_policy.csv");
+        internal readonly string _subjectPriorityWithDomainModelText = ReadTestFile("subject_priority_model_with_domain.conf");
+        internal readonly string _subjectPriorityWithDomainPolicyText = ReadTestFile("subject_priority_policy_with_domain.csv");
 
         // https://github.com/casbin/Casbin.NET/issues/154
         internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");

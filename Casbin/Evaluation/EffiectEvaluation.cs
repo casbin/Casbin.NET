@@ -78,6 +78,20 @@ namespace Casbin.Evaluation
                     }
                     break;
 
+                case EffectExpressionType.PriorityAllOverride:
+                    switch (effect)
+                    {
+                        case PolicyEffect.Allow:
+                            result = true;
+                            hitPolicy = true;
+                            return false;
+                        case PolicyEffect.Deny:
+                            result = false;
+                            hitPolicy = true;
+                            return false;
+                    }
+                    break;
+
                 case EffectExpressionType.Custom:
                     // TODO: Support custom policy effect.
                     break;

@@ -53,5 +53,7 @@ namespace Casbin.Model
         public void RefreshPolicyStringSet();
 
         public void SortPoliciesByPriority();
+
+        public void SortPoliciesBySubjectHierarchy();
     }
 }

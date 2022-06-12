@@ -1032,5 +1032,35 @@ namespace Casbin.UnitTests.ModelTests
             e = DefaultEnforcer.Create(m, a);
             Assert.NotEmpty(e.GetPolicy());
         }
+
+        [Fact]
+        public void TestEnforceSubjectPriority()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._subjectPriorityModelText,
+                _testModelFixture._subjectPriorityPolicyText));
+
+            TestEnforce(e, "jane", "data1", "read", true);
+            TestEnforce(e, "alice", "data1", "read", true);
+        }
+
+        [Fact]
+        public void TestEnforceSubjectPriorityWithDomain()
+        {
+            var e = new Enforcer(
+                Path.Combine("Examples", "subject_priority_model_with_domain.conf"),
+                Path.Combine("Examples", "subject_priority_policy_with_domain.csv"));
+
+            Assert.True(e.Enforce(
+                "alice",
+                "data1",
+                "domain1",
+                "write"));
+            Assert.True(e.Enforce(
+                "bob",
+                "data2",
+                "domain2",
+                "write"));
+        }
     }
 }

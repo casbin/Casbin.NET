@@ -262,6 +262,76 @@ namespace Casbin.Model
             }
         }
 
+        public void SortPoliciesBySubjectHierarchy()
+        {
+            if (Sections.Count == 0)
+            {
+                return;
+            }
+            if (!Sections[PermConstants.DefaultPolicyEffectType][PermConstants.DefaultPolicyEffectType].Value.Equals(PermConstants.PolicyEffect.SubjectPriority))
+            {
+                return;
+            }
+            var subjectHierarchyMap = GetSubjectHierarchyMap(Sections[PermConstants.DefaultRoleType][PermConstants.DefaultRoleType].Policy);
+            foreach (var keyValuePair in Sections[PermConstants.DefaultPolicyType])
+            {
+                var assertion = keyValuePair.Value;
+                assertion.TrySortPoliciesBySubjectHierarchy(subjectHierarchyMap, GetNameWithDomain);
+            }
+        }
+
+        private string GetNameWithDomain(string domain, string name)
+        {
+            return domain + PermConstants.SubjectPrioritySeparatorString + name;
+        }
+
+        private Dictionary<string, int> GetSubjectHierarchyMap(IReadOnlyList<IPolicyValues> policies)
+        {
+            Dictionary<string, int> refer = new Dictionary<string, int>();
+            Dictionary<string, int> res = new Dictionary<string, int>();
+            Dictionary<string, List<string>> policyChildenMap = new Dictionary<string, List<string>>();
+            foreach(var policy in policies)
+            {
+                string domain = policy.Count > 2 ? policy[2] : null;
+                string child = GetNameWithDomain(domain, policy[0]);
+                string parent = GetNameWithDomain(domain, policy[1]);
+                if (policyChildenMap.ContainsKey(parent))
+                {
+                    policyChildenMap[parent].Add(child);
+                }
+                else
+                {
+                    policyChildenMap[parent] = new List<string>(new string[] { child });
+                }
+                refer[parent] = refer[child] = 0;
+            }
+            Queue<string> q = new Queue<string>();
+            foreach(var keyValuePair in refer)
+            {
+                if (keyValuePair.Value != 0) continue;
+                int level = 0;
+                q.Enqueue(keyValuePair.Key);
+                while (q.Count > 0)
+                {
+                    int size = q.Count;
+                    while (size-- > 0)
+                    {
+                        var node = q.Dequeue();
+                        res[node] = level;
+                        if (policyChildenMap.ContainsKey(node))
+                        {
+                            foreach(var child in policyChildenMap[node])
+                            {
+                                q.Enqueue(child);
+                            }
+                        }
+                    }
+                    level++;
+                }
+            }
+            return res; 
+        }
+
         private void LoadModel(IConfig config)
         {
             LoadSection(config, PermConstants.Section.RequestSection);
