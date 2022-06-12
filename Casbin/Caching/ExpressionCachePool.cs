@@ -1,36 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using DynamicExpresso;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Casbin.Caching;
 
 public class ExpressionCachePool : IExpressionCachePool
 {
-    private readonly Dictionary<Type, IExpressionCache> _cachePool = new();
-
-    public void SetLambda(string expression, Lambda lambda)
-    {
-        Type type = typeof(Lambda);
-        if (_cachePool.TryGetValue(type, out IExpressionCache cache) is false)
-        {
-            cache = new ExpressionCache();
-            _cachePool[type] = cache;
-        }
-        var cacheImpl = (ExpressionCache) cache;
-        cacheImpl.Set(expression, lambda);
-    }
-
-    public bool TryGetLambda(string expression, out Lambda lambda)
-    {
-        Type type = typeof(Lambda);
-        if (_cachePool.TryGetValue(type, out IExpressionCache cache) is false)
-        {
-            lambda = default;
-            return false;
-        }
-        var cacheImpl = (ExpressionCache) cache;
-        return cacheImpl.TryGet(expression, out lambda);
-    }
+    private ConcurrentDictionary<Type, IExpressionCache> _cachePool = new();
 
     public void SetFunc<TFunc>(string expression, TFunc func) where TFunc : Delegate
     {
@@ -53,15 +29,14 @@ public class ExpressionCachePool : IExpressionCachePool
             cache = new ExpressionCache<TFunc>();
             _cachePool[type] = cache;
         }
+
         var cacheImpl = (IExpressionCache<TFunc>)cache;
         return cacheImpl.TryGet(expression, out func);
     }
 
     public void Clear()
     {
-        foreach (IExpressionCache cache in _cachePool.Values)
-        {
-            cache?.Clear();
-        }
+        ConcurrentDictionary<Type, IExpressionCache> cachePool = new ConcurrentDictionary<Type, IExpressionCache>();
+        Interlocked.Exchange(ref _cachePool, cachePool);
     }
 }
