@@ -17,6 +17,17 @@ namespace Casbin.UnitTests.ModelTests
         }
 
         [Fact]
+        public void TestGetList()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+            e.BuildRoleLinks();
+            TestStringList(e.GetAllSubjects, AsList("alice", "bob", "data2_admin"));
+            TestStringList(e.GetAllObjects, AsList("data1", "data2"));
+            TestStringList(e.GetAllActions, AsList("read", "write"));
+            TestStringList(e.GetAllRoles, AsList("data2_admin"));
+        }
+
+        [Fact]
         public void TestGetPolicyApi()
         {
             var e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
@@ -141,7 +152,7 @@ namespace Casbin.UnitTests.ModelTests
             await e.RemovePolicyAsync("alice", "data1", "read");
             await e.AddPolicyAsync("eve", "data3", "read");
             await e.AddPolicyAsync("eve", "data3", "read");
-            
+
             var rules = AsList(
                 AsList("jack", "data4", "read"),
                 AsList("jack", "data4", "read"),
@@ -217,6 +228,13 @@ namespace Casbin.UnitTests.ModelTests
             TestGetRoles(e, "alice", AsList("data2_admin"));
             e.RemoveNamedGroupingPolicy("g", namedGroupingPolicy);
 
+            e.AddNamedGroupingPolicies("g", groupingRules);
+            e.AddNamedGroupingPolicies("g", groupingRules);
+            TestGetRoles(e, "ham", AsList("data4_admin"));
+            TestGetRoles(e, "jack", AsList("data5_admin"));
+            e.RemoveNamedGroupingPolicies("g", groupingRules);
+            e.RemoveNamedGroupingPolicies("g", groupingRules);
+
             TestGetRoles(e, "alice", AsList());
             TestGetRoles(e, "bob", AsList("data1_admin"));
             TestGetRoles(e, "eve", AsList("data3_admin"));
@@ -269,6 +287,13 @@ namespace Casbin.UnitTests.ModelTests
             await e.AddNamedGroupingPolicyAsync("g", namedGroupingPolicy);
             TestGetRoles(e, "alice", AsList("data2_admin"));
             await e.RemoveNamedGroupingPolicyAsync("g", namedGroupingPolicy);
+
+            await e.AddNamedGroupingPoliciesAsync("g", groupingRules);
+            await e.AddNamedGroupingPoliciesAsync("g", groupingRules);
+            TestGetRoles(e, "ham", AsList("data4_admin"));
+            TestGetRoles(e, "jack", AsList("data5_admin"));
+            await e.RemoveNamedGroupingPoliciesAsync("g", groupingRules);
+            await e.RemoveNamedGroupingPoliciesAsync("g", groupingRules);
 
             TestGetRoles(e, "alice", AsList());
             TestGetRoles(e, "bob", AsList("data1_admin"));

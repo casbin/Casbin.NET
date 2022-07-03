@@ -94,6 +94,14 @@ namespace Casbin.UnitTests.Util
             }
         }
 
+        internal delegate IEnumerable<string> GetAllList();
+
+        internal static void TestStringList(GetAllList getAllList, List<string> res)
+        {
+            var myRes = getAllList();
+            Assert.True(res.DeepEquals(myRes));
+        }
+
         internal static void TestGetPolicy(IEnforcer e, List<List<string>> res)
         {
             var myRes = e.GetPolicy();
