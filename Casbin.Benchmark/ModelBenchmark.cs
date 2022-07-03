@@ -26,7 +26,7 @@ namespace Casbin.Benchmark
         [Params(10, 100, 1000, 10000)]
         public int NowPolicyCount { get; set; }
 
-        [GlobalSetup(Targets = new[] { nameof(AddPolicy), nameof(HasPolicy) })]
+        [GlobalSetup(Targets = new[] { nameof(AddPolicy), nameof(HasPolicy), nameof(RemovePolicy) })]
         public void GlobalSetup()
         {
             for (int i = 0; i < NowPolicyCount; i++)
@@ -53,6 +53,13 @@ namespace Casbin.Benchmark
         public void AddPolicy()
         {
             _enforcer.AddPolicy(NowTestUserName, NowTestDataName, "read");
+        }
+
+        [Benchmark]
+        [BenchmarkCategory("ModelManagement")]
+        public void RemovePolicy()
+        {
+            _enforcer.RemovePolicy(NowTestUserName, NowTestDataName, "read");
         }
     }
 }
