@@ -3,6 +3,7 @@
     public enum PolicyOperation
     {
         PolicyAdd,
-        PolicyRemove
+        PolicyRemove,
+        PolicyUpdate,
     }
 }

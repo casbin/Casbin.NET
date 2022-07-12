@@ -36,6 +36,17 @@ namespace Casbin.Model
             string section, string roleType, IEnumerable<string> rule);
 
         /// <summary>
+        /// Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRule"></param>
+        /// <param name="newRule"></param>
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<string> oldRule, IEnumerable<string> newRule);
+
+        /// <summary>
         /// Provides incremental build the role inheritance relations.
         /// </summary>
         /// <param name="policyOperation"></param>
@@ -44,6 +55,17 @@ namespace Casbin.Model
         /// <param name="rules"></param>
         public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
             string section, string roleType, IEnumerable<IEnumerable<string>> rules);
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRules"></param>
+        /// <param name="newRules"></param>
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules);
 
         /// <summary>
         /// Initializes the roles in RBAC.

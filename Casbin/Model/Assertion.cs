@@ -57,6 +57,17 @@ namespace Casbin.Model
             BuildRoleLink(count, policyOperation, rule);
         }
 
+        internal void BuildIncrementalRoleLink(PolicyOperation policyOperation, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            int count = Value.Count(c => c is '_');
+            if (count < 2)
+            {
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+            }
+
+            BuildRoleLink(count, policyOperation, oldRule, newRule);
+        }
+
         internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> rules)
         {
             int count = Value.Count(c => c is '_');
@@ -68,6 +79,26 @@ namespace Casbin.Model
             foreach (var rule in rules)
             {
                 BuildRoleLink(count, policyOperation, rule);
+            }
+        }
+
+        internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        {
+            int count = Value.Count(c => c is '_');
+            if (count < 2)
+            {
+                throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
+            }
+
+            var rulesList = oldRules as IReadOnlyList<IEnumerable<string>> ?? oldRules.ToList();
+            var newRulesList = newRules as IReadOnlyList<IEnumerable<string>> ?? newRules.ToList();
+            if (rulesList.Count != newRulesList.Count)
+            {
+                throw new InvalidOperationException($"the length of oldPolices should be equal to the length of newPolices, but got the length of oldPolices is {rulesList.Count}, the length of newPolices is {newRulesList.Count}.");
+            }
+            for (int i = 0; i < rulesList.Count; i++)
+            {
+                BuildRoleLink(count, policyOperation, rulesList[i], newRulesList[i]);
             }
         }
 
@@ -86,7 +117,7 @@ namespace Casbin.Model
         }
 
         private void BuildRoleLink(int groupPolicyCount,
-            PolicyOperation policyOperation, IEnumerable<string> rule)
+            PolicyOperation policyOperation, IEnumerable<string> rule, params IEnumerable<string>[] newRule)
         {
             var roleManager = RoleManager;
             List<string> ruleEnum = rule as List<string> ?? rule.ToList();
@@ -112,6 +143,38 @@ namespace Casbin.Model
                             break;
                         case 3:
                             roleManager.AddLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
+                    }
+                    break;
+                case PolicyOperation.PolicyUpdate:
+                    if (newRule.Length == 0)
+                    {
+                        throw new InvalidOperationException("Grouping policy elements do not meet role definition.");
+                    }
+
+                    List<string> newRuleEnum = newRule[0] as List<string> ?? newRule[0].ToList();
+                    int newRuleCount = newRuleEnum.Count;
+                    if (newRuleCount < groupPolicyCount)
+                    {
+                        throw new InvalidOperationException("Grouping policy elements do not meet role definition.");
+                    }
+
+                    if (newRuleCount > groupPolicyCount)
+                    {
+                        newRuleEnum = newRuleEnum.GetRange(0, groupPolicyCount);
+                    }
+
+                    switch (groupPolicyCount)
+                    {
+                        case 2:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1]);
+                            roleManager.AddLink(newRuleEnum[0], newRuleEnum[1]);
+                            break;
+                        case 3:
+                            roleManager.DeleteLink(ruleEnum[0], ruleEnum[1], ruleEnum[2]);
+                            roleManager.AddLink(newRuleEnum[0], newRuleEnum[1], newRuleEnum[2]);
                             break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
@@ -155,6 +218,31 @@ namespace Casbin.Model
 
             _policy.Add(Model.Policy.CreateOnlyString(ruleList));
             PolicyStringSet.Add(Utility.RuleToString(ruleList));
+            return true;
+        }
+
+        internal bool TryUpdatePolicy(IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            var oldRuleList = oldRule as IReadOnlyList<string> ?? oldRule.ToArray();
+            if (Contains(oldRuleList) is false)
+            {
+                return false;
+            }
+
+            var newRuleList = newRule as IReadOnlyList<string> ?? newRule.ToArray();
+            for (int i = 0; i < Policy.Count; i++)
+            {
+                var ruleInPolicy = Policy[i];
+                if (oldRuleList.DeepEquals(ruleInPolicy) is false)
+                {
+                    continue;
+                }
+                _policy.RemoveAt(i);
+                PolicyStringSet.Remove(Utility.RuleToString(oldRuleList));
+                _policy.Insert(i, Model.Policy.CreateOnlyString(newRuleList));
+                PolicyStringSet.Add(Utility.RuleToString(newRuleList));
+                break;
+            }
             return true;
         }
 

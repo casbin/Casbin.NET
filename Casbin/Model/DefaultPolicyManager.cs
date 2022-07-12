@@ -360,6 +360,19 @@ namespace Casbin.Model
             }
         }
 
+        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        {
+            StartRead();
+            try
+            {
+                return PolicyStore.HasAllPolicies(section, policyType, rules);
+            }
+            finally
+            {
+                EndRead();
+            }
+        }
+
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
         {
             if (TryStartWrite() is false)
@@ -401,6 +414,56 @@ namespace Casbin.Model
 
                 BatchAdapter?.AddPolicies(section, policyType, rulesArray);
                 return PolicyStore.AddPolicies(section, policyType, rulesArray);
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
+                IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
+                if (HasAdapter is false || AutoSave is false)
+                {
+                    return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                }
+
+                SingleAdapter?.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                if (HasAdapter is false || AutoSave is false)
+                {
+                    return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                }
+
+                BatchAdapter?.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
             }
             finally
             {
@@ -530,6 +593,65 @@ namespace Casbin.Model
                 }
 
                 return PolicyStore.AddPolicies(section, policyType, rulesArray);
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public virtual async Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
+                IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
+                if (HasAdapter is false || AutoSave is false)
+                {
+                    return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                }
+
+                if (SingleAdapter is not null)
+                {
+                    await SingleAdapter.UpdatePolicyAsync(section, policyType, oldRuleArray, newRuleArray);
+                }
+
+                return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
+        public virtual async Task<bool> UpdatePoliciesAsync(string section, string policyType,
+            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                if (HasAdapter is false || AutoSave is false)
+                {
+                    return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                }
+
+                if (BatchAdapter is not null)
+                {
+                    await BatchAdapter.UpdatePoliciesAsync(section, policyType, oldRulesArray, newRulesArray);
+                }
+
+                return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
             }
             finally
             {
