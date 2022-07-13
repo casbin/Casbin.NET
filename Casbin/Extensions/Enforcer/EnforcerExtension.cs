@@ -237,6 +237,7 @@ namespace Casbin
 
             enforcer.ClearCache();
             enforcer.Model.RefreshPolicyStringSet();
+
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
@@ -258,6 +259,7 @@ namespace Casbin
 
             enforcer.ClearCache();
             enforcer.Model.RefreshPolicyStringSet();
+
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();

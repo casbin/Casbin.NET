@@ -42,6 +42,8 @@ namespace Casbin
             {
                 this.LoadPolicy();
             }
+            Model.SortPoliciesByPriority();
+            Model.SortPoliciesBySubjectHierarchy();
         }
 
         #region Options

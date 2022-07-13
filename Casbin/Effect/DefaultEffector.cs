@@ -69,6 +69,7 @@ namespace Casbin.Effect
             PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
             PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
             PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
+            PermConstants.PolicyEffect.SubjectPriority => EffectExpressionType.PriorityAllOverride, 
             PermConstants.PolicyEffect.PriorityDenyOverride => EffectExpressionType.PriorityDenyOverride,
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
