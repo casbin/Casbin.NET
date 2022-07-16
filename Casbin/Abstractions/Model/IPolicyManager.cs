@@ -46,6 +46,10 @@ namespace Casbin.Model
 
         public Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
+        public Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule);
+
+        public Task<bool> UpdatePoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules);
+
         public Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule);
 
         public Task<bool> RemovePoliciesAsync(string section, string policyType,

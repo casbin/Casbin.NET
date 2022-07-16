@@ -23,9 +23,15 @@ namespace Casbin.Model
 
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
 
+        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule);
 
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule);
+
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules);
 
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule);
 

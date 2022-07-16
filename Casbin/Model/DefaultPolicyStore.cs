@@ -95,6 +95,13 @@ namespace Casbin.Model
             return ruleArray.Length == 0 || ruleArray.Any(assertion.Contains);
         }
 
+        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        {
+            var assertion = GetRequiredAssertion(section, policyType);
+            var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
+            return ruleArray.Length == 0 || ruleArray.All(assertion.Contains);
+        }
+
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
         {
             var assertion = GetRequiredAssertion(section, policyType);
@@ -119,6 +126,35 @@ namespace Casbin.Model
             foreach (var rule in ruleArray)
             {
                 assertion.TryAddPolicy(rule);
+            }
+            return true;
+        }
+
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            var assertion = GetRequiredAssertion(section, policyType);
+            return assertion.TryUpdatePolicy(oldRule, newRule);
+        }
+
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        {
+            if (oldRules is null)
+            {
+                throw new ArgumentNullException(nameof(oldRules));
+            }
+
+            var assertion = GetRequiredAssertion(section, policyType);
+            var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+            var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+
+            if (oldRulesArray.Length != newRulesArray.Length)
+            {
+                return false;
+            }
+
+            for (int i = 0; i < oldRulesArray.Length; i++)
+            {
+                assertion.TryUpdatePolicy(oldRulesArray[i], newRulesArray[i]);
             }
             return true;
         }

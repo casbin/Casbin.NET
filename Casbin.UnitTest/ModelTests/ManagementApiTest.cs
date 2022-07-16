@@ -133,6 +133,68 @@ namespace Casbin.UnitTests.ModelTests
 
             e.RemoveFilteredPolicy(1, "");
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
+
+            bool res = e.UpdatePolicy(AsList("eve", "data3", "read"), AsList("eve", "data3", "write"));
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "write")));
+            Assert.True(res);
+
+            // This test shows that a non-existent policy will not be updated.
+            res = e.UpdatePolicy(AsList("non_exist", "data3", "write"), AsList("non_exist", "data3", "read"));
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "write")));
+            Assert.False(res);
+
+            e.AddPolicies(rules);
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "write"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("leyo", "data4", "read"),
+                AsList("ham", "data4", "write")));
+
+            res = e.UpdatePolicies(
+                AsList(
+                    AsList("eve", "data3", "write"),
+                    AsList("leyo", "data4", "read"),
+                    AsList("katy", "data4", "write")),
+                AsList(
+                    AsList("eve", "data3", "read"),
+                    AsList("leyo", "data4", "write"),
+                    AsList("katy", "data1", "write")));
+            TestGetPolicy(e, AsList(
+                    AsList("eve", "data3", "read"),
+                    AsList("jack", "data4", "read"),
+                    AsList("katy", "data1", "write"),
+                    AsList("leyo", "data4", "write"),
+                    AsList("ham", "data4", "write")));
+            Assert.True(res);
+
+            // This test shows that a non-existent policy in oldParameters will not be updated, so other existent ones
+            // will be ignored and the return value will be False.
+            res = e.UpdatePolicies(
+                AsList(
+                    AsList("eve", "data3", "read"), AsList("non_exist", "data4", "read")),
+                AsList(
+                    AsList("eve", "data3", "write"), AsList("non_exist", "data4", "write")));
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
+            Assert.False(res);
+
+            // If oldRules' length is not the same as newRules', no rules will be updated.
+            res = e.UpdatePolicies(
+                AsList(
+                    AsList("eve", "data3", "read"), AsList("leyo", "data4", "write")),
+                AsList(AsList("eve", "data3", "write")));
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
+            Assert.False(res);
         }
 
         [Fact]
@@ -193,6 +255,68 @@ namespace Casbin.UnitTests.ModelTests
             await e.RemoveFilteredPolicyAsync(1, "data2");
 
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
+
+            bool res = await e.UpdatePolicyAsync(AsList("eve", "data3", "read"), AsList("eve", "data3", "write"));
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "write")));
+            Assert.True(res);
+
+            // This test shows that a non-existent policy will not be updated.
+            res = await e.UpdatePolicyAsync(AsList("non_exist", "data3", "write"), AsList("non_exist", "data3", "read"));
+            TestGetPolicy(e, AsList(AsList("eve", "data3", "write")));
+            Assert.False(res);
+
+            await e.AddPoliciesAsync(rules);
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "write"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data4", "write"),
+                AsList("leyo", "data4", "read"),
+                AsList("ham", "data4", "write")));
+
+            res = await e.UpdatePoliciesAsync(
+                AsList(
+                    AsList("eve", "data3", "write"),
+                    AsList("leyo", "data4", "read"),
+                    AsList("katy", "data4", "write")),
+                AsList(
+                    AsList("eve", "data3", "read"),
+                    AsList("leyo", "data4", "write"),
+                    AsList("katy", "data1", "write")));
+            TestGetPolicy(e, AsList(
+                    AsList("eve", "data3", "read"),
+                    AsList("jack", "data4", "read"),
+                    AsList("katy", "data1", "write"),
+                    AsList("leyo", "data4", "write"),
+                    AsList("ham", "data4", "write")));
+            Assert.True(res);
+
+            // This test shows that a non-existent policy in oldParameters will not be updated, so other existent ones
+            // will be ignored and the return value will be False.
+            res = await e.UpdatePoliciesAsync(
+                AsList(
+                    AsList("eve", "data3", "read"), AsList("non_exist", "data4", "read")),
+                AsList(
+                    AsList("eve", "data3", "write"), AsList("non_exist", "data4", "write")));
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
+            Assert.False(res);
+
+            // If oldRules' length is not the same as newRules', no rules will be updated.
+            res = await e.UpdatePoliciesAsync(
+                AsList(
+                    AsList("eve", "data3", "read"), AsList("leyo", "data4", "write")),
+                AsList(AsList("eve", "data3", "write")));
+            TestGetPolicy(e, AsList(
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
+            Assert.False(res);
         }
 
         [Fact]
@@ -254,6 +378,58 @@ namespace Casbin.UnitTests.ModelTests
             TestGetUsers(e, "data1_admin", AsList());
             TestGetUsers(e, "data2_admin", AsList());
             TestGetUsers(e, "data3_admin", AsList("eve"));
+
+            e.AddGroupingPolicy("data3_admin", "data4_admin");
+            bool res = e.UpdateGroupingPolicy(AsList("eve", "data3_admin"), AsList("eve", "admin"));
+            Assert.True(res);
+            res = e.UpdateGroupingPolicy(AsList("data3_admin", "data4_admin"), AsList("admin", "data4_admin"));
+            Assert.True(res);
+            TestGetUsers(e, "data4_admin", AsList("admin"));
+            TestGetUsers(e, "admin", AsList("eve"));
+            TestGetRoles(e, "eve", AsList("admin"));
+            TestGetRoles(e, "admin", AsList("data4_admin"));
+
+            res = e.UpdateGroupingPolicy(AsList("non_exist", "data4_admin"), AsList("non_exist2", "data4_admin"));
+            Assert.False(res);
+            TestGetUsers(e, "data4_admin", AsList("admin"));
+
+            res = e.UpdateGroupingPolicies(
+                AsList(
+                    AsList("eve", "admin"),
+                    AsList("admin", "data4_admin")),
+                AsList(
+                    AsList("eve", "admin_groups"),
+                    AsList("admin", "data5_admin")));
+
+            Assert.True(res);
+            TestGetUsers(e, "data5_admin", AsList("admin"));
+            TestGetUsers(e, "admin_groups", AsList("eve"));
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
+
+            res = e.UpdateGroupingPolicies(
+                AsList(
+                    AsList("admin", "data5_admin"),
+                    AsList("non_exist", "admin_groups")
+                    ),
+                AsList(
+                    AsList("admin", "data6_admin"),
+                    AsList("non_exist2", "admin_groups")
+                    ));
+            Assert.False(res);
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
+
+            // If oldRules' length is not the same as newRules', no rules will be updated.
+            res = e.UpdateGroupingPolicies(
+                AsList(
+                    AsList("admin", "data5_admin"),
+                    AsList("eve", "admin2_groups")),
+                AsList(
+                    AsList("admin", "data6_admin")));
+            Assert.False(res);
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
         }
 
         [Fact]
@@ -314,6 +490,58 @@ namespace Casbin.UnitTests.ModelTests
             TestGetUsers(e, "data1_admin", AsList());
             TestGetUsers(e, "data2_admin", AsList());
             TestGetUsers(e, "data3_admin", AsList("eve"));
+
+            await e.AddGroupingPolicyAsync("data3_admin", "data4_admin");
+            bool res = await e.UpdateGroupingPolicyAsync(AsList("eve", "data3_admin"), AsList("eve", "admin"));
+            Assert.True(res);
+            res = await e.UpdateGroupingPolicyAsync(AsList("data3_admin", "data4_admin"), AsList("admin", "data4_admin"));
+            Assert.True(res);
+            TestGetUsers(e, "data4_admin", AsList("admin"));
+            TestGetUsers(e, "admin", AsList("eve"));
+            TestGetRoles(e, "eve", AsList("admin"));
+            TestGetRoles(e, "admin", AsList("data4_admin"));
+
+            res = await e.UpdateGroupingPolicyAsync(AsList("non_exist", "data4_admin"), AsList("non_exist2", "data4_admin"));
+            Assert.False(res);
+            TestGetUsers(e, "data4_admin", AsList("admin"));
+
+            res = await e.UpdateGroupingPoliciesAsync(
+                AsList(
+                    AsList("eve", "admin"),
+                    AsList("admin", "data4_admin")),
+                AsList(
+                    AsList("eve", "admin_groups"),
+                    AsList("admin", "data5_admin")));
+
+            Assert.True(res);
+            TestGetUsers(e, "data5_admin", AsList("admin"));
+            TestGetUsers(e, "admin_groups", AsList("eve"));
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
+
+            res = await e.UpdateGroupingPoliciesAsync(
+                AsList(
+                    AsList("admin", "data5_admin"),
+                    AsList("non_exist", "admin_groups")
+                    ),
+                AsList(
+                    AsList("admin", "data6_admin"),
+                    AsList("non_exist2", "admin_groups")
+                    ));
+            Assert.False(res);
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
+
+            // If oldRules' length is not the same as newRules', no rules will be updated.
+            res = await e.UpdateGroupingPoliciesAsync(
+                AsList(
+                    AsList("admin", "data5_admin"),
+                    AsList("eve", "admin2_groups")),
+                AsList(
+                    AsList("admin", "data6_admin")));
+            Assert.False(res);
+            TestGetRoles(e, "admin", AsList("data5_admin"));
+            TestGetRoles(e, "eve", AsList("admin_groups"));
         }
     }
 }

@@ -188,6 +188,28 @@ namespace Casbin.Model
         }
 
         /// <summary>
+        /// Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRule"></param>
+        /// <param name="newRule"></param>
+        public void BuildIncrementalRoleLink(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        {
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetRequiredAssertion(section, roleType);
+            assertion.BuildIncrementalRoleLink(policyOperation, oldRule, newRule);
+
+            GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
         /// Provides incremental build the role inheritance relations.
         /// </summary>
         /// <param name="policyOperation"></param>
@@ -204,6 +226,28 @@ namespace Casbin.Model
 
             Assertion assertion = GetRequiredAssertion(section, roleType);
             assertion.BuildIncrementalRoleLinks(policyOperation, rules);
+
+            GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
+        /// Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="policyOperation"></param>
+        /// <param name="section"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRules"></param>
+        /// <param name="newRules"></param>
+        public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
+            string section, string roleType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        {
+            if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            Assertion assertion = GetRequiredAssertion(section, roleType);
+            assertion.BuildIncrementalRoleLinks(policyOperation, oldRules, newRules);
 
             GFunctionCachePool.Clear(roleType);
         }
@@ -387,11 +431,20 @@ namespace Casbin.Model
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.HasPolicies(section, policyType, rules);
 
+        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+            => PolicyManager.HasAllPolicies(section, policyType, rules);
+
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
             => PolicyManager.AddPolicy(section, policyType, rule);
 
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.AddPolicies(section, policyType, rules);
+
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+            => PolicyManager.UpdatePolicy(section, policyType, oldRule, newRule);
+
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+            => PolicyManager.UpdatePolicies(section, policyType, oldRules, newRules);
 
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
             => PolicyManager.RemovePolicy(section, policyType, rule);
