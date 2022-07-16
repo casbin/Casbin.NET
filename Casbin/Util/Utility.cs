@@ -4,11 +4,6 @@ namespace Casbin.Util
 {
     internal static class Utility
     {
-        internal static string RuleToString(IEnumerable<string> rule)
-        {
-            return string.Join(PermConstants.PolicySeparatorString, rule);
-        }
-
         /// <summary>
         /// SetEquals determines whether two string sets are identical.
         /// </summary>

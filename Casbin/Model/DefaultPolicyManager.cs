@@ -421,7 +421,8 @@ namespace Casbin.Model
             }
         }
 
-        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule,
+            IEnumerable<string> newRule)
         {
             if (TryStartWrite() is false)
             {
@@ -446,7 +447,8 @@ namespace Casbin.Model
             }
         }
 
-        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
+            IEnumerable<IEnumerable<string>> newRules)
         {
             if (TryStartWrite() is false)
             {
@@ -455,8 +457,8 @@ namespace Casbin.Model
 
             try
             {
-                var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
                     return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
@@ -600,7 +602,8 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        public virtual async Task<bool> UpdatePolicyAsync(string section, string policyType,
+            IEnumerable<string> oldRule, IEnumerable<string> newRule)
         {
             if (TryStartWrite() is false)
             {
@@ -639,8 +642,8 @@ namespace Casbin.Model
 
             try
             {
-                var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
                     return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);

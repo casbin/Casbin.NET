@@ -209,9 +209,9 @@ namespace Casbin.Model
             });
         }
 
-        public override Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
-        {
-            return Task.Run(() =>
+        public override Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule,
+            IEnumerable<string> newRule) =>
+            Task.Run(() =>
             {
                 if (TryStartWrite() is false)
                 {
@@ -240,12 +240,10 @@ namespace Casbin.Model
                     EndWrite();
                 }
             });
-        }
 
         public override Task<bool> UpdatePoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
-        {
-            return Task.Run(() =>
+            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
+            Task.Run(() =>
             {
                 if (TryStartWrite() is false)
                 {
@@ -254,11 +252,12 @@ namespace Casbin.Model
 
                 try
                 {
-                    var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                    var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                    IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                    IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
                     if (HasAdapter is false || AutoSave is false)
                     {
-                        return Task.FromResult(PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray));
+                        return Task.FromResult(PolicyStore.UpdatePolicies(section, policyType, oldRulesArray,
+                            newRulesArray));
                     }
 
                     if (BatchAdapter is not null)
@@ -266,14 +265,14 @@ namespace Casbin.Model
                         BatchAdapter.UpdatePoliciesAsync(section, policyType, oldRulesArray, newRulesArray).Wait();
                     }
 
-                    return Task.FromResult(PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray));
+                    return Task.FromResult(
+                        PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray));
                 }
                 finally
                 {
                     EndWrite();
                 }
             });
-        }
 
         public override Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
         {

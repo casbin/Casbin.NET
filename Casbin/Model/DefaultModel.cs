@@ -12,18 +12,21 @@ namespace Casbin.Model
 {
     public class DefaultModel : IModel
     {
-        private static readonly IDictionary<string, string> s_sectionNameMap = new Dictionary<string, string>() {
-            { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName},
-            { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName},
-            { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName},
-            { PermConstants.Section.PolicyEffectSection, PermConstants.Section.PolicyEffectSectionName},
-            { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName}
+        private static readonly IDictionary<string, string> s_sectionNameMap = new Dictionary<string, string>
+        {
+            { PermConstants.Section.RequestSection, PermConstants.Section.RequestSectionName },
+            { PermConstants.Section.PolicySection, PermConstants.Section.PolicySectionName },
+            { PermConstants.Section.RoleSection, PermConstants.Section.RoleSectionName },
+            { PermConstants.Section.PolicyEffectSection, PermConstants.Section.PolicyEffectSectionName },
+            { PermConstants.Section.MatcherSection, PermConstants.Section.MatcherSectionName }
         };
 
         internal DefaultModel(IPolicyManager policyManager)
         {
             PolicyManager = policyManager ?? throw new NullReferenceException(nameof(policyManager));
         }
+
+        public IGFunctionCachePool GFunctionCachePool { get; } = new GFunctionCachePool();
 
         public IPolicyManager PolicyManager { get; set; }
 
@@ -37,57 +40,6 @@ namespace Casbin.Model
         public IEnforceViewCache EnforceViewCache { get; } = new EnforceViewCache();
 
         public IExpressionHandler ExpressionHandler { get; } = new ExpressionHandler();
-
-        public IGFunctionCachePool GFunctionCachePool { get; }  = new GFunctionCachePool();
-
-        /// <summary>
-        /// Creates a default model.
-        /// </summary>
-        /// <returns></returns>
-        public static IModel Create()
-        {
-            DefaultModel model = new(DefaultPolicyManager.Create());
-            return model;
-        }
-
-        /// <summary>
-        /// Creates a default model from file.
-        /// </summary>
-        /// <param name="path">The path of the model file.</param>
-        /// <returns></returns>
-        public static IModel CreateFromFile(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-            {
-                throw new ArgumentNullException(nameof(path));
-            }
-
-            if (!File.Exists(path))
-            {
-                throw new FileNotFoundException("Can not find the model file.");
-            }
-
-            IModel model = Create();
-            model.LoadModelFromFile(path);
-            return model;
-        }
-
-        /// <summary>
-        /// Creates a default model from text.
-        /// </summary>
-        /// <param name="text"></param>
-        /// <returns></returns>
-        public static IModel CreateFromText(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new ArgumentNullException(nameof(text));
-            }
-
-            IModel model = Create();
-            model.LoadModelFromText(text);
-            return model;
-        }
 
         public void LoadModelFromFile(string path)
         {
@@ -107,11 +59,7 @@ namespace Casbin.Model
                 return false;
             }
 
-            var assertion = new Assertion
-            {
-                Key = key,
-                Value = value
-            };
+            Assertion assertion = new() { Key = key, Value = value };
 
             if (section.Equals(PermConstants.Section.RequestSection)
                 || section.Equals(PermConstants.Section.PolicySection))
@@ -126,6 +74,7 @@ namespace Casbin.Model
                     {
                         tokenDic.Add(tokens[i], i);
                     }
+
                     assertion.Tokens = tokenDic;
                 }
             }
@@ -137,10 +86,7 @@ namespace Casbin.Model
 
             if (Sections.ContainsKey(section) is false)
             {
-                var assertionMap = new Dictionary<string, Assertion>
-                {
-                    [key] = assertion
-                };
+                Dictionary<string, Assertion> assertionMap = new() { [key] = assertion };
                 Sections.Add(section, assertionMap);
             }
             else
@@ -153,6 +99,7 @@ namespace Casbin.Model
                 ExpressionHandler.SetFunction(key, BuiltInFunctions.GenerateGFunction(
                     assertion.RoleManager, GFunctionCachePool.GetCache(key)));
             }
+
             return true;
         }
 
@@ -188,7 +135,7 @@ namespace Casbin.Model
         }
 
         /// <summary>
-        /// Provides incremental build the role inheritance relation.
+        ///     Provides incremental build the role inheritance relation.
         /// </summary>
         /// <param name="policyOperation"></param>
         /// <param name="section"></param>
@@ -231,7 +178,7 @@ namespace Casbin.Model
         }
 
         /// <summary>
-        /// Provides incremental build the role inheritance relations.
+        ///     Provides incremental build the role inheritance relations.
         /// </summary>
         /// <param name="policyOperation"></param>
         /// <param name="section"></param>
@@ -239,7 +186,8 @@ namespace Casbin.Model
         /// <param name="oldRules"></param>
         /// <param name="newRules"></param>
         public void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
-            string section, string roleType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+            string section, string roleType, IEnumerable<IEnumerable<string>> oldRules,
+            IEnumerable<IEnumerable<string>> newRules)
         {
             if (Sections.ContainsKey(PermConstants.Section.RoleSection) is false)
             {
@@ -291,7 +239,7 @@ namespace Casbin.Model
         public void RefreshPolicyStringSet()
         {
             foreach (Assertion assertion in Sections.Values
-                .SelectMany(pair => pair.Values))
+                         .SelectMany(pair => pair.Values))
             {
                 assertion.RefreshPolicyStringSet();
             }
@@ -300,7 +248,7 @@ namespace Casbin.Model
         public void SortPoliciesByPriority()
         {
             foreach (Assertion assertion in Sections.Values
-                .SelectMany(pair => pair.Values))
+                         .SelectMany(pair => pair.Values))
             {
                 assertion.TrySortPoliciesByPriority();
             }
@@ -312,16 +260,69 @@ namespace Casbin.Model
             {
                 return;
             }
-            if (!Sections[PermConstants.DefaultPolicyEffectType][PermConstants.DefaultPolicyEffectType].Value.Equals(PermConstants.PolicyEffect.SubjectPriority))
+
+            if (!Sections[PermConstants.DefaultPolicyEffectType][PermConstants.DefaultPolicyEffectType].Value
+                    .Equals(PermConstants.PolicyEffect.SubjectPriority))
             {
                 return;
             }
-            var subjectHierarchyMap = GetSubjectHierarchyMap(Sections[PermConstants.DefaultRoleType][PermConstants.DefaultRoleType].Policy);
+
+            Dictionary<string, int> subjectHierarchyMap =
+                GetSubjectHierarchyMap(Sections[PermConstants.DefaultRoleType][PermConstants.DefaultRoleType].Policy);
             foreach (var keyValuePair in Sections[PermConstants.DefaultPolicyType])
             {
                 var assertion = keyValuePair.Value;
                 assertion.TrySortPoliciesBySubjectHierarchy(subjectHierarchyMap, GetNameWithDomain);
             }
+        }
+
+        /// <summary>
+        ///     Creates a default model.
+        /// </summary>
+        /// <returns></returns>
+        public static IModel Create()
+        {
+            DefaultModel model = new(DefaultPolicyManager.Create());
+            return model;
+        }
+
+        /// <summary>
+        ///     Creates a default model from file.
+        /// </summary>
+        /// <param name="path">The path of the model file.</param>
+        /// <returns></returns>
+        public static IModel CreateFromFile(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+            {
+                throw new ArgumentNullException(nameof(path));
+            }
+
+            if (!File.Exists(path))
+            {
+                throw new FileNotFoundException("Can not find the model file.");
+            }
+
+            IModel model = Create();
+            model.LoadModelFromFile(path);
+            return model;
+        }
+
+        /// <summary>
+        ///     Creates a default model from text.
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static IModel CreateFromText(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                throw new ArgumentNullException(nameof(text));
+            }
+
+            IModel model = Create();
+            model.LoadModelFromText(text);
+            return model;
         }
 
         private string GetNameWithDomain(string domain, string name)
@@ -334,7 +335,7 @@ namespace Casbin.Model
             Dictionary<string, int> refer = new Dictionary<string, int>();
             Dictionary<string, int> res = new Dictionary<string, int>();
             Dictionary<string, List<string>> policyChildenMap = new Dictionary<string, List<string>>();
-            foreach(var policy in policies)
+            foreach (IPolicyValues policy in policies)
             {
                 string domain = policy.Count > 2 ? policy[2] : null;
                 string child = GetNameWithDomain(domain, policy[0]);
@@ -347,10 +348,12 @@ namespace Casbin.Model
                 {
                     policyChildenMap[parent] = new List<string>(new string[] { child });
                 }
+
                 refer[parent] = refer[child] = 0;
             }
+
             Queue<string> q = new Queue<string>();
-            foreach(var keyValuePair in refer)
+            foreach (KeyValuePair<string, int> keyValuePair in refer)
             {
                 if (keyValuePair.Value != 0) continue;
                 int level = 0;
@@ -364,16 +367,18 @@ namespace Casbin.Model
                         res[node] = level;
                         if (policyChildenMap.ContainsKey(node))
                         {
-                            foreach(var child in policyChildenMap[node])
+                            foreach (string child in policyChildenMap[node])
                             {
                                 q.Enqueue(child);
                             }
                         }
                     }
+
                     level++;
                 }
             }
-            return res; 
+
+            return res;
         }
 
         private void LoadModel(IConfig config)
@@ -395,6 +400,7 @@ namespace Casbin.Model
                 {
                     break;
                 }
+
                 i++;
             }
         }
@@ -416,7 +422,8 @@ namespace Casbin.Model
         public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
             => PolicyManager.GetPolicy(section, policyType);
 
-        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
+            params string[] fieldValues)
             => PolicyManager.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
         public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex)
@@ -440,10 +447,12 @@ namespace Casbin.Model
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.AddPolicies(section, policyType, rules);
 
-        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule,
+            IEnumerable<string> newRule)
             => PolicyManager.UpdatePolicy(section, policyType, oldRule, newRule);
 
-        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
+            IEnumerable<IEnumerable<string>> newRules)
             => PolicyManager.UpdatePolicies(section, policyType, oldRules, newRules);
 
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
@@ -452,12 +461,14 @@ namespace Casbin.Model
         public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.RemovePolicies(section, policyType, rules);
 
-        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex, params string[] fieldValues)
+        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
+            params string[] fieldValues)
             => PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
         public void ClearPolicy() => PolicyManager.ClearPolicy();
 
-        public Assertion GetRequiredAssertion(string section, string type) => PolicyManager.GetRequiredAssertion(section, type);
+        public Assertion GetRequiredAssertion(string section, string type) =>
+            PolicyManager.GetRequiredAssertion(section, type);
 
         public bool TryGetAssertion(string section, string type, out Assertion returnAssertion) =>
             PolicyManager.TryGetAssertion(section, type, out returnAssertion);

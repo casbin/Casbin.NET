@@ -11,7 +11,8 @@ namespace Casbin.Persist
 
         void UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule);
 
-        Task UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRules, IEnumerable<string> newRules);
+        Task UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRules,
+            IEnumerable<string> newRules);
 
         void RemovePolicy(string section, string policyType, IEnumerable<string> rule);
 

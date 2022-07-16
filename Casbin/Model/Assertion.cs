@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Casbin.Rbac;
-using Casbin.Util;
 
 namespace Casbin.Model
 {
@@ -14,22 +13,6 @@ namespace Casbin.Model
     {
         private List<IPolicyValues> _policy;
 
-        public string Key { get; internal set; }
-
-        public string Value { get; internal set; }
-
-        public IReadOnlyDictionary<string, int> Tokens { get; internal set; }
-
-        public IRoleManager RoleManager { get; internal set; }
-
-        public IReadOnlyList<IPolicyValues> Policy
-        {
-            get => _policy;
-            internal set => _policy = value as List<IPolicyValues> ?? value.ToList();
-        }
-
-        internal HashSet<string> PolicyStringSet { get; }
-
         public Assertion()
         {
             _policy = new List<IPolicyValues>();
@@ -37,12 +20,28 @@ namespace Casbin.Model
             RoleManager = new DefaultRoleManager(10);
         }
 
+        public IRoleManager RoleManager { get; internal set; }
+
+        internal HashSet<string> PolicyStringSet { get; }
+
+        public string Key { get; internal set; }
+
+        public string Value { get; internal set; }
+
+        public IReadOnlyDictionary<string, int> Tokens { get; internal set; }
+
+        public IReadOnlyList<IPolicyValues> Policy
+        {
+            get => _policy;
+            internal set => _policy = value as List<IPolicyValues> ?? value.ToList();
+        }
+
         public void RefreshPolicyStringSet()
         {
             PolicyStringSet.Clear();
             foreach (var rule in Policy)
             {
-                PolicyStringSet.Add(Utility.RuleToString(rule));
+                PolicyStringSet.Add(rule.ToText());
             }
         }
 
@@ -57,7 +56,8 @@ namespace Casbin.Model
             BuildRoleLink(count, policyOperation, rule);
         }
 
-        internal void BuildIncrementalRoleLink(PolicyOperation policyOperation, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        internal void BuildIncrementalRoleLink(PolicyOperation policyOperation, IEnumerable<string> oldRule,
+            IEnumerable<string> newRule)
         {
             int count = Value.Count(c => c is '_');
             if (count < 2)
@@ -82,7 +82,8 @@ namespace Casbin.Model
             }
         }
 
-        internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+        internal void BuildIncrementalRoleLinks(PolicyOperation policyOperation,
+            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
         {
             int count = Value.Count(c => c is '_');
             if (count < 2)
@@ -90,12 +91,16 @@ namespace Casbin.Model
                 throw new InvalidOperationException("the number of \"_\" in role definition should be at least 2.");
             }
 
-            var rulesList = oldRules as IReadOnlyList<IEnumerable<string>> ?? oldRules.ToList();
-            var newRulesList = newRules as IReadOnlyList<IEnumerable<string>> ?? newRules.ToList();
+            IReadOnlyList<IEnumerable<string>> rulesList =
+                oldRules as IReadOnlyList<IEnumerable<string>> ?? oldRules.ToList();
+            IReadOnlyList<IEnumerable<string>> newRulesList =
+                newRules as IReadOnlyList<IEnumerable<string>> ?? newRules.ToList();
             if (rulesList.Count != newRulesList.Count)
             {
-                throw new InvalidOperationException($"the length of oldPolices should be equal to the length of newPolices, but got the length of oldPolices is {rulesList.Count}, the length of newPolices is {newRulesList.Count}.");
+                throw new InvalidOperationException(
+                    $"the length of oldPolices should be equal to the length of newPolices, but got the length of oldPolices is {rulesList.Count}, the length of newPolices is {newRulesList.Count}.");
             }
+
             for (int i = 0; i < rulesList.Count; i++)
             {
                 BuildRoleLink(count, policyOperation, rulesList[i], newRulesList[i]);
@@ -147,6 +152,7 @@ namespace Casbin.Model
                         default:
                             throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
+
                     break;
                 case PolicyOperation.PolicyUpdate:
                     if (newRule.Length == 0)
@@ -179,6 +185,7 @@ namespace Casbin.Model
                         default:
                             throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
+
                     break;
                 case PolicyOperation.PolicyRemove:
                     switch (groupPolicyCount)
@@ -192,78 +199,77 @@ namespace Casbin.Model
                         default:
                             throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
+
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);
             }
         }
 
-        internal bool Contains(IEnumerable<string> rule)
-        {
-            return PolicyStringSet.Contains(Utility.RuleToString(rule));
-        }
+        internal bool Contains(IPolicyValues values) => PolicyStringSet.Contains(values.ToText());
 
-        internal bool TryAddPolicy(IEnumerable<string> rule)
+        internal bool TryAddPolicy(IPolicyValues values)
         {
-            var ruleList = rule as IReadOnlyList<string> ?? rule.ToArray();
-            if (Contains(ruleList))
+            if (Contains(values))
             {
                 return false;
             }
 
             if (TryGetPriorityIndex(out int index))
             {
-                return TryAddPolicyByPriority(ruleList, index);
+                return TryAddPolicyByPriority(values, index);
             }
 
-            _policy.Add(Model.Policy.CreateOnlyString(ruleList));
-            PolicyStringSet.Add(Utility.RuleToString(ruleList));
+            _policy.Add(values);
+            PolicyStringSet.Add(values.ToText());
             return true;
         }
 
-        internal bool TryUpdatePolicy(IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        internal bool TryUpdatePolicy(IPolicyValues oldValues, IPolicyValues newValues)
         {
-            var oldRuleList = oldRule as IReadOnlyList<string> ?? oldRule.ToArray();
-            if (Contains(oldRuleList) is false)
+            if (Contains(oldValues) is false)
             {
                 return false;
             }
 
-            var newRuleList = newRule as IReadOnlyList<string> ?? newRule.ToArray();
             for (int i = 0; i < Policy.Count; i++)
             {
-                var ruleInPolicy = Policy[i];
-                if (oldRuleList.DeepEquals(ruleInPolicy) is false)
+                IPolicyValues ruleInPolicy = Policy[i];
+                if (ruleInPolicy.Equals(oldValues) is false)
                 {
                     continue;
                 }
+
                 _policy.RemoveAt(i);
-                PolicyStringSet.Remove(Utility.RuleToString(oldRuleList));
-                _policy.Insert(i, Model.Policy.CreateOnlyString(newRuleList));
-                PolicyStringSet.Add(Utility.RuleToString(newRuleList));
-                break;
+                PolicyStringSet.Remove(oldValues.ToText());
+                _policy.Insert(i, newValues);
+                PolicyStringSet.Add(newValues.ToText());
+                return true;
             }
+
             return true;
         }
 
-        internal bool TryRemovePolicy(IEnumerable<string> rule)
+        internal bool TryRemovePolicy(IPolicyValues values)
         {
-            var ruleList = rule as IReadOnlyList<string> ?? rule.ToArray();
-            if (Contains(ruleList) is false)
+            if (Contains(values) is false)
             {
                 return false;
             }
+
             for (int i = 0; i < Policy.Count; i++)
             {
                 var ruleInPolicy = Policy[i];
-                if (ruleList.DeepEquals(ruleInPolicy) is false)
+                if (ruleInPolicy.Equals(values) is false)
                 {
                     continue;
                 }
+
                 _policy.RemoveAt(i);
-                PolicyStringSet.Remove(Utility.RuleToString(ruleList));
-                break;
+                PolicyStringSet.Remove(values.ToText());
+                return true;
             }
+
             return true;
         }
 
@@ -273,21 +279,21 @@ namespace Casbin.Model
             PolicyStringSet.Clear();
         }
 
-        private bool TryAddPolicyByPriority(IReadOnlyList<string> rule, int priorityIndex)
+        private bool TryAddPolicyByPriority(IPolicyValues values, int priorityIndex)
         {
-            if (int.TryParse(rule[priorityIndex], out int priority) is false)
+            if (int.TryParse(values[priorityIndex], out int priority) is false)
             {
                 return false;
             }
 
-            bool LastLessOrEqualPriority(IReadOnlyList<string> p)
+            bool LastLessOrEqualPriority(IPolicyValues v)
             {
-                return int.Parse(p[priorityIndex]) <= priority;
+                return int.Parse(v[priorityIndex]) <= priority;
             }
 
             int lastIndex = _policy.FindLastIndex(LastLessOrEqualPriority);
-            _policy.Insert(lastIndex + 1, Model.Policy.CreateOnlyString(rule));
-            PolicyStringSet.Add(Utility.RuleToString(rule));
+            _policy.Insert(lastIndex + 1, values);
+            PolicyStringSet.Add(values.ToText());
             return true;
         }
 
@@ -298,6 +304,7 @@ namespace Casbin.Model
                 index = -1;
                 return false;
             }
+
             return Tokens.TryGetValue("priority", out index);
         }
 
@@ -333,6 +340,7 @@ namespace Casbin.Model
                 index = -1;
                 return false;
             }
+
             return Tokens.TryGetValue("dom", out index);
         }
 
@@ -343,16 +351,19 @@ namespace Casbin.Model
                 index = -1;
                 return false;
             }
+
             return Tokens.TryGetValue("sub", out index);
         }
 
 
-        internal bool TrySortPoliciesBySubjectHierarchy(Dictionary<string, int> subjectHierarchyMap, Func<string, string, string> nameFormatter)
+        internal bool TrySortPoliciesBySubjectHierarchy(Dictionary<string, int> subjectHierarchyMap,
+            Func<string, string, string> nameFormatter)
         {
-            if(TryGetSubjectHierarchyDomainIndex(out int domainIndex) is false)
+            if (TryGetSubjectHierarchyDomainIndex(out int domainIndex) is false)
             {
                 domainIndex = -1;
             }
+
             if (TryGetSubjectHierarchySubjectIndex(out int subjectIndex) is false)
             {
                 return false;
@@ -362,16 +373,18 @@ namespace Casbin.Model
             int PolicyComparison(IPolicyValues p1, IPolicyValues p2)
             {
                 string domain1 = "", domain2 = "";
-                if(domainIndex != -1)
+                if (domainIndex != -1)
                 {
                     domain1 = p1[domainIndex];
                     domain2 = p2[domainIndex];
                 }
+
                 string name1 = nameFormatter(domain1, p1[subjectIndex]);
                 string name2 = nameFormatter(domain2, p2[subjectIndex]);
 
                 return subjectHierarchyMap[name1] - subjectHierarchyMap[name2];
             }
+
             _policy.Sort(PolicyComparison);
             return true;
         }
