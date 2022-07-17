@@ -397,6 +397,29 @@ namespace Casbin.Model
             }
         }
 
+        public bool AddPolicy(string section, string policyType, IPolicyValues values)
+        {
+            if (TryStartWrite() is false)
+            {
+                return false;
+            }
+
+            try
+            {
+                if (HasAdapter is false || AutoSave is false)
+                {
+                    return PolicyStore.AddPolicy(section, policyType, values);
+                }
+
+                SingleAdapter?.AddPolicy(section, policyType, values);
+                return PolicyStore.AddPolicy(section, policyType, values);
+            }
+            finally
+            {
+                EndWrite();
+            }
+        }
+
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
         {
             if (TryStartWrite() is false)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using Casbin.Model;
 
 namespace Casbin
 {
@@ -48,7 +50,7 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
         /// <returns>
-        /// All the subjects in policy rules of the ptype type. It actually
+        /// All the subjects in policy rules of the policyType type. It actually
         /// collects the 0-index elements of the policy rules.So make sure
         /// your subject is the 0-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
@@ -77,7 +79,7 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
         /// <returns>
-        /// All the objects in policy rules of the ptype type. It actually
+        /// All the objects in policy rules of the policyType type. It actually
         /// collects the 1-index elements of the policy rules.So make sure
         /// your object is the 1-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
@@ -105,7 +107,7 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
         /// <returns>
-        /// All the actions in policy rules of the ptype type. It actually
+        /// All the actions in policy rules of the policyType type. It actually
         /// collects the 2-index elements of the policy rules.So make sure
         /// your action is the 2-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
@@ -132,7 +134,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <returns>The "p" policy rules of the specified ptype.</returns>
+        /// <returns>The "p" policy rules of the specified policyType.</returns>
         public static IEnumerable<IEnumerable<string>> GetNamedPolicy(this IEnforcer enforcer, string ptype)
         {
             return enforcer.InternalGetPolicy(PermConstants.Section.PolicySection, ptype);
@@ -158,7 +160,7 @@ namespace Casbin
         /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
         /// <param name="fieldValues">The field values to be matched, value "" means not to  match this field.</param>
-        /// <returns>The filtered "p" policy rules of the specified ptype.</returns>
+        /// <returns>The filtered "p" policy rules of the specified policyType.</returns>
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedPolicy(this IEnforcer enforcer, string ptype,
             int fieldIndex, params string[] fieldValues) =>
             enforcer.InternalGetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex,
@@ -172,7 +174,7 @@ namespace Casbin
         /// Determines whether an authorization rule exists.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="paramList">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="paramList">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Whether the rule exists.</returns>
         public static bool HasPolicy(this IEnforcer enforcer, IEnumerable<string> paramList)
         {
@@ -183,7 +185,7 @@ namespace Casbin
         /// Determines whether an authorization rule exists.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Whether the rule exists.</returns>
         public static bool HasPolicy(this IEnforcer enforcer, params string[] parameters)
         {
@@ -219,16 +221,17 @@ namespace Casbin
         #region Add Store
 
         /// <summary>
-        /// Adds an authorization rule to the current policy. If the rule
-        /// already exists, the function returns false and the rule will not be added.
-        /// Otherwise the function returns true by adding the new rule.
+        ///     Adds an authorization rule to the current policy. If the rule
+        ///     already exists, the function returns false and the rule will not be added.
+        ///     Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="values">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
-        public static bool AddPolicy(this IEnforcer enforcer, params string[] parameters)
+        public static bool AddPolicy(this IEnforcer enforcer, IEnumerable<string> values)
         {
-            return AddPolicy(enforcer, parameters as IEnumerable<string>);
+            string[] valueArray = values as string[] ?? values.ToArray();
+            return enforcer.AddPolicy(valueArray);
         }
 
         /// <summary>
@@ -237,7 +240,18 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="values">The "p" policy rule, policyType "p" is implicitly used.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static bool AddPolicy(this IEnforcer enforcer, params string[] values) =>
+            enforcer.AddNamedPolicy(PermConstants.DefaultPolicyType, values);
+
+        /// <summary>
+        /// Adds an authorization rule to the current policy. If the rule
+        /// already exists, the function returns false and the rule will not be added.
+        /// Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddPolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
@@ -250,20 +264,7 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static bool AddPolicy(this IEnforcer enforcer, IEnumerable<string> parameters)
-        {
-            return AddNamedPolicy(enforcer, PermConstants.DefaultPolicyType, parameters);
-        }
-
-        /// <summary>
-        /// Adds an authorization rule to the current policy. If the rule
-        /// already exists, the function returns false and the rule will not be added.
-        /// Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddPolicyAsync(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -276,13 +277,39 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <param name="parameters">The "p" policy rule.</param>
+        /// <param name="policyType">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="values">The "p" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
-        public static bool AddNamedPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
+        public static bool AddNamedPolicy(this IEnforcer enforcer, string policyType, IEnumerable<string> values)
         {
-            return AddNamedPolicy(enforcer, ptype, parameters as IEnumerable<string>);
+            string[] valueArray = values as string[] ?? values.ToArray();
+            return enforcer.AddNamedPolicy(policyType, valueArray);
         }
+
+        /// <summary>
+        ///     Adds an authorization rule to the current named policy.If the
+        ///     rule already exists, the function returns false and the rule will not be added.
+        ///     Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="policyType">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="values">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static bool AddNamedPolicy(this IEnforcer enforcer, string policyType, params string[] values) =>
+            enforcer.InternalAddPolicy(PermConstants.Section.PolicySection, policyType, Policy.ValuesFrom(values));
+
+
+        /// <summary>
+        ///     Adds an authorization rule to the current named policy.If the
+        ///     rule already exists, the function returns false and the rule will not be added.
+        ///     Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="policyType">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="values">The "p" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string policyType,
+            params string[] parameters) => AddNamedPolicyAsync(enforcer, policyType, parameters as IEnumerable<string>);
 
         /// <summary>
         /// Adds an authorization rule to the current named policy.If the
@@ -290,42 +317,12 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
+        /// <param name="policyType">The policy type, can be "p", "p2", "p3", ..</param>
         /// <param name="parameters">The "p" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
-        public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string ptype, params string[] parameters)
-        {
-            return AddNamedPolicyAsync(enforcer, ptype, parameters as IEnumerable<string>);
-        }
-
-        /// <summary>
-        /// Adds an authorization rule to the current named policy.If the
-        /// rule already exists, the function returns false and the rule will not be added.
-        /// Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <param name="parameters">The "p" policy rule.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static bool AddNamedPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
-        {
-            return enforcer.InternalAddPolicy(PermConstants.Section.PolicySection, ptype, parameters);
-        }
-
-        /// <summary>
-        /// Adds an authorization rule to the current named policy.If the
-        /// rule already exists, the function returns false and the rule will not be added.
-        /// Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <param name="parameters">The "p" policy rule.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string ptype,
-            IEnumerable<string> parameters)
-        {
-            return enforcer.InternalAddPolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
-        }
+        public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string policyType,
+            IEnumerable<string> parameters) =>
+            enforcer.InternalAddPolicyAsync(PermConstants.Section.PolicySection, policyType, parameters);
 
         /// <summary>
         /// Adds authorization rules to the current policy. If the rule
@@ -333,7 +330,7 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="rules">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool AddPolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -346,7 +343,7 @@ namespace Casbin
         /// Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="rules">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddPoliciesAsync(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -391,8 +388,8 @@ namespace Casbin
         ///     Updates an authorization rule to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "p" policy rule to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newParameters">The "p" policy rule to replace the old one, ptype "p" is implicitly used.</param>
+        /// <param name="oldParameters">The "p" policy rule to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newParameters">The "p" policy rule to replace the old one, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdatePolicy(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             params string[] newParameters) =>
@@ -402,8 +399,8 @@ namespace Casbin
         ///     Updates an authorization rule to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "p" policy rule to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newParameters">The "p" policy rule to replace the old one, ptype "p" is implicitly used.</param>
+        /// <param name="oldParameters">The "p" policy rule to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newParameters">The "p" policy rule to replace the old one, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdatePolicyAsync(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             params string[] newParameters) =>
@@ -413,8 +410,8 @@ namespace Casbin
         ///     Updates an authorization rule to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "p" policy rule to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newParameters">The "p" policy rule to replace the old one, ptype "p" is implicitly used.</param>
+        /// <param name="oldParameters">The "p" policy rule to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newParameters">The "p" policy rule to replace the old one, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdatePolicy(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             IEnumerable<string> newParameters) =>
@@ -424,8 +421,8 @@ namespace Casbin
         ///     Updates an authorization rule to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "p" policy rule to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newParameters">The "p" policy rule to replace the old one, ptype "p" is implicitly used.</param>
+        /// <param name="oldParameters">The "p" policy rule to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newParameters">The "p" policy rule to replace the old one, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdatePolicyAsync(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             IEnumerable<string> newParameters) =>
@@ -484,8 +481,8 @@ namespace Casbin
         ///     Updates authorization rules to the current policies.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldRules">The "p" policy rules to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newRules">The "p" policy rules to replace the old ones, ptype "p" is implicitly used.</param>
+        /// <param name="oldRules">The "p" policy rules to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newRules">The "p" policy rules to replace the old ones, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdatePolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> oldRules,
             IEnumerable<IEnumerable<string>> newRules) =>
@@ -495,8 +492,8 @@ namespace Casbin
         ///     Updates authorization rules to the current policies.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldRules">The "p" policy rules to be replaced, ptype "p" is implicitly used.</param>
-        /// <param name="newRules">The "p" policy rules to replace the old ones, ptype "p" is implicitly used.</param>
+        /// <param name="oldRules">The "p" policy rules to be replaced, policyType "p" is implicitly used.</param>
+        /// <param name="newRules">The "p" policy rules to replace the old ones, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdatePoliciesAsync(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> oldRules,
             IEnumerable<IEnumerable<string>> newRules) =>
@@ -534,7 +531,7 @@ namespace Casbin
         /// Removes an authorization rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemovePolicy(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -545,7 +542,7 @@ namespace Casbin
         /// Removes an authorization rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemovePolicyAsync(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -556,7 +553,7 @@ namespace Casbin
         /// Removes an authorization rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemovePolicy(this IEnforcer enforcer, params string[] parameters)
         {
@@ -567,7 +564,7 @@ namespace Casbin
         /// Removes an authorization rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="parameters">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemovePolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
@@ -628,7 +625,7 @@ namespace Casbin
         /// Removes authorization rules from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="rules">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemovePolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -639,7 +636,7 @@ namespace Casbin
         /// Removes authorization rules from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "p" policy rule, ptype "p" is implicitly used.</param>
+        /// <param name="rules">The "p" policy rule, policyType "p" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemovePoliciesAsync(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -752,7 +749,7 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
         /// <returns>
-        /// All the subjects in policy rules of the ptype type. It actually
+        /// All the subjects in policy rules of the policyType type. It actually
         /// collects the 0-index elements of the policy rules.So make
         /// Sure your subject is the 0-index element, like (sub, obj, act).
         /// Duplicates are removed.</returns>
@@ -769,7 +766,7 @@ namespace Casbin
         /// Determines whether a role inheritance rule exists.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Whether the rule exists.</returns>
         public static bool HasGroupingPolicy(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -780,7 +777,7 @@ namespace Casbin
         /// Determines whether a role inheritance rule exists.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Whether the rule exists.</returns>
         public static bool HasGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
         {
@@ -843,7 +840,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <returns>The "g" policy rules of the specified ptype.</returns>
+        /// <returns>The "g" policy rules of the specified policyType.</returns>
         public static IEnumerable<IEnumerable<string>> GetNamedGroupingPolicy(this IEnforcer enforcer, string ptype)
         {
             return enforcer.InternalGetPolicy(PermConstants.Section.RoleSection, ptype);
@@ -856,7 +853,7 @@ namespace Casbin
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="fieldIndex">The policy rule's start index to be matched.</param>
         /// <param name="fieldValues">The field values to be matched, value "" means not to match this field.</param>
-        /// <returns>The filtered "g" policy rules of the specified ptype.</returns>
+        /// <returns>The filtered "g" policy rules of the specified policyType.</returns>
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedGroupingPolicy(this IEnforcer enforcer,
             string ptype, int fieldIndex, params string[] fieldValues) =>
             enforcer.InternalGetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex,
@@ -872,7 +869,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool AddGroupingPolicy(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -885,7 +882,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddGroupingPolicyAsync(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -898,7 +895,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool AddGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
         {
@@ -911,7 +908,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddGroupingPolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
@@ -924,28 +921,40 @@ namespace Casbin
         /// will not be added. Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule.</param>
+        /// <param name="policyType">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="values">The "g" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
-        public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
+        public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string policyType,
+            IEnumerable<string> values)
         {
-            return enforcer.InternalAddPolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            string[] valuesArray = values as string[] ?? values.ToArray();
+            return enforcer.AddNamedGroupingPolicy(policyType, valuesArray);
         }
 
         /// <summary>
         /// Adds a named role inheritance rule to the current
         /// policy. If the rule already exists, the function returns false and the rule
         /// will not be added. Otherwise the function returns true by adding the new rule.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="policyType">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="values">The "g" policy rule.</param>
+        /// <returns>Succeeds or not.</returns>
+        public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string policyType, params string[] values) =>
+            enforcer.InternalAddPolicy(PermConstants.Section.RoleSection, policyType, Policy.ValuesFrom(values));
+
+        /// <summary>
+        ///     Adds a named role inheritance rule to the current
+        ///     policy. If the rule already exists, the function returns false and the rule
+        ///     will not be added. Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parameters">The "g" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
-            IEnumerable<string> parameters)
-        {
-            return await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
-        }
+            IEnumerable<string> parameters) =>
+            await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
 
         /// <summary>
         /// Adds a named role inheritance rule to the current
@@ -953,21 +962,7 @@ namespace Casbin
         /// will not be added. Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule.</param>
-        /// <returns>Succeeds or not.</returns>
-        public static bool AddNamedGroupingPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
-        {
-            return enforcer.AddNamedGroupingPolicy(ptype, parameters as IEnumerable<string>);
-        }
-
-        /// <summary>
-        /// Adds a named role inheritance rule to the current
-        /// policy. If the rule already exists, the function returns false and the rule
-        /// will not be added. Otherwise the function returns true by adding the new rule.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
+        /// <param name="policyType">The policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parameters">The "g" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
@@ -982,7 +977,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool AddGroupingPolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -995,7 +990,7 @@ namespace Casbin
         /// Added.Otherwise the function returns true by adding the new rule.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddGroupingPoliciesAsync(this IEnforcer enforcer,
             IEnumerable<IEnumerable<string>> rules)
@@ -1041,8 +1036,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateGroupingPolicy(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             params string[] newParameters) =>
@@ -1052,8 +1047,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateGroupingPolicyAsync(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             params string[] newParameters) =>
@@ -1063,8 +1058,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateGroupingPolicy(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             IEnumerable<string> newParameters) => UpdateNamedGroupingPolicy(enforcer,
@@ -1074,8 +1069,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateGroupingPolicyAsync(this IEnforcer enforcer, IEnumerable<string> oldParameters,
             IEnumerable<string> newParameters) => UpdateNamedGroupingPolicyAsync(enforcer,
@@ -1086,8 +1081,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedGroupingPolicy(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, params string[] newParameters) =>
@@ -1098,8 +1093,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, params string[] newParameters) =>
@@ -1110,8 +1105,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedGroupingPolicy(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, IEnumerable<string> newParameters) =>
@@ -1122,8 +1117,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldParameters">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newParameters">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldParameters">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newParameters">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> UpdateNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, IEnumerable<string> newParameters) =>
@@ -1134,8 +1129,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldRules">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newRules">The "g" policy rule to replace the old ones, ptype "g" is implicitly used.</param>
+        /// <param name="oldRules">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newRules">The "g" policy rule to replace the old ones, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateGroupingPolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> oldRules,
             IEnumerable<IEnumerable<string>> newRules) => UpdateNamedGroupingPolicies(enforcer,
@@ -1145,8 +1140,8 @@ namespace Casbin
         ///     Updates a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="oldRules">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newRules">The "g" policy rule to replace the old one, ptype "g" is implicitly used.</param>
+        /// <param name="oldRules">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newRules">The "g" policy rule to replace the old one, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateGroupingPoliciesAsync(this IEnforcer enforcer,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
@@ -1157,8 +1152,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldRules">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newRules">The "g" policy rule to replace the old ones, ptype "g" is implicitly used.</param>
+        /// <param name="oldRules">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newRules">The "g" policy rule to replace the old ones, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedGroupingPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
@@ -1169,8 +1164,8 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="oldRules">The "g" policy rule to be replaced, ptype "g" is implicitly used.</param>
-        /// <param name="newRules">The "g" policy rule to replace the old ones, ptype "g" is implicitly used.</param>
+        /// <param name="oldRules">The "g" policy rule to be replaced, policyType "g" is implicitly used.</param>
+        /// <param name="newRules">The "g" policy rule to replace the old ones, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> UpdateNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
@@ -1184,7 +1179,7 @@ namespace Casbin
         /// Removes a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveGroupingPolicy(this IEnforcer enforcer, params string[] parameters)
         {
@@ -1195,7 +1190,7 @@ namespace Casbin
         /// Removes a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveGroupingPolicyAsync(this IEnforcer enforcer, params string[] parameters)
         {
@@ -1206,7 +1201,7 @@ namespace Casbin
         /// Removes a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveGroupingPolicy(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -1217,7 +1212,7 @@ namespace Casbin
         /// Removes a role inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveGroupingPolicyAsync(this IEnforcer enforcer, IEnumerable<string> parameters)
         {
@@ -1230,7 +1225,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicy(this IEnforcer enforcer, string ptype, params string[] parameters)
         {
@@ -1243,7 +1238,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             params string[] parameters)
@@ -1257,7 +1252,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicy(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters) =>
@@ -1269,7 +1264,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="parameters">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="parameters">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> RemoveNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters) =>
@@ -1279,7 +1274,7 @@ namespace Casbin
         /// Removes roles inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveGroupingPolicies(this IEnforcer enforcer, IEnumerable<IEnumerable<string>> rules)
         {
@@ -1290,7 +1285,7 @@ namespace Casbin
         /// Removes roles inheritance rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> RemoveGroupingPoliciesAsync(this IEnforcer enforcer,
             IEnumerable<IEnumerable<string>> rules)
@@ -1304,7 +1299,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
@@ -1318,7 +1313,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="ptype">The policy type, can be "g", "g2", "g3", ..</param>
-        /// <param name="rules">The "g" policy rule, ptype "g" is implicitly used.</param>
+        /// <param name="rules">The "g" policy rule, policyType "g" is implicitly used.</param>
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> RemoveNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)

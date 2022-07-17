@@ -31,6 +31,7 @@ public class SupportCountTests
                 requestType = PermConstants.DefaultRequestType;
                 matcherType = PermConstants.DefaultMatcherType;
             }
+
             enforcer.AddNamedPolicy(policyType, CreateTestPolicy(i));
             TestEnforce(enforcer, enforcer.CreateContext(requestType, policyType,
                 PermConstants.DefaultPolicyEffectType, matcherType), i);
@@ -101,6 +102,7 @@ public class SupportCountTests
         {
             policy.Add($"value{i + 1}");
         }
-        return Policy.CreateOnlyString(policy);
+
+        return Policy.ValuesFrom(policy);
     }
 }

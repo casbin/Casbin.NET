@@ -27,7 +27,7 @@ public static class PolicyStoreExtension
     {
         string type = lineTokens[0];
         string section = type.Substring(0, 1);
-        IPolicyValues values = Policy.CreateOnlyString(lineTokens.Skip(1).ToList());
+        IPolicyValues values = Policy.ValuesFrom(lineTokens.Skip(1).ToList());
         return store.TryGetAssertion(section, type, out Assertion assertion)
                && assertion.TryAddPolicy(values);
     }

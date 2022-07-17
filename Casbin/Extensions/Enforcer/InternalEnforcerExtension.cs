@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Casbin.Model;
 #if !NET452
 using Microsoft.Extensions.Logging;
 #endif
@@ -52,21 +53,19 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="rule"></param>
+        /// <param name="values"></param>
         /// <returns></returns>
         internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType,
-            IEnumerable<string> rule)
+            IPolicyValues values)
         {
-            IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-
-            bool ruleAdded = enforcer.PolicyManager.AddPolicy(section, policyType, ruleArray);
+            bool ruleAdded = enforcer.PolicyManager.AddPolicy(section, policyType, values);
 
             if (ruleAdded is false)
             {
                 return false;
             }
 
-            OnPolicyChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, ruleArray);
+            OnPolicyChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, values);
             return true;
         }
 
@@ -446,11 +445,11 @@ namespace Casbin
         }
 
         private static void OnPolicyChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<string> rule)
+            string section, string policyType, IPolicyValues values)
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
-                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
+                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, values);
             }
 
             NotifyPolicyChanged(enforcer);

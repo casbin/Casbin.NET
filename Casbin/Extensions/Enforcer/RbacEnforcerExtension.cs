@@ -8,6 +8,43 @@ namespace Casbin
 {
     public static class RbacEnforcerExtension
     {
+        #region Has roles or users
+
+        /// <summary>
+        /// Determines whether a user has a role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="name"></param>
+        /// <param name="role"></param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public static bool HasRoleForUser(this IEnforcer enforcer, string name, string role, string domain = null)
+        {
+            var roles = enforcer.GetRolesForUser(name, domain);
+            return roles.Any(roleEnum => roleEnum.Equals(role));
+        }
+
+        #endregion
+
+        #region Get permissions
+
+        /// <summary>
+        /// Gets permissions for a user or role.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="user">User or role</param>
+        /// <param name="domain"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEnumerable<string>> GetPermissionsForUser(this IEnforcer enforcer, string user,
+            string domain = null)
+        {
+            return domain is null
+                ? enforcer.GetFilteredPolicy(0, user)
+                : enforcer.GetFilteredPolicy(0, user, domain);
+        }
+
+        #endregion
+
         #region Get roles or users
 
         /// <summary>
@@ -64,32 +101,18 @@ namespace Casbin
             var userIds = new List<string>();
             foreach (string name in names)
             {
-                userIds.AddRange(enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name));
+                userIds.AddRange(
+                    enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
+                        .RoleManager.GetUsers(name));
             }
+
             return userIds;
-        }
-        #endregion
-
-        #region Has roles or users
-
-        /// <summary>
-        /// Determines whether a user has a role.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="name"></param>
-        /// <param name="role"></param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public static bool HasRoleForUser(this IEnforcer enforcer, string name, string role, string domain = null)
-        {
-            var roles = enforcer.GetRolesForUser(name, domain);
-            return roles.Any(roleEnum => roleEnum.Equals(role));
         }
 
         #endregion
 
         #region Add roles or users
+
         /// <summary>
         /// Adds a role for a user.
         /// </summary>
@@ -113,7 +136,8 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public static Task<bool> AddRoleForUserAsync(this IEnforcer enforcer, string user, string role, string domain = null)
+        public static Task<bool> AddRoleForUserAsync(this IEnforcer enforcer, string user, string role,
+            string domain = null)
         {
             return domain is null
                 ? enforcer.AddGroupingPolicyAsync(user, role)
@@ -128,11 +152,12 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public static bool AddRolesForUser(this IEnforcer enforcer, string user, IEnumerable<string> role, string domain = null)
+        public static bool AddRolesForUser(this IEnforcer enforcer, string user, IEnumerable<string> role,
+            string domain = null)
         {
             return domain is null
-                ? enforcer.AddGroupingPolicies(role.Select(r => new List<string>{user, r}))
-                : enforcer.AddGroupingPolicies(role.Select(r => new List<string>{user, r, domain}));
+                ? enforcer.AddGroupingPolicies(role.Select(r => new List<string> { user, r }))
+                : enforcer.AddGroupingPolicies(role.Select(r => new List<string> { user, r, domain }));
         }
 
         /// <summary>
@@ -143,11 +168,12 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns>Returns false if the user already has the role (aka not affected).</returns>
-        public static Task<bool> AddRolesForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> role, string domain = null)
+        public static Task<bool> AddRolesForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> role,
+            string domain = null)
         {
             return domain is null
-                ? enforcer.AddGroupingPoliciesAsync(role.Select(r => new List<string> {user, r}))
-                : enforcer.AddGroupingPoliciesAsync(role.Select(r => new List<string> {user, r, domain}));
+                ? enforcer.AddGroupingPoliciesAsync(role.Select(r => new List<string> { user, r }))
+                : enforcer.AddGroupingPoliciesAsync(role.Select(r => new List<string> { user, r, domain }));
         }
 
         #endregion
@@ -177,7 +203,8 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns>Returns false if the us/*does */not have the role (aka not affected).</returns>
-        public static Task<bool> DeleteRoleForUserAsync(this IEnforcer enforcer, string user, string role, string domain = null)
+        public static Task<bool> DeleteRoleForUserAsync(this IEnforcer enforcer, string user, string role,
+            string domain = null)
         {
             return domain is null
                 ? enforcer.RemoveGroupingPolicyAsync(user, role)
@@ -265,24 +292,6 @@ namespace Casbin
 
         #endregion
 
-        #region Get permissions
-
-        /// <summary>
-        /// Gets permissions for a user or role.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="user">User or role</param>
-        /// <param name="domain"></param>
-        /// <returns></returns>
-        public static IEnumerable<IEnumerable<string>> GetPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
-        {
-            return domain is null
-                ? enforcer.GetFilteredPolicy(0, user)
-                : enforcer.GetFilteredPolicy(0, user, domain);
-        }
-
-        #endregion
-
         #region Has permissions
 
         /// <summary>
@@ -306,10 +315,7 @@ namespace Casbin
         /// <returns></returns>
         public static bool HasPermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
         {
-            var parameters = new List<string>
-            {
-                user
-            };
+            var parameters = new List<string> { user };
             parameters.AddRange(permission);
             return enforcer.HasPolicy(parameters);
         }
@@ -337,7 +343,8 @@ namespace Casbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns> Returns false if the user or role already has the permission (aka not affected).</returns>
-        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user, params string[] permission)
+        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user,
+            params string[] permission)
         {
             return AddPermissionForUserAsync(enforcer, user, permission as IEnumerable<string>);
         }
@@ -351,7 +358,7 @@ namespace Casbin
         /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
         public static bool AddPermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
         {
-            var parameters = new[] {user}.Concat(permission);
+            var parameters = new[] { user }.Concat(permission);
             return enforcer.AddPolicy(parameters);
         }
 
@@ -362,11 +369,13 @@ namespace Casbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role already has the permission (aka not affected).</returns>
-        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        public static Task<bool> AddPermissionForUserAsync(this IEnforcer enforcer, string user,
+            IEnumerable<string> permission)
         {
-            var parameters = new[] {user}.Concat(permission);
+            var parameters = new[] { user }.Concat(permission);
             return enforcer.AddPolicyAsync(parameters);
         }
+
         #endregion
 
         #region Delete permissions
@@ -435,7 +444,8 @@ namespace Casbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns></returns>
-        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user, params string[] permission)
+        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user,
+            params string[] permission)
         {
             return DeletePermissionForUserAsync(enforcer, user, permission as IEnumerable<string>);
         }
@@ -450,7 +460,7 @@ namespace Casbin
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
         public static bool DeletePermissionForUser(this IEnforcer enforcer, string user, IEnumerable<string> permission)
         {
-            var parameters = new[] {user}.Concat(permission);
+            var parameters = new[] { user }.Concat(permission);
             return enforcer.RemovePolicy(parameters);
         }
 
@@ -461,11 +471,11 @@ namespace Casbin
         /// <param name="user">User or role</param>
         /// <param name="permission"></param>
         /// <returns>Returns false if the user or role does not have any permissions (aka not affected).</returns>
-        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user, IEnumerable<string> permission)
+        public static Task<bool> DeletePermissionForUserAsync(this IEnforcer enforcer, string user,
+            IEnumerable<string> permission)
         {
-            var parameters = new[] {user}.Concat(permission);
+            var parameters = new[] { user }.Concat(permission);
             return enforcer.RemovePolicyAsync(parameters);
-
         }
 
         /// <summary>
@@ -502,9 +512,10 @@ namespace Casbin
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static IEnumerable<string> GetImplicitRolesForUser(this IEnforcer enforcer, string name, string domain = null)
+        public static IEnumerable<string> GetImplicitRolesForUser(this IEnforcer enforcer, string name,
+            string domain = null)
         {
-            HashSet<string> roleSet = new() {name};
+            HashSet<string> roleSet = new() { name };
             Queue<string> queue = new();
             queue.Enqueue(name);
             var sections = enforcer.Model.Sections;
@@ -549,7 +560,8 @@ namespace Casbin
         /// <param name="user"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static IEnumerable<IEnumerable<string>> GetImplicitPermissionsForUser(this IEnforcer enforcer, string user, string domain = null)
+        public static IEnumerable<IEnumerable<string>> GetImplicitPermissionsForUser(this IEnforcer enforcer,
+            string user, string domain = null)
         {
             var roles = new List<string> { user };
             roles.AddRange(GetImplicitRolesForUser(enforcer, user, domain));
@@ -558,15 +570,18 @@ namespace Casbin
             {
                 result.AddRange(GetPermissionsForUser(enforcer, role, domain));
             }
+
             return result;
         }
 
-        public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer, params string[] permission)
+        public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer,
+            params string[] permission)
         {
             return GetImplicitUsersForPermission(enforcer, permission as IEnumerable<string>);
         }
 
-        public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer, IEnumerable<string> permissions)
+        public static IEnumerable<string> GetImplicitUsersForPermission(this IEnforcer enforcer,
+            IEnumerable<string> permissions)
         {
             var policySubjects = enforcer.GetAllSubjects();
             var groupInherit = enforcer.InternalGetValuesForFieldInPolicyAllTypes("g", 1);
@@ -576,7 +591,9 @@ namespace Casbin
             if (Request.SupportGeneric(permissionList.Length + 1) is false)
             {
                 return policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject => enforcer.Enforce(Request.Create(new[]{subject}.Concat(permissionList).Cast<object>().ToArray())))
+                    .Where(subject =>
+                        enforcer.Enforce(Request.CreateValues(new[] { subject }.Concat(permissionList).Cast<object>()
+                            .ToArray())))
                     .Except(groupInherit);
             }
 
@@ -589,40 +606,41 @@ namespace Casbin
                     .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1]))
                     .Except(groupInherit),
                 4 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2]))
+                    .Where(subject =>
+                        enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2]))
                     .Except(groupInherit),
                 5 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3]))
                     .Except(groupInherit),
                 6 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4]))
                     .Except(groupInherit),
                 7 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5]))
                     .Except(groupInherit),
                 8 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5], permissionList[6]))
                     .Except(groupInherit),
                 9 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7]))
                     .Except(groupInherit),
                 10 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
                         permissionList[8]))
                     .Except(groupInherit),
                 11 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
                         permissionList[8], permissionList[9]))
                     .Except(groupInherit),
                 12 => policySubjects.Concat(groupSubjects).Distinct()
-                    .Where(subject =>enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
+                    .Where(subject => enforcer.Enforce(subject, permissionList[0], permissionList[1], permissionList[2],
                         permissionList[3], permissionList[4], permissionList[5], permissionList[6], permissionList[7],
                         permissionList[8], permissionList[9], permissionList[10]))
                     .Except(groupInherit),
@@ -635,7 +653,8 @@ namespace Casbin
 
         #region RBAC APIs with domains
 
-        public static IEnumerable<string> GetDomainsForUser(this IEnforcer enforcer, string name, string roleType = null)
+        public static IEnumerable<string> GetDomainsForUser(this IEnforcer enforcer, string name,
+            string roleType = null)
         {
             roleType ??= PermConstants.DefaultRoleType;
             return enforcer.Model.Sections[PermConstants.Section.RoleSection][roleType].RoleManager.GetDomains(name);
@@ -650,7 +669,8 @@ namespace Casbin
         /// <returns></returns>
         public static IEnumerable<string> GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain)
         {
-            return enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager.GetRoles(name, domain);
+            return enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager
+                .GetRoles(name, domain);
         }
 
         /// <summary>
@@ -660,7 +680,8 @@ namespace Casbin
         /// <param name="user">User or role</param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static IEnumerable<IEnumerable<string>> GetPermissionsForUserInDomain(this IEnforcer enforcer, string user, string domain)
+        public static IEnumerable<IEnumerable<string>> GetPermissionsForUserInDomain(this IEnforcer enforcer,
+            string user, string domain)
         {
             return enforcer.GetFilteredPolicy(0, user, domain);
         }
@@ -686,7 +707,8 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static Task<bool> AddRoleForUserInDomainAsync(this IEnforcer enforcer, string user, string role, string domain)
+        public static Task<bool> AddRoleForUserInDomainAsync(this IEnforcer enforcer, string user, string role,
+            string domain)
         {
             return enforcer.AddGroupingPolicyAsync(user, role, domain);
         }
@@ -712,7 +734,8 @@ namespace Casbin
         /// <param name="role"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static Task<bool> DeleteRoleForUserInDomainAsync(this IEnforcer enforcer, string user, string role, string domain)
+        public static Task<bool> DeleteRoleForUserInDomainAsync(this IEnforcer enforcer, string user, string role,
+            string domain)
         {
             return enforcer.RemoveGroupingPolicyAsync(user, role, domain);
         }

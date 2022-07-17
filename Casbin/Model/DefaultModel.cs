@@ -435,6 +435,9 @@ namespace Casbin.Model
         public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
             => PolicyManager.HasPolicy(section, policyType, rule);
 
+        public bool HasPolicy(string section, string policyType, IPolicyValues values)
+            => PolicyManager.HasPolicy(section, policyType, values);
+
         public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.HasPolicies(section, policyType, rules);
 
@@ -443,6 +446,9 @@ namespace Casbin.Model
 
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
             => PolicyManager.AddPolicy(section, policyType, rule);
+
+        public bool AddPolicy(string section, string policyType, IPolicyValues values)
+            => PolicyManager.AddPolicy(section, policyType, values);
 
         public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
             => PolicyManager.AddPolicies(section, policyType, rules);

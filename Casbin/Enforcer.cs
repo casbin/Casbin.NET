@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Caching;
@@ -8,7 +9,6 @@ using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
 using Casbin.Util;
-using System.Runtime.CompilerServices;
 #if !NET452
 using Microsoft.Extensions.Logging;
 #endif
@@ -38,52 +38,65 @@ namespace Casbin
             {
                 this.SetAdapter(adapter);
             }
+
             if (lazyLoadPolicy is false)
             {
                 this.LoadPolicy();
             }
+
             Model.SortPoliciesByPriority();
             Model.SortPoliciesBySubjectHierarchy();
         }
 
+        public bool IsSynchronized => Model?.IsSynchronized ?? false;
+        public string ModelPath => Model?.ModelPath;
+        public bool IsFiltered => Adapter is IFilteredAdapter { IsFiltered: true };
+
         #region Options
+
         public bool Enabled { get; set; } = true;
         public bool EnabledCache { get; set; } = true;
+
         public bool AutoSave
         {
             get => PolicyManager.AutoSave;
             set => PolicyManager.AutoSave = value;
         }
+
         public bool AutoBuildRoleLinks { get; set; } = true;
         public bool AutoNotifyWatcher { get; set; } = true;
         public bool AutoCleanEnforceCache { get; set; } = true;
+
         #endregion
 
         #region Extensions
+
         public IEffector Effector { get; set; } = new DefaultEffector();
         public IModel Model { get; set; }
+
         public IPolicyManager PolicyManager
         {
             get => Model?.PolicyManager;
             set => Model.SetPolicyManager(value);
         }
+
         public IReadOnlyAdapter Adapter
         {
             get => PolicyManager?.Adapter;
             set => PolicyManager.SetAdapter(value);
         }
+
         public IWatcher Watcher { get; set; }
         public IRoleManager RoleManager { get; set; } = new DefaultRoleManager(10);
         public IEnforceCache EnforceCache { get; set; } = new EnforceCache(new EnforceCacheOptions());
 #if !NET452
         public ILogger Logger { get; set; }
 #endif
+
         #endregion
-        public bool IsSynchronized => Model?.IsSynchronized ?? false;
-        public string ModelPath => Model?.ModelPath;
-        public bool IsFiltered => Adapter is IFilteredAdapter {IsFiltered: true};
 
         #region Enforce method
+
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
@@ -174,13 +187,15 @@ namespace Casbin
             return result;
         }
 
-        private Task<bool> InternalEnforceAsync<TRequest>(EnforceContext context, IPolicyManager policyManager, TRequest requestValues) where TRequest : IRequestValues
+        private Task<bool> InternalEnforceAsync<TRequest>(EnforceContext context, IPolicyManager policyManager,
+            TRequest requestValues) where TRequest : IRequestValues
         {
             bool CallInFunc() => InternalEnforce(in context, in policyManager, in requestValues);
             return policyManager.IsSynchronized ? Task.Run(CallInFunc) : Task.FromResult(CallInFunc());
         }
 
-        private bool InternalEnforce<TRequest>(in EnforceContext context, in IPolicyManager policyManager, in TRequest requestValues) where TRequest : IRequestValues
+        private bool InternalEnforce<TRequest>(in EnforceContext context, in IPolicyManager policyManager,
+            in TRequest requestValues) where TRequest : IRequestValues
         {
             policyManager.StartRead();
             try
@@ -192,18 +207,32 @@ namespace Casbin
 
                 return context.View.PolicyTokens.Count switch
                 {
-                    1 => InternalEnforce<TRequest, Policy<string>>(in context, requestValues),
-                    2 => InternalEnforce<TRequest, Policy<string, string>>(in context, requestValues),
-                    3 => InternalEnforce<TRequest, Policy<string, string, string>>(in context, requestValues),
-                    4 => InternalEnforce<TRequest, Policy<string, string, string, string>>(in context, requestValues),
-                    5 => InternalEnforce<TRequest, Policy<string, string, string, string, string>>(in context, requestValues),
-                    6 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string>>(in context, requestValues),
-                    7 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string>>(in context, requestValues),
-                    8 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string, string>>(in context, requestValues),
-                    9 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string, string, string>>(in context, requestValues),
-                    10 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string, string, string, string>>(in context, requestValues),
-                    11 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string, string, string, string, string>>(in context, requestValues),
-                    12 => InternalEnforce<TRequest, Policy<string, string, string, string, string, string, string, string, string, string, string, string>>(in context, requestValues),
+                    1 => InternalEnforce<TRequest, PolicyValues<string>>(in context, requestValues),
+                    2 => InternalEnforce<TRequest, PolicyValues<string, string>>(in context, requestValues),
+                    3 => InternalEnforce<TRequest, PolicyValues<string, string, string>>(in context, requestValues),
+                    4 => InternalEnforce<TRequest, PolicyValues<string, string, string, string>>(in context,
+                        requestValues),
+                    5 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string>>(in context,
+                        requestValues),
+                    6 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string>>(
+                        in context,
+                        requestValues),
+                    7 => InternalEnforce<TRequest,
+                        PolicyValues<string, string, string, string, string, string, string>>(
+                        in context, requestValues),
+                    8 => InternalEnforce<TRequest,
+                        PolicyValues<string, string, string, string, string, string, string, string>>(in context,
+                        requestValues),
+                    9 => InternalEnforce<TRequest,
+                        PolicyValues<string, string, string, string, string, string, string, string, string>>(
+                        in context,
+                        requestValues),
+                    10 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
+                        string, string, string>>(in context, requestValues),
+                    11 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
+                        string, string, string, string>>(in context, requestValues),
+                    12 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
+                        string, string, string, string, string>>(in context, requestValues),
                     _ => InternalEnforce<IRequestValues, IPolicyValues>(in context, requestValues)
                 };
             }
@@ -234,15 +263,17 @@ namespace Casbin
             {
                 for (int policyIndex = 0; policyIndex < session.PolicyCount; policyIndex++)
                 {
-                    var policyValues = (TPolicy) policyList[policyIndex];
+                    var policyValues = (TPolicy)policyList[policyIndex];
                     session.PolicyIndex = policyIndex;
 
                     HandleBeforeExpression(in context, ref session, in requestValues, in policyValues, ref effectChain);
-                    session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString, in requestValues, in policyValues);
+                    session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
+                        in requestValues, in policyValues);
 
                     if (session.IsChainEffector)
                     {
-                        HandleExpressionResult(in context, ref session, in requestValues, in policyValues, ref effectChain);
+                        HandleExpressionResult(in context, ref session, in requestValues, in policyValues,
+                            ref effectChain);
                     }
                     else
                     {
@@ -257,9 +288,10 @@ namespace Casbin
             }
             else
             {
-                var policyValues = (TPolicy) Policy.CreateOnlyString(new string[context.View.PolicyTokens.Count]);
+                TPolicy policyValues = (TPolicy)Policy.ValuesFrom(new string[context.View.PolicyTokens.Count]);
                 HandleBeforeExpression(in context, ref session, in requestValues, in policyValues, ref effectChain);
-                session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString, in requestValues, in policyValues);
+                session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
+                    in requestValues, in policyValues);
 
                 if (session.IsChainEffector)
                 {
@@ -270,6 +302,7 @@ namespace Casbin
                     HandleExpressionResult(in context, ref session, in requestValues, in policyValues, Effector);
                 }
             }
+
             return session.EnforceResult;
         }
 
@@ -283,7 +316,8 @@ namespace Casbin
             int requestTokenCount = context.View.RequestAssertion.Tokens.Count;
             if (requestTokenCount != request.Count)
             {
-                throw new ArgumentException($"Invalid request size: expected {requestTokenCount}, got {request.Count}.");
+                throw new ArgumentException(
+                    $"Invalid request size: expected {requestTokenCount}, got {request.Count}.");
             }
 
             if (session.IsChainEffector is false)
@@ -307,6 +341,7 @@ namespace Casbin
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
+
                 return;
             }
 
@@ -315,20 +350,24 @@ namespace Casbin
                 throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policy.Count}.");
             }
 
-            if (session.IsChainEffector is false && context.View.EffectExpressionType is EffectExpressionType.PriorityDenyOverride)
+            if (session.IsChainEffector is false &&
+                context.View.EffectExpressionType is EffectExpressionType.PriorityDenyOverride)
             {
-                ThrowHelper.ThrowNotSupportException($"Only IChainEffector<T> support {nameof(EffectExpressionType.PriorityDenyOverride)} policy effect expression.");
+                ThrowHelper.ThrowNotSupportException(
+                    $"Only IChainEffector<T> support {nameof(EffectExpressionType.PriorityDenyOverride)} policy effect expression.");
             }
 
-            if (context.View.HasPriority && context.View.EffectExpressionType is EffectExpressionType.PriorityDenyOverride)
+            if (context.View.HasPriority &&
+                context.View.EffectExpressionType is EffectExpressionType.PriorityDenyOverride)
             {
                 if (int.TryParse(policy[context.View.PriorityIndex], out int nowPriority))
                 {
                     if (session.Priority.HasValue && nowPriority != session.Priority.Value
-                        && effectChain.HitPolicyCount > 0)
+                                                  && effectChain.HitPolicyCount > 0)
                     {
                         session.DetermineResult(effectChain.Result);
                     }
+
                     session.Priority = nowPriority;
                 }
             }
@@ -353,7 +392,8 @@ namespace Casbin
             if (session.PolicyCount is 0)
             {
                 nowEffect = GetEffect(session.ExpressionResult);
-                nowEffect = effector.MergeEffects(context.View.Effect, new[] { nowEffect }, null, session.PolicyIndex, session.PolicyCount, out _);
+                nowEffect = effector.MergeEffects(context.View.Effect, new[] { nowEffect }, null, session.PolicyIndex,
+                    session.PolicyCount, out _);
                 bool finalResult = nowEffect.ToNullableBool() ?? false;
                 session.DetermineResult(finalResult);
             }
@@ -372,7 +412,8 @@ namespace Casbin
             }
 
             session.PolicyEffects[session.PolicyIndex] = nowEffect;
-            nowEffect = effector.MergeEffects(context.View.Effect, session.PolicyEffects, null, session.PolicyIndex, session.PolicyCount, out int hitPolicyIndex);
+            nowEffect = effector.MergeEffects(context.View.Effect, session.PolicyEffects, null, session.PolicyIndex,
+                session.PolicyCount, out int hitPolicyIndex);
 
             if (context.Explain && hitPolicyIndex is not -1)
             {
@@ -402,6 +443,7 @@ namespace Casbin
                 {
                     session.DetermineResult(effectChain.Result);
                 }
+
                 session.DetermineResult(false);
             }
 
@@ -439,17 +481,20 @@ namespace Casbin
             return expressionResult ? PolicyEffect.Allow : PolicyEffect.Indeterminate;
         }
 
-        private static string RewriteEval(in EnforceContext context, string expressionString, IPolicyValues policyValues)
+        private static string RewriteEval(in EnforceContext context, string expressionString,
+            IPolicyValues policyValues)
         {
             if (context.View.EvalRules is null)
             {
                 return expressionString;
             }
+
             Dictionary<string, string> rules = new();
             foreach (KeyValuePair<string, int> rule in context.View.EvalRules)
             {
                 rules[rule.Key] = policyValues[rule.Value];
             }
+
             expressionString = StringUtil.ReplaceEval(expressionString, rules);
             return expressionString;
         }

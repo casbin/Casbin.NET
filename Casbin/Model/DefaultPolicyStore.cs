@@ -76,7 +76,7 @@ namespace Casbin.Model
         public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
         {
             string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+            IPolicyValues values = Policy.ValuesFrom(ruleArray);
             return HasPolicy(section, policyType, values);
         }
 
@@ -86,7 +86,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in rules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 valuesList.Add(values);
             }
 
@@ -99,7 +99,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in rules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 valuesList.Add(values);
             }
 
@@ -109,7 +109,7 @@ namespace Casbin.Model
         public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
         {
             string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+            IPolicyValues values = Policy.ValuesFrom(ruleArray);
             return AddPolicy(section, policyType, values);
         }
 
@@ -119,7 +119,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in rules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 valuesList.Add(values);
             }
 
@@ -131,8 +131,8 @@ namespace Casbin.Model
         {
             string[] oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
             string[] newRuleArray = newRule as string[] ?? newRule.ToArray();
-            IPolicyValues oldValues = Policy.CreateOnlyString(oldRuleArray);
-            IPolicyValues newValues = Policy.CreateOnlyString(newRuleArray);
+            IPolicyValues oldValues = Policy.ValuesFrom(oldRuleArray);
+            IPolicyValues newValues = Policy.ValuesFrom(newRuleArray);
             return UpdatePolicy(section, policyType, oldValues, newValues);
         }
 
@@ -143,7 +143,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in oldRules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 oldValuesList.Add(values);
             }
 
@@ -151,7 +151,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in newRules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 newValuesList.Add(values);
             }
 
@@ -161,7 +161,7 @@ namespace Casbin.Model
         public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
         {
             string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+            IPolicyValues values = Policy.ValuesFrom(ruleArray);
             return RemovePolicy(section, policyType, values);
         }
 
@@ -171,7 +171,7 @@ namespace Casbin.Model
             foreach (IEnumerable<string> rule in rules)
             {
                 string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.CreateOnlyString(ruleArray);
+                IPolicyValues values = Policy.ValuesFrom(ruleArray);
                 valuesList.Add(values);
             }
 
@@ -273,6 +273,12 @@ namespace Casbin.Model
             return true;
         }
 
+        public bool AddPolicy(string section, string policyType, IPolicyValues values)
+        {
+            Assertion assertion = GetRequiredAssertion(section, policyType);
+            return assertion.TryAddPolicy(values);
+        }
+
         private bool HasPolicy(string section, string policyType, IPolicyValues values)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
@@ -292,12 +298,6 @@ namespace Casbin.Model
             Assertion assertion = GetRequiredAssertion(section, policyType);
             List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
             return list.Count is 0 || list.All(assertion.Contains);
-        }
-
-        private bool AddPolicy(string section, string policyType, IPolicyValues values)
-        {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            return assertion.TryAddPolicy(values);
         }
 
         private bool AddPolicies(string section, string policyType, IEnumerable<IPolicyValues> valuesList)
