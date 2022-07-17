@@ -4,6 +4,6 @@
     {
         PolicyAdd,
         PolicyRemove,
-        PolicyUpdate,
+        PolicyUpdate
     }
 }

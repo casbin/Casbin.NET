@@ -9,7 +9,8 @@ namespace Casbin
 {
     internal static class InternalEnforcerExtension
     {
-        internal static IEnumerable<IEnumerable<string>> InternalGetPolicy(this IEnforcer enforcer, string section, string policyType)
+        internal static IEnumerable<IEnumerable<string>> InternalGetPolicy(this IEnforcer enforcer, string section,
+            string policyType)
         {
             return enforcer.PolicyManager.GetPolicy(section, policyType);
         }
@@ -21,12 +22,14 @@ namespace Casbin
             return enforcer.PolicyManager.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
         }
 
-        internal static IEnumerable<string> InternalGetValuesForFieldInPolicy(this IEnforcer enforcer, string section, string policyType, int fieldIndex)
+        internal static IEnumerable<string> InternalGetValuesForFieldInPolicy(this IEnforcer enforcer, string section,
+            string policyType, int fieldIndex)
         {
             return enforcer.PolicyManager.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
         }
 
-        internal static IEnumerable<string> InternalGetValuesForFieldInPolicyAllTypes(this IEnforcer enforcer, string section, int fieldIndex)
+        internal static IEnumerable<string> InternalGetValuesForFieldInPolicyAllTypes(this IEnforcer enforcer,
+            string section, int fieldIndex)
         {
             return enforcer.PolicyManager.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
         }
@@ -51,7 +54,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
+        internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
 
@@ -74,7 +78,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
+        internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string section,
+            string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
             if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray))
@@ -101,7 +106,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static bool InternalAddPolicies(this IEnforcer enforcer, string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        internal static bool InternalAddPolicies(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
         {
             var ruleArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
@@ -130,7 +136,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string section,
+            string policyType, IEnumerable<IEnumerable<string>> rules)
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
@@ -151,7 +158,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Updates a rule from the current policy.
+        ///     Updates a rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -159,7 +166,8 @@ namespace Casbin
         /// <param name="oldRule"></param>
         /// <param name="newRule"></param>
         /// <returns></returns>
-        internal static bool InternalUpdatePolicy(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        internal static bool InternalUpdatePolicy(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<string> oldRule, IEnumerable<string> newRule)
         {
             IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
             if (enforcer.PolicyManager.HasPolicy(section, policyType, oldRuleArray) is false)
@@ -180,7 +188,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Updates a rule from the current policy.
+        ///     Updates a rule from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -188,7 +196,8 @@ namespace Casbin
         /// <param name="oldRule"></param>
         /// <param name="newRule"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalUpdatePolicyAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
+        internal static async Task<bool> InternalUpdatePolicyAsync(this IEnforcer enforcer, string section,
+            string policyType, IEnumerable<string> oldRule, IEnumerable<string> newRule)
         {
             IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
             if (enforcer.PolicyManager.HasPolicy(section, policyType, oldRuleArray) is false)
@@ -197,19 +206,21 @@ namespace Casbin
             }
 
             IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
-            bool ruleUpdated = await enforcer.PolicyManager.UpdatePolicyAsync(section, policyType, oldRuleArray, newRuleArray);
+            bool ruleUpdated =
+                await enforcer.PolicyManager.UpdatePolicyAsync(section, policyType, oldRuleArray, newRuleArray);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRuleArray, newRuleArray);
+            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRuleArray,
+                newRuleArray);
             return true;
         }
 
         /// <summary>
-        /// Updates rules from the current policy.
+        ///     Updates rules from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -220,14 +231,13 @@ namespace Casbin
         internal static bool InternalUpdatePolicies(this IEnforcer enforcer, string section, string policyType,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
         {
-            var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-
+            IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
             if (enforcer.PolicyManager.HasAllPolicies(section, policyType, oldRulesArray) is false)
             {
                 return false;
             }
 
-            var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+            IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
             bool ruleUpdated = enforcer.PolicyManager.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
 
             if (ruleUpdated is false)
@@ -235,12 +245,13 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRulesArray, newRulesArray);
+            OnPoliciesChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRulesArray,
+                newRulesArray);
             return true;
         }
 
         /// <summary>
-        /// Updates rules from the current policy.
+        ///     Updates rules from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -251,22 +262,24 @@ namespace Casbin
         internal static async Task<bool> InternalUpdatePoliciesAsync(this IEnforcer enforcer, string section,
             string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
         {
-            var oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+            IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
 
             if (enforcer.PolicyManager.HasAllPolicies(section, policyType, oldRulesArray) is false)
             {
                 return false;
             }
 
-            var newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
-            bool ruleUpdated = await enforcer.PolicyManager.UpdatePoliciesAsync(section, policyType, oldRulesArray, newRulesArray);
+            IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+            bool ruleUpdated = await enforcer.PolicyManager.UpdatePoliciesAsync(
+                section, policyType, oldRulesArray, newRulesArray);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRulesArray, newRulesArray);
+            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRulesArray,
+                newRulesArray);
             return true;
         }
 
@@ -278,7 +291,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static bool InternalRemovePolicy(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
+        internal static bool InternalRemovePolicy(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
             if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray) is false)
@@ -293,7 +307,7 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, new [] {ruleArray});
+            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, new[] { ruleArray });
             return true;
         }
 
@@ -305,7 +319,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rule"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<string> rule)
+        internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string section,
+            string policyType, IEnumerable<string> rule)
         {
             IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
             if (enforcer.PolicyManager.HasPolicy(section, policyType, ruleArray) is false)
@@ -332,7 +347,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static bool InternalRemovePolicies(this IEnforcer enforcer, string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        internal static bool InternalRemovePolicies(this IEnforcer enforcer, string section, string policyType,
+            IEnumerable<IEnumerable<string>> rules)
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
@@ -360,7 +376,8 @@ namespace Casbin
         /// <param name="policyType"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string section,
+            string policyType, IEnumerable<IEnumerable<string>> rules)
         {
             var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
 
@@ -389,9 +406,11 @@ namespace Casbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string section, string policyType, int fieldIndex, params string[] fieldValues)
+        internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string section, string policyType,
+            int fieldIndex, params string[] fieldValues)
         {
-            var effectPolices = enforcer.PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+            IEnumerable<IEnumerable<string>> effectPolices =
+                enforcer.PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
 
             if (effectPolices is null)
             {
@@ -411,9 +430,11 @@ namespace Casbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string section, string policyType, int fieldIndex, params string[] fieldValues)
+        internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string section,
+            string policyType, int fieldIndex, params string[] fieldValues)
         {
-            var effectPolicies = await enforcer.PolicyManager.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
+            IEnumerable<IEnumerable<string>> effectPolicies =
+                await enforcer.PolicyManager.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
 
             if (effectPolicies is null)
             {
@@ -454,6 +475,7 @@ namespace Casbin
                 enforcer.Model.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, rule);
             }
+
             await NotifyPolicyChangedAsync(enforcer);
         }
 
@@ -465,6 +487,7 @@ namespace Casbin
                 enforcer.Model.BuildIncrementalRoleLink(policyOperation,
                     section, policyType, oldRule, newRule);
             }
+
             await NotifyPolicyChangedAsync(enforcer);
         }
 
@@ -476,17 +499,20 @@ namespace Casbin
                 enforcer.Model.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
             }
+
             NotifyPolicyChanged(enforcer);
         }
 
         private static void OnPoliciesChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+            string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
+            IEnumerable<IEnumerable<string>> newRules)
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
                 enforcer.Model.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, oldRules, newRules);
             }
+
             NotifyPolicyChanged(enforcer);
         }
 
@@ -498,17 +524,20 @@ namespace Casbin
                 enforcer.Model.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, rules);
             }
+
             await NotifyPolicyChangedAsync(enforcer);
         }
 
         private static async Task OnPoliciesAsyncChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,  IEnumerable<IEnumerable<string>> newRules)
+            string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
+            IEnumerable<IEnumerable<string>> newRules)
         {
             if (section.Equals(PermConstants.Section.RoleSection))
             {
                 enforcer.Model.BuildIncrementalRoleLinks(policyOperation,
                     section, policyType, oldRules, newRules);
             }
+
             await NotifyPolicyChangedAsync(enforcer);
         }
 

@@ -4,238 +4,257 @@ using System.Collections.Generic;
 
 namespace Casbin.Model;
 
-public record Policy<T1>(T1 Value1) : IPolicyValues
+public abstract record PolicyValues : IPolicyValues
 {
-    public string this[int index] => index switch
+    private string _text;
+    public virtual int Count => throw new NotImplementedException();
+    public virtual string this[int index] => throw new NotImplementedException();
+    public virtual IEnumerator<string> GetEnumerator() => throw new NotImplementedException();
+    IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+
+    public string ToText()
     {
-        0 => Policy.ToString(Value1),
-        _ => throw new ArgumentOutOfRangeException(nameof(index))
-    };
+        _text ??= Policy.ToText(this);
+        return _text;
+    }
 
-    public int Count => 1;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1>>(this);
+    public bool Equals(IPolicyValues other) => Policy.Equals(this, other);
 }
 
-public record Policy<T1, T2>(T1 Value1, T2 Value2) : IPolicyValues
+public record Policy<T1>(T1 Value1) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 1;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
+        0 => Policy.ToStringValue(Value1),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 2;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1>>(this);
+    public override string ToString() => base.ToString();
 }
 
-public record Policy<T1, T2, T3>(T1 Value1, T2 Value2, T3 Value3) : IPolicyValues
+public record Policy<T1, T2>(T1 Value1, T2 Value2) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 2;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 3;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3>>(this);
-};
-
-public record Policy<T1, T2, T3, T4>(T1 Value1, T2 Value2, T3 Value3, T4 Value4) : IPolicyValues
-{
-    public string this[int index] => index switch
-    {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        _ => throw new ArgumentOutOfRangeException(nameof(index))
-    };
-
-    public int Count => 4;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5) : IPolicyValues
+public record Policy<T1, T2, T3>(T1 Value1, T2 Value2, T3 Value3) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 3;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 5;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6) : IPolicyValues
+public record Policy<T1, T2, T3, T4>(T1 Value1, T2 Value2, T3 Value3, T4 Value4) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 4;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 6;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 5;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 7;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7, T8>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5, T6>
+    (T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 6;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
-        7 => Policy.ToString(Value8),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 8;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8>>(this);
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5, T6, T7>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6,
+    T7 Value7) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 7;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
-        7 => Policy.ToString(Value8),
-        8 => Policy.ToString(Value9),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 9;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>>(this);
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5, T6, T7, T8>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6,
+    T7 Value7, T8 Value8) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 8;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
-        7 => Policy.ToString(Value8),
-        8 => Policy.ToString(Value9),
-        9 => Policy.ToString(Value10),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
+        7 => Policy.ToStringValue(Value8),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 10;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>>(this);
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5,
+    T6 Value6, T7 Value7, T8 Value8, T9 Value9) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 9;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
-        7 => Policy.ToString(Value8),
-        8 => Policy.ToString(Value9),
-        9 => Policy.ToString(Value10),
-        10 => Policy.ToString(Value11),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
+        7 => Policy.ToStringValue(Value8),
+        8 => Policy.ToStringValue(Value9),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 11;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>(this);
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>>(this);
 }
 
-public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11, T12 Value12) : IPolicyValues
+public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5,
+    T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10) : PolicyValues
 {
-    public string this[int index] => index switch
+    public override int Count => 10;
+
+    public override string this[int index] => index switch
     {
-        0 => Policy.ToString(Value1),
-        1 => Policy.ToString(Value2),
-        2 => Policy.ToString(Value3),
-        3 => Policy.ToString(Value4),
-        4 => Policy.ToString(Value5),
-        5 => Policy.ToString(Value6),
-        6 => Policy.ToString(Value7),
-        7 => Policy.ToString(Value8),
-        8 => Policy.ToString(Value9),
-        9 => Policy.ToString(Value10),
-        10 => Policy.ToString(Value11),
-        11 => Policy.ToString(Value12),
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
+        7 => Policy.ToStringValue(Value8),
+        8 => Policy.ToStringValue(Value9),
+        9 => Policy.ToStringValue(Value10),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
-    public int Count => 12;
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>>(this);
+}
 
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>(this);
+public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(T1 Value1, T2 Value2, T3 Value3, T4 Value4,
+    T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11) : PolicyValues
+{
+    public override int Count => 11;
+
+    public override string this[int index] => index switch
+    {
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
+        7 => Policy.ToStringValue(Value8),
+        8 => Policy.ToStringValue(Value9),
+        9 => Policy.ToStringValue(Value10),
+        10 => Policy.ToStringValue(Value11),
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>>(this);
+}
+
+public record Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1 Value1, T2 Value2, T3 Value3, T4 Value4,
+    T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11, T12 Value12) : PolicyValues
+{
+    public override int Count => 12;
+
+    public override string this[int index] => index switch
+    {
+        0 => Policy.ToStringValue(Value1),
+        1 => Policy.ToStringValue(Value2),
+        2 => Policy.ToStringValue(Value3),
+        3 => Policy.ToStringValue(Value4),
+        4 => Policy.ToStringValue(Value5),
+        5 => Policy.ToStringValue(Value6),
+        6 => Policy.ToStringValue(Value7),
+        7 => Policy.ToStringValue(Value8),
+        8 => Policy.ToStringValue(Value9),
+        9 => Policy.ToStringValue(Value10),
+        10 => Policy.ToStringValue(Value11),
+        11 => Policy.ToStringValue(Value12),
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>(this);
 }
 
 internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValues
@@ -252,43 +271,43 @@ internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValue
     public object Current => _value[_index];
     string IEnumerator<string>.Current => _value[_index];
 
-    public void Dispose() { }
+    public void Dispose()
+    {
+    }
+
     public bool MoveNext() => ++_index < _value.Count;
     public void Reset() => _index = -1;
 }
 
-internal class PolicyValues : IPolicyValues
+internal record StringListPolicy : PolicyValues
 {
     private readonly IReadOnlyList<string> _values;
 
-    public PolicyValues(IReadOnlyList<string> values)
+    public StringListPolicy(IReadOnlyList<string> values)
     {
         _values = values;
     }
 
-    public string this[int index] => _values[index];
-
-    public int Count => _values.Count;
-
-    public IEnumerator<string> GetEnumerator() => _values.GetEnumerator();
-    IEnumerator IEnumerable.GetEnumerator() => _values.GetEnumerator();
+    public override int Count => _values.Count;
+    public override string this[int index] => _values[index];
+    public override IEnumerator<string> GetEnumerator() => _values.GetEnumerator();
 }
 
-public class Policy : IPolicyValues
+public record Policy : PolicyValues
 {
-    public string this[int index] => index switch
-    {
-        _ => throw new ArgumentOutOfRangeException(nameof(index))
-    };
-
-    public int Count => 0;
-
-    public IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy>(this);
-    IEnumerator IEnumerable.GetEnumerator() => new PolicyEnumerator<Policy>(this);
+    public override int Count => 0;
+    public override string this[int index] => throw new ArgumentOutOfRangeException(nameof(index));
 
     public static Policy Empty { get; } = new();
+    public override IEnumerator<string> GetEnumerator() => new PolicyEnumerator<Policy>(this);
 
-    internal static string ToString<T>(T value)
+    internal static string ToText<T>(T values) where T : IPolicyValues
+        => string.Join(PermConstants.PolicySeparatorString, values);
+
+    internal static bool Equals<T>(T values, T other) where T : IPolicyValues
+        => values.Count == other.Count && values.ToText().Equals(other.ToText());
+
+    internal static string ToStringValue<T>(T value)
     {
         return value as string ?? value.ToString();
     }
@@ -337,35 +356,35 @@ public class Policy : IPolicyValues
         return new Policy<T1, T2, T3, T4, T5, T6, T7>(value1, value2, value3, value4, value5, value6, value7);
     }
 
-    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2, T3 value3,
-        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8)
-    {
-        return new Policy<T1, T2, T3, T4, T5, T6, T7, T8>(value1, value2, value3, value4, value5, value6, value7, value8);
-    }
+    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8> Create<T1, T2, T3, T4, T5, T6, T7, T8>(T1 value1, T2 value2,
+        T3 value3,
+        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8) =>
+        new(value1, value2, value3, value4, value5, value6, value7,
+            value8);
 
-    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 value1, T2 value2, T3 value3,
-        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9)
-    {
-        return new Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9>(value1, value2, value3, value4, value5, value6, value7, value8, value9);
-    }
+    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 value1,
+        T2 value2, T3 value3,
+        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9) =>
+        new(value1, value2, value3, value4, value5, value6, value7,
+            value8, value9);
 
-    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(T1 value1, T2 value2, T3 value3,
-        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10)
-    {
-        return new Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10);
-    }
+    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(
+        T1 value1, T2 value2, T3 value3,
+        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10) =>
+        new(value1, value2, value3, value4, value5, value6,
+            value7, value8, value9, value10);
 
-    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(T1 value1, T2 value2, T3 value3,
-        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11)
-    {
-        return new Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11);
-    }
+    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10,
+        T11>(T1 value1, T2 value2, T3 value3,
+        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11) =>
+        new(value1, value2, value3, value4, value5, value6,
+            value7, value8, value9, value10, value11);
 
-    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1 value1, T2 value2, T3 value3,
-        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12)
-    {
-        return new Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12);
-    }
+    public static Policy<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> Create<T1, T2, T3, T4, T5, T6, T7, T8, T9,
+        T10, T11, T12>(T1 value1, T2 value2, T3 value3,
+        T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12) =>
+        new(value1, value2, value3, value4, value5,
+            value6, value7, value8, value9, value10, value11, value12);
 
     public static IPolicyValues CreateOnlyString(IReadOnlyList<string> values)
     {
@@ -394,7 +413,7 @@ public class Policy : IPolicyValues
             12 => Create(values[0], values[1], values[2], values[3],
                 values[4], values[5], values[6], values[7], values[8],
                 values[9], values[10], values[11]),
-            _ => new PolicyValues(values)
+            _ => new StringListPolicy(values)
         };
     }
 }

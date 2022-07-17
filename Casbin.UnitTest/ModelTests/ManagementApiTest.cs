@@ -34,23 +34,31 @@ namespace Casbin.UnitTests.ModelTests
             e.BuildRoleLinks();
 
             TestGetPolicy(e, AsList(
-                    AsList("alice", "data1", "read"),
-                    AsList("bob", "data2", "write"),
-                    AsList("data2_admin", "data2", "read"),
-                    AsList("data2_admin", "data2", "write")));
+                AsList("alice", "data1", "read"),
+                AsList("bob", "data2", "write"),
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write")));
 
             TestGetFilteredPolicy(e, 0, AsList(AsList("alice", "data1", "read")), "alice");
             TestGetFilteredPolicy(e, 0, AsList(AsList("bob", "data2", "write")), "bob");
-            TestGetFilteredPolicy(e, 0, AsList(AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")), "data2_admin");
+            TestGetFilteredPolicy(e, 0,
+                AsList(AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")), "data2_admin");
             TestGetFilteredPolicy(e, 1, AsList(AsList("alice", "data1", "read")), "data1");
-            TestGetFilteredPolicy(e, 1, AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")), "data2");
-            TestGetFilteredPolicy(e, 2, AsList(AsList("alice", "data1", "read"), AsList("data2_admin", "data2", "read")), "read");
-            TestGetFilteredPolicy(e, 2, AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "write")), "write");
+            TestGetFilteredPolicy(e, 1,
+                AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"),
+                    AsList("data2_admin", "data2", "write")), "data2");
+            TestGetFilteredPolicy(e, 2,
+                AsList(AsList("alice", "data1", "read"), AsList("data2_admin", "data2", "read")), "read");
+            TestGetFilteredPolicy(e, 2,
+                AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "write")), "write");
 
-            TestGetFilteredPolicy(e, 0, AsList(AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")), "data2_admin", "data2");
+            TestGetFilteredPolicy(e, 0,
+                AsList(AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")), "data2_admin",
+                "data2");
             // Note: "" (empty string) in fieldValues means matching all values.
             TestGetFilteredPolicy(e, 0, AsList(AsList("data2_admin", "data2", "read")), "data2_admin", "", "read");
-            TestGetFilteredPolicy(e, 1, AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "write")), "data2", "write");
+            TestGetFilteredPolicy(e, 1,
+                AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "write")), "data2", "write");
 
             TestHasPolicy(e, AsList("alice", "data1", "read"), true);
             TestHasPolicy(e, AsList("bob", "data2", "write"), true);
@@ -77,10 +85,10 @@ namespace Casbin.UnitTests.ModelTests
             e.BuildRoleLinks();
 
             TestGetPolicy(e, AsList(
-                    AsList("alice", "data1", "read"),
-                    AsList("bob", "data2", "write"),
-                    AsList("data2_admin", "data2", "read"),
-                    AsList("data2_admin", "data2", "write")));
+                AsList("alice", "data1", "read"),
+                AsList("bob", "data2", "write"),
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write")));
 
             e.RemovePolicy("alice", "data1", "read");
             e.RemovePolicy("bob", "data2", "write");
@@ -103,13 +111,13 @@ namespace Casbin.UnitTests.ModelTests
             _ = e.AddPolicies(rules);
 
             TestGetPolicy(e, AsList(
-                AsList("data2_admin", "data2", "read"),
-                AsList("data2_admin", "data2", "write"),
-                AsList("eve", "data3", "read"),
-                AsList("jack", "data4", "read"),
-                AsList("katy", "data4", "write"),
-                AsList("leyo", "data4", "read"),
-                AsList("ham", "data4", "write")
+                    AsList("data2_admin", "data2", "read"),
+                    AsList("data2_admin", "data2", "write"),
+                    AsList("eve", "data3", "read"),
+                    AsList("jack", "data4", "read"),
+                    AsList("katy", "data4", "write"),
+                    AsList("leyo", "data4", "read"),
+                    AsList("ham", "data4", "write")
                 )
             );
 
@@ -121,9 +129,9 @@ namespace Casbin.UnitTests.ModelTests
             e.AddNamedPolicy("p", namedPolicy);
 
             TestGetPolicy(e, AsList(
-                    AsList("data2_admin", "data2", "read"),
-                    AsList("data2_admin", "data2", "write"),
-                    AsList("eve", "data3", "read")));
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write"),
+                AsList("eve", "data3", "read")));
 
             e.RemoveFilteredPolicy(1, "data2");
             TestGetPolicy(e, AsList(AsList("eve", "data3", "read")));
@@ -161,11 +169,11 @@ namespace Casbin.UnitTests.ModelTests
                     AsList("leyo", "data4", "write"),
                     AsList("katy", "data1", "write")));
             TestGetPolicy(e, AsList(
-                    AsList("eve", "data3", "read"),
-                    AsList("jack", "data4", "read"),
-                    AsList("katy", "data1", "write"),
-                    AsList("leyo", "data4", "write"),
-                    AsList("ham", "data4", "write")));
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
             Assert.True(res);
 
             // This test shows that a non-existent policy in oldParameters will not be updated, so other existent ones
@@ -261,7 +269,8 @@ namespace Casbin.UnitTests.ModelTests
             Assert.True(res);
 
             // This test shows that a non-existent policy will not be updated.
-            res = await e.UpdatePolicyAsync(AsList("non_exist", "data3", "write"), AsList("non_exist", "data3", "read"));
+            res = await e.UpdatePolicyAsync(AsList("non_exist", "data3", "write"),
+                AsList("non_exist", "data3", "read"));
             TestGetPolicy(e, AsList(AsList("eve", "data3", "write")));
             Assert.False(res);
 
@@ -283,11 +292,11 @@ namespace Casbin.UnitTests.ModelTests
                     AsList("leyo", "data4", "write"),
                     AsList("katy", "data1", "write")));
             TestGetPolicy(e, AsList(
-                    AsList("eve", "data3", "read"),
-                    AsList("jack", "data4", "read"),
-                    AsList("katy", "data1", "write"),
-                    AsList("leyo", "data4", "write"),
-                    AsList("ham", "data4", "write")));
+                AsList("eve", "data3", "read"),
+                AsList("jack", "data4", "read"),
+                AsList("katy", "data1", "write"),
+                AsList("leyo", "data4", "write"),
+                AsList("ham", "data4", "write")));
             Assert.True(res);
 
             // This test shows that a non-existent policy in oldParameters will not be updated, so other existent ones
@@ -411,11 +420,11 @@ namespace Casbin.UnitTests.ModelTests
                 AsList(
                     AsList("admin", "data5_admin"),
                     AsList("non_exist", "admin_groups")
-                    ),
+                ),
                 AsList(
                     AsList("admin", "data6_admin"),
                     AsList("non_exist2", "admin_groups")
-                    ));
+                ));
             Assert.False(res);
             TestGetRoles(e, "admin", AsList("data5_admin"));
             TestGetRoles(e, "eve", AsList("admin_groups"));
@@ -494,14 +503,16 @@ namespace Casbin.UnitTests.ModelTests
             await e.AddGroupingPolicyAsync("data3_admin", "data4_admin");
             bool res = await e.UpdateGroupingPolicyAsync(AsList("eve", "data3_admin"), AsList("eve", "admin"));
             Assert.True(res);
-            res = await e.UpdateGroupingPolicyAsync(AsList("data3_admin", "data4_admin"), AsList("admin", "data4_admin"));
+            res = await e.UpdateGroupingPolicyAsync(AsList("data3_admin", "data4_admin"),
+                AsList("admin", "data4_admin"));
             Assert.True(res);
             TestGetUsers(e, "data4_admin", AsList("admin"));
             TestGetUsers(e, "admin", AsList("eve"));
             TestGetRoles(e, "eve", AsList("admin"));
             TestGetRoles(e, "admin", AsList("data4_admin"));
 
-            res = await e.UpdateGroupingPolicyAsync(AsList("non_exist", "data4_admin"), AsList("non_exist2", "data4_admin"));
+            res = await e.UpdateGroupingPolicyAsync(AsList("non_exist", "data4_admin"),
+                AsList("non_exist2", "data4_admin"));
             Assert.False(res);
             TestGetUsers(e, "data4_admin", AsList("admin"));
 
@@ -523,11 +534,11 @@ namespace Casbin.UnitTests.ModelTests
                 AsList(
                     AsList("admin", "data5_admin"),
                     AsList("non_exist", "admin_groups")
-                    ),
+                ),
                 AsList(
                     AsList("admin", "data6_admin"),
                     AsList("non_exist2", "admin_groups")
-                    ));
+                ));
             Assert.False(res);
             TestGetRoles(e, "admin", AsList("data5_admin"));
             TestGetRoles(e, "eve", AsList("admin_groups"));

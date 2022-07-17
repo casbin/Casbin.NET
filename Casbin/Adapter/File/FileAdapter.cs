@@ -7,15 +7,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
-using Casbin.Util;
 
 namespace Casbin.Adapter.File
 {
     public class FileAdapter : IEpochAdapter
     {
-        protected readonly string FilePath;
-        private readonly bool _readOnly;
         private readonly StreamReader _byteArrayInputStream;
+        private readonly bool _readOnly;
+        protected readonly string FilePath;
 
         public FileAdapter(string filePath)
         {
@@ -43,6 +42,7 @@ namespace Casbin.Adapter.File
                     FilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
                 LoadPolicyData(model, sr);
             }
+
             if (_byteArrayInputStream is not null)
             {
                 LoadPolicyData(model, _byteArrayInputStream);
@@ -104,8 +104,9 @@ namespace Casbin.Adapter.File
             {
                 string key = kv.Key;
                 Assertion value = kv.Value;
-                policy.AddRange(value.Policy.Select(p => $"{key}, {Utility.RuleToString(p)}"));
+                policy.AddRange(value.Policy.Select(p => $"{key}, {p.ToText()}"));
             }
+
             return policy;
         }
 
@@ -135,6 +136,7 @@ namespace Casbin.Adapter.File
             {
                 policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
             }
+
             return policy;
         }
 
