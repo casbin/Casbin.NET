@@ -42,22 +42,22 @@ namespace Casbin.Model
 
         public Task<bool> SavePolicyAsync();
 
-        public Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule);
+        public Task<bool> AddPolicyAsync(string section, string policyType, IPolicyValues rule);
 
-        public Task<bool> AddPoliciesAsync(string section, string policyType, IEnumerable<IEnumerable<string>> rules);
+        public Task<bool> AddPoliciesAsync(string section, string policyType, IReadOnlyList<IPolicyValues> rules);
 
         public Task<bool> UpdatePoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules);
+            IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules);
 
-        public Task<bool> UpdatePolicyAsync(string section, string policyType, IEnumerable<string> oldRule,
-            IEnumerable<string> newRule);
+        public Task<bool> UpdatePolicyAsync(string section, string policyType, IPolicyValues oldRule,
+            IPolicyValues newRule);
 
-        public Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule);
+        public Task<bool> RemovePolicyAsync(string section, string policyType, IPolicyValues rule);
 
         public Task<bool> RemovePoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> rules);
+            IReadOnlyList<IPolicyValues> rules);
 
-        public Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section, string policyType,
-            int fieldIndex, params string[] fieldValues);
+        public Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(string section, string policyType,
+            int fieldIndex, IPolicyValues fieldValues);
     }
 }

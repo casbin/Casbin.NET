@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Casbin.Model;
 
@@ -131,5 +133,16 @@ public static class Policy
                 values[9], values[10], values[11]),
             _ => new StringListPolicy(values)
         };
+    }
+
+    public static IPolicyValues ValuesFrom(IEnumerable<string> values)
+    {
+        return ValuesFrom(values as IReadOnlyList<string> ?? values.ToList());
+    }
+
+    public static IReadOnlyList<IPolicyValues> ValuesListFrom(IEnumerable<IEnumerable<string>> rules)
+    {
+        var policies = rules.Select(rule => ValuesFrom(rule));
+        return policies as IReadOnlyList<IPolicyValues> ?? policies.ToList();
     }
 }
