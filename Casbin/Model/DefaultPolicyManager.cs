@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Persist;
 
@@ -180,8 +179,6 @@ namespace Casbin.Model
             {
                 EndWrite();
             }
-
-            ;
         }
 
         public virtual async Task<bool> LoadFilteredPolicyAsync(Filter filter)
@@ -265,7 +262,7 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
+        public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType)
         {
             if (TryStartRead() is false)
             {
@@ -282,8 +279,8 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
-            params string[] fieldValues)
+        public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
+            IPolicyValues fieldValues)
         {
             if (TryStartRead() is false)
             {
@@ -334,7 +331,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
+        public bool HasPolicy(string section, string policyType, IPolicyValues rule)
         {
             StartRead();
             try
@@ -347,7 +344,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
         {
             StartRead();
             try
@@ -360,7 +357,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
         {
             StartRead();
             try
@@ -370,30 +367,6 @@ namespace Casbin.Model
             finally
             {
                 EndRead();
-            }
-        }
-
-        public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.AddPolicy(section, policyType, ruleArray);
-                }
-
-                SingleAdapter?.AddPolicy(section, policyType, ruleArray);
-                return PolicyStore.AddPolicy(section, policyType, ruleArray);
-            }
-            finally
-            {
-                EndWrite();
             }
         }
 
@@ -420,7 +393,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public bool AddPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -429,14 +402,13 @@ namespace Casbin.Model
 
             try
             {
-                var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.AddPolicies(section, policyType, rulesArray);
+                    return PolicyStore.AddPolicies(section, policyType, rules);
                 }
 
-                BatchAdapter?.AddPolicies(section, policyType, rulesArray);
-                return PolicyStore.AddPolicies(section, policyType, rulesArray);
+                BatchAdapter?.AddPolicies(section, policyType, rules);
+                return PolicyStore.AddPolicies(section, policyType, rules);
             }
             finally
             {
@@ -444,8 +416,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule,
-            IEnumerable<string> newRule)
+        public bool UpdatePolicy(string section, string policyType, IPolicyValues oldRule, IPolicyValues newRule)
         {
             if (TryStartWrite() is false)
             {
@@ -454,15 +425,15 @@ namespace Casbin.Model
 
             try
             {
-                IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
-                IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
+                // IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
+                // IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                    return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
                 }
 
-                SingleAdapter?.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
-                return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                SingleAdapter?.UpdatePolicy(section, policyType, oldRule, newRule);
+                return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
             }
             finally
             {
@@ -470,8 +441,8 @@ namespace Casbin.Model
             }
         }
 
-        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
-            IEnumerable<IEnumerable<string>> newRules)
+        public bool UpdatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> oldRules,
+            IReadOnlyList<IPolicyValues> newRules)
         {
             if (TryStartWrite() is false)
             {
@@ -480,15 +451,15 @@ namespace Casbin.Model
 
             try
             {
-                IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
+                // IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
+                // IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                    return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
                 }
 
-                BatchAdapter?.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
-                return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                BatchAdapter?.UpdatePolicies(section, policyType, oldRules, newRules);
+                return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
             }
             finally
             {
@@ -496,7 +467,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
+        public bool RemovePolicy(string section, string policyType, IPolicyValues rule)
         {
             if (TryStartWrite() is false)
             {
@@ -505,14 +476,13 @@ namespace Casbin.Model
 
             try
             {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.RemovePolicy(section, policyType, ruleArray);
+                    return PolicyStore.RemovePolicy(section, policyType, rule);
                 }
 
-                SingleAdapter?.RemovePolicy(section, policyType, ruleArray);
-                return PolicyStore.RemovePolicy(section, policyType, ruleArray);
+                SingleAdapter?.RemovePolicy(section, policyType, rule);
+                return PolicyStore.RemovePolicy(section, policyType, rule);
             }
             finally
             {
@@ -520,7 +490,7 @@ namespace Casbin.Model
             }
         }
 
-        public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
+        public bool RemovePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -529,14 +499,13 @@ namespace Casbin.Model
 
             try
             {
-                var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.RemovePolicies(section, policyType, rulesArray);
+                    return PolicyStore.RemovePolicies(section, policyType, rules);
                 }
 
-                BatchAdapter?.RemovePolicies(section, policyType, rulesArray);
-                return PolicyStore.RemovePolicies(section, policyType, rulesArray);
+                BatchAdapter?.RemovePolicies(section, policyType, rules);
+                return PolicyStore.RemovePolicies(section, policyType, rules);
             }
             finally
             {
@@ -544,8 +513,8 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
-            params string[] fieldValues)
+        public IEnumerable<IPolicyValues> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
+            IPolicyValues fieldValues)
         {
             if (TryStartWrite() is false)
             {
@@ -568,7 +537,7 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<bool> AddPolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        public virtual async Task<bool> AddPolicyAsync(string section, string policyType, IPolicyValues rule)
         {
             if (TryStartWrite() is false)
             {
@@ -577,18 +546,17 @@ namespace Casbin.Model
 
             try
             {
-                IEnumerable<string> ruleArray = rule as string[] ?? rule.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.AddPolicy(section, policyType, ruleArray);
+                    return PolicyStore.AddPolicy(section, policyType, rule);
                 }
 
                 if (SingleAdapter is not null)
                 {
-                    await SingleAdapter.AddPolicyAsync(section, policyType, ruleArray);
+                    await SingleAdapter.AddPolicyAsync(section, policyType, rule);
                 }
 
-                return PolicyStore.AddPolicy(section, policyType, ruleArray);
+                return PolicyStore.AddPolicy(section, policyType, rule);
             }
             finally
             {
@@ -597,7 +565,7 @@ namespace Casbin.Model
         }
 
         public virtual async Task<bool> AddPoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> rules)
+            IReadOnlyList<IPolicyValues> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -606,18 +574,17 @@ namespace Casbin.Model
 
             try
             {
-                var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.AddPolicies(section, policyType, rulesArray);
+                    return PolicyStore.AddPolicies(section, policyType, rules);
                 }
 
                 if (BatchAdapter is not null)
                 {
-                    await BatchAdapter.AddPoliciesAsync(section, policyType, rulesArray);
+                    await BatchAdapter.AddPoliciesAsync(section, policyType, rules);
                 }
 
-                return PolicyStore.AddPolicies(section, policyType, rulesArray);
+                return PolicyStore.AddPolicies(section, policyType, rules);
             }
             finally
             {
@@ -626,7 +593,7 @@ namespace Casbin.Model
         }
 
         public virtual async Task<bool> UpdatePolicyAsync(string section, string policyType,
-            IEnumerable<string> oldRule, IEnumerable<string> newRule)
+            IPolicyValues oldRule, IPolicyValues newRule)
         {
             if (TryStartWrite() is false)
             {
@@ -635,19 +602,17 @@ namespace Casbin.Model
 
             try
             {
-                IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
-                IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                    return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
                 }
 
                 if (SingleAdapter is not null)
                 {
-                    await SingleAdapter.UpdatePolicyAsync(section, policyType, oldRuleArray, newRuleArray);
+                    await SingleAdapter.UpdatePolicyAsync(section, policyType, oldRule, newRule);
                 }
 
-                return PolicyStore.UpdatePolicy(section, policyType, oldRuleArray, newRuleArray);
+                return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
             }
             finally
             {
@@ -656,7 +621,7 @@ namespace Casbin.Model
         }
 
         public virtual async Task<bool> UpdatePoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules)
+            IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules)
         {
             if (TryStartWrite() is false)
             {
@@ -665,19 +630,17 @@ namespace Casbin.Model
 
             try
             {
-                IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                    return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
                 }
 
                 if (BatchAdapter is not null)
                 {
-                    await BatchAdapter.UpdatePoliciesAsync(section, policyType, oldRulesArray, newRulesArray);
+                    await BatchAdapter.UpdatePoliciesAsync(section, policyType, oldRules, newRules);
                 }
 
-                return PolicyStore.UpdatePolicies(section, policyType, oldRulesArray, newRulesArray);
+                return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
             }
             finally
             {
@@ -685,7 +648,7 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<bool> RemovePolicyAsync(string section, string policyType, IEnumerable<string> rule)
+        public virtual async Task<bool> RemovePolicyAsync(string section, string policyType, IPolicyValues rule)
         {
             if (TryStartWrite() is false)
             {
@@ -694,18 +657,17 @@ namespace Casbin.Model
 
             try
             {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.RemovePolicy(section, policyType, ruleArray);
+                    return PolicyStore.RemovePolicy(section, policyType, rule);
                 }
 
                 if (SingleAdapter is not null)
                 {
-                    await SingleAdapter.RemovePolicyAsync(section, policyType, ruleArray);
+                    await SingleAdapter.RemovePolicyAsync(section, policyType, rule);
                 }
 
-                return PolicyStore.RemovePolicy(section, policyType, ruleArray);
+                return PolicyStore.RemovePolicy(section, policyType, rule);
             }
             finally
             {
@@ -714,7 +676,7 @@ namespace Casbin.Model
         }
 
         public virtual async Task<bool> RemovePoliciesAsync(string section, string policyType,
-            IEnumerable<IEnumerable<string>> rules)
+            IReadOnlyList<IPolicyValues> rules)
         {
             if (TryStartWrite() is false)
             {
@@ -723,18 +685,17 @@ namespace Casbin.Model
 
             try
             {
-                var rulesArray = rules as IEnumerable<string>[] ?? rules.ToArray();
                 if (HasAdapter is false || AutoSave is false)
                 {
-                    return PolicyStore.RemovePolicies(section, policyType, rulesArray);
+                    return PolicyStore.RemovePolicies(section, policyType, rules);
                 }
 
                 if (BatchAdapter is not null)
                 {
-                    await BatchAdapter.RemovePoliciesAsync(section, policyType, rulesArray);
+                    await BatchAdapter.RemovePoliciesAsync(section, policyType, rules);
                 }
 
-                return PolicyStore.RemovePolicies(section, policyType, rulesArray);
+                return PolicyStore.RemovePolicies(section, policyType, rules);
             }
             finally
             {
@@ -742,8 +703,8 @@ namespace Casbin.Model
             }
         }
 
-        public virtual async Task<IEnumerable<IEnumerable<string>>> RemoveFilteredPolicyAsync(string section,
-            string policyType, int fieldIndex, params string[] fieldValues)
+        public virtual async Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(string section,
+            string policyType, int fieldIndex, IPolicyValues fieldValues)
         {
             if (TryStartWrite() is false)
             {

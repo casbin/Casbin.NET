@@ -164,7 +164,7 @@ namespace Casbin
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedPolicy(this IEnforcer enforcer, string ptype,
             int fieldIndex, params string[] fieldValues) =>
             enforcer.InternalGetFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex,
-                fieldValues);
+                Policy.ValuesFrom(fieldValues));
 
         #endregion End of "p" (Store) Management
 
@@ -201,7 +201,8 @@ namespace Casbin
         /// <returns>Whether the rule exists.</returns>
         public static bool HasNamedPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> paramList)
         {
-            return enforcer.Model.HasPolicy(PermConstants.Section.PolicySection, ptype, paramList);
+            return enforcer.Model.HasPolicy(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesFrom(paramList));
         }
 
         /// <summary>
@@ -306,7 +307,7 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="policyType">The policy type, can be "p", "p2", "p3", ..</param>
-        /// <param name="values">The "p" policy rule.</param>
+        /// <param name="parameters">The "p" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string policyType,
             params string[] parameters) => AddNamedPolicyAsync(enforcer, policyType, parameters as IEnumerable<string>);
@@ -322,7 +323,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddNamedPolicyAsync(this IEnforcer enforcer, string policyType,
             IEnumerable<string> parameters) =>
-            enforcer.InternalAddPolicyAsync(PermConstants.Section.PolicySection, policyType, parameters);
+            enforcer.InternalAddPolicyAsync(PermConstants.Section.PolicySection, policyType,
+                Policy.ValuesFrom(parameters));
 
         /// <summary>
         /// Adds authorization rules to the current policy. If the rule
@@ -360,10 +362,9 @@ namespace Casbin
         /// <param name="rules">The "p" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
         public static bool AddNamedPolicies(this IEnforcer enforcer, string ptype,
-            IEnumerable<IEnumerable<string>> rules)
-        {
-            return enforcer.InternalAddPolicies(PermConstants.Section.PolicySection, ptype, rules);
-        }
+            IEnumerable<IEnumerable<string>> rules) =>
+            enforcer.InternalAddPolicies(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesListFrom(rules));
 
         /// <summary>
         /// Adds authorization rules to the current named policy.If the
@@ -375,10 +376,9 @@ namespace Casbin
         /// <param name="rules">The "p" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> AddNamedPoliciesAsync(this IEnforcer enforcer, string ptype,
-            IEnumerable<IEnumerable<string>> rules)
-        {
-            return enforcer.InternalAddPoliciesAsync(PermConstants.Section.PolicySection, ptype, rules);
-        }
+            IEnumerable<IEnumerable<string>> rules) =>
+            enforcer.InternalAddPoliciesAsync(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesListFrom(rules));
 
         #endregion
 
@@ -462,7 +462,7 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> oldParameters,
             IEnumerable<string> newParameters) => enforcer.InternalUpdatePolicy(PermConstants.Section.PolicySection,
-            ptype, oldParameters, newParameters);
+            ptype, Policy.ValuesFrom(oldParameters), Policy.ValuesFrom(newParameters));
 
         /// <summary>
         ///     Updates an authorization rule to the current named policy.
@@ -474,8 +474,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateNamedPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, IEnumerable<string> newParameters) =>
-            enforcer.InternalUpdatePolicyAsync(PermConstants.Section.PolicySection, ptype, oldParameters,
-                newParameters);
+            enforcer.InternalUpdatePolicyAsync(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesFrom(oldParameters), Policy.ValuesFrom(newParameters));
 
         /// <summary>
         ///     Updates authorization rules to the current policies.
@@ -509,7 +509,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
-            enforcer.InternalUpdatePolicies(PermConstants.Section.PolicySection, ptype, oldRules, newRules);
+            enforcer.InternalUpdatePolicies(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesListFrom(oldRules), Policy.ValuesListFrom(newRules));
 
         /// <summary>
         ///     Updates authorization rules to the current named policies.
@@ -521,7 +522,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static Task<bool> UpdateNamedPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
-            enforcer.InternalUpdatePoliciesAsync(PermConstants.Section.PolicySection, ptype, oldRules, newRules);
+            enforcer.InternalUpdatePoliciesAsync(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesListFrom(oldRules), Policy.ValuesListFrom(newRules));
 
         #endregion
 
@@ -605,7 +607,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
         {
-            return enforcer.InternalRemovePolicy(PermConstants.Section.PolicySection, ptype, parameters);
+            return enforcer.InternalRemovePolicy(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesFrom(parameters));
         }
 
         /// <summary>
@@ -618,7 +621,8 @@ namespace Casbin
         public static Task<bool> RemoveNamedPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters)
         {
-            return enforcer.InternalRemovePolicyAsync(PermConstants.Section.PolicySection, ptype, parameters);
+            return enforcer.InternalRemovePolicyAsync(PermConstants.Section.PolicySection, ptype,
+                Policy.ValuesFrom(parameters));
         }
 
         /// <summary>
@@ -653,7 +657,7 @@ namespace Casbin
         public static bool RemoveNamedPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalRemovePolicies(PermConstants.Section.PolicySection, ptype, rules);
+            return enforcer.InternalRemovePolicies(PermConstants.Section.PolicySection, ptype, Policy.ValuesListFrom(rules));
         }
 
         /// <summary>
@@ -666,7 +670,7 @@ namespace Casbin
         public static Task<bool> RemoveNamedPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalRemovePoliciesAsync(PermConstants.Section.PolicySection, ptype, rules);
+            return enforcer.InternalRemovePoliciesAsync(PermConstants.Section.PolicySection, ptype, Policy.ValuesListFrom(rules));
         }
 
         /// <summary>
@@ -706,7 +710,7 @@ namespace Casbin
         public static bool RemoveFilteredNamedPolicy(this IEnforcer enforcer, string ptype, int fieldIndex,
             params string[] fieldValues) =>
             enforcer.InternalRemoveFilteredPolicy(PermConstants.Section.PolicySection, ptype, fieldIndex,
-                fieldValues);
+                Policy.ValuesFrom(fieldValues));
 
         /// <summary>
         /// Removes an authorization rule from the current named policy, field filters can be specified.
@@ -719,7 +723,7 @@ namespace Casbin
         public static Task<bool> RemoveFilteredNamedPolicyAsync(this IEnforcer enforcer, string ptype, int fieldIndex,
             params string[] fieldValues) =>
             enforcer.InternalRemoveFilteredPolicyAsync(PermConstants.Section.PolicySection, ptype, fieldIndex,
-                fieldValues);
+                Policy.ValuesFrom(fieldValues));
 
         #endregion
 
@@ -794,7 +798,8 @@ namespace Casbin
         /// <returns>Whether the rule exists.</returns>
         public static bool HasNamedGroupingPolicy(this IEnforcer enforcer, string ptype, IEnumerable<string> parameters)
         {
-            return enforcer.InternalHasPolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            return enforcer.InternalHasPolicy(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(parameters));
         }
 
         /// <summary>
@@ -857,7 +862,7 @@ namespace Casbin
         public static IEnumerable<IEnumerable<string>> GetFilteredNamedGroupingPolicy(this IEnforcer enforcer,
             string ptype, int fieldIndex, params string[] fieldValues) =>
             enforcer.InternalGetFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex,
-                fieldValues);
+                Policy.ValuesFrom(fieldValues));
 
         #endregion
 
@@ -954,7 +959,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters) =>
-            await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            await enforcer.InternalAddPolicyAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(parameters));
 
         /// <summary>
         /// Adds a named role inheritance rule to the current
@@ -965,10 +971,10 @@ namespace Casbin
         /// <param name="policyType">The policy type, can be "g", "g2", "g3", ..</param>
         /// <param name="parameters">The "g" policy rule.</param>
         /// <returns>Succeeds or not.</returns>
-        public static Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
+        public static Task<bool> AddNamedGroupingPolicyAsync(this IEnforcer enforcer, string policyType,
             params string[] parameters)
         {
-            return enforcer.AddNamedGroupingPolicyAsync(ptype, parameters as IEnumerable<string>);
+            return enforcer.AddNamedGroupingPolicyAsync(policyType, parameters as IEnumerable<string>);
         }
 
         /// <summary>
@@ -1010,7 +1016,9 @@ namespace Casbin
         public static bool AddNamedGroupingPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalAddPolicies(PermConstants.Section.RoleSection, ptype, rules);
+            var ans = Policy.ValuesListFrom(rules);
+            return enforcer.InternalAddPolicies(PermConstants.Section.RoleSection, ptype,
+                ans);
         }
 
         /// <summary>
@@ -1025,7 +1033,8 @@ namespace Casbin
         public static async Task<bool> AddNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return await enforcer.InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
+            return await enforcer.InternalAddPoliciesAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesListFrom(rules));
         }
 
         #endregion
@@ -1110,7 +1119,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedGroupingPolicy(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, IEnumerable<string> newParameters) =>
-            enforcer.InternalUpdatePolicy(PermConstants.Section.RoleSection, ptype, oldParameters, newParameters);
+            enforcer.InternalUpdatePolicy(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(oldParameters), Policy.ValuesFrom(newParameters));
 
         /// <summary>
         ///     Updates a role inheritance rule from the current policy, field filters can be specified.
@@ -1122,8 +1132,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> UpdateNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> oldParameters, IEnumerable<string> newParameters) =>
-            await enforcer.InternalUpdatePolicyAsync(PermConstants.Section.RoleSection, ptype, oldParameters,
-                newParameters);
+            await enforcer.InternalUpdatePolicyAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(oldParameters), Policy.ValuesFrom(newParameters));
 
         /// <summary>
         ///     Updates a role inheritance rule from the current policy.
@@ -1157,7 +1167,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool UpdateNamedGroupingPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
-            enforcer.InternalUpdatePolicies(PermConstants.Section.RoleSection, ptype, oldRules, newRules);
+            enforcer.InternalUpdatePolicies(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesListFrom(oldRules), Policy.ValuesListFrom(newRules));
 
         /// <summary>
         ///     Updates a role inheritance rule from the current policy, field filters can be specified.
@@ -1169,7 +1180,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> UpdateNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> oldRules, IEnumerable<IEnumerable<string>> newRules) =>
-            await enforcer.InternalUpdatePoliciesAsync(PermConstants.Section.RoleSection, ptype, oldRules, newRules);
+            await enforcer.InternalUpdatePoliciesAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesListFrom(oldRules), Policy.ValuesListFrom(newRules));
 
         #endregion
 
@@ -1256,7 +1268,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static bool RemoveNamedGroupingPolicy(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters) =>
-            enforcer.InternalRemovePolicy(PermConstants.Section.RoleSection, ptype, parameters);
+            enforcer.InternalRemovePolicy(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(parameters));
 
         /// <summary>
         /// Removes a role inheritance rule from the current
@@ -1268,7 +1281,8 @@ namespace Casbin
         /// <returns>Succeeds or not.</returns>
         public static async Task<bool> RemoveNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<string> parameters) =>
-            await enforcer.InternalRemovePolicyAsync(PermConstants.Section.RoleSection, ptype, parameters);
+            await enforcer.InternalRemovePolicyAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesFrom(parameters));
 
         /// <summary>
         /// Removes roles inheritance rule from the current policy.
@@ -1304,7 +1318,8 @@ namespace Casbin
         public static bool RemoveNamedGroupingPolicies(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return enforcer.InternalRemovePolicies(PermConstants.Section.RoleSection, ptype, rules);
+            return enforcer.InternalRemovePolicies(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesListFrom(rules));
         }
 
         /// <summary>
@@ -1318,7 +1333,8 @@ namespace Casbin
         public static async Task<bool> RemoveNamedGroupingPoliciesAsync(this IEnforcer enforcer, string ptype,
             IEnumerable<IEnumerable<string>> rules)
         {
-            return await enforcer.InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype, rules);
+            return await enforcer.InternalRemovePoliciesAsync(PermConstants.Section.RoleSection, ptype,
+                Policy.ValuesListFrom(rules));
         }
 
         /// <summary>
@@ -1358,7 +1374,7 @@ namespace Casbin
         public static bool RemoveFilteredNamedGroupingPolicy(this IEnforcer enforcer, string ptype, int fieldIndex,
             params string[] fieldValues) =>
             enforcer.InternalRemoveFilteredPolicy(PermConstants.Section.RoleSection, ptype, fieldIndex,
-                fieldValues);
+                Policy.ValuesFrom(fieldValues));
 
         /// <summary>
         /// Removes a role inheritance rule from the current named policy, field filters can be specified.
@@ -1371,7 +1387,7 @@ namespace Casbin
         public static async Task<bool> RemoveFilteredNamedGroupingPolicyAsync(this IEnforcer enforcer, string ptype,
             int fieldIndex, params string[] fieldValues) =>
             await enforcer.InternalRemoveFilteredPolicyAsync(PermConstants.Section.RoleSection, ptype,
-                fieldIndex, fieldValues);
+                fieldIndex, Policy.ValuesFrom(fieldValues));
 
         #endregion
 

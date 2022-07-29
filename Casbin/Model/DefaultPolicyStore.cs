@@ -35,25 +35,25 @@ namespace Casbin.Model
             }
         }
 
-        public IEnumerable<IEnumerable<string>> GetPolicy(string section, string policyType)
+        public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType)
         {
             return Sections[section][policyType].Policy;
         }
 
-        public IEnumerable<IEnumerable<string>> GetFilteredPolicy(string section, string policyType, int fieldIndex,
-            params string[] fieldValues)
+        public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
+            IPolicyValues fieldValues)
         {
             if (fieldValues == null)
             {
                 throw new ArgumentNullException(nameof(fieldValues));
             }
 
-            if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            if (fieldValues.Count == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
                 return Sections[section][policyType].Policy;
             }
 
-            var result = new List<IEnumerable<string>>();
+            var result = new List<IPolicyValues>();
 
             foreach (var rule in Sections[section][policyType].Policy)
             {
@@ -73,126 +73,21 @@ namespace Casbin.Model
             return result;
         }
 
-        public bool HasPolicy(string section, string policyType, IEnumerable<string> rule)
-        {
-            string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.ValuesFrom(ruleArray);
-            return HasPolicy(section, policyType, values);
-        }
-
-        public bool HasPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
-        {
-            List<IPolicyValues> valuesList = new();
-            foreach (IEnumerable<string> rule in rules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                valuesList.Add(values);
-            }
-
-            return HasPolicies(section, policyType, valuesList);
-        }
-
-        public bool HasAllPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
-        {
-            List<IPolicyValues> valuesList = new();
-            foreach (IEnumerable<string> rule in rules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                valuesList.Add(values);
-            }
-
-            return HasAllPolicies(section, policyType, valuesList);
-        }
-
-        public bool AddPolicy(string section, string policyType, IEnumerable<string> rule)
-        {
-            string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.ValuesFrom(ruleArray);
-            return AddPolicy(section, policyType, values);
-        }
-
-        public bool AddPolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
-        {
-            List<IPolicyValues> valuesList = new();
-            foreach (IEnumerable<string> rule in rules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                valuesList.Add(values);
-            }
-
-            return AddPolicies(section, policyType, valuesList);
-        }
-
-        public bool UpdatePolicy(string section, string policyType, IEnumerable<string> oldRule,
-            IEnumerable<string> newRule)
-        {
-            string[] oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
-            string[] newRuleArray = newRule as string[] ?? newRule.ToArray();
-            IPolicyValues oldValues = Policy.ValuesFrom(oldRuleArray);
-            IPolicyValues newValues = Policy.ValuesFrom(newRuleArray);
-            return UpdatePolicy(section, policyType, oldValues, newValues);
-        }
-
-        public bool UpdatePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> oldRules,
-            IEnumerable<IEnumerable<string>> newRules)
-        {
-            List<IPolicyValues> oldValuesList = new();
-            foreach (IEnumerable<string> rule in oldRules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                oldValuesList.Add(values);
-            }
-
-            List<IPolicyValues> newValuesList = new();
-            foreach (IEnumerable<string> rule in newRules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                newValuesList.Add(values);
-            }
-
-            return UpdatePolicies(section, policyType, oldValuesList, newValuesList);
-        }
-
-        public bool RemovePolicy(string section, string policyType, IEnumerable<string> rule)
-        {
-            string[] ruleArray = rule as string[] ?? rule.ToArray();
-            IPolicyValues values = Policy.ValuesFrom(ruleArray);
-            return RemovePolicy(section, policyType, values);
-        }
-
-        public bool RemovePolicies(string section, string policyType, IEnumerable<IEnumerable<string>> rules)
-        {
-            List<IPolicyValues> valuesList = new();
-            foreach (IEnumerable<string> rule in rules)
-            {
-                string[] ruleArray = rule as string[] ?? rule.ToArray();
-                IPolicyValues values = Policy.ValuesFrom(ruleArray);
-                valuesList.Add(values);
-            }
-
-            return RemovePolicies(section, policyType, valuesList);
-        }
-
-        public IEnumerable<IEnumerable<string>> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
-            params string[] fieldValues)
+        public IEnumerable<IPolicyValues> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
+            IPolicyValues fieldValues)
         {
             if (fieldValues == null)
             {
                 throw new ArgumentNullException(nameof(fieldValues));
             }
 
-            if (fieldValues.Length == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            if (fieldValues.Count == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
                 return null;
             }
 
             var newPolicy = new List<IPolicyValues>();
-            List<IEnumerable<string>> effectPolicies = null;
+            List<IPolicyValues> effectPolicies = null;
 
             Assertion assertion = Sections[section][policyType];
             foreach (IPolicyValues values in assertion.Policy)
@@ -206,7 +101,7 @@ namespace Casbin.Model
 
                 if (matched)
                 {
-                    effectPolicies ??= new List<IEnumerable<string>>();
+                    effectPolicies ??= new List<IPolicyValues>();
                     effectPolicies.Add(values);
                     assertion.PolicyStringSet.Remove(values.ToText());
                 }
@@ -279,28 +174,28 @@ namespace Casbin.Model
             return assertion.TryAddPolicy(values);
         }
 
-        private bool HasPolicy(string section, string policyType, IPolicyValues values)
+        public bool HasPolicy(string section, string policyType, IPolicyValues values)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
             return assertion.Contains(values);
         }
 
 
-        private bool HasPolicies(string section, string policyType, IEnumerable<IPolicyValues> valuesList)
+        public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
             List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
             return list.Count == 0 || list.Any(assertion.Contains);
         }
 
-        private bool HasAllPolicies(string section, string policyType, IEnumerable<IPolicyValues> valuesList)
+        public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
             List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
             return list.Count is 0 || list.All(assertion.Contains);
         }
 
-        private bool AddPolicies(string section, string policyType, IEnumerable<IPolicyValues> valuesList)
+        public bool AddPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
             if (valuesList is null)
             {
@@ -322,14 +217,14 @@ namespace Casbin.Model
             return true;
         }
 
-        private bool UpdatePolicy(string section, string policyType, IPolicyValues oldValues, IPolicyValues newValues)
+        public bool UpdatePolicy(string section, string policyType, IPolicyValues oldValues, IPolicyValues newValues)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
             return assertion.TryUpdatePolicy(oldValues, newValues);
         }
 
-        private bool UpdatePolicies(string section, string policyType, IEnumerable<IPolicyValues> oldValuesList,
-            IEnumerable<IPolicyValues> newValuesList)
+        public bool UpdatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> oldValuesList,
+            IReadOnlyList<IPolicyValues> newValuesList)
         {
             if (oldValuesList is null)
             {
@@ -357,13 +252,13 @@ namespace Casbin.Model
             return true;
         }
 
-        private bool RemovePolicy(string section, string policyType, IPolicyValues values)
+        public bool RemovePolicy(string section, string policyType, IPolicyValues values)
         {
             Assertion assertion = GetRequiredAssertion(section, policyType);
             return assertion.TryRemovePolicy(values);
         }
 
-        private bool RemovePolicies(string section, string policyType, IEnumerable<IPolicyValues> valuesList)
+        public bool RemovePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
             if (valuesList is null)
             {
@@ -390,9 +285,9 @@ namespace Casbin.Model
         private static IEnumerable<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section,
             string policyType, int fieldIndex)
         {
-            List<string> values = section[policyType].Policy
+            IEnumerable<string> values = section[policyType].Policy
                 .Select(rule => rule[fieldIndex])
-                .Distinct().ToList();
+                .Distinct();
             return values;
         }
     }
