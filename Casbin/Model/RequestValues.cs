@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Casbin.Model;
 
-public readonly record struct RequestValues : IRequestValues
+public struct RequestValues : IRequestValues
 {
     public static RequestValues Empty { get; } = new();
 
@@ -20,8 +20,12 @@ public readonly record struct RequestValues : IRequestValues
     }
 }
 
-public readonly record struct RequestValues<T>(T Value1) : IRequestValues
+public struct RequestValues<T> : IRequestValues
 {
+    public RequestValues(T value) => Value1 = value;
+
+    public T Value1 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -31,8 +35,17 @@ public readonly record struct RequestValues<T>(T Value1) : IRequestValues
     public int Count => 1;
 }
 
-public readonly record struct RequestValues<T1, T2>(T1 Value1, T2 Value2) : IRequestValues
+public struct RequestValues<T1, T2> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2)
+    {
+        Value1 = value1;
+        Value2 = value2;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -43,8 +56,19 @@ public readonly record struct RequestValues<T1, T2>(T1 Value1, T2 Value2) : IReq
     public int Count => 2;
 }
 
-public readonly record struct RequestValues<T1, T2, T3>(T1 Value1, T2 Value2, T3 Value3) : IRequestValues
+public struct RequestValues<T1, T2, T3> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -56,9 +80,21 @@ public readonly record struct RequestValues<T1, T2, T3>(T1 Value1, T2 Value2, T3
     public int Count => 3;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -71,9 +107,23 @@ public readonly record struct RequestValues<T1, T2, T3, T4>(T1 Value1, T2 Value2
     public int Count => 4;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -87,9 +137,25 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5>(T1 Value1, T2 Va
     public int Count => 5;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -97,16 +163,34 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6>(T1 Value1, T
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
+        5 => RequestValues.ToStringValue(Value6),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 6;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -114,17 +198,37 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7>(T1 Value
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 7;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+    public T8 Value8 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -132,18 +236,41 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8>(T1 V
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
-        8 => RequestValues.ToStringValue(Value8),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
+        7 => RequestValues.ToStringValue(Value8),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 8;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+        Value9 = value9;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+    public T8 Value8 { get; set; }
+    public T9 Value9 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -151,19 +278,44 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9>(
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
-        8 => RequestValues.ToStringValue(Value8),
-        9 => RequestValues.ToStringValue(Value9),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
+        7 => RequestValues.ToStringValue(Value8),
+        8 => RequestValues.ToStringValue(Value9),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 9;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(T1 Value1, T2 Value2, T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+        Value9 = value9;
+        Value10 = value10;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+    public T8 Value8 { get; set; }
+    public T9 Value9 { get; set; }
+    public T10 Value10 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -171,21 +323,47 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, 
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
-        8 => RequestValues.ToStringValue(Value8),
-        9 => RequestValues.ToStringValue(Value9),
-        10 => RequestValues.ToStringValue(Value10),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
+        7 => RequestValues.ToStringValue(Value8),
+        8 => RequestValues.ToStringValue(Value9),
+        9 => RequestValues.ToStringValue(Value10),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 10;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(T1 Value1, T2 Value2,
-    T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+        Value9 = value9;
+        Value10 = value10;
+        Value11 = value11;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+    public T8 Value8 { get; set; }
+    public T9 Value9 { get; set; }
+    public T10 Value10 { get; set; }
+    public T11 Value11 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -193,23 +371,50 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, 
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
-        8 => RequestValues.ToStringValue(Value8),
-        9 => RequestValues.ToStringValue(Value9),
-        10 => RequestValues.ToStringValue(Value10),
-        11 => RequestValues.ToStringValue(Value11),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
+        7 => RequestValues.ToStringValue(Value8),
+        8 => RequestValues.ToStringValue(Value9),
+        9 => RequestValues.ToStringValue(Value10),
+        10 => RequestValues.ToStringValue(Value11),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
     public int Count => 11;
 }
 
-public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1 Value1, T2 Value2,
-    T3 Value3,
-    T4 Value4, T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11,
-    T12 Value12) : IRequestValues
+public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : IRequestValues
 {
+    public RequestValues(T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12)
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+        Value9 = value9;
+        Value10 = value10;
+        Value11 = value11;
+        Value12 = value12;
+    }
+
+    public T1 Value1 { get; set; }
+    public T2 Value2 { get; set; }
+    public T3 Value3 { get; set; }
+    public T4 Value4 { get; set; }
+    public T5 Value5 { get; set; }
+    public T6 Value6 { get; set; }
+    public T7 Value7 { get; set; }
+    public T8 Value8 { get; set; }
+    public T9 Value9 { get; set; }
+    public T10 Value10 { get; set; }
+    public T11 Value11 { get; set; }
+    public T12 Value12 { get; set; }
+
     public string this[int index] => index switch
     {
         0 => RequestValues.ToStringValue(Value1),
@@ -217,13 +422,13 @@ public readonly record struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, 
         2 => RequestValues.ToStringValue(Value3),
         3 => RequestValues.ToStringValue(Value4),
         4 => RequestValues.ToStringValue(Value5),
-        6 => RequestValues.ToStringValue(Value6),
-        7 => RequestValues.ToStringValue(Value7),
-        8 => RequestValues.ToStringValue(Value8),
-        9 => RequestValues.ToStringValue(Value9),
-        10 => RequestValues.ToStringValue(Value10),
-        11 => RequestValues.ToStringValue(Value11),
-        12 => RequestValues.ToStringValue(Value12),
+        5 => RequestValues.ToStringValue(Value6),
+        6 => RequestValues.ToStringValue(Value7),
+        7 => RequestValues.ToStringValue(Value8),
+        8 => RequestValues.ToStringValue(Value9),
+        9 => RequestValues.ToStringValue(Value10),
+        10 => RequestValues.ToStringValue(Value11),
+        11 => RequestValues.ToStringValue(Value12),
         _ => throw new ArgumentOutOfRangeException(nameof(index))
     };
 
@@ -240,6 +445,5 @@ public readonly struct ObjectListRequestValues : IRequestValues
     }
 
     public string this[int index] => RequestValues.ToStringValue(_values[index]);
-
     public int Count => _values.Count;
 }
