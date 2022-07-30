@@ -64,7 +64,7 @@ internal class ExpressionHandler : IExpressionHandler
     {
         if (context.View.SupportGeneric is false)
         {
-            if (_cachePool.TryGetFunc<Func<IRequestValues, IPolicyValues, bool>>(expressionString,
+            if (_cachePool.TryGetFunc(expressionString,
                     out Func<IRequestValues, IPolicyValues, bool> func))
             {
                 return func(request, policy);
@@ -75,7 +75,7 @@ internal class ExpressionHandler : IExpressionHandler
             return func(request, policy);
         }
 
-        if (_cachePool.TryGetFunc<Func<TRequest, TPolicy, bool>>(expressionString,
+        if (_cachePool.TryGetFunc(expressionString,
                 out Func<TRequest, TPolicy, bool> genericFunc) is not false)
         {
             return genericFunc(request, policy);

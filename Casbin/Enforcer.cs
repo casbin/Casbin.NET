@@ -288,7 +288,7 @@ namespace Casbin
             }
             else
             {
-                TPolicy policyValues = (TPolicy)Policy.ValuesFrom(new string[context.View.PolicyTokens.Count]);
+                StringPolicyValues policyValues = StringPolicyValues.Empty;
                 HandleBeforeExpression(in context, ref session, in requestValues, in policyValues, ref effectChain);
                 session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
                     in requestValues, in policyValues);
