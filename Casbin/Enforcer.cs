@@ -314,10 +314,10 @@ namespace Casbin
             session.PolicyCount = context.View.PolicyAssertion.Policy.Count;
 
             int requestTokenCount = context.View.RequestAssertion.Tokens.Count;
-            if (requestTokenCount != request.Count)
+            if (requestTokenCount > request.Count)
             {
                 throw new ArgumentException(
-                    $"Invalid request size: expected {requestTokenCount}, got {request.Count}.");
+                    $"Invalid request size: expected {requestTokenCount} at least, got {request.Count}.");
             }
 
             if (session.IsChainEffector is false)
@@ -345,9 +345,10 @@ namespace Casbin
                 return;
             }
 
-            if (policyTokenCount != policy.Count)
+            if (policyTokenCount > policy.Count)
             {
-                throw new ArgumentException($"Invalid policy size: expected {policyTokenCount}, got {policy.Count}.");
+                throw new ArgumentException(
+                    $"Invalid policy size: expected {policyTokenCount} at least, got {policy.Count}.");
             }
 
             if (session.IsChainEffector is false &&
