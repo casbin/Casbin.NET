@@ -11,7 +11,7 @@ namespace Casbin
         #region Has roles or users
 
         /// <summary>
-        /// Determines whether a user has a role.
+        ///     Determines whether a user has a role.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="name"></param>
@@ -20,7 +20,7 @@ namespace Casbin
         /// <returns></returns>
         public static bool HasRoleForUser(this IEnforcer enforcer, string name, string role, string domain = null)
         {
-            var roles = enforcer.GetRolesForUser(name, domain);
+            IEnumerable<string> roles = enforcer.GetRolesForUser(name, domain);
             return roles.Any(roleEnum => roleEnum.Equals(role));
         }
 
@@ -29,19 +29,17 @@ namespace Casbin
         #region Get permissions
 
         /// <summary>
-        /// Gets permissions for a user or role.
+        ///     Gets permissions for a user or role.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="user">User or role</param>
         /// <param name="domain"></param>
         /// <returns></returns>
         public static IEnumerable<IEnumerable<string>> GetPermissionsForUser(this IEnforcer enforcer, string user,
-            string domain = null)
-        {
-            return domain is null
+            string domain = null) =>
+            domain is null
                 ? enforcer.GetFilteredPolicy(0, user)
                 : enforcer.GetFilteredPolicy(0, user, domain);
-        }
 
         #endregion
 
@@ -57,10 +55,8 @@ namespace Casbin
         public static IEnumerable<string> GetRolesForUser(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
-                ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetRoles(name)
-                : enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetRoles(name, domain);
+                ? enforcer.Model.GetRoleManger().GetRoles(name)
+                : enforcer.Model.GetRoleManger().GetRoles(name, domain);
         }
 
         /// <summary>
@@ -73,10 +69,8 @@ namespace Casbin
         public static IEnumerable<string> GetUsersForRole(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
-                ? enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name)
-                : enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                    .RoleManager.GetUsers(name, domain);
+                ? enforcer.Model.GetRoleManger().GetUsers(name)
+                : enforcer.Model.GetRoleManger().GetUsers(name, domain);
         }
 
         /// <summary>
@@ -101,9 +95,7 @@ namespace Casbin
             var userIds = new List<string>();
             foreach (string name in names)
             {
-                userIds.AddRange(
-                    enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType]
-                        .RoleManager.GetUsers(name));
+                userIds.AddRange(enforcer.Model.GetRoleManger().GetUsers(name));
             }
 
             return userIds;
@@ -523,11 +515,11 @@ namespace Casbin
             while (queue.Count is not 0)
             {
                 string nowRole = queue.Dequeue();
-                foreach (var assertion in sections[PermConstants.Section.RoleSection].Values)
+                foreach (KeyValuePair<string, RoleAssertion> assertion in sections.GetRoleAssertions())
                 {
                     var roles = domain is null
-                        ? assertion.RoleManager.GetRoles(nowRole)
-                        : assertion.RoleManager.GetRoles(nowRole, domain);
+                        ? assertion.Value.RoleManager.GetRoles(nowRole)
+                        : assertion.Value.RoleManager.GetRoles(nowRole, domain);
 
                     foreach (string role in roles)
                     {
@@ -657,7 +649,7 @@ namespace Casbin
             string roleType = null)
         {
             roleType ??= PermConstants.DefaultRoleType;
-            return enforcer.Model.Sections[PermConstants.Section.RoleSection][roleType].RoleManager.GetDomains(name);
+            return enforcer.Model.GetRoleManger(roleType).GetDomains(name);
         }
 
         /// <summary>
@@ -667,11 +659,9 @@ namespace Casbin
         /// <param name="name"></param>
         /// <param name="domain"></param>
         /// <returns></returns>
-        public static IEnumerable<string> GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain)
-        {
-            return enforcer.Model.Sections[PermConstants.Section.RoleSection][PermConstants.DefaultRoleType].RoleManager
-                .GetRoles(name, domain);
-        }
+        public static IEnumerable<string>
+            GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain) =>
+            enforcer.Model.GetRoleManger().GetRoles(name, domain);
 
         /// <summary>
         ///

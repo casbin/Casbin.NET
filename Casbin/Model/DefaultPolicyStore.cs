@@ -2,60 +2,64 @@
 using System.Collections.Generic;
 using System.Linq;
 #if !NET452
-using Microsoft.Extensions.Logging;
 #endif
 
 namespace Casbin.Model
 {
-    public class DefaultPolicyStore : IPolicyStore
+    public partial class DefaultPolicyStore : IPolicyStore
     {
-        private DefaultPolicyStore() => Sections = new Dictionary<string, Dictionary<string, Assertion>>();
+        private readonly IDictionary<string, IDictionary<string, Node>> _nodesMap =
+            new Dictionary<string, IDictionary<string, Node>>();
 
-#if !NET452
-        internal ILogger Logger { get; set; }
-#endif
-        public Dictionary<string, Dictionary<string, Assertion>> Sections { get; }
-
-        public void ClearPolicy()
+        public bool AddNode(string section, string type, PolicyAssertion policyAssertion)
         {
-            if (Sections.ContainsKey(PermConstants.Section.PolicySection))
+            if (_nodesMap.TryGetValue(section, out IDictionary<string, Node> nodes) is false)
             {
-                foreach (Assertion assertion in Sections[PermConstants.Section.PolicySection].Values)
-                {
-                    assertion.ClearPolicy();
-                }
+                nodes = new Dictionary<string, Node>();
+                _nodesMap[section] = nodes;
             }
 
-            if (Sections.ContainsKey(PermConstants.Section.RoleSection))
+            if (nodes.ContainsKey(type))
             {
-                foreach (Assertion assertion in Sections[PermConstants.Section.RoleSection].Values)
-                {
-                    assertion.ClearPolicy();
-                }
+                return false;
             }
+
+            Node node = new Node(policyAssertion);
+            nodes[type] = node;
+            return true;
         }
+
+        public bool ContainsNodes(string section) => _nodesMap.ContainsKey(section);
+
+        public bool ContainsNode(string section, string policyType) =>
+            _nodesMap.TryGetValue(section, out IDictionary<string, Node> nodes) && nodes.ContainsKey(policyType);
+
+        public PolicyScanner Scan(string section, string policyType) =>
+            new(GetNode(section, policyType).Iterate());
 
         public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType)
-        {
-            return Sections[section][policyType].Policy;
-        }
+            => GetNode(section, policyType).GetPolicy();
+
+        public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section)
+            => GetNodes(section).ToDictionary(kv =>
+                kv.Key, x => GetPolicy(section, x.Key));
 
         public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
             IPolicyValues fieldValues)
         {
-            if (fieldValues == null)
+            if (fieldValues is null)
             {
                 throw new ArgumentNullException(nameof(fieldValues));
             }
 
-            if (fieldValues.Count == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            if (fieldValues.Count is 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
-                return Sections[section][policyType].Policy;
+                return GetPolicy(section, policyType);
             }
 
             var result = new List<IPolicyValues>();
-
-            foreach (var rule in Sections[section][policyType].Policy)
+            Node node = GetNode(section, policyType);
+            foreach (IPolicyValues rule in node.GetPolicy())
             {
                 // Matched means all the fieldValue equals rule[fieldIndex + i].
                 // when fieldValue is empty, this field will skip equals check.
@@ -76,12 +80,12 @@ namespace Casbin.Model
         public IEnumerable<IPolicyValues> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
             IPolicyValues fieldValues)
         {
-            if (fieldValues == null)
+            if (fieldValues is null)
             {
                 throw new ArgumentNullException(nameof(fieldValues));
             }
 
-            if (fieldValues.Count == 0 || fieldValues.All(string.IsNullOrWhiteSpace))
+            if (fieldValues.Count is 0 || fieldValues.All(string.IsNullOrWhiteSpace))
             {
                 return null;
             }
@@ -89,8 +93,8 @@ namespace Casbin.Model
             var newPolicy = new List<IPolicyValues>();
             List<IPolicyValues> effectPolicies = null;
 
-            Assertion assertion = Sections[section][policyType];
-            foreach (IPolicyValues values in assertion.Policy)
+            Node node = GetNode(section, policyType);
+            foreach (IPolicyValues values in node.GetPolicy())
             {
                 // Matched means all the fieldValue equals rule[fieldIndex + i].
                 // when fieldValue is empty, this field will skip equals check.
@@ -103,7 +107,7 @@ namespace Casbin.Model
                 {
                     effectPolicies ??= new List<IPolicyValues>();
                     effectPolicies.Add(values);
-                    assertion.PolicyStringSet.Remove(values.ToText());
+                    node.PolicyTextSet.Remove(values.ToText());
                 }
                 else
                 {
@@ -111,17 +115,30 @@ namespace Casbin.Model
                 }
             }
 
-            assertion.Policy = newPolicy;
+            node.SetPolicy(newPolicy);
             return effectPolicies;
+        }
+
+        public bool SortPolicyByPriority(string section, string policyType)
+        {
+            Node node = GetNode(section, policyType);
+            return node.TrySortPolicyByPriority();
+        }
+
+        public bool SortPolicyBySubjectHierarchy(string section, string policyType,
+            IDictionary<string, int> subjectHierarchyMap)
+        {
+            Node node = GetNode(section, policyType);
+            return node.TrySortPoliciesBySubjectHierarchy(subjectHierarchyMap, GetNameWithDomain);
         }
 
         public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex)
         {
-            var sectionDictionary = Sections[section];
             var values = new List<string>();
-            foreach (string policyType in sectionDictionary.Keys)
+            IDictionary<string, Node> nodes = GetNodes(section);
+            foreach (KeyValuePair<string, Node> node in nodes)
             {
-                values.AddRange(GetValuesForFieldInPolicy(sectionDictionary, policyType, fieldIndex));
+                values.AddRange(GetValuesForFieldInPolicy(node.Value, fieldIndex));
             }
 
             return values;
@@ -129,70 +146,32 @@ namespace Casbin.Model
 
         public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex)
         {
-            return GetValuesForFieldInPolicy(Sections[section], policyType, fieldIndex);
-        }
-
-        public Assertion GetRequiredAssertion(string section, string policyType)
-        {
-            bool exist = TryGetAssertion(section, policyType, out Assertion assertion);
-            if (exist is false)
-            {
-                throw new ArgumentException(
-                    $"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
-            }
-
-            return assertion;
-        }
-
-        public bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
-        {
-            if (Sections.TryGetValue(section, out Dictionary<string, Assertion> assertions) is false)
-            {
-                returnAssertion = default;
-                return false;
-            }
-
-            if (assertions.TryGetValue(policyType, out Assertion assertion) is false)
-            {
-                returnAssertion = default;
-                return false;
-            }
-
-            if (assertion is null)
-            {
-                returnAssertion = default;
-                return false;
-            }
-
-            returnAssertion = assertion;
-            return true;
+            Node node = GetNode(section, policyType);
+            return GetValuesForFieldInPolicy(node, fieldIndex);
         }
 
         public bool AddPolicy(string section, string policyType, IPolicyValues values)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            return assertion.TryAddPolicy(values);
+            Node node = GetNode(section, policyType);
+            return node.TryAddPolicy(values);
         }
 
         public bool HasPolicy(string section, string policyType, IPolicyValues values)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            return assertion.Contains(values);
+            Node node = GetNode(section, policyType);
+            return node.ContainsPolicy(values);
         }
-
 
         public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
-            return list.Count == 0 || list.Any(assertion.Contains);
+            Node node = GetNode(section, policyType);
+            return valuesList.Count == 0 || valuesList.Any(node.ContainsPolicy);
         }
 
         public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
-            return list.Count is 0 || list.All(assertion.Contains);
+            Node node = GetNode(section, policyType);
+            return valuesList.Count is 0 || valuesList.All(node.ContainsPolicy);
         }
 
         public bool AddPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
@@ -202,16 +181,15 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(valuesList));
             }
 
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
-            if (list.Count is 0)
+            if (valuesList.Count is 0)
             {
                 return true;
             }
 
-            foreach (IPolicyValues values in list)
+            Node node = GetNode(section, policyType);
+            foreach (IPolicyValues values in valuesList)
             {
-                assertion.TryAddPolicy(values);
+                node.TryAddPolicy(values);
             }
 
             return true;
@@ -219,8 +197,8 @@ namespace Casbin.Model
 
         public bool UpdatePolicy(string section, string policyType, IPolicyValues oldValues, IPolicyValues newValues)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            return assertion.TryUpdatePolicy(oldValues, newValues);
+            Node node = GetNode(section, policyType);
+            return node.TryUpdatePolicy(oldValues, newValues);
         }
 
         public bool UpdatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> oldValuesList,
@@ -236,17 +214,15 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(newValuesList));
             }
 
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            List<IPolicyValues> oldList = oldValuesList as List<IPolicyValues> ?? oldValuesList.ToList();
-            List<IPolicyValues> newList = newValuesList as List<IPolicyValues> ?? newValuesList.ToList();
-            if (oldList.Count != newList.Count)
+            if (oldValuesList.Count != newValuesList.Count)
             {
                 return false;
             }
 
-            for (int i = 0; i < oldList.Count; i++)
+            Node node = GetNode(section, policyType);
+            for (int i = 0; i < oldValuesList.Count; i++)
             {
-                assertion.TryUpdatePolicy(oldList[i], newList[i]);
+                node.TryUpdatePolicy(oldValuesList[i], newValuesList[i]);
             }
 
             return true;
@@ -254,8 +230,8 @@ namespace Casbin.Model
 
         public bool RemovePolicy(string section, string policyType, IPolicyValues values)
         {
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            return assertion.TryRemovePolicy(values);
+            Node node = GetNode(section, policyType);
+            return node.TryRemovePolicy(values);
         }
 
         public bool RemovePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
@@ -265,30 +241,39 @@ namespace Casbin.Model
                 throw new ArgumentNullException(nameof(valuesList));
             }
 
-            Assertion assertion = GetRequiredAssertion(section, policyType);
-            List<IPolicyValues> list = valuesList as List<IPolicyValues> ?? valuesList.ToList();
-            if (list.Count is 0)
+            if (valuesList.Count is 0)
             {
                 return true;
             }
 
-            foreach (IPolicyValues values in list)
+            Node node = GetNode(section, policyType);
+            foreach (IPolicyValues values in valuesList)
             {
-                assertion.TryRemovePolicy(values);
+                node.TryRemovePolicy(values);
             }
 
             return true;
         }
 
-        internal static IPolicyStore Create() => new DefaultPolicyStore();
-
-        private static IEnumerable<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section,
-            string policyType, int fieldIndex)
+        public void ClearPolicy()
         {
-            IEnumerable<string> values = section[policyType].Policy
-                .Select(rule => rule[fieldIndex])
-                .Distinct();
-            return values;
+            foreach (KeyValuePair<string, IDictionary<string, Node>> nodes in _nodesMap)
+            {
+                foreach (KeyValuePair<string, Node> node in nodes.Value)
+                {
+                    node.Value.ClearPolicy();
+                }
+            }
         }
+
+        private static string GetNameWithDomain(string domain, string name) =>
+            domain + PermConstants.SubjectPrioritySeparatorString + name;
+
+        private static IEnumerable<string> GetValuesForFieldInPolicy(Node node, int fieldIndex) =>
+            node.GetPolicy().Select(rule => rule[fieldIndex]).Distinct().ToList();
+
+        private IDictionary<string, Node> GetNodes(string section) => _nodesMap[section];
+
+        private Node GetNode(string section, string type) => _nodesMap[section][type];
     }
 }

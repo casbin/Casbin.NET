@@ -22,12 +22,12 @@ namespace Casbin
         /// </summary>
         public static void LoadModel(this IEnforcer enforcer)
         {
-            if (enforcer.ModelPath is null)
+            if (enforcer.Model.Path is null)
             {
                 return;
             }
 
-            enforcer.Model = DefaultModel.CreateFromFile(enforcer.ModelPath);
+            enforcer.Model = DefaultModel.CreateFromFile(enforcer.Model.Path);
         }
 
         #endregion
@@ -54,7 +54,7 @@ namespace Casbin
         /// <param name="autoSave"></param>
         public static IEnforcer EnableAutoSave(this IEnforcer enforcer, bool autoSave)
         {
-            enforcer.AutoSave = autoSave;
+            enforcer.Model.EnableAutoSave(autoSave);
             return enforcer;
         }
 
@@ -128,20 +128,11 @@ namespace Casbin
         /// <param name="model"></param>
         public static IEnforcer SetModel(this IEnforcer enforcer, IModel model)
         {
-            if (enforcer.IsSynchronized)
-            {
-                model = model.ToSyncModel();
-            }
-
             enforcer.Model = model;
-            if (enforcer.AutoCleanEnforceCache)
-            {
-                enforcer.EnforceCache?.Clear();
+            enforcer.EnforceCache?.Clear();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
+            enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
-            }
-
             return enforcer;
         }
 
@@ -161,51 +152,9 @@ namespace Casbin
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="watcher"></param>
-        /// <param name="useAsync">Whether use async update callback.</param>
-        public static IEnforcer SetWatcher(this IEnforcer enforcer, IWatcher watcher, bool useAsync = true)
+        public static IEnforcer SetWatcher(this IEnforcer enforcer, IWatcher watcher)
         {
             enforcer.Watcher = watcher;
-            if (useAsync)
-            {
-                watcher?.SetUpdateCallback(enforcer.LoadPolicyAsync);
-                return enforcer;
-            }
-
-            watcher?.SetUpdateCallback(() => enforcer.LoadPolicy());
-            return enforcer;
-        }
-
-        /// <summary>
-        /// Sets the current role manager.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="roleManager"></param>
-        public static IEnforcer SetRoleManager(this IEnforcer enforcer, IRoleManager roleManager)
-        {
-            enforcer.RoleManager = roleManager;
-            enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
-            return enforcer;
-        }
-
-        /// <summary>
-        /// Sets the current role manager.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="roleType"></param>
-        /// <param name="roleManager"></param>
-        public static IEnforcer SetRoleManager(this IEnforcer enforcer, string roleType, IRoleManager roleManager)
-        {
-            enforcer.Model.SetRoleManager(roleType, roleManager);
-            if (enforcer.AutoBuildRoleLinks)
-            {
-                enforcer.Model.BuildRoleLinks();
-            }
-
-            if (enforcer.AutoCleanEnforceCache)
-            {
-                enforcer.EnforceCache?.Clear();
-            }
-
             return enforcer;
         }
 
@@ -229,15 +178,14 @@ namespace Casbin
         /// </summary>
         public static bool LoadPolicy(this IEnforcer enforcer)
         {
-            bool result = enforcer.PolicyManager.LoadPolicy();
+            bool result = enforcer.Model.LoadPolicy();
             if (result is false)
             {
                 return false;
             }
 
             enforcer.ClearCache();
-            enforcer.Model.RefreshPolicyStringSet();
-
+            enforcer.Model.SortPolicy();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
@@ -251,15 +199,14 @@ namespace Casbin
         /// </summary>
         public static async Task<bool> LoadPolicyAsync(this IEnforcer enforcer)
         {
-            bool result = await enforcer.PolicyManager.LoadPolicyAsync();
+            bool result = await enforcer.Model.LoadPolicyAsync();
             if (result is false)
             {
                 return false;
             }
 
             enforcer.ClearCache();
-            enforcer.Model.RefreshPolicyStringSet();
-
+            enforcer.Model.SortPolicy();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
@@ -276,13 +223,7 @@ namespace Casbin
         /// <returns></returns>
         public static bool LoadFilteredPolicy(this IEnforcer enforcer, Filter filter)
         {
-            if (enforcer.Adapter is not IFilteredAdapter filteredAdapter)
-            {
-                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
-            }
-
-            enforcer.ClearPolicy();
-            bool result = enforcer.PolicyManager.LoadFilteredPolicy(filter);
+            bool result = enforcer.Model.LoadFilteredPolicy(filter);
             if (result is false)
             {
                 return false;
@@ -304,13 +245,7 @@ namespace Casbin
         /// <returns></returns>
         public static async Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, Filter filter)
         {
-            if (enforcer.Adapter is not IFilteredAdapter filteredAdapter)
-            {
-                throw new NotSupportedException("Filtered policies are not supported by this adapter.");
-            }
-
-            enforcer.ClearPolicy();
-            bool result = await enforcer.PolicyManager.LoadFilteredPolicyAsync(filter);
+            bool result = await enforcer.Model.LoadFilteredPolicyAsync(filter);
             if (result is false)
             {
                 return false;
@@ -330,7 +265,7 @@ namespace Casbin
         /// </summary>
         public static bool SavePolicy(this IEnforcer enforcer)
         {
-            bool result = enforcer.PolicyManager.SavePolicy();
+            bool result = enforcer.Model.SavePolicy();
             if (result is false)
             {
                 return false;
@@ -351,17 +286,7 @@ namespace Casbin
                 return false;
             }
 
-            if (enforcer.Adapter is not IEpochAdapter adapter)
-            {
-                throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
-            }
-
-            if (enforcer.IsFiltered)
-            {
-                throw new InvalidOperationException("Cannot save a filtered policy");
-            }
-
-            bool result = await enforcer.PolicyManager.SavePolicyAsync();
+            bool result = await enforcer.Model.SavePolicyAsync();
             if (result is false)
             {
                 return false;
@@ -380,21 +305,15 @@ namespace Casbin
         /// </summary>
         public static void ClearPolicy(this IEnforcer enforcer)
         {
-            enforcer.Model.ClearPolicy();
+            enforcer.Model.PolicyStoreHolder.PolicyStore.ClearPolicy();
             enforcer.ClearCache();
         }
 
         public static void ClearCache(this IEnforcer enforcer)
         {
-            if (enforcer.AutoCleanEnforceCache)
-            {
-                enforcer.EnforceCache?.Clear();
+            enforcer.EnforceCache?.Clear();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
-#endif
-            }
-#if !NET452
-            enforcer.Logger?.LogInformation("Store Management, Cleared all policy");
+            enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
         }
 
@@ -408,6 +327,21 @@ namespace Casbin
         public static void BuildRoleLinks(this IEnforcer enforcer)
         {
             enforcer.Model.BuildRoleLinks();
+        }
+
+        public static IRoleManager GetRoleManager(this IEnforcer enforcer, string roleType) =>
+            enforcer.Model.GetRoleManger(roleType);
+
+        public static void SetRoleManager(this IEnforcer enforcer, IRoleManager roleManager) =>
+            enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
+
+        public static void SetRoleManager(this IEnforcer enforcer, string roleType, IRoleManager roleManager)
+        {
+            enforcer.Model.SetRoleManager(roleType, roleManager);
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
         }
 
         public static Enforcer AddMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
@@ -469,10 +403,6 @@ namespace Casbin
         {
             return EnforceContext.CreateWithMatcher(enforcer, matcher, requestType, policyType, effectType, explain);
         }
-
-        #endregion
-
-        #region Enforce extensions
 
         #endregion
 

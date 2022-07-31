@@ -100,11 +100,11 @@ namespace Casbin.Adapter.File
         private static IEnumerable<string> GetModelPolicy(IPolicyStore store, string section)
         {
             var policy = new List<string>();
-            foreach (var kv in store.Sections[section])
+            foreach (KeyValuePair<string, IEnumerable<IPolicyValues>> kv in store.GetPolicyAllType(section))
             {
                 string key = kv.Key;
-                Assertion value = kv.Value;
-                policy.AddRange(value.Policy.Select(p => $"{key}, {p.ToText()}"));
+                IEnumerable<IPolicyValues> value = kv.Value;
+                policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
             }
 
             return policy;
@@ -131,8 +131,12 @@ namespace Casbin.Adapter.File
         private static IEnumerable<string> ConvertToPolicyStrings(IPolicyStore store)
         {
             var policy = new List<string>();
-            policy.AddRange(GetModelPolicy(store, PermConstants.DefaultPolicyType));
-            if (store.Sections.ContainsKey(PermConstants.Section.RoleSection))
+            if (store.ContainsNodes(PermConstants.Section.PolicySection))
+            {
+                policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
+            }
+
+            if (store.ContainsNodes(PermConstants.Section.RoleSection))
             {
                 policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
             }

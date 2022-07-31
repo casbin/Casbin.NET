@@ -13,7 +13,7 @@ public static class PolicyStoreExtension
             return false;
         }
 
-        if (line[0] == '#')
+        if (line.StartsWith("/") || line.StartsWith("#"))
         {
             return false;
         }
@@ -28,7 +28,6 @@ public static class PolicyStoreExtension
         string type = lineTokens[0];
         string section = type.Substring(0, 1);
         IPolicyValues values = Policy.ValuesFrom(lineTokens.Skip(1).ToList());
-        return store.TryGetAssertion(section, type, out Assertion assertion)
-               && assertion.TryAddPolicy(values);
+        return store.AddPolicy(section, type, values);
     }
 }
