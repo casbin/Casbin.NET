@@ -2,6 +2,7 @@
 using System.Text;
 using Casbin.Adapter.File;
 using Casbin.Model;
+using Casbin.Persist;
 
 namespace Casbin.UnitTests.Fixtures;
 
@@ -123,15 +124,10 @@ public class TestModelFixture
 
     private static IModel LoadModelFromMemory(IModel model, string policy)
     {
-        model.ClearPolicy();
-        using (MemoryStream ms = new(Encoding.UTF8.GetBytes(policy)))
-        {
-            FileAdapter fileAdapter = new(ms);
-            fileAdapter.LoadPolicy(model);
-        }
-
-        model.RefreshPolicyStringSet();
-        model.SortPoliciesByPriority();
+        using MemoryStream ms = new(Encoding.UTF8.GetBytes(policy));
+        FileAdapter fileAdapter = new(ms);
+        fileAdapter.LoadPolicy(model);
+        model.SortPolicy();
         return model;
     }
 

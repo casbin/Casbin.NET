@@ -23,7 +23,7 @@ public class WatcherTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
         enforcer.SavePolicy();
         Assert.True(sampleWatcher.Called);
     }
@@ -34,7 +34,7 @@ public class WatcherTest
         SampleWatcher sampleWatcher = new();
         Assert.False(sampleWatcher.AsyncCalled);
 
-        Enforcer enforcer = new(_testModelFixture.GetBasicTestModel(),
+        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_async_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);

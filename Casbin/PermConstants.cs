@@ -4,7 +4,7 @@
     {
         public const char PolicySeparatorChar = ',';
         public const string PolicySeparatorString = ", "; // include a white space
-        public const string SubjectPrioritySeparatorString = "::";
+        internal const string SubjectPrioritySeparatorString = "::";
 
         public const string DefaultRequestType = "r";
         public const string RequestType2 = "r2";
@@ -63,6 +63,15 @@
             public const string Priority = "priority(p.eft) || deny";
             public const string SubjectPriority = "subjectPriority(p.eft) || deny";
             public const string PriorityDenyOverride = "priority(p.eft) && !some(where (p.eft == deny))";
+        }
+
+        public static class Token
+        {
+            public const string Subject = "sub";
+            public const string Domain = "dom";
+            public const string Object = "obj";
+            public const string Action = "act";
+            public const string Priority = "priority";
         }
     }
 }
