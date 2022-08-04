@@ -32,6 +32,19 @@ public class BuiltInFunctionTest
         new object[] { "/topic/edit/123s", "/topic/delete/[0-9]+", false }
     };
 
+    public static IEnumerable<object[]> KeyGetTestData = new[]
+    {
+        new object[] { "/foo", "/foo", "" },
+        new object[] { "/foo", "/foo*", "" },
+        new object[] { "/foo", "/foo/*", "" },
+        new object[] { "/foo/bar", "/foo", "" },
+        new object[] { "/foo/bar", "/foo*", "/bar" },
+        new object[] { "/foo/bar", "/foo/*", "bar" },
+        new object[] { "/foobar", "/foo", "" },
+        new object[] { "/foobar", "/foo*", "bar" },
+        new object[] { "/foobar", "/foo/*", "" }
+    };
+
     public static IEnumerable<object[]> keyMatchTestData = new[]
     {
         new object[] { "/foo", "/foo", true }, new object[] { "/foo", "/foo*", true },
@@ -139,6 +152,12 @@ public class BuiltInFunctionTest
     public void TestRegexMatch(string key1, string key2, bool expectedResult) =>
         Assert.Equal(expectedResult,
             BuiltInFunctions.RegexMatch(key1, key2));
+
+    [Theory]
+    [MemberData(nameof(KeyGetTestData))]
+    public void TestKeyGet(string key1, string key2, string expectedResult) =>
+        Assert.Equal(expectedResult,
+            BuiltInFunctions.KeyGet(key1, key2));
 
     [Theory]
     [MemberData(nameof(keyMatchTestData))]
