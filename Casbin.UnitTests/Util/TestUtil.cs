@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Rbac;
+using Casbin.Model;
 using Casbin.Util;
 using Xunit;
 
@@ -25,6 +26,32 @@ public static class TestUtil
     internal static async Task TestEnforceAsync<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, bool res) =>
         Assert.Equal(res, await e.EnforceAsync(sub, obj, act));
 
+    internal static void TestBatchEnforce<T>(IEnforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues =>
+        Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforce(values.Select(x => x.Item1))));
+
+    internal static void TestParallelBatchEnforce<T>(Enforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues =>
+        Assert.True(values.Select(x => x.Item2).SequenceEqual(e.ParallelBatchEnforce(values.Select(x => x.Item1).ToList())));
+
+    internal static async void TestBatchEnforceAsync<T>(IEnforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues 
+    {
+#if !NET452
+        var res = e.BatchEnforceAsync(values.Select(x => x.Item1));
+#else
+        var res = await e.BatchEnforceAsync(values.Select(x => x.Item1));
+#endif
+        var expectedResults = values.Select(x => x.Item2);
+        var expectedResultEnumerator = expectedResults.GetEnumerator();
+#if !NET452
+        await foreach(var item in res)
+#else
+        foreach(var item in res)
+#endif
+        {
+            expectedResultEnumerator.MoveNext();
+            Assert.Equal(expectedResultEnumerator.Current, item);
+        }
+    }
+
     internal static void TestDomainEnforce<T1, T2, T3, T4>(IEnforcer e, T1 sub, T2 dom, T3 obj, T4 act, bool res) =>
         Assert.Equal(res, e.Enforce(sub, dom, obj, act));
 
@@ -33,6 +60,35 @@ public static class TestUtil
 
     internal static async Task TestEnforceWithMatcherAsync<T1, T2, T3>(this IEnforcer e, string matcher, T1 sub, T2 obj,
         T3 act, bool res) => Assert.Equal(res, await e.EnforceWithMatcherAsync(matcher, sub, obj, act));
+    
+    internal static void TestBatchEnforceWithMatcher<T>(this IEnforcer e, string matcher, IEnumerable<(T, bool)> values) 
+        where T : IRequestValues => 
+            Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforceWithMatcher(matcher, values.Select(x => x.Item1))));
+
+    internal static void TestBatchEnforceWithMatcherParallel<T>(this Enforcer e, string matcher, IEnumerable<(T, bool)> values) 
+        where T : IRequestValues => 
+            Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforceWithMatcherParallel<T>(matcher, values.Select(x => x.Item1).ToList())));
+
+    internal static async void TestBatchEnforceWithMatcherAsync<T>(IEnforcer e, string matcher, IEnumerable<(T, bool)> values) 
+        where T : IRequestValues 
+    {
+#if !NET452
+        var res = e.BatchEnforceWithMatcherAsync(matcher, values.Select(x => x.Item1));
+#else
+        var res = await e.BatchEnforceWithMatcherAsync(matcher, values.Select(x => x.Item1));
+#endif
+        var expectedResults = values.Select(x => x.Item2);
+        var expectedResultEnumerator = expectedResults.GetEnumerator();
+#if !NET452
+        await foreach(var item in res)
+#else
+        foreach(var item in res)
+#endif
+        {
+            expectedResultEnumerator.MoveNext();
+            Assert.Equal(expectedResultEnumerator.Current, item);
+        }
+    }
 
     internal static void TestEnforceEx<T1, T2, T3>(IEnforcer e, T1 sub, T2 obj, T3 act, List<string> res)
     {
