@@ -16,6 +16,28 @@ namespace Casbin.Util
         private delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
+        /// KeyGet returns the matched part
+        /// For example, "/foo/bar/foo" matches "/foo/*"
+        /// "bar/foo" will been returned
+        /// </summary>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// <returns>Whether key1 matches key2.</returns>
+        public static string KeyGet(string key1, string key2)
+        {
+            int m = key1.Length, n = key2.Length;
+            if(m < n) return "";
+            var span1 = key1.AsSpan();
+            var span2 = key2.AsSpan();
+            for (int i = 0; i < n; i++)
+            {
+                if(span1[i] != span2[i])
+                    return span2[i] == '*' ? span1.Slice(i, m - i).ToString() : "";
+            }
+            return "";
+        }
+
+        /// <summary>
         /// Determines whether key1 matches the pattern of key2 (similar to RESTful path),
         /// key2 can contain a *. For example, "/foo/bar" matches "/foo/*".
         /// </summary>
