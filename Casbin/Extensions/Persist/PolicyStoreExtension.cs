@@ -25,7 +25,7 @@ public static class PolicyStoreExtension
     // ReSharper disable once MemberCanBePrivate.Global
     public static bool TryLoadPolicyLine(this IPolicyStore store, IReadOnlyList<string> lineTokens)
     {
-        string type = lineTokens[0];
+        string type = lineTokens[0].Trim('\uFEFF','\u200B');
         string section = type.Substring(0, 1);
         IPolicyValues values = Policy.ValuesFrom(lineTokens.Skip(1).ToList());
         return store.TryGetAssertion(section, type, out Assertion assertion)

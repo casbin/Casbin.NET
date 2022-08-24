@@ -28,11 +28,6 @@ namespace Casbin.Adapter.File
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new InvalidOperationException("invalid file path, file path cannot be empty");
-            }
-
             LoadFilteredPolicyFile(store, filter);
         }
 
@@ -43,17 +38,12 @@ namespace Casbin.Adapter.File
                 return LoadPolicyAsync(store);
             }
 
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new InvalidOperationException("invalid file path, file path cannot be empty");
-            }
-
             return LoadFilteredPolicyFileAsync(store, filter);
         }
 
         private void LoadFilteredPolicyFile(IPolicyStore store, Filter filter)
         {
-            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            var reader = _byteArrayInputStream;
             while (reader.EndOfStream is false)
             {
                 string line = reader.ReadLine()?.Trim();
@@ -68,7 +58,7 @@ namespace Casbin.Adapter.File
 
         private async Task LoadFilteredPolicyFileAsync(IPolicyStore store, Filter filter)
         {
-            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            var reader = _byteArrayInputStream;
             while (reader.EndOfStream is false)
             {
                 string line = (await reader.ReadLineAsync())?.Trim();

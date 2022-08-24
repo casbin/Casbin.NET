@@ -600,6 +600,21 @@ public class ModelTest
         Assert.False(e.Enforce(context, new { Age = 70 }, "data2", "read"));
     }
 
+    [Fact]
+    public void TestFailedToLoadPolicy()
+    {
+        var e = new Enforcer(TestModelFixture.GetNewTestModel(
+            _testModelFixture._rbacWithDenyModelText,
+            _testModelFixture._rbacWithDenyPolicyText));
+        e.BuildRoleLinks();
+        TestEnforce(e, "alice", "data2", "read", true);
+        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.Throws<System.IO.FileNotFoundException>(() => e.SetAdapter(new Casbin.Adapter.File.FileAdapter("Not found")));
+        e.LoadPolicy();
+        TestEnforce(e, "alice", "data2", "read", true);
+        TestEnforce(e, "bob", "data2", "write", true);
+    }
+
     public class TestResource
     {
         public TestResource(string name, string owner)

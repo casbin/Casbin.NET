@@ -12,18 +12,18 @@ namespace Casbin.Adapter.File
 {
     public class FileAdapter : IEpochAdapter
     {
-        private readonly StreamReader _byteArrayInputStream;
-        private readonly bool _readOnly;
-        protected readonly string FilePath;
-
-        public FileAdapter(string filePath)
+        protected readonly StreamReader _byteArrayInputStream;
+        protected readonly StreamWriter _byteArrayOutputStream;
+        public FileAdapter(string filePath) : this(new FileStream(
+                    filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite), 
+                    new FileStream(
+                    filePath, FileMode.Open, FileAccess.Write, FileShare.ReadWrite))
         {
-            FilePath = filePath;
+            
         }
 
         public FileAdapter(Stream inputStream)
         {
-            _readOnly = true;
             try
             {
                 _byteArrayInputStream = new StreamReader(inputStream);
@@ -34,15 +34,21 @@ namespace Casbin.Adapter.File
             }
         }
 
+        public FileAdapter(Stream inputStream, Stream outputStream)
+        {
+            try
+            {
+                _byteArrayInputStream = new StreamReader(inputStream);
+                _byteArrayOutputStream = new StreamWriter(outputStream);
+            }
+            catch (IOException e)
+            {
+                throw new IOException("File adapter init error", e);
+            }
+        }
+
         public void LoadPolicy(IPolicyStore model)
         {
-            if (string.IsNullOrWhiteSpace(FilePath) is false)
-            {
-                using var sr = new StreamReader(new FileStream(
-                    FilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
-                LoadPolicyData(model, sr);
-            }
-
             if (_byteArrayInputStream is not null)
             {
                 LoadPolicyData(model, _byteArrayInputStream);
@@ -51,14 +57,6 @@ namespace Casbin.Adapter.File
 
         public async Task LoadPolicyAsync(IPolicyStore store)
         {
-            if (string.IsNullOrWhiteSpace(FilePath) is false)
-            {
-                using var sr = new StreamReader(new FileStream(
-                    FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                await LoadPolicyDataAsync(store, sr);
-                Debug.WriteLine("xxx");
-            }
-
             if (_byteArrayInputStream is not null)
             {
                 await LoadPolicyDataAsync(store, _byteArrayInputStream);
@@ -67,14 +65,9 @@ namespace Casbin.Adapter.File
 
         public void SavePolicy(IPolicyStore store)
         {
-            if (_byteArrayInputStream != null && _readOnly)
+            if (_byteArrayOutputStream is null)
             {
-                throw new Exception("Store file can not write, because use inputStream is readOnly");
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new ArgumentException("Invalid file path, file path cannot be empty");
+                throw new Exception("Store file can not write, because use outputStream has not been set.");
             }
 
             var policy = ConvertToPolicyStrings(store);
@@ -83,14 +76,9 @@ namespace Casbin.Adapter.File
 
         public Task SavePolicyAsync(IPolicyStore store)
         {
-            if (_byteArrayInputStream != null && _readOnly)
+            if (_byteArrayOutputStream is null)
             {
-                throw new Exception("Store file can not write, because use inputStream is readOnly");
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new ArgumentException("Invalid file path, file path cannot be empty");
+                throw new Exception("Store file can not write, because use outputStream has not been set.");
             }
 
             var policy = ConvertToPolicyStrings(store);
@@ -112,6 +100,10 @@ namespace Casbin.Adapter.File
 
         private static void LoadPolicyData(IPolicyStore store, StreamReader inputStream)
         {
+            if(inputStream.EndOfStream is true)
+            {
+                inputStream.BaseStream.Position = 0;
+            }
             while (inputStream.EndOfStream is false)
             {
                 string line = inputStream.ReadLine();
@@ -121,6 +113,10 @@ namespace Casbin.Adapter.File
 
         private static async Task LoadPolicyDataAsync(IPolicyStore store, StreamReader inputStream)
         {
+            if(inputStream.EndOfStream is true)
+            {
+                inputStream.BaseStream.Position = 0;
+            }
             while (inputStream.EndOfStream is false)
             {
                 string line = await inputStream.ReadLineAsync();
@@ -142,17 +138,16 @@ namespace Casbin.Adapter.File
 
         private void SavePolicyFile(string text)
         {
-            System.IO.File.WriteAllText(FilePath, text, Encoding.UTF8);
+#if (NET6_0 || NET5_0 || NETCOREAPP3_1)
+            _byteArrayOutputStream.Write(text.AsSpan());
+#else
+            _byteArrayOutputStream.Write(text.ToCharArray());
+#endif
         }
 
         private async Task SavePolicyFileAsync(string text)
         {
-            text = text ?? string.Empty;
-            byte[] content = Encoding.UTF8.GetBytes(text);
-            using var fs = new FileStream(
-                FilePath, FileMode.Create, FileAccess.Write,
-                FileShare.None, bufferSize: 4096, useAsync: true);
-            await fs.WriteAsync(content, 0, content.Length);
+            await _byteArrayOutputStream.WriteAsync(text);
         }
     }
 }
