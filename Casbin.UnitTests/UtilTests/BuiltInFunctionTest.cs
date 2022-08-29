@@ -45,6 +45,40 @@ public class BuiltInFunctionTest
         new object[] { "/foobar", "/foo/*", "" }
     };
 
+    public static IEnumerable<object[]> KeyGet2TestData = new[]
+    {
+        new object[] { "/foo", "/foo", "id", ""},
+        new object[] { "/foo", "/foo*", "id", ""},
+        new object[] { "/foo", "/foo/*", "id", ""},
+        new object[] { "/foo/bar", "/foo", "id", ""},
+        new object[] { "/foo/bar", "/foo*", "id", ""}, // different with KeyMatch.
+        new object[] { "/foo/bar", "/foo/*", "id", ""},
+        new object[] { "/foobar", "/foo", "id", ""},
+        new object[] { "/foobar", "/foo*", "id", ""}, // different with KeyMatch.
+        new object[] { "/foobar", "/foo/*", "id", ""},
+
+        new object[] { "/", "/:resource", "resource", ""},
+        new object[] { "/resource1", "/:resource", "resource", "resource1"},
+        new object[] { "/myid", "/:id/using/:resId", "id", ""},
+        new object[] { "/myid/using/myresid", "/:id/using/:resId", "id", "myid"},
+        new object[] { "/myid/using/myresid", "/:id/using/:resId", "resId", "myresid"},
+
+        new object[] { "/proxy/myid", "/proxy/:id/*", "id", ""},
+        new object[] { "/proxy/myid/", "/proxy/:id/*", "id", "myid"},
+        new object[] { "/proxy/myid/res", "/proxy/:id/*", "id", "myid"},
+        new object[] { "/proxy/myid/res/res2", "/proxy/:id/*", "id", "myid"},
+        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/*", "id", "myid"},
+        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/res/*", "id", "myid"},
+        new object[] { "/proxy/", "/proxy/:id/*", "id", ""},
+
+        new object[] { "/alice", "/:id", "id", "alice"},
+        new object[] { "/alice/all", "/:id/all", "id", "alice"},
+        new object[] { "/alice", "/:id/all", "id", ""},
+        new object[] { "/alice/all", "/:id", "id", ""},
+
+        new object[] { "/alice/all", "/:/all", "", ""}
+    };
+
     public static IEnumerable<object[]> keyMatchTestData = new[]
     {
         new object[] { "/foo", "/foo", true }, new object[] { "/foo", "/foo*", true },
@@ -158,6 +192,12 @@ public class BuiltInFunctionTest
     public void TestKeyGet(string key1, string key2, string expectedResult) =>
         Assert.Equal(expectedResult,
             BuiltInFunctions.KeyGet(key1, key2));
+
+    [Theory]
+    [MemberData(nameof(KeyGet2TestData))]
+    public void TestKeyGet2(string key1, string key2, string pathVar, string expectedResult) =>
+        Assert.Equal(expectedResult,
+            BuiltInFunctions.KeyGet2(key1, key2, pathVar));
 
     [Theory]
     [MemberData(nameof(keyMatchTestData))]
