@@ -187,6 +187,74 @@ namespace Casbin
             return result;
         }
 
+        /// <summary>
+        /// Decides whether some "subject" can access corresponding "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
+        /// <param name="requestValues">The requests needs to be mediated, whose element is usually an array of strings
+        /// but can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the requests.</returns>
+        public IEnumerable<bool> BatchEnforce<TRequest>(EnforceContext context, 
+            IEnumerable<TRequest> requestValues) where TRequest : IRequestValues
+        {
+            foreach(var requestValue in requestValues){
+                yield return this.Enforce(context, requestValue);
+            }
+        }
+
+        /// <summary>
+        /// Decides whether some "subject" can access corresponding "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act). The method uses multi-thread
+        /// to accelerate the process.
+        /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
+        /// <param name="requestValues">The requests needs to be mediated, whose element is usually an array of strings
+        /// but can be class instances if ABAC is used.</param>
+        /// <param name="maxDegreeOfParallelism">The max degree of parallelism of the process.</param>
+        /// <returns>Whether to allow the requests.</returns>
+        public IEnumerable<bool> ParallelBatchEnforce<TRequest>(EnforceContext context, 
+            IReadOnlyList<TRequest> requestValues, int maxDegreeOfParallelism = -1) where TRequest : IRequestValues
+        {
+            int n = requestValues.Count;
+            if(n == 0) return new bool[] { };
+            bool[] res = new bool[n]; 
+            Parallel.For(0, n, new ParallelOptions() { MaxDegreeOfParallelism = maxDegreeOfParallelism }, Index =>
+            {
+                res[Index] = this.Enforce(context, requestValues[Index]);
+            });
+            return res;
+        }
+
+        /// <summary>
+        /// Decides whether some "subject" can access corresponding "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
+        /// <param name="requestValues">The requests needs to be mediated, whose element is usually an array of strings
+        /// but can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the requests.</returns>
+#if !NET452
+        public async IAsyncEnumerable<bool> BatchEnforceAsync<TRequest>(EnforceContext context, IEnumerable<TRequest> requestValues) 
+            where TRequest : IRequestValues
+        {
+            foreach(var requestValue in requestValues){
+                bool res = await this.EnforceAsync(context, requestValue);
+                yield return res;
+            }
+        }
+#else
+        public async Task<IEnumerable<bool>> BatchEnforceAsync<TRequest>(EnforceContext context, IEnumerable<TRequest> requestValues) 
+            where TRequest : IRequestValues
+        {
+            List<bool> res = new List<bool>();
+            foreach(var requestValue in requestValues){
+                res.Add(await this.EnforceAsync(context, requestValue));
+            }
+            return res;
+        }
+#endif
+
         private Task<bool> InternalEnforceAsync<TRequest>(EnforceContext context, IPolicyManager policyManager,
             TRequest requestValues) where TRequest : IRequestValues
         {

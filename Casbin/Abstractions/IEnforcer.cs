@@ -1,15 +1,22 @@
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Casbin.Caching;
 using Casbin.Effect;
-using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
 #if !NET452
 using Microsoft.Extensions.Logging;
 #endif
+
 namespace Casbin
 {
+#if !NET452
+    using BatchEnforceAsyncResults = IAsyncEnumerable<bool>;
+#else
+    using BatchEnforceAsyncResults = Task<IEnumerable<bool>>;
+#endif
+
     /// <summary>
     /// IEnforcer is the API interface of Enforcer
     /// </summary>
@@ -60,5 +67,27 @@ namespace Casbin
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public Task<bool> EnforceAsync<TRequest>(EnforceContext context, TRequest requestValues) where TRequest : IRequestValues;
+
+        /// <summary>
+        /// Decides whether some "subject" can access corresponding "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
+        /// <param name="requestValues">The requests needs to be mediated, whose element is usually an array of strings
+        /// but can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the requests.</returns>
+        public IEnumerable<bool> BatchEnforce<TRequest>(EnforceContext context, IEnumerable<TRequest> requestValues) 
+            where TRequest : IRequestValues;
+
+        /// <summary>
+        /// Decides whether some "subject" can access corresponding "object" with the operation
+        /// "action", input parameters are usually: (sub, obj, act).
+        /// </summary>
+        /// <param name="context">Enforce context include all status on enforcing</param>
+        /// <param name="requestValues">The requests needs to be mediated, whose element is usually an array of strings
+        /// but can be class instances if ABAC is used.</param>
+        /// <returns>Whether to allow the requests.</returns>
+        public BatchEnforceAsyncResults BatchEnforceAsync<TRequest>(EnforceContext context, IEnumerable<TRequest> requestValues)
+            where TRequest : IRequestValues;
     }
 }
