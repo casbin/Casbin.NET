@@ -117,7 +117,7 @@ namespace Casbin.Model
 
             foreach (IPolicyValues rule in Policy)
             {
-                BuildRoleLink(count, PolicyOperation.PolicyAdd, rule);
+                BuildRoleLink(count, PolicyOperation.AddPolicy, rule);
             }
         }
 
@@ -140,7 +140,8 @@ namespace Casbin.Model
 
             switch (policyOperation)
             {
-                case PolicyOperation.PolicyAdd:
+                case PolicyOperation.AddPolicy:
+                case PolicyOperation.AddPolicies:
                     switch (groupPolicyCount)
                     {
                         case 2:
@@ -154,7 +155,8 @@ namespace Casbin.Model
                     }
 
                     break;
-                case PolicyOperation.PolicyUpdate:
+                case PolicyOperation.UpdatePolicy:
+                case PolicyOperation.UpdatePolicies:
                     if (newRule.Length == 0)
                     {
                         throw new InvalidOperationException("Grouping policy elements do not meet role definition.");
@@ -187,7 +189,9 @@ namespace Casbin.Model
                     }
 
                     break;
-                case PolicyOperation.PolicyRemove:
+                case PolicyOperation.RemovePolicy:
+                case PolicyOperation.RemovePolicies:
+                case PolicyOperation.RemoveFilteredPolicy:
                     switch (groupPolicyCount)
                     {
                         case 2:
@@ -200,6 +204,8 @@ namespace Casbin.Model
                             throw new ArgumentOutOfRangeException(nameof(groupPolicyCount), groupPolicyCount, null);
                     }
 
+                    break;
+                case PolicyOperation.Custom:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(policyOperation), policyOperation, null);

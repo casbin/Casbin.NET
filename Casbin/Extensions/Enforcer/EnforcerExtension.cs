@@ -336,7 +336,8 @@ namespace Casbin
                 return false;
             }
 
-            enforcer.Watcher?.Update();
+            IWatcherMessage watcherMessage = WatcherMessage.CreateSavePolicyMessage();
+            enforcer.Watcher?.Update(watcherMessage);
             return true;
         }
 
@@ -367,9 +368,10 @@ namespace Casbin
                 return false;
             }
 
+            IWatcherMessage watcherMessage = WatcherMessage.CreateSavePolicyMessage();
             if (enforcer.Watcher is not null)
             {
-                await enforcer.Watcher.UpdateAsync();
+                await enforcer.Watcher.UpdateAsync(watcherMessage);
             }
 
             return true;

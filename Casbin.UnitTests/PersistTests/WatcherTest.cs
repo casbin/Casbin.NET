@@ -55,13 +55,13 @@ public class WatcherTest
 
         public void SetUpdateCallback(Func<Task> callback) => _asyncCallback = callback;
 
-        public void Update()
+        public void Update(IWatcherMessage watcherMessage)
         {
             _callback?.Invoke();
             Called = true;
         }
 
-        public async Task UpdateAsync()
+        public async Task UpdateAsync(IWatcherMessage watcherMessage)
         {
             if (!(_asyncCallback is null))
             {
