@@ -9,8 +9,8 @@ namespace Casbin.Persist
 
         void SetUpdateCallback(Func<Task> callback);
 
-        void Update();
+        void Update(IWatcherMessage watcherMessage);
 
-        Task UpdateAsync();
+        Task UpdateAsync(IWatcherMessage watcherMessage);
     }
 }
