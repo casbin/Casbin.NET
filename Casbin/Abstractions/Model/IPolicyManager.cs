@@ -1,63 +1,41 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Casbin.Persist;
 
 namespace Casbin.Model
 {
-    public interface IPolicyManager : IPolicyStore
+    public interface IPolicyManager : IReadOnlyPolicyManager
     {
-        public bool IsSynchronized { get; }
-
-        public IReadOnlyAdapter Adapter { get; set; }
-
-        public bool HasAdapter { get; }
-
-        public bool IsFiltered { get; }
-
         public bool AutoSave { get; set; }
 
-        public IPolicyStore PolicyStore { get; set; }
+        public bool AddPolicy(IPolicyValues rule);
 
-        public void StartRead();
+        public Task<bool> AddPolicyAsync(IPolicyValues rule);
 
-        public void StartWrite();
+        public bool AddPolicies(IReadOnlyList<IPolicyValues> rules);
 
-        public bool TryStartRead();
+        public Task<bool> AddPoliciesAsync(IReadOnlyList<IPolicyValues> rules);
 
-        public bool TryStartWrite();
-
-        public void EndRead();
-
-        public void EndWrite();
-
-        public bool LoadPolicy();
-
-        public Task<bool> LoadPolicyAsync();
-
-        public bool LoadFilteredPolicy(Filter filter);
-
-        public Task<bool> LoadFilteredPolicyAsync(Filter filter);
-
-        public bool SavePolicy();
-
-        public Task<bool> SavePolicyAsync();
-
-        public Task<bool> AddPolicyAsync(string section, string policyType, IPolicyValues rule);
-
-        public Task<bool> AddPoliciesAsync(string section, string policyType, IReadOnlyList<IPolicyValues> rules);
-
-        public Task<bool> UpdatePoliciesAsync(string section, string policyType,
-            IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules);
-
-        public Task<bool> UpdatePolicyAsync(string section, string policyType, IPolicyValues oldRule,
+        public bool UpdatePolicy(IPolicyValues oldRule,
             IPolicyValues newRule);
 
-        public Task<bool> RemovePolicyAsync(string section, string policyType, IPolicyValues rule);
+        public Task<bool> UpdatePolicyAsync(IPolicyValues oldRule,
+            IPolicyValues newRule);
 
-        public Task<bool> RemovePoliciesAsync(string section, string policyType,
-            IReadOnlyList<IPolicyValues> rules);
+        public bool UpdatePolicies(IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules);
 
-        public Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(string section, string policyType,
-            int fieldIndex, IPolicyValues fieldValues);
+        public Task<bool> UpdatePoliciesAsync(IReadOnlyList<IPolicyValues> oldRules,
+            IReadOnlyList<IPolicyValues> newRules);
+
+        public bool RemovePolicy(IPolicyValues rule);
+
+        public Task<bool> RemovePolicyAsync(IPolicyValues rule);
+
+        public bool RemovePolicies(IReadOnlyList<IPolicyValues> rules);
+
+        public Task<bool> RemovePoliciesAsync(IReadOnlyList<IPolicyValues> rules);
+
+        public IEnumerable<IPolicyValues> RemoveFilteredPolicy(int fieldIndex, IPolicyValues fieldValues);
+
+        public Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(int fieldIndex, IPolicyValues fieldValues);
     }
 }

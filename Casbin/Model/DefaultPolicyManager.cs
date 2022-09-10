@@ -1,749 +1,243 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Casbin.Persist;
+using Casbin.Model.Holder;
 
 namespace Casbin.Model
 {
     public class DefaultPolicyManager : IPolicyManager
     {
-        protected IBatchAdapter BatchAdapter;
-        protected IEpochAdapter EpochAdapter;
-        protected IFilteredAdapter FilteredAdapter;
-        protected ISingleAdapter SingleAdapter;
+        private readonly AdapterHolder _adapterHolder;
+        private readonly PolicyStoreHolder _policyStoreHolder;
+        private readonly string _policyType;
+        private readonly string _section;
 
-        // ReSharper disable once MemberCanBeProtected.Global
-        public DefaultPolicyManager(IPolicyStore policyStore, IReadOnlyAdapter adapter = null)
+        internal DefaultPolicyManager(string section, string policyType,
+            PolicyStoreHolder policyStoreHolder, AdapterHolder adapterHolder)
         {
-            PolicyStore = policyStore;
-            if (adapter is not null)
-            {
-                Adapter = adapter;
-            }
+            _section = section;
+            _policyType = policyType;
+            _policyStoreHolder = policyStoreHolder;
+            _adapterHolder = adapterHolder;
         }
 
-        public virtual bool IsSynchronized => false;
-        public bool HasAdapter => Adapter is not null;
-        public bool IsFiltered => FilteredAdapter is not null && FilteredAdapter.IsFiltered;
-        public Dictionary<string, Dictionary<string, Assertion>> Sections => PolicyStore.Sections;
+        private bool HasAdapter => _adapterHolder.Adapter is null;
+
         public bool AutoSave { get; set; } = true;
-        public IPolicyStore PolicyStore { get; set; }
 
-        public IReadOnlyAdapter Adapter
+        public PolicyScanner Scan() =>
+            _policyStoreHolder.PolicyStore.Scan(_section, _policyType);
+
+        public IEnumerable<IPolicyValues> GetPolicy() =>
+            _policyStoreHolder.PolicyStore.GetPolicy(_section, _policyType);
+
+        public IEnumerable<IPolicyValues> GetFilteredPolicy(int fieldIndex, IPolicyValues fieldValues) =>
+            _policyStoreHolder.PolicyStore.GetFilteredPolicy(_section, _policyType, fieldIndex, fieldValues);
+
+        public IEnumerable<string> GetValuesForFieldInPolicy(int fieldIndex) =>
+            _policyStoreHolder.PolicyStore.GetValuesForFieldInPolicy(_section, _policyType, fieldIndex);
+
+        public bool HasPolicy(IPolicyValues values) =>
+            _policyStoreHolder.PolicyStore.HasPolicy(_section, _policyType, values);
+
+        public bool HasPolicies(IReadOnlyList<IPolicyValues> valueList) =>
+            _policyStoreHolder.PolicyStore.HasPolicies(_section, _policyType, valueList);
+
+        public bool HasAllPolicies(IReadOnlyList<IPolicyValues> rules) =>
+            _policyStoreHolder.PolicyStore.HasAllPolicies(_section, _policyType, rules);
+
+        public virtual bool AddPolicy(IPolicyValues values)
         {
-            get => EpochAdapter;
-            set
+            if (HasAdapter is false || AutoSave is false)
             {
-                SingleAdapter = value as ISingleAdapter;
-                BatchAdapter = value as IBatchAdapter;
-                EpochAdapter = value as IEpochAdapter;
-                FilteredAdapter = value as IFilteredAdapter;
+                return _policyStoreHolder.PolicyStore.AddPolicy(_section, _policyType, values);
             }
+
+            _adapterHolder.SingleAdapter?.AddPolicy(_section, _policyType, values);
+            return _policyStoreHolder.PolicyStore.AddPolicy(_section, _policyType, values);
         }
 
-        public virtual void StartRead()
+        public virtual bool AddPolicies(IReadOnlyList<IPolicyValues> rules)
         {
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.AddPolicies(_section, _policyType, rules);
+            }
+
+            _adapterHolder.BatchAdapter?.AddPolicies(_section, _policyType, rules);
+            return _policyStoreHolder.PolicyStore.AddPolicies(_section, _policyType, rules);
         }
 
-        public virtual void StartWrite()
+        public virtual bool UpdatePolicy(IPolicyValues oldRule, IPolicyValues newRule)
         {
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.UpdatePolicy(_section, _policyType, oldRule, newRule);
+            }
+
+            _adapterHolder.SingleAdapter?.UpdatePolicy(_section, _policyType, oldRule, newRule);
+            return _policyStoreHolder.PolicyStore.UpdatePolicy(_section, _policyType, oldRule, newRule);
         }
 
-        public virtual void EndRead()
+        public virtual bool UpdatePolicies(IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules)
         {
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.UpdatePolicies(_section, _policyType, oldRules, newRules);
+            }
+
+            _adapterHolder.BatchAdapter?.UpdatePolicies(_section, _policyType, oldRules, newRules);
+            return _policyStoreHolder.PolicyStore.UpdatePolicies(_section, _policyType, oldRules, newRules);
         }
 
-        public virtual void EndWrite()
+        public virtual bool RemovePolicy(IPolicyValues rule)
         {
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.RemovePolicy(_section, _policyType, rule);
+            }
+
+            _adapterHolder.SingleAdapter?.RemovePolicy(_section, _policyType, rule);
+            return _policyStoreHolder.PolicyStore.RemovePolicy(_section, _policyType, rule);
         }
 
-        public virtual bool TryStartRead()
+        public virtual bool RemovePolicies(IReadOnlyList<IPolicyValues> rules)
         {
-            return true;
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.RemovePolicies(_section, _policyType, rules);
+            }
+
+            _adapterHolder.BatchAdapter?.RemovePolicies(_section, _policyType, rules);
+            return _policyStoreHolder.PolicyStore.RemovePolicies(_section, _policyType, rules);
         }
 
-        public virtual bool TryStartWrite()
+        public virtual IEnumerable<IPolicyValues> RemoveFilteredPolicy(int fieldIndex, IPolicyValues fieldValues)
         {
-            return true;
+            if (HasAdapter is false || AutoSave is false)
+            {
+                return _policyStoreHolder.PolicyStore.RemoveFilteredPolicy(_section, _policyType, fieldIndex,
+                    fieldValues);
+            }
+
+            _adapterHolder.BatchAdapter?.RemoveFilteredPolicy(_section, _policyType, fieldIndex, fieldValues);
+            return _policyStoreHolder.PolicyStore.RemoveFilteredPolicy(_section, _policyType, fieldIndex, fieldValues);
         }
 
-        public bool LoadPolicy()
+        public virtual async Task<bool> AddPolicyAsync(IPolicyValues rule)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.AddPolicy(_section, _policyType, rule);
             }
 
-            try
+            if (_adapterHolder.SingleAdapter is not null)
             {
-                if (HasAdapter is false)
-                {
-                    return false;
-                }
-
-                if (EpochAdapter is null)
-                {
-                    return false;
-                }
-
-                PolicyStore.ClearPolicy();
-                EpochAdapter.LoadPolicy(PolicyStore);
-                return true;
+                await _adapterHolder.SingleAdapter.AddPolicyAsync(_section, _policyType, rule);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.AddPolicy(_section, _policyType, rule);
         }
 
-        public bool LoadFilteredPolicy(Filter filter)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (FilteredAdapter is null)
-                {
-                    return false;
-                }
-
-                FilteredAdapter.LoadFilteredPolicy(PolicyStore, filter);
-                return true;
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool SavePolicy()
-        {
-            if (TryStartRead() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false)
-                {
-                    return false;
-                }
-
-                if (EpochAdapter is null)
-                {
-                    throw new InvalidOperationException("Cannot save policy when use a readonly adapter");
-                }
-
-                if (IsFiltered)
-                {
-                    throw new InvalidOperationException("Cannot save filtered policies");
-                }
-
-                EpochAdapter.SavePolicy(PolicyStore);
-                return true;
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public virtual async Task<bool> LoadPolicyAsync()
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false)
-                {
-                    return false;
-                }
-
-                if (EpochAdapter is null)
-                {
-                    return false;
-                }
-
-                PolicyStore.ClearPolicy();
-                await EpochAdapter.LoadPolicyAsync(PolicyStore);
-                return true;
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public virtual async Task<bool> LoadFilteredPolicyAsync(Filter filter)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (FilteredAdapter is null)
-                {
-                    return false;
-                }
-
-                await FilteredAdapter.LoadFilteredPolicyAsync(PolicyStore, filter);
-                return true;
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public virtual async Task<bool> SavePolicyAsync()
-        {
-            if (TryStartRead() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (EpochAdapter is null)
-                {
-                    return false;
-                }
-
-                await EpochAdapter.SavePolicyAsync(PolicyStore);
-                return true;
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public Assertion GetRequiredAssertion(string section, string type)
-        {
-            if (TryStartRead() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                return PolicyStore.GetRequiredAssertion(section, type);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public bool TryGetAssertion(string section, string policyType, out Assertion returnAssertion)
-        {
-            if (TryStartRead() is false)
-            {
-                returnAssertion = null;
-                return false;
-            }
-
-            try
-            {
-                return PolicyStore.TryGetAssertion(section, policyType, out returnAssertion);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType)
-        {
-            if (TryStartRead() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                return PolicyStore.GetPolicy(section, policyType);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
-            IPolicyValues fieldValues)
-        {
-            if (TryStartRead() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                return PolicyStore.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public IEnumerable<string> GetValuesForFieldInPolicy(string section, string policyType, int fieldIndex)
-        {
-            if (TryStartRead() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                return PolicyStore.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex)
-        {
-            if (TryStartRead() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                return PolicyStore.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public bool HasPolicy(string section, string policyType, IPolicyValues rule)
-        {
-            StartRead();
-            try
-            {
-                return PolicyStore.HasPolicy(section, policyType, rule);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
-        {
-            StartRead();
-            try
-            {
-                return PolicyStore.HasPolicies(section, policyType, rules);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
-        {
-            StartRead();
-            try
-            {
-                return PolicyStore.HasAllPolicies(section, policyType, rules);
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
-
-        public bool AddPolicy(string section, string policyType, IPolicyValues values)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.AddPolicy(section, policyType, values);
-                }
-
-                SingleAdapter?.AddPolicy(section, policyType, values);
-                return PolicyStore.AddPolicy(section, policyType, values);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool AddPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.AddPolicies(section, policyType, rules);
-                }
-
-                BatchAdapter?.AddPolicies(section, policyType, rules);
-                return PolicyStore.AddPolicies(section, policyType, rules);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool UpdatePolicy(string section, string policyType, IPolicyValues oldRule, IPolicyValues newRule)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                // IEnumerable<string> oldRuleArray = oldRule as string[] ?? oldRule.ToArray();
-                // IEnumerable<string> newRuleArray = newRule as string[] ?? newRule.ToArray();
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
-                }
-
-                SingleAdapter?.UpdatePolicy(section, policyType, oldRule, newRule);
-                return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool UpdatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> oldRules,
-            IReadOnlyList<IPolicyValues> newRules)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                // IEnumerable<string>[] oldRulesArray = oldRules as IEnumerable<string>[] ?? oldRules.ToArray();
-                // IEnumerable<string>[] newRulesArray = newRules as IEnumerable<string>[] ?? newRules.ToArray();
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
-                }
-
-                BatchAdapter?.UpdatePolicies(section, policyType, oldRules, newRules);
-                return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool RemovePolicy(string section, string policyType, IPolicyValues rule)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemovePolicy(section, policyType, rule);
-                }
-
-                SingleAdapter?.RemovePolicy(section, policyType, rule);
-                return PolicyStore.RemovePolicy(section, policyType, rule);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public bool RemovePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemovePolicies(section, policyType, rules);
-                }
-
-                BatchAdapter?.RemovePolicies(section, policyType, rules);
-                return PolicyStore.RemovePolicies(section, policyType, rules);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public IEnumerable<IPolicyValues> RemoveFilteredPolicy(string section, string policyType, int fieldIndex,
-            IPolicyValues fieldValues)
-        {
-            if (TryStartWrite() is false)
-            {
-                return null;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-                }
-
-                BatchAdapter?.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-                return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public virtual async Task<bool> AddPolicyAsync(string section, string policyType, IPolicyValues rule)
-        {
-            if (TryStartWrite() is false)
-            {
-                return false;
-            }
-
-            try
-            {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.AddPolicy(section, policyType, rule);
-                }
-
-                if (SingleAdapter is not null)
-                {
-                    await SingleAdapter.AddPolicyAsync(section, policyType, rule);
-                }
-
-                return PolicyStore.AddPolicy(section, policyType, rule);
-            }
-            finally
-            {
-                EndWrite();
-            }
-        }
-
-        public virtual async Task<bool> AddPoliciesAsync(string section, string policyType,
+        public virtual async Task<bool> AddPoliciesAsync(
             IReadOnlyList<IPolicyValues> rules)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.AddPolicies(_section, _policyType, rules);
             }
 
-            try
+            if (_adapterHolder.BatchAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.AddPolicies(section, policyType, rules);
-                }
-
-                if (BatchAdapter is not null)
-                {
-                    await BatchAdapter.AddPoliciesAsync(section, policyType, rules);
-                }
-
-                return PolicyStore.AddPolicies(section, policyType, rules);
+                await _adapterHolder.BatchAdapter.AddPoliciesAsync(_section, _policyType, rules);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.AddPolicies(_section, _policyType, rules);
         }
 
-        public virtual async Task<bool> UpdatePolicyAsync(string section, string policyType,
+        public virtual async Task<bool> UpdatePolicyAsync(
             IPolicyValues oldRule, IPolicyValues newRule)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.UpdatePolicy(_section, _policyType, oldRule, newRule);
             }
 
-            try
+            if (_adapterHolder.SingleAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
-                }
-
-                if (SingleAdapter is not null)
-                {
-                    await SingleAdapter.UpdatePolicyAsync(section, policyType, oldRule, newRule);
-                }
-
-                return PolicyStore.UpdatePolicy(section, policyType, oldRule, newRule);
+                await _adapterHolder.SingleAdapter.UpdatePolicyAsync(_section, _policyType, oldRule, newRule);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.UpdatePolicy(_section, _policyType, oldRule, newRule);
         }
 
-        public virtual async Task<bool> UpdatePoliciesAsync(string section, string policyType,
+        public virtual async Task<bool> UpdatePoliciesAsync(
             IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.UpdatePolicies(_section, _policyType, oldRules, newRules);
             }
 
-            try
+            if (_adapterHolder.BatchAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
-                }
-
-                if (BatchAdapter is not null)
-                {
-                    await BatchAdapter.UpdatePoliciesAsync(section, policyType, oldRules, newRules);
-                }
-
-                return PolicyStore.UpdatePolicies(section, policyType, oldRules, newRules);
+                await _adapterHolder.BatchAdapter.UpdatePoliciesAsync(_section, _policyType, oldRules, newRules);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.UpdatePolicies(_section, _policyType, oldRules, newRules);
         }
 
-        public virtual async Task<bool> RemovePolicyAsync(string section, string policyType, IPolicyValues rule)
+        public virtual async Task<bool> RemovePolicyAsync(IPolicyValues rule)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.RemovePolicy(_section, _policyType, rule);
             }
 
-            try
+            if (_adapterHolder.SingleAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemovePolicy(section, policyType, rule);
-                }
-
-                if (SingleAdapter is not null)
-                {
-                    await SingleAdapter.RemovePolicyAsync(section, policyType, rule);
-                }
-
-                return PolicyStore.RemovePolicy(section, policyType, rule);
+                await _adapterHolder.SingleAdapter.RemovePolicyAsync(_section, _policyType, rule);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.RemovePolicy(_section, _policyType, rule);
         }
 
-        public virtual async Task<bool> RemovePoliciesAsync(string section, string policyType,
+        public virtual async Task<bool> RemovePoliciesAsync(
             IReadOnlyList<IPolicyValues> rules)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return false;
+                return _policyStoreHolder.PolicyStore.RemovePolicies(_section, _policyType, rules);
             }
 
-            try
+            if (_adapterHolder.BatchAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemovePolicies(section, policyType, rules);
-                }
-
-                if (BatchAdapter is not null)
-                {
-                    await BatchAdapter.RemovePoliciesAsync(section, policyType, rules);
-                }
-
-                return PolicyStore.RemovePolicies(section, policyType, rules);
+                await _adapterHolder.BatchAdapter.RemovePoliciesAsync(_section, _policyType, rules);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.RemovePolicies(_section, _policyType, rules);
         }
 
-        public virtual async Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(string section,
-            string policyType, int fieldIndex, IPolicyValues fieldValues)
+        public virtual async Task<IEnumerable<IPolicyValues>> RemoveFilteredPolicyAsync(
+            int fieldIndex, IPolicyValues fieldValues)
         {
-            if (TryStartWrite() is false)
+            if (HasAdapter is false || AutoSave is false)
             {
-                return null;
+                return _policyStoreHolder.PolicyStore.RemoveFilteredPolicy(_section, _policyType, fieldIndex,
+                    fieldValues);
             }
 
-            try
+            if (_adapterHolder.BatchAdapter is not null)
             {
-                if (HasAdapter is false || AutoSave is false)
-                {
-                    return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-                }
-
-                if (BatchAdapter is not null)
-                {
-                    await BatchAdapter.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
-                }
-
-                return PolicyStore.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+                await _adapterHolder.BatchAdapter.RemoveFilteredPolicyAsync(_section, _policyType, fieldIndex,
+                    fieldValues);
             }
-            finally
-            {
-                EndWrite();
-            }
+
+            return _policyStoreHolder.PolicyStore.RemoveFilteredPolicy(_section, _policyType, fieldIndex, fieldValues);
         }
 
-        public void ClearPolicy()
-        {
-            StartRead();
-            try
-            {
-                PolicyStore.ClearPolicy();
-            }
-            finally
-            {
-                EndRead();
-            }
-        }
+        public Task<IEnumerable<IPolicyValues>> GetPolicyAsync() =>
+            Task.FromResult(_policyStoreHolder.PolicyStore.GetPolicy(_section, _policyType));
 
-        public static IPolicyManager Create() => new DefaultPolicyManager(DefaultPolicyStore.Create());
+        public void ClearPolicy() => _policyStoreHolder.PolicyStore.ClearPolicy();
     }
 }

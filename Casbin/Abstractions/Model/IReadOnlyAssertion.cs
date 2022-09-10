@@ -9,7 +9,5 @@ namespace Casbin.Model
         public string Value { get; }
 
         public IReadOnlyDictionary<string, int> Tokens { get; }
-
-        public IReadOnlyList<IPolicyValues> Policy { get; }
     }
 }

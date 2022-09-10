@@ -10,14 +10,14 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("Functions")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net50)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net60)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net70)]
     public class BuildInFunctionsBenchmark
     {
         public IEnumerable<object[]> KeyMatch4TestData() => new[]
         {
-            new object[] {"/parent/123/child/123", "/parent/{id}/child/{id}"},
-            new object[] {"/parent/123/child/123", "/parent/{id}/child/{another_id}"}
+            new object[] { "/parent/123/child/123", "/parent/{id}/child/{id}" },
+            new object[] { "/parent/123/child/123", "/parent/{id}/child/{another_id}" }
         };
 
         [Benchmark]
@@ -30,8 +30,7 @@ namespace Casbin.Benchmark
 
         public IEnumerable<object[]> IPMatchTestData() => new[]
         {
-            new object[] {"192.168.2.123", "192.168.2.123"},
-            new object[] {"192.168.2.123", "192.168.2.0/24"}
+            new object[] { "192.168.2.123", "192.168.2.123" }, new object[] { "192.168.2.123", "192.168.2.0/24" }
         };
 
         [Benchmark]

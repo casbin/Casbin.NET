@@ -10,43 +10,32 @@ namespace Casbin
     internal static class InternalEnforcerExtension
     {
         internal static IEnumerable<IPolicyValues> InternalGetPolicy(this IEnforcer enforcer, string section,
-            string policyType)
-        {
-            return enforcer.PolicyManager.GetPolicy(section, policyType);
-        }
+            string policyType) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.GetPolicy(section, policyType);
 
         internal static IEnumerable<IPolicyValues> InternalGetFilteredPolicy(this IEnforcer enforcer,
-            string section, string policyType, int fieldIndex, IPolicyValues fieldValues)
-        {
-            return enforcer.PolicyManager.GetFilteredPolicy(section, policyType, fieldIndex, fieldValues);
-        }
+            string section, string policyType, int fieldIndex, IPolicyValues fieldValues) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.GetFilteredPolicy(section, policyType, fieldIndex,
+                fieldValues);
 
         internal static IEnumerable<string> InternalGetValuesForFieldInPolicy(this IEnforcer enforcer, string section,
-            string policyType, int fieldIndex)
-        {
-            return enforcer.PolicyManager.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
-        }
+            string policyType, int fieldIndex) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.GetValuesForFieldInPolicy(section, policyType, fieldIndex);
 
         internal static IEnumerable<string> InternalGetValuesForFieldInPolicyAllTypes(this IEnforcer enforcer,
-            string section, int fieldIndex)
-        {
-            return enforcer.PolicyManager.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
-        }
+            string section, int fieldIndex) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.GetValuesForFieldInPolicyAllTypes(section, fieldIndex);
 
         internal static bool InternalHasPolicy(this IEnforcer enforcer, string section, string policyType,
-            IPolicyValues rule)
-        {
-            return enforcer.PolicyManager.HasPolicy(section, policyType, rule);
-        }
+            IPolicyValues rule) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.HasPolicy(section, policyType, rule);
 
         internal static bool InternalHasPolicies(this IEnforcer enforcer, string section, string policyType,
-            IReadOnlyList<IPolicyValues> rules)
-        {
-            return enforcer.PolicyManager.HasPolicies(section, policyType, rules);
-        }
+            IReadOnlyList<IPolicyValues> rules) =>
+            enforcer.Model.PolicyStoreHolder.PolicyStore.HasPolicies(section, policyType, rules);
 
         /// <summary>
-        /// Adds a rule to the current policy.
+        /// Adds a values to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -56,7 +45,8 @@ namespace Casbin
         internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType,
             IPolicyValues values)
         {
-            bool ruleAdded = enforcer.PolicyManager.AddPolicy(section, policyType, values);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            bool ruleAdded = policyManager.AddPolicy(values);
 
             if (ruleAdded is false)
             {
@@ -68,229 +58,239 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Adds a rule to the current policy.
+        /// Adds a values to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="rule"></param>
+        /// <param name="values"></param>
         /// <returns></returns>
         internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string section,
-            string policyType, IPolicyValues rule)
+            string policyType, IPolicyValues values)
         {
-            if (enforcer.PolicyManager.HasPolicy(section, policyType, rule))
+            IPolicyManager policyManger = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManger.HasPolicy(values))
             {
                 return false;
             }
 
-            bool ruleAdded = await enforcer.PolicyManager.AddPolicyAsync(section, policyType, rule);
+            bool ruleAdded = await policyManger.AddPolicyAsync(values);
 
             if (ruleAdded is false)
             {
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, rule);
+            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, values);
             return true;
         }
 
         /// <summary>
-        /// Adds rules to the current policy.
+        /// Adds valuesList to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="rules"></param>
+        /// <param name="valuesList"></param>
         /// <returns></returns>
         internal static bool InternalAddPolicies(this IEnforcer enforcer, string section, string policyType,
-            IReadOnlyList<IPolicyValues> rules)
+            IReadOnlyList<IPolicyValues> valuesList)
         {
-            if (enforcer.PolicyManager.HasPolicies(section, policyType, rules))
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicies(valuesList))
             {
                 return false;
             }
 
-            bool ruleAdded = enforcer.PolicyManager.AddPolicies(section, policyType, rules);
+            bool ruleAdded = policyManager.AddPolicies(valuesList);
 
             if (ruleAdded is false)
             {
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, rules);
+            OnPoliciesChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, valuesList);
             return true;
         }
 
 
         /// <summary>
-        /// Adds rules to the current policy.
+        /// Adds valuesList to the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="rules"></param>
+        /// <param name="valuesList"></param>
         /// <returns></returns>
         internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string section,
-            string policyType, IReadOnlyList<IPolicyValues> rules)
+            string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
-            if (enforcer.PolicyManager.HasPolicies(section, policyType, rules))
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicies(valuesList))
             {
                 return false;
             }
 
-            bool ruleAdded = await enforcer.PolicyManager.AddPoliciesAsync(section, policyType, rules);
+            bool ruleAdded = await policyManager.AddPoliciesAsync(valuesList);
 
             if (ruleAdded is false)
             {
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, rules);
+            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, valuesList);
             return true;
         }
 
         /// <summary>
-        ///     Updates a rule from the current policy.
+        ///     Updates a values from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="oldRule"></param>
-        /// <param name="newRule"></param>
+        /// <param name="oldValues"></param>
+        /// <param name="newValues"></param>
         /// <returns></returns>
         internal static bool InternalUpdatePolicy(this IEnforcer enforcer, string section, string policyType,
-            IPolicyValues oldRule, IPolicyValues newRule)
+            IPolicyValues oldValues, IPolicyValues newValues)
         {
-            if (enforcer.PolicyManager.HasPolicy(section, policyType, oldRule) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicy(oldValues) is false)
             {
                 return false;
             }
 
-            bool ruleUpdated = enforcer.PolicyManager.UpdatePolicy(section, policyType, oldRule, newRule);
+            bool ruleUpdated = policyManager.UpdatePolicy(oldValues, newValues);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            OnPolicyChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRule, newRule);
+            OnPolicyChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValues, newValues);
             return true;
         }
 
         /// <summary>
-        ///     Updates a rule from the current policy.
+        /// Updates a values from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="oldRule"></param>
-        /// <param name="newRule"></param>
+        /// <param name="oldValues"></param>
+        /// <param name="newValues"></param>
         /// <returns></returns>
         internal static async Task<bool> InternalUpdatePolicyAsync(this IEnforcer enforcer, string section,
-            string policyType, IPolicyValues oldRule, IPolicyValues newRule)
+            string policyType, IPolicyValues oldValues, IPolicyValues newValues)
         {
-            if (enforcer.PolicyManager.HasPolicy(section, policyType, oldRule) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicy(oldValues) is false)
             {
                 return false;
             }
 
-            bool ruleUpdated = await enforcer.PolicyManager.UpdatePolicyAsync(section, policyType, oldRule, newRule);
+            bool ruleUpdated = await policyManager.UpdatePolicyAsync(oldValues, newValues);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRule, newRule);
+            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValues,
+                newValues);
             return true;
         }
 
         /// <summary>
-        ///     Updates rules from the current policy.
+        ///     Updates valuesList from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="oldRules"></param>
-        /// <param name="newRules"></param>
+        /// <param name="oldValuesList"></param>
+        /// <param name="newValuesList"></param>
         /// <returns></returns>
         internal static bool InternalUpdatePolicies(this IEnforcer enforcer, string section, string policyType,
-            IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules)
+            IReadOnlyList<IPolicyValues> oldValuesList, IReadOnlyList<IPolicyValues> newValuesList)
         {
-            if (enforcer.PolicyManager.HasAllPolicies(section, policyType, oldRules) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasAllPolicies(oldValuesList) is false)
             {
                 return false;
             }
 
-            bool ruleUpdated = enforcer.PolicyManager.UpdatePolicies(section, policyType, oldRules, newRules);
+            bool ruleUpdated = policyManager.UpdatePolicies(oldValuesList, newValuesList);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRules, newRules);
+            OnPoliciesChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValuesList,
+                newValuesList);
             return true;
         }
 
         /// <summary>
-        ///     Updates rules from the current policy.
+        ///     Updates valuesList from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="oldRules"></param>
-        /// <param name="newRules"></param>
+        /// <param name="oldValuesList"></param>
+        /// <param name="newValuesList"></param>
         /// <returns></returns>
         internal static async Task<bool> InternalUpdatePoliciesAsync(this IEnforcer enforcer, string section,
-            string policyType, IReadOnlyList<IPolicyValues> oldRules, IReadOnlyList<IPolicyValues> newRules)
+            string policyType, IReadOnlyList<IPolicyValues> oldValuesList, IReadOnlyList<IPolicyValues> newValuesList)
         {
-            if (enforcer.PolicyManager.HasAllPolicies(section, policyType, oldRules) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasAllPolicies(oldValuesList) is false)
             {
                 return false;
             }
 
-            bool ruleUpdated = await enforcer.PolicyManager.UpdatePoliciesAsync(section, policyType, oldRules, newRules);
+            bool ruleUpdated = await policyManager.UpdatePoliciesAsync(oldValuesList, newValuesList);
 
             if (ruleUpdated is false)
             {
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldRules,
-                newRules);
+            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValuesList,
+                newValuesList);
             return true;
         }
 
         /// <summary>
-        /// Removes a rule from the current policy.
+        /// Removes a values from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
         /// <param name="policyType"></param>
-        /// <param name="rule"></param>
+        /// <param name="values"></param>
         /// <returns></returns>
         internal static bool InternalRemovePolicy(this IEnforcer enforcer, string section, string policyType,
-            IPolicyValues rule)
+            IPolicyValues values)
         {
-            if (enforcer.PolicyManager.HasPolicy(section, policyType, rule) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicy(values) is false)
             {
                 return false;
             }
 
-            bool ruleRemoved = enforcer.PolicyManager.RemovePolicy(section, policyType, rule);
+            bool ruleRemoved = policyManager.RemovePolicy(values);
 
             if (ruleRemoved is false)
             {
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, new[] { rule });
+            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, new[] { values });
             return true;
         }
 
         /// <summary>
-        /// Removes a rule from the current policy.
+        /// Removes a values from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -300,12 +300,13 @@ namespace Casbin
         internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string section,
             string policyType, IPolicyValues rule)
         {
-            if (enforcer.PolicyManager.HasPolicy(section, policyType, rule) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicy(rule) is false)
             {
                 return false;
             }
 
-            bool ruleRemoved = await enforcer.PolicyManager.RemovePolicyAsync(section, policyType, rule);
+            bool ruleRemoved = await policyManager.RemovePolicyAsync(rule);
 
             if (ruleRemoved is false)
             {
@@ -317,7 +318,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Removes rules from the current policy.
+        /// Removes valuesList from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -327,12 +328,13 @@ namespace Casbin
         internal static bool InternalRemovePolicies(this IEnforcer enforcer, string section, string policyType,
             IReadOnlyList<IPolicyValues> rules)
         {
-            if (enforcer.PolicyManager.HasPolicies(section, policyType, rules) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicies(rules) is false)
             {
                 return false;
             }
 
-            bool ruleRemoved = enforcer.PolicyManager.RemovePolicies(section, policyType, rules);
+            bool ruleRemoved = policyManager.RemovePolicies(rules);
 
             if (ruleRemoved is false)
             {
@@ -344,7 +346,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Removes rules from the current policy.
+        /// Removes valuesList from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -354,12 +356,13 @@ namespace Casbin
         internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string section,
             string policyType, IReadOnlyList<IPolicyValues> rules)
         {
-            if (enforcer.PolicyManager.HasPolicies(section, policyType, rules) is false)
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            if (policyManager.HasPolicies(rules) is false)
             {
                 return false;
             }
 
-            bool ruleRemoved = await enforcer.PolicyManager.RemovePoliciesAsync(section, policyType, rules);
+            bool ruleRemoved = await policyManager.RemovePoliciesAsync(rules);
 
             if (ruleRemoved is false)
             {
@@ -371,7 +374,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Removes rules based on field filters from the current policy.
+        /// Removes valuesList based on field filters from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -382,8 +385,8 @@ namespace Casbin
         internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string section, string policyType,
             int fieldIndex, IPolicyValues fieldValues)
         {
-            IEnumerable<IPolicyValues> effectPolices =
-                enforcer.PolicyManager.RemoveFilteredPolicy(section, policyType, fieldIndex, fieldValues);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IEnumerable<IPolicyValues> effectPolices = policyManager.RemoveFilteredPolicy(fieldIndex, fieldValues);
 
             if (effectPolices is null)
             {
@@ -395,7 +398,7 @@ namespace Casbin
         }
 
         /// <summary>
-        /// Removes rules based on field filters from the current policy.
+        /// Removes valuesList based on field filters from the current policy.
         /// </summary>
         /// <param name="enforcer"></param>
         /// <param name="section"></param>
@@ -406,8 +409,9 @@ namespace Casbin
         internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string section,
             string policyType, int fieldIndex, IPolicyValues fieldValues)
         {
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
             IEnumerable<IPolicyValues> effectPolicies =
-                await enforcer.PolicyManager.RemoveFilteredPolicyAsync(section, policyType, fieldIndex, fieldValues);
+                await policyManager.RemoveFilteredPolicyAsync(fieldIndex, fieldValues);
 
             if (effectPolicies is null)
             {
@@ -513,7 +517,7 @@ namespace Casbin
             {
                 enforcer.EnforceCache?.Clear();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
             }
 
@@ -529,7 +533,7 @@ namespace Casbin
             {
                 await enforcer.EnforceCache.ClearAsync();
 #if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
+                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
 #endif
             }
 

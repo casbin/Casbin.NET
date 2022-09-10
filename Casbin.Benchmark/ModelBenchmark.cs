@@ -9,8 +9,8 @@ namespace Casbin.Benchmark
     [BenchmarkCategory("Model")]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net50)]
     [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net60)]
+    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net70)]
     public class ModelBenchmark
     {
         private readonly Enforcer _enforcer;
@@ -23,8 +23,7 @@ namespace Casbin.Benchmark
         private string NowTestUserName { get; set; }
         private string NowTestDataName { get; set; }
 
-        [Params(10, 100, 1000, 10000)]
-        public int NowPolicyCount { get; set; }
+        [Params(10, 100, 1000, 10000)] public int NowPolicyCount { get; set; }
 
         [GlobalSetup(Targets = new[] { nameof(AddPolicy), nameof(HasPolicy), nameof(RemovePolicy) })]
         public void GlobalSetup()
@@ -33,6 +32,7 @@ namespace Casbin.Benchmark
             {
                 _enforcer.AddPolicy($"group{i}", $"obj{i / 10}", "read");
             }
+
             Console.WriteLine($"// Already set {NowPolicyCount} policies.");
 
             NowTestUserName = $"name{NowPolicyCount / 2 + 1}";
