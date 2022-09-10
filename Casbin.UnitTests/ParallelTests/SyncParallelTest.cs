@@ -1,26 +1,28 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
 using Casbin.Model;
 using Casbin.UnitTests.Fixtures;
+using Xunit;
+using Xunit.Abstractions;
 
 namespace Casbin.UnitTests.ParallelTest
 {
     using RbacRequest = RequestValues<string, string, string, string>;
+
     [Collection("Model collection")]
     public class SyncParallelTest
     {
-        private RbacParallelTestHelper<RbacRequest> _rbacParallelTestHelper;
         private readonly ITestOutputHelper _output;
         private readonly TestModelFixture _testModelFixture;
+        private RbacParallelTestHelper<RbacRequest> _rbacParallelTestHelper;
+
         public SyncParallelTest(ITestOutputHelper output, TestModelFixture testModelFixture)
         {
             _output = output;
             _testModelFixture = testModelFixture;
         }
 
-        public void Init()
+        private void InitRbacParallelTestHelper()
         {
             Enforcer e1 = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
             e1.BuildRoleLinks();
@@ -49,7 +51,7 @@ namespace Casbin.UnitTests.ParallelTest
         [Fact]
         public async Task RbacWithDomainsSyncParallelTestAsync()
         {
-            Init();
+            InitRbacParallelTestHelper();
             await _rbacParallelTestHelper.TestCorrectness(2000, 1000, 0, 1000);
         }
     }
