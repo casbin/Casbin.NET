@@ -16,7 +16,7 @@ public class WatcherMessageTest
 
     public WatcherMessageTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
 
-    private void MessageEquals(IWatcherMessage message, IWatcherMessage message2)
+    private void MessageEquals(PolicyChangedMessage message, PolicyChangedMessage message2)
     {
         Assert.Equal(message.Operation, message2.Operation);
         Assert.Equal(message.Section, message2.Section);
@@ -36,14 +36,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.AddPolicy("alice", "data1", "read");
         Assert.True(sampleWatcher.WatcherMessage is null);
 
         enforcer.AddPolicy("alice", "book1", "write");
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateAddPolicyMessage("p", "p", Policy.ValuesFrom(new[] { "alice", "book1", "write" })));
+            PolicyChangedMessage.CreateAddPolicy("p", "p", Policy.ValuesFrom(new[] { "alice", "book1", "write" })));
     }
 
     [Fact]
@@ -54,14 +54,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.RemovePolicy("alice", "data1", "write");
         Assert.True(sampleWatcher.WatcherMessage is null);
 
         enforcer.RemovePolicy("alice", "data1", "read");
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateRemovePolicyMessage("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" })));
+            PolicyChangedMessage.CreateRemovePolicy("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" })));
     }
 
     [Fact]
@@ -72,14 +72,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.UpdatePolicy(new[] { "alice", "book1", "read" }, "alice", "book2", "write");
         Assert.True(sampleWatcher.WatcherMessage is null);
 
         enforcer.UpdatePolicy(new[] { "alice", "data1", "read" }, "alice", "book2", "write");
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateUpdatePolicyMessage("p", "p",
+            PolicyChangedMessage.CreateUpdatePolicy("p", "p",
                 Policy.ValuesFrom(new[] { "alice", "data1", "read" }),
                 Policy.ValuesFrom(new[] { "alice", "book2", "write" })));
     }
@@ -92,9 +92,9 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
         enforcer.SavePolicy();
-        MessageEquals(sampleWatcher.WatcherMessage, WatcherMessage.CreateSavePolicyMessage());
+        MessageEquals(sampleWatcher.WatcherMessage, PolicyChangedMessage.CreateSavePolicy());
     }
 
     [Fact]
@@ -105,7 +105,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.AddPolicies(new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } });
         Assert.True(sampleWatcher.WatcherMessage is null);
@@ -116,7 +116,7 @@ public class WatcherMessageTest
         };
         enforcer.AddPolicies(rules);
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateAddPoliciesMessage("p", "p", Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateAddPolicies("p", "p", Policy.ValuesListFrom(rules)));
     }
 
     [Fact]
@@ -127,7 +127,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
@@ -139,7 +139,7 @@ public class WatcherMessageTest
         rules = new[] { new[] { "data2_admin", "data2", "read" }, new[] { "alice", "book3", "read" } };
         enforcer.RemovePolicies(rules);
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateRemovePoliciesMessage("p", "p", Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateRemovePolicies("p", "p", Policy.ValuesListFrom(rules)));
     }
 
     [Fact]
@@ -150,7 +150,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.UpdatePolicies(new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } },
             new[] { new[] { "data3_admin", "data200", "read" }, new[] { "frank", "book6", "read" } });
@@ -166,7 +166,7 @@ public class WatcherMessageTest
         };
         enforcer.UpdatePolicies(oldRules, newRules);
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateUpdatePoliciesMessage("p", "p", Policy.ValuesListFrom(oldRules),
+            PolicyChangedMessage.CreateUpdatePolicies("p", "p", Policy.ValuesListFrom(oldRules),
                 Policy.ValuesListFrom(newRules)));
     }
 
@@ -178,7 +178,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         enforcer.RemoveFilteredPolicy(1, "data3");
         Assert.True(sampleWatcher.WatcherMessage is null);
@@ -189,7 +189,7 @@ public class WatcherMessageTest
         };
         enforcer.RemoveFilteredPolicy(0, "data2_admin");
         MessageEquals(sampleWatcher.WatcherMessage,
-            WatcherMessage.CreateRemoveFilteredPolicyMessage("p", "p", 0, Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateRemoveFilteredPolicy("p", "p", 0, Policy.ValuesListFrom(rules)));
     }
 
     [Fact]
@@ -200,14 +200,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.AddPolicyAsync("alice", "data1", "read");
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
         await enforcer.AddPolicyAsync("alice", "book1", "write");
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateAddPolicyMessage("p", "p", Policy.ValuesFrom(new[] { "alice", "book1", "write" })));
+            PolicyChangedMessage.CreateAddPolicy("p", "p", Policy.ValuesFrom(new[] { "alice", "book1", "write" })));
     }
 
     [Fact]
@@ -218,14 +218,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.RemovePolicyAsync("alice", "data1", "write");
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
         await enforcer.RemovePolicyAsync("alice", "data1", "read");
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateRemovePolicyMessage("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" })));
+            PolicyChangedMessage.CreateRemovePolicy("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" })));
     }
 
     [Fact]
@@ -236,14 +236,14 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.UpdatePolicyAsync(new[] { "alice", "book1", "read" }, "alice", "book2", "write");
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
         await enforcer.UpdatePolicyAsync(new[] { "alice", "data1", "read" }, "alice", "book2", "write");
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateUpdatePolicyMessage("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" }),
+            PolicyChangedMessage.CreateUpdatePolicy("p", "p", Policy.ValuesFrom(new[] { "alice", "data1", "read" }),
                 Policy.ValuesFrom(new[] { "alice", "book2", "write" })));
     }
 
@@ -255,11 +255,11 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.SavePolicyAsync();
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateSavePolicyMessage());
+            PolicyChangedMessage.CreateSavePolicy());
     }
 
     [Fact]
@@ -270,7 +270,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.AddPoliciesAsync(new[]
         {
@@ -284,7 +284,7 @@ public class WatcherMessageTest
         };
         await enforcer.AddPoliciesAsync(rules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateAddPoliciesMessage("p", "p", Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateAddPolicies("p", "p", Policy.ValuesListFrom(rules)));
     }
 
     [Fact]
@@ -295,7 +295,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
@@ -307,7 +307,7 @@ public class WatcherMessageTest
         rules = new[] { new[] { "data2_admin", "data2", "read" }, new[] { "alice", "book3", "read" } };
         await enforcer.RemovePoliciesAsync(rules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateRemovePoliciesMessage("p", "p", Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateRemovePolicies("p", "p", Policy.ValuesListFrom(rules)));
     }
 
     [Fact]
@@ -318,7 +318,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.UpdatePoliciesAsync(
             new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } },
@@ -335,7 +335,7 @@ public class WatcherMessageTest
         };
         await enforcer.UpdatePoliciesAsync(oldRules, newRules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateUpdatePoliciesMessage("p", "p", Policy.ValuesListFrom(oldRules),
+            PolicyChangedMessage.CreateUpdatePolicies("p", "p", Policy.ValuesListFrom(oldRules),
                 Policy.ValuesListFrom(newRules)));
     }
 
@@ -347,7 +347,7 @@ public class WatcherMessageTest
         Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
-        enforcer.SetWatcher(sampleWatcher, false);
+        enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.RemoveFilteredPolicyAsync(1, "data3");
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
@@ -358,7 +358,7 @@ public class WatcherMessageTest
         };
         await enforcer.RemoveFilteredPolicyAsync(0, "data2_admin");
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
-            WatcherMessage.CreateRemoveFilteredPolicyMessage("p", "p", 0, Policy.ValuesListFrom(rules)));
+            PolicyChangedMessage.CreateRemoveFilteredPolicy("p", "p", 0, Policy.ValuesListFrom(rules)));
     }
 
     private class SampleWatcher : IWatcher
@@ -366,28 +366,45 @@ public class WatcherMessageTest
         private Func<Task> _asyncCallback;
         private Action _callback;
 
-        public IWatcherMessage WatcherMessage { get; private set; }
+        public PolicyChangedMessage WatcherMessage { get; private set; }
 
-        public IWatcherMessage AsyncWatcherMessage { get; private set; }
+        public PolicyChangedMessage AsyncWatcherMessage { get; private set; }
 
         public void SetUpdateCallback(Action callback) => _callback = callback;
 
         public void SetUpdateCallback(Func<Task> callback) => _asyncCallback = callback;
+        public void Update() => _callback?.Invoke();
 
-        public void Update(IWatcherMessage watcherMessage)
+        public async Task UpdateAsync()
+        {
+            if (_asyncCallback is not null)
+            {
+                await _asyncCallback.Invoke();
+            }
+        }
+
+        public void SetUpdateCallback(Action<PolicyChangedMessage> callback) => throw new NotImplementedException();
+
+        public void SetUpdateCallback(Func<PolicyChangedMessage, Task> callback) => throw new NotImplementedException();
+
+        public void Update(PolicyChangedMessage watcherMessage)
         {
             _callback?.Invoke();
             WatcherMessage = watcherMessage;
         }
 
-        public async Task UpdateAsync(IWatcherMessage watcherMessage)
+        public async Task UpdateAsync(PolicyChangedMessage watcherMessage)
         {
-            if (!(_asyncCallback is null))
+            if (_asyncCallback is not null)
             {
                 await _asyncCallback.Invoke();
             }
 
             AsyncWatcherMessage = watcherMessage;
+        }
+
+        public void Close()
+        {
         }
     }
 }

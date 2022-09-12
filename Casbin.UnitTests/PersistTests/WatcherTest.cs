@@ -42,9 +42,10 @@ public class WatcherTest
         Assert.True(sampleWatcher.AsyncCalled);
     }
 
-    public class SampleWatcher : IWatcher
+    private class SampleWatcher : IWatcher
     {
         private Func<Task> _asyncCallback;
+
         private Action _callback;
 
         public bool Called { get; private set; }
@@ -55,20 +56,34 @@ public class WatcherTest
 
         public void SetUpdateCallback(Func<Task> callback) => _asyncCallback = callback;
 
-        public void Update(IWatcherMessage watcherMessage)
+        public void Update()
         {
             _callback?.Invoke();
             Called = true;
         }
 
-        public async Task UpdateAsync(IWatcherMessage watcherMessage)
+        public async Task UpdateAsync()
         {
-            if (!(_asyncCallback is null))
+            if (_asyncCallback is not null)
             {
                 await _asyncCallback.Invoke();
             }
 
             AsyncCalled = true;
         }
+
+        public void SetUpdateCallback(Action<PolicyChangedMessage> callback) => throw new NotImplementedException();
+
+        public void SetUpdateCallback(Func<PolicyChangedMessage, Task> callback) => throw new NotImplementedException();
+
+        public void Update(PolicyChangedMessage message) => Update();
+
+        public Task UpdateAsync(PolicyChangedMessage message) => UpdateAsync();
+
+        public void Close() => _callback = () => { };
+
+        public void SetUpdateCallback<TMessage>(Func<TMessage> callback) => throw new NotImplementedException();
+
+        public void SetUpdateCallback<TMessage>(Func<TMessage, Task> callback) => throw new NotImplementedException();
     }
 }

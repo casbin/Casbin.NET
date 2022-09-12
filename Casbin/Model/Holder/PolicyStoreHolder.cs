@@ -6,12 +6,6 @@ public class PolicyStoreHolder
 {
     private IPolicyStore _policyStore;
 
-    public PolicyStoreHolder()
-    {
-    }
-
-    public PolicyStoreHolder(IPolicyStore policyStore) => _policyStore = policyStore;
-
     public IPolicyStore PolicyStore
     {
         get => _policyStore;
