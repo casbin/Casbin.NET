@@ -17,7 +17,7 @@ namespace Casbin
         public IReadOnlyList<string> RequestTokens { get; private set; }
 
         public string PolicyType { get; set; }
-        public IReadOnlyAssertion PolicyAssertion { get; private set; }
+        public PolicyAssertion PolicyAssertion { get; private set; }
         public IReadOnlyList<string> PolicyTokens { get; private set; }
 
         public bool SupportGeneric { get; private set; }
@@ -47,7 +47,7 @@ namespace Casbin
             string effectType = PermConstants.DefaultPolicyEffectType,
             string matcherType = PermConstants.DefaultMatcherType)
         {
-            string matcher = model.GetRequiredAssertion(PermConstants.Section.MatcherSection, matcherType).Value;
+            string matcher = model.Sections.GetValue(PermConstants.Section.MatcherSection, matcherType);
             return CreateWithMatcher(model, matcher, requestType, policyType, effectType);
         }
 
@@ -58,32 +58,27 @@ namespace Casbin
             string policyType = PermConstants.DefaultPolicyType,
             string effectType = PermConstants.DefaultPolicyEffectType)
         {
-            IReadOnlyAssertion requestAssertion = model.GetRequiredAssertion(PermConstants.Section.RequestSection, requestType);
-            IReadOnlyAssertion policyAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicySection, policyType);
-            IReadOnlyAssertion effectAssertion = model.GetRequiredAssertion(PermConstants.Section.PolicyEffectSection, effectType);
+            IReadOnlyAssertion requestAssertion = model.Sections.GetRequestAssertion(requestType);
+            PolicyAssertion policyAssertion = model.Sections.GetPolicyAssertion(policyType);
+            IReadOnlyAssertion effectAssertion = model.Sections.GetPolicyEffectAssertion(effectType);
             EnforceView view = new()
             {
                 RequestType = requestType,
                 RequestAssertion = requestAssertion,
                 // TODO: ToImmutableArray dot support .NET 4.5.2
                 RequestTokens = requestAssertion.Tokens.Keys.ToArray(),
-
                 PolicyType = policyType,
                 PolicyAssertion = policyAssertion,
                 // TODO: ToImmutableArray dot support .NET 4.5.2
                 PolicyTokens = policyAssertion.Tokens.Keys.ToArray(),
-
                 Matcher = matcher,
                 HasEval = StringUtil.HasEval(matcher),
                 HasRequestParameter = matcher.Contains($"{requestType}."),
                 HasPolicyParameter = matcher.Contains($"{policyType}."),
-
                 Effect = effectAssertion.Value,
                 EffectExpressionType = DefaultEffector.ParseEffectExpressionType(effectAssertion.Value),
-
                 HasEffect = policyAssertion.TryGetTokenIndex("eft", out int effectIndex),
                 EffectIndex = effectIndex,
-
                 HasPriority = policyAssertion.TryGetTokenIndex("priority", out int priorityIndex),
                 PriorityIndex = priorityIndex,
             };
@@ -96,10 +91,13 @@ namespace Casbin
                     string ruleNameEnum = ruleName.Replace($"{view.PolicyType}.", string.Empty);
                     if (view.PolicyAssertion.Tokens.TryGetValue(ruleNameEnum, out int ruleIndex) is false)
                     {
-                        throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
+                        throw new ArgumentException(
+                            "Please make sure rule exists in policy when using eval() in matcher");
                     }
+
                     evalRules[ruleName] = ruleIndex;
                 }
+
                 view.EvalRules = evalRules;
             }
 
@@ -126,11 +124,13 @@ namespace Casbin
                     matcher = matcher.Replace($"{view.RequestType}.{tokenPair.Key}",
                         $"{view.RequestType}[{tokenPair.Value}]");
                 }
+
                 foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
                 {
                     matcher = matcher.Replace($"{view.PolicyType}.{tokenPair.Key}",
                         $"{view.PolicyType}[{tokenPair.Value}]");
                 }
+
                 return matcher;
             }
 
@@ -139,11 +139,13 @@ namespace Casbin
                 matcher = matcher.Replace($"{view.RequestType}.{tokenPair.Key}",
                     $"{view.RequestType}.Value{tokenPair.Value + 1}");
             }
+
             foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
             {
                 matcher = matcher.Replace($"{view.PolicyType}.{tokenPair.Key}",
                     $"{view.PolicyType}.Value{tokenPair.Value + 1}");
             }
+
             return matcher;
         }
     }

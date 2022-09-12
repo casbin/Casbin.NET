@@ -360,6 +360,46 @@ public record PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1
         new PolicyEnumerator<PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>(this);
 }
 
+public record StringPolicyValues(string Value1 = "", string Value2 = "", string Value3 = "",
+    string Value4 = "", string Value5 = "", string Value6 = "",
+    string Value7 = "", string Value8 = "", string Value9 = "",
+    string Value10 = "", string Value11 = "", string Value12 = "") : PolicyValues
+{
+    public static new readonly StringPolicyValues Empty = new();
+    public override int Count => 12;
+
+    public override string this[int index] => index switch
+    {
+        0 => Value1,
+        1 => Value2,
+        2 => Value3,
+        3 => Value4,
+        4 => Value5,
+        5 => Value6,
+        6 => Value7,
+        7 => Value8,
+        8 => Value9,
+        9 => Value10,
+        10 => Value11,
+        11 => Value12,
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<StringPolicyValues>(this);
+}
+
+internal record StringListPolicy : PolicyValues
+{
+    private readonly IReadOnlyList<string> _values;
+
+    public StringListPolicy(IReadOnlyList<string> values) => _values = values;
+
+    public override int Count => _values.Count;
+    public override string this[int index] => _values[index];
+    public override IEnumerator<string> GetEnumerator() => _values.GetEnumerator();
+}
+
 internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValues
 {
     public PolicyEnumerator(T value)
@@ -380,15 +420,4 @@ internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValue
 
     public bool MoveNext() => ++_index < _value.Count;
     public void Reset() => _index = -1;
-}
-
-internal record StringListPolicy : PolicyValues
-{
-    private readonly IReadOnlyList<string> _values;
-
-    public StringListPolicy(IReadOnlyList<string> values) => _values = values;
-
-    public override int Count => _values.Count;
-    public override string this[int index] => _values[index];
-    public override IEnumerator<string> GetEnumerator() => _values.GetEnumerator();
 }

@@ -311,6 +311,74 @@ public class EnforcerTest
     }
 
     [Fact]
+    public void TestRbacBatchEnforceInMemory()
+    {
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("g", "g", "_, _");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
+
+        Enforcer e = new(m);
+
+        e.AddPermissionForUser("alice", "data1", "read");
+        e.AddPermissionForUser("bob", "data2", "write");
+        e.AddPermissionForUser("data2_admin", "data2", "read");
+        e.AddPermissionForUser("data2_admin", "data2", "write");
+        e.AddRoleForUser("alice", "data2_admin");
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), true),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), true),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), false),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), true)
+        };
+
+        TestBatchEnforce(e, testCases);
+    }
+
+    [Fact]
+    public void TestRbacParallelBatchEnforceInMemory()
+    {
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("g", "g", "_, _");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
+
+        Enforcer e = new(m);
+
+        e.AddPermissionForUser("alice", "data1", "read");
+        e.AddPermissionForUser("bob", "data2", "write");
+        e.AddPermissionForUser("data2_admin", "data2", "read");
+        e.AddPermissionForUser("data2_admin", "data2", "write");
+        e.AddRoleForUser("alice", "data2_admin");
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), true),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), true),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), false),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), true)
+        };
+
+        TestParallelBatchEnforce(e, testCases);
+    }
+
+    [Fact]
     public async Task TestRbacModelInMemoryAsync()
     {
         IModel m = DefaultModel.Create();
@@ -336,6 +404,40 @@ public class EnforcerTest
         await TestEnforceAsync(e, "bob", "data1", "write", false);
         await TestEnforceAsync(e, "bob", "data2", "read", false);
         await TestEnforceAsync(e, "bob", "data2", "write", true);
+    }
+
+    [Fact]
+    public void TestRbacBatchEnforceInMemoryAsync()
+    {
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("g", "g", "_, _");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act");
+
+        Enforcer e = new(m);
+
+        e.AddPermissionForUserAsync("alice", "data1", "read");
+        e.AddPermissionForUserAsync("bob", "data2", "write");
+        e.AddPermissionForUserAsync("data2_admin", "data2", "read");
+        e.AddPermissionForUserAsync("data2_admin", "data2", "write");
+        e.AddRoleForUserAsync("alice", "data2_admin");
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), true),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), true),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), false),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), true)
+        };
+
+        TestBatchEnforceAsync(e, testCases);
     }
 
     [Fact]
@@ -1031,6 +1133,50 @@ public class EnforcerTest
     }
 
     [Fact]
+    public void TestBatchEnforceWithMatcherApi()
+    {
+        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), false),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), false),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), true),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), false)
+        };
+
+        e.TestBatchEnforceWithMatcher(matcher, testCases);
+    }
+
+    [Fact]
+    public void TestBatchEnforceWithMatcherParallel()
+    {
+        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), false),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), false),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), true),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), false)
+        };
+
+        e.TestBatchEnforceWithMatcherParallel(matcher, testCases);
+    }
+
+    [Fact]
     public async Task TestEnforceWithMatcherAsync()
     {
         Enforcer e = new(_testModelFixture.GetBasicTestModel());
@@ -1044,6 +1190,28 @@ public class EnforcerTest
         await e.TestEnforceWithMatcherAsync(matcher, "bob", "data1", "write", false);
         await e.TestEnforceWithMatcherAsync(matcher, "bob", "data2", "read", false);
         await e.TestEnforceWithMatcherAsync(matcher, "bob", "data2", "write", false);
+    }
+
+    [Fact]
+    public void TestBatchEnforceWithMatcherApiAsync()
+    {
+        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
+
+        IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
+            new (RequestValues<string, string, string>, bool)[]
+        {
+            (Request.CreateValues("alice", "data1", "read"), false),
+            (Request.CreateValues("alice", "data1", "write"), false),
+            (Request.CreateValues("alice", "data2", "read"), false),
+            (Request.CreateValues("alice", "data2", "write"), true),
+            (Request.CreateValues("bob", "data1", "read"), true),
+            (Request.CreateValues("bob", "data1", "write"), false),
+            (Request.CreateValues("bob", "data2", "read"), false),
+            (Request.CreateValues("bob", "data2", "write"), false)
+        };
+
+        TestBatchEnforceWithMatcherAsync(e, matcher, testCases);
     }
 
     [Fact]

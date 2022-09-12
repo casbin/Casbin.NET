@@ -20,6 +20,8 @@ namespace Casbin.Model
                 FunctionDict = new Dictionary<string, Delegate>()
             };
 
+            map.AddFunction("keyGet", BuiltInFunctions.KeyGet);
+            map.AddFunction("keyGet2", BuiltInFunctions.KeyGet2);
             map.AddFunction("keyMatch", BuiltInFunctions.KeyMatch);
             map.AddFunction("keyMatch2", BuiltInFunctions.KeyMatch2);
             map.AddFunction("keyMatch3", BuiltInFunctions.KeyMatch3);

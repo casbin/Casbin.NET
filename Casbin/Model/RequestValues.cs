@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Casbin.Model;
 
@@ -13,6 +14,7 @@ public struct RequestValues : IRequestValues
     };
 
     public int Count => 0;
+    public bool TrySetValue<T>(int index, T value) => false;
 
     internal static string ToStringValue<T>(T value)
     {
@@ -23,7 +25,6 @@ public struct RequestValues : IRequestValues
 public struct RequestValues<T> : IRequestValues
 {
     public RequestValues(T value) => Value1 = value;
-
     public T Value1 { get; set; }
 
     public string this[int index] => index switch
@@ -33,6 +34,18 @@ public struct RequestValues<T> : IRequestValues
     };
 
     public int Count => 1;
+
+    public bool TrySetValue<T1>(int index, T1 value)
+    {
+        switch (index)
+        {
+            case 0 when value is T v:
+                Value1 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2> : IRequestValues
@@ -54,6 +67,21 @@ public struct RequestValues<T1, T2> : IRequestValues
     };
 
     public int Count => 2;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3> : IRequestValues
@@ -78,6 +106,24 @@ public struct RequestValues<T1, T2, T3> : IRequestValues
     };
 
     public int Count => 3;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4> : IRequestValues
@@ -105,6 +151,27 @@ public struct RequestValues<T1, T2, T3, T4> : IRequestValues
     };
 
     public int Count => 4;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5> : IRequestValues
@@ -135,6 +202,30 @@ public struct RequestValues<T1, T2, T3, T4, T5> : IRequestValues
     };
 
     public int Count => 5;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6> : IRequestValues
@@ -168,6 +259,33 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6> : IRequestValues
     };
 
     public int Count => 6;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7> : IRequestValues
@@ -204,6 +322,36 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7> : IRequestValues
     };
 
     public int Count => 7;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8> : IRequestValues
@@ -243,6 +391,39 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8> : IRequestValues
     };
 
     public int Count => 8;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            case 7 when value is T8 v:
+                Value8 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IRequestValues
@@ -286,6 +467,42 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IRequestValues
     };
 
     public int Count => 9;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            case 7 when value is T8 v:
+                Value8 = v;
+                return true;
+            case 8 when value is T9 v:
+                Value9 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IRequestValues
@@ -332,6 +549,45 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IRequestV
     };
 
     public int Count => 10;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            case 7 when value is T8 v:
+                Value8 = v;
+                return true;
+            case 8 when value is T9 v:
+                Value9 = v;
+                return true;
+            case 9 when value is T10 v:
+                Value10 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IRequestValues
@@ -381,6 +637,48 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IReq
     };
 
     public int Count => 11;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            case 7 when value is T8 v:
+                Value8 = v;
+                return true;
+            case 8 when value is T9 v:
+                Value9 = v;
+                return true;
+            case 9 when value is T10 v:
+                Value10 = v;
+                return true;
+            case 10 when value is T11 v:
+                Value11 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> : IRequestValues
@@ -433,17 +731,181 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> :
     };
 
     public int Count => 12;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        switch (index)
+        {
+            case 0 when value is T1 v:
+                Value1 = v;
+                return true;
+            case 1 when value is T2 v:
+                Value2 = v;
+                return true;
+            case 2 when value is T3 v:
+                Value3 = v;
+                return true;
+            case 3 when value is T4 v:
+                Value4 = v;
+                return true;
+            case 4 when value is T5 v:
+                Value5 = v;
+                return true;
+            case 5 when value is T6 v:
+                Value6 = v;
+                return true;
+            case 6 when value is T7 v:
+                Value7 = v;
+                return true;
+            case 7 when value is T8 v:
+                Value8 = v;
+                return true;
+            case 8 when value is T9 v:
+                Value9 = v;
+                return true;
+            case 9 when value is T10 v:
+                Value10 = v;
+                return true;
+            case 10 when value is T11 v:
+                Value11 = v;
+                return true;
+            case 11 when value is T12 v:
+                Value12 = v;
+                return true;
+            default:
+                return false;
+        }
+    }
+}
+
+public struct StringRequestValues : IRequestValues
+{
+    public static readonly StringRequestValues Empty = new();
+
+    public StringRequestValues(string value1 = "", string value2 = "", string value3 = "", string value4 = "",
+        string value5 = "", string value6 = "", string value7 = "", string value8 = "",
+        string value9 = "", string value10 = "", string value11 = "", string value12 = "")
+    {
+        Value1 = value1;
+        Value2 = value2;
+        Value3 = value3;
+        Value4 = value4;
+        Value5 = value5;
+        Value6 = value6;
+        Value7 = value7;
+        Value8 = value8;
+        Value9 = value9;
+        Value10 = value10;
+        Value11 = value11;
+        Value12 = value12;
+    }
+
+    public string Value1 { get; set; }
+    public string Value2 { get; set; }
+    public string Value3 { get; set; }
+    public string Value4 { get; set; }
+    public string Value5 { get; set; }
+    public string Value6 { get; set; }
+    public string Value7 { get; set; }
+    public string Value8 { get; set; }
+    public string Value9 { get; set; }
+    public string Value10 { get; set; }
+    public string Value11 { get; set; }
+    public string Value12 { get; set; }
+
+    public string this[int index] => index switch
+    {
+        1 => Value1,
+        2 => Value2,
+        3 => Value3,
+        4 => Value4,
+        5 => Value5,
+        6 => Value6,
+        7 => Value7,
+        8 => Value8,
+        9 => Value9,
+        10 => Value10,
+        11 => Value11,
+        12 => Value12,
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public int Count => 12;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        if (value is string v)
+        {
+            return TrySetValue(index, v);
+        }
+
+        return false;
+    }
+
+    public bool TrySetValue(int index, string value)
+    {
+        switch (index)
+        {
+            case 0:
+                Value1 = value;
+                return true;
+            case 1:
+                Value2 = value;
+                return true;
+            case 2:
+                Value3 = value;
+                return true;
+            case 3:
+                Value4 = value;
+                return true;
+            case 4:
+                Value5 = value;
+                return true;
+            case 5:
+                Value6 = value;
+                return true;
+            case 6:
+                Value7 = value;
+                return true;
+            case 7:
+                Value8 = value;
+                return true;
+            case 8:
+                Value9 = value;
+                return true;
+            case 9:
+                Value10 = value;
+                return true;
+            case 10:
+                Value11 = value;
+                return true;
+            case 11:
+                Value12 = value;
+                return true;
+            default:
+                return false;
+        }
+    }
 }
 
 public readonly struct ObjectListRequestValues : IRequestValues
 {
-    private readonly IReadOnlyList<object> _values;
+    private readonly IList<object> _values;
 
-    public ObjectListRequestValues(IReadOnlyList<object> values)
-    {
-        _values = values;
-    }
+    public ObjectListRequestValues(IReadOnlyList<object> values) =>
+        _values = values as IList<object> ?? values.ToList();
 
     public string this[int index] => RequestValues.ToStringValue(_values[index]);
     public int Count => _values.Count;
+
+    public bool TrySetValue<T>(int index, T value)
+    {
+        if (index < 0 || index >= Count)
+        {
+            return false;
+        }
+
+        _values[index] = value;
+        return true;
+    }
 }
