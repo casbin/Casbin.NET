@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Model;
@@ -1016,7 +1018,14 @@ public class EnforcerTest
         FileAdapter a = new("examples/basic_policy.csv");
         e.SetAdapter(a);
         e.LoadPolicy();
+        TestEnforce(e, "alice", "data1", "read", true);
+        e.ClearPolicy();
+        e.ClearCache();
 
+        var policyBytes = Encoding.UTF8.GetBytes(File.ReadAllText(TestModelFixture.GetTestFile("basic_policy.csv")));
+        StreamAdapter b = new(new MemoryStream(policyBytes, false), new MemoryStream(policyBytes, true));
+        e.SetAdapter(b);
+        e.LoadPolicy();
         TestEnforce(e, "alice", "data1", "read", true);
     }
 
@@ -1030,7 +1039,14 @@ public class EnforcerTest
         FileAdapter a = new("examples/basic_policy_for_async_adapter_test.csv");
         e.SetAdapter(a);
         await e.LoadPolicyAsync();
+        await TestEnforceAsync(e, "alice", "data1", "read", true);
+        e.ClearPolicy();
+        e.ClearCache();
 
+        var policyBytes = Encoding.UTF8.GetBytes(File.ReadAllText(TestModelFixture.GetTestFile("basic_policy.csv")));
+        StreamAdapter b = new(new MemoryStream(policyBytes, false), new MemoryStream(policyBytes, true));
+        e.SetAdapter(b);
+        await e.LoadPolicyAsync();
         await TestEnforceAsync(e, "alice", "data1", "read", true);
     }
 
