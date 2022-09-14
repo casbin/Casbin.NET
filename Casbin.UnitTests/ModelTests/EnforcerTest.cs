@@ -995,6 +995,10 @@ public class EnforcerTest
         e.SetAdapter(a);
         e.LoadPolicy();
 
+        StreamAdapter b = new("examples/basic_policy.csv");
+        e.SetAdapter(b);
+        e.LoadPolicy();
+
         TestEnforce(e, "alice", "data1", "read", true);
     }
 
@@ -1007,6 +1011,10 @@ public class EnforcerTest
 
         FileAdapter a = new("examples/basic_policy_for_async_adapter_test.csv");
         e.SetAdapter(a);
+        await e.LoadPolicyAsync();
+
+        StreamAdapter b = new("examples/basic_policy_for_async_adapter_test.csv");
+        e.SetAdapter(b);
         await e.LoadPolicyAsync();
 
         await TestEnforceAsync(e, "alice", "data1", "read", true);
