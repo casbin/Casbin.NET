@@ -7,6 +7,7 @@ namespace Casbin.Util
     internal static class StringUtil
     {
         private static readonly Regex s_evalRegex = new(@"\beval\((?<rule>[^)]*)\)");
+        private static readonly Regex s_inOperatorRegex = new(@"([a-zA-Z0-9_.()""]+) in ([a-zA-Z0-9_.()""]+)");
 
         /// <summary>
         /// Removes the comments starting with # in the text.
@@ -87,6 +88,26 @@ namespace Casbin.Util
                 }
                 return rule;
             });
+        }
+
+        /// <summary>
+        /// Replace in operator with function "Contains".
+        /// </summary>
+        /// <param name="expressString"></param>
+        /// <returns></returns>
+        internal static string ReplaceInOperator(string expressString)
+        {
+            var res = s_inOperatorRegex.Replace(expressString, match =>
+            {
+                GroupCollection matchGroups = match.Groups;
+                int subMatchCount = matchGroups.Count - 1;
+                if(subMatchCount == 2)
+                {
+                    return matchGroups[2].Value + ".Contains(" + matchGroups[1].Value + ")";
+                }
+                return matchGroups[0].Value;
+            });
+            return res;
         }
     }
 }
