@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using Casbin.Caching;
 using Casbin.Config;
+using Casbin.Effect;
 using Casbin.Evaluation;
 using Casbin.Model.Holder;
 using Casbin.Rbac;
@@ -18,6 +19,8 @@ namespace Casbin.Model
         public ISections Sections { get; }
         public PolicyStoreHolder PolicyStoreHolder { get; } = new();
         public AdapterHolder AdapterHolder { get; } = new();
+        public EffectorHolder EffectorHolder { get; } = new();
+        public WatcherHolder WatcherHolder { get; } = new();
         public IEnforceViewCache EnforceViewCache { get; set; } = new EnforceViewCache();
         public IEnforceCache EnforceCache { get; set; } = new EnforceCache(new EnforceCacheOptions());
         public IExpressionHandler ExpressionHandler { get; set; } = new ExpressionHandler();
@@ -65,7 +68,8 @@ namespace Casbin.Model
         {
             DefaultModel model = new(new DefaultSections())
             {
-                PolicyStoreHolder = { PolicyStore = new DefaultPolicyStore() }
+                PolicyStoreHolder = { PolicyStore = new DefaultPolicyStore() },
+                EffectorHolder = { Effector = new DefaultEffector() }
             };
             return model;
         }

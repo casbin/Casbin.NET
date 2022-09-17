@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Model;
+using Casbin.Persist;
 #if !NET452
-using Microsoft.Extensions.Logging;
 #endif
 
 namespace Casbin
 {
-    internal static class InternalEnforcerExtension
+    internal static partial class InternalEnforcerExtension
     {
         internal static IEnumerable<IPolicyValues> InternalGetPolicy(this IEnforcer enforcer, string section,
             string policyType) =>
@@ -53,7 +54,7 @@ namespace Casbin
                 return false;
             }
 
-            OnPolicyChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, values);
+            OnPolicyChanged(enforcer, PolicyChangedMessage.CreateAddPolicy(section, policyType, values));
             return true;
         }
 
@@ -81,7 +82,7 @@ namespace Casbin
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, values);
+            await OnPolicyAsyncChanged(enforcer, PolicyChangedMessage.CreateAddPolicy(section, policyType, values));
             return true;
         }
 
@@ -109,7 +110,7 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, valuesList);
+            OnPolicyChanged(enforcer, PolicyChangedMessage.CreateAddPolicies(section, policyType, valuesList));
             return true;
         }
 
@@ -138,7 +139,8 @@ namespace Casbin
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyAdd, section, policyType, valuesList);
+            await OnPolicyAsyncChanged(enforcer,
+                PolicyChangedMessage.CreateAddPolicies(section, policyType, valuesList));
             return true;
         }
 
@@ -167,7 +169,8 @@ namespace Casbin
                 return false;
             }
 
-            OnPolicyChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValues, newValues);
+            OnPolicyChanged(enforcer,
+                PolicyChangedMessage.CreateUpdatePolicy(section, policyType, oldValues, newValues));
             return true;
         }
 
@@ -196,8 +199,8 @@ namespace Casbin
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValues,
-                newValues);
+            await OnPolicyAsyncChanged(enforcer,
+                PolicyChangedMessage.CreateUpdatePolicy(section, policyType, oldValues, newValues));
             return true;
         }
 
@@ -226,8 +229,8 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValuesList,
-                newValuesList);
+            OnPolicyChanged(enforcer,
+                PolicyChangedMessage.CreateUpdatePolicies(section, policyType, oldValuesList, newValuesList));
             return true;
         }
 
@@ -256,8 +259,8 @@ namespace Casbin
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyUpdate, section, policyType, oldValuesList,
-                newValuesList);
+            await OnPolicyAsyncChanged(enforcer,
+                PolicyChangedMessage.CreateUpdatePolicies(section, policyType, oldValuesList, newValuesList));
             return true;
         }
 
@@ -285,7 +288,7 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, new[] { values });
+            OnPolicyChanged(enforcer, PolicyChangedMessage.CreateRemovePolicy(section, policyType, values));
             return true;
         }
 
@@ -313,7 +316,7 @@ namespace Casbin
                 return false;
             }
 
-            await OnPolicyAsyncChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, rule);
+            await OnPolicyAsyncChanged(enforcer, PolicyChangedMessage.CreateRemovePolicy(section, policyType, rule));
             return true;
         }
 
@@ -341,7 +344,7 @@ namespace Casbin
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, rules);
+            OnPolicyChanged(enforcer, PolicyChangedMessage.CreateRemovePolicies(section, policyType, rules));
             return true;
         }
 
@@ -369,7 +372,8 @@ namespace Casbin
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, rules);
+            await OnPolicyAsyncChanged(enforcer,
+                PolicyChangedMessage.CreateRemovePolicies(section, policyType, rules));
             return true;
         }
 
@@ -386,14 +390,17 @@ namespace Casbin
             int fieldIndex, IPolicyValues fieldValues)
         {
             IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
-            IEnumerable<IPolicyValues> effectPolices = policyManager.RemoveFilteredPolicy(fieldIndex, fieldValues);
+            IEnumerable<IPolicyValues> effectPolicies = policyManager.RemoveFilteredPolicy(fieldIndex, fieldValues);
 
-            if (effectPolices is null)
+            if (effectPolicies is null)
             {
                 return false;
             }
 
-            OnPoliciesChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, effectPolices);
+            IReadOnlyList<IPolicyValues> rules = effectPolicies as IReadOnlyList<IPolicyValues> ??
+                                                 effectPolicies.ToList();
+            OnPolicyChanged(enforcer,
+                PolicyChangedMessage.CreateRemoveFilteredPolicy(section, policyType, fieldIndex, rules));
             return true;
         }
 
@@ -418,129 +425,11 @@ namespace Casbin
                 return false;
             }
 
-            await OnPoliciesAsyncChanged(enforcer, PolicyOperation.PolicyRemove, section, policyType, effectPolicies);
+            IReadOnlyList<IPolicyValues> rules = effectPolicies as IReadOnlyList<IPolicyValues> ??
+                                                 effectPolicies.ToList();
+            await OnPolicyAsyncChanged(enforcer,
+                PolicyChangedMessage.CreateRemoveFilteredPolicy(section, policyType, fieldIndex, rules));
             return true;
-        }
-
-        private static void OnPolicyChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IPolicyValues values)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, values);
-            }
-
-            NotifyPolicyChanged(enforcer);
-        }
-
-        private static void OnPolicyChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IPolicyValues oldRule, IPolicyValues newRule)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, oldRule, newRule);
-            }
-
-            NotifyPolicyChanged(enforcer);
-        }
-
-        private static async Task OnPolicyAsyncChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IPolicyValues rule)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, rule);
-            }
-
-            await NotifyPolicyChangedAsync(enforcer);
-        }
-
-        private static async Task OnPolicyAsyncChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IPolicyValues oldRule, IPolicyValues newRule)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLink(policyOperation, section, policyType, oldRule, newRule);
-            }
-
-            await NotifyPolicyChangedAsync(enforcer);
-        }
-
-        private static void OnPoliciesChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IPolicyValues> rules)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
-            }
-
-            NotifyPolicyChanged(enforcer);
-        }
-
-        private static void OnPoliciesChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IPolicyValues> oldRules, IEnumerable<IPolicyValues> newRules)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLinks(policyOperation, section, policyType, oldRules, newRules);
-            }
-
-            NotifyPolicyChanged(enforcer);
-        }
-
-        private static async Task OnPoliciesAsyncChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IPolicyValues> rules)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLinks(policyOperation, section, policyType, rules);
-            }
-
-            await NotifyPolicyChangedAsync(enforcer);
-        }
-
-        private static async Task OnPoliciesAsyncChanged(IEnforcer enforcer, PolicyOperation policyOperation,
-            string section, string policyType, IEnumerable<IPolicyValues> oldRules,
-            IEnumerable<IPolicyValues> newRules)
-        {
-            if (section.Equals(PermConstants.Section.RoleSection))
-            {
-                enforcer.Model.BuildIncrementalRoleLinks(policyOperation, section, policyType, oldRules, newRules);
-            }
-
-            await NotifyPolicyChangedAsync(enforcer);
-        }
-
-        private static void NotifyPolicyChanged(IEnforcer enforcer)
-        {
-            if (enforcer.AutoCleanEnforceCache)
-            {
-                enforcer.EnforceCache?.Clear();
-#if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
-#endif
-            }
-
-            if (enforcer.AutoNotifyWatcher)
-            {
-                enforcer.Watcher?.Update();
-            }
-        }
-
-        private static async Task NotifyPolicyChangedAsync(IEnforcer enforcer)
-        {
-            if (enforcer.AutoCleanEnforceCache && enforcer.EnforceCache is not null)
-            {
-                await enforcer.EnforceCache.ClearAsync();
-#if !NET452
-                enforcer.Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache");
-#endif
-            }
-
-            if (enforcer.AutoNotifyWatcher && enforcer.Watcher is not null)
-            {
-                await enforcer.Watcher.UpdateAsync();
-            }
         }
     }
 }

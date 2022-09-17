@@ -1,16 +1,6 @@
-﻿using System;
-using System.Threading.Tasks;
-
-namespace Casbin.Persist
+﻿namespace Casbin.Persist
 {
-    public interface IWatcher
+    public interface IWatcher : IReadOnlyWatcher, IFullWatcher, IIncrementalWatcher
     {
-        void SetUpdateCallback(Action callback);
-
-        void SetUpdateCallback(Func<Task> callback);
-
-        void Update();
-
-        Task UpdateAsync();
     }
 }

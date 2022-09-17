@@ -19,7 +19,7 @@ public class RoleAssertion : PolicyAssertion
 
         foreach (IPolicyValues policy in PolicyManager.GetPolicy())
         {
-            BuildRoleLink(count, PolicyOperation.PolicyAdd, policy);
+            BuildRoleLink(count, PolicyOperation.AddPolicy, policy);
         }
     }
 
@@ -104,7 +104,8 @@ public class RoleAssertion : PolicyAssertion
 
         switch (policyOperation)
         {
-            case PolicyOperation.PolicyAdd:
+            case PolicyOperation.AddPolicy:
+            case PolicyOperation.AddPolicies:
                 switch (groupPolicyCount)
                 {
                     case 2:
@@ -118,7 +119,8 @@ public class RoleAssertion : PolicyAssertion
                 }
 
                 break;
-            case PolicyOperation.PolicyUpdate:
+            case PolicyOperation.UpdatePolicy:
+            case PolicyOperation.UpdatePolicies:
                 if (newRule == null)
                 {
                     throw new InvalidOperationException("Grouping policy elements do not meet role definition.");
@@ -151,7 +153,9 @@ public class RoleAssertion : PolicyAssertion
                 }
 
                 break;
-            case PolicyOperation.PolicyRemove:
+            case PolicyOperation.RemovePolicy:
+            case PolicyOperation.RemovePolicies:
+            case PolicyOperation.RemoveFilteredPolicy:
                 switch (groupPolicyCount)
                 {
                     case 2:

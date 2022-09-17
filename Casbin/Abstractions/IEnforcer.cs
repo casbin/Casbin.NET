@@ -12,6 +12,7 @@ namespace Casbin
 {
 #if !NET452
     using BatchEnforceAsyncResults = IAsyncEnumerable<bool>;
+
 #else
     using BatchEnforceAsyncResults = Task<IEnumerable<bool>>;
 #endif
@@ -21,29 +22,6 @@ namespace Casbin
     /// </summary>
     public interface IEnforcer
     {
-        #region Options
-
-        public bool Enabled { get; set; }
-        public bool EnabledCache { get; set; }
-        public bool AutoBuildRoleLinks { get; set; }
-        public bool AutoNotifyWatcher { get; set; }
-        public bool AutoCleanEnforceCache { get; set; }
-
-        #endregion
-
-        #region Extensions
-
-        public IEffector Effector { get; set; }
-        public IModel Model { get; set; }
-        public IReadOnlyAdapter Adapter { get; set; }
-        public IWatcher Watcher { get; set; }
-        public IEnforceCache EnforceCache { get; set; }
-#if !NET452
-        public ILogger Logger { get; set; }
-#endif
-
-        #endregion
-
         /// <summary>
         ///     Decides whether a "subject" can access a "object" with the operation
         ///     "action", input parameters are usually: (sub, obj, act).
@@ -95,5 +73,28 @@ namespace Casbin
         public BatchEnforceAsyncResults BatchEnforceAsync<TRequest>(EnforceContext context,
             IEnumerable<TRequest> requestValues)
             where TRequest : IRequestValues;
+
+        #region Options
+
+        public bool Enabled { get; set; }
+        public bool EnabledCache { get; set; }
+        public bool AutoBuildRoleLinks { get; set; }
+        public bool AutoNotifyWatcher { get; set; }
+        public bool AutoCleanEnforceCache { get; set; }
+
+        #endregion
+
+        #region Extensions
+
+        public IEffector Effector { get; set; }
+        public IModel Model { get; set; }
+        public IReadOnlyAdapter Adapter { get; set; }
+        public IReadOnlyWatcher Watcher { get; set; }
+        public IEnforceCache EnforceCache { get; set; }
+#if !NET452
+        public ILogger Logger { get; set; }
+#endif
+
+        #endregion
     }
 }
