@@ -42,7 +42,7 @@ namespace Casbin
         /// <param name="enable"></param>
         public static IEnforcer EnableEnforce(this IEnforcer enforcer, bool enable)
         {
-            enforcer.Enabled = enable;
+            enforcer.Options.Enabled = enable;
             return enforcer;
         }
 
@@ -66,7 +66,7 @@ namespace Casbin
         /// <param name="autoBuildRoleLinks">Whether to automatically build the role links.</param>
         public static IEnforcer EnableAutoBuildRoleLinks(this IEnforcer enforcer, bool autoBuildRoleLinks)
         {
-            enforcer.AutoBuildRoleLinks = autoBuildRoleLinks;
+            enforcer.Options.AutoBuildRoleLinks = autoBuildRoleLinks;
             return enforcer;
         }
 
@@ -78,19 +78,19 @@ namespace Casbin
         /// <param name="autoNotifyWatcher">Whether to automatically notify watcher.</param>
         public static IEnforcer EnableAutoNotifyWatcher(this IEnforcer enforcer, bool autoNotifyWatcher)
         {
-            enforcer.AutoNotifyWatcher = autoNotifyWatcher;
+            enforcer.Options.AutoNotifyWatcher = autoNotifyWatcher;
             return enforcer;
         }
 
         public static IEnforcer EnableCache(this IEnforcer enforcer, bool enableCache)
         {
-            enforcer.EnabledCache = enableCache;
+            enforcer.Options.EnabledCache = enableCache;
             return enforcer;
         }
 
         public static IEnforcer EnableAutoCleanEnforceCache(this IEnforcer enforcer, bool autoCleanEnforceCache)
         {
-            enforcer.AutoCleanEnforceCache = autoCleanEnforceCache;
+            enforcer.Options.AutoCleanEnforceCache = autoCleanEnforceCache;
             return enforcer;
         }
 
@@ -186,7 +186,7 @@ namespace Casbin
 
             enforcer.ClearCache();
             enforcer.Model.SortPolicy();
-            if (enforcer.AutoBuildRoleLinks)
+            if (enforcer.Options.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
@@ -207,7 +207,7 @@ namespace Casbin
 
             enforcer.ClearCache();
             enforcer.Model.SortPolicy();
-            if (enforcer.AutoBuildRoleLinks)
+            if (enforcer.Options.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
@@ -229,7 +229,7 @@ namespace Casbin
                 return false;
             }
 
-            if (enforcer.AutoBuildRoleLinks)
+            if (enforcer.Options.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
@@ -251,7 +251,7 @@ namespace Casbin
                 return false;
             }
 
-            if (enforcer.AutoBuildRoleLinks)
+            if (enforcer.Options.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }
@@ -336,7 +336,7 @@ namespace Casbin
         public static void SetRoleManager(this IEnforcer enforcer, string roleType, IRoleManager roleManager)
         {
             enforcer.Model.SetRoleManager(roleType, roleManager);
-            if (enforcer.AutoBuildRoleLinks)
+            if (enforcer.Options.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
             }

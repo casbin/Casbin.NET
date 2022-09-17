@@ -71,7 +71,7 @@ namespace Casbin
 
         internal static void TryCleanEnforceCache(this IEnforcer enforcer)
         {
-            if (enforcer.AutoCleanEnforceCache)
+            if (enforcer.Options.AutoCleanEnforceCache)
             {
                 enforcer.ClearCache();
             }
@@ -80,7 +80,7 @@ namespace Casbin
         internal static void TryNotifyPolicyChanged(this IEnforcer enforcer, PolicyChangedMessage message)
         {
             // ReSharper disable once InvertIf
-            if (enforcer.AutoNotifyWatcher && enforcer.Watcher is not null)
+            if (enforcer.Options.AutoNotifyWatcher && enforcer.Watcher is not null)
             {
                 WatcherHolder holder = enforcer.Model.WatcherHolder;
                 if (holder.WatcherEx is not null)
@@ -105,7 +105,7 @@ namespace Casbin
 
         internal static async Task TryNotifyPolicyChangedAsync(this IEnforcer enforcer, PolicyChangedMessage message)
         {
-            if (enforcer.AutoNotifyWatcher && enforcer.Watcher is not null)
+            if (enforcer.Options.AutoNotifyWatcher && enforcer.Watcher is not null)
             {
                 WatcherHolder holder = enforcer.Model.WatcherHolder;
                 if (holder.WatcherEx is not null)

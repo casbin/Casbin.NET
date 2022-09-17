@@ -61,7 +61,7 @@ public class EnforcerTest
     }
 
     [Fact]
-    public void TestEnforceWithLazyLoadPolicy()
+    public void TestEnforceWithoutAutoLoadPolicy()
     {
         IModel m = DefaultModel.Create();
         m.AddDef("r", "r", "sub, obj, act");
@@ -71,7 +71,7 @@ public class EnforcerTest
 
         FileAdapter a = new("examples/keymatch_policy.csv");
 
-        IEnforcer e = DefaultEnforcer.Create(m, a, true);
+        IEnforcer e = DefaultEnforcer.Create(m, a, options => { options.AutoLoadPolicy = false; });
         Assert.Empty(e.GetPolicy());
 
         e = DefaultEnforcer.Create(m, a);
