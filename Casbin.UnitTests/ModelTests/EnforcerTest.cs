@@ -249,6 +249,28 @@ public class EnforcerTest
     }
 
     [Fact]
+    public void TestInOperator()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            _testModelFixture._rbacInOperatorModelText,
+            _testModelFixture._rbacInOperatorPolicyText));
+
+        TestEnforce(e, new
+        {
+            Name = "Alice",
+            Amount = 5100,
+            Roles = new string[] { "Manager", "DepartmentDirector" }
+        }, "authorization", "grant", true);
+
+        TestEnforce(e, new
+        {
+            Name = "Alice",
+            Amount = 5100,
+            Roles = new string[] { "DepartmentDirector" }
+        }, "authorization", "grant", false);
+    }
+
+    [Fact]
     public void TestRbacModelInMemoryIndeterminate()
     {
         IModel m = DefaultModel.Create();

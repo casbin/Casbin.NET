@@ -152,7 +152,7 @@ public partial class Enforcer
 
     private static void HandleBeforeExpression<TRequest, TPolicy, TChain>(
         in EnforceContext context, ref EnforceSession session,
-        in TRequest request, in TPolicy policy, ref TChain effectChain)
+        in TRequest request, scoped in TPolicy policy, scoped ref TChain effectChain)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
         where TChain : IEffectChain
@@ -204,12 +204,13 @@ public partial class Enforcer
 
         session.ExpressionString = context.View.Matcher;
         session.ExpressionString = RewriteEval(in context, session.ExpressionString, policy);
+        session.ExpressionString = RewriteInOperator(in context, session.ExpressionString);
         session.ExpressionString = EnforceView.TransformMatcher(context.View, session.ExpressionString);
     }
 
     private static void HandleExpressionResult<TRequest, TPolicy>(
         in EnforceContext context, ref EnforceSession session,
-        in TRequest request, in TPolicy policy, IEffector effector)
+        in TRequest request, scoped in TPolicy policy, IEffector effector)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
     {
@@ -257,7 +258,7 @@ public partial class Enforcer
 
     private static void HandleExpressionResult<TRequest, TPolicy, TChain>(
         in EnforceContext context, ref EnforceSession session,
-        in TRequest request, in TPolicy policy, ref TChain effectChain)
+        in TRequest request, scoped in TPolicy policy, scoped ref TChain effectChain)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
         where TChain : IEffectChain
@@ -321,6 +322,16 @@ public partial class Enforcer
         }
 
         expressionString = StringUtil.ReplaceEval(expressionString, rules);
+        return expressionString;
+    }
+
+    private static string RewriteInOperator(in EnforceContext context, string expressionString)
+    {
+        if (context.View.Matcher is null)
+        {
+            return expressionString;
+        }
+        expressionString = StringUtil.ReplaceInOperator(expressionString);
         return expressionString;
     }
 }
