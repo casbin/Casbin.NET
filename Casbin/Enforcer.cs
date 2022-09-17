@@ -17,17 +17,17 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath, bool lazyLoadPolicy = false)
-            : this(modelPath, new FileAdapter(policyPath), lazyLoadPolicy)
+        public Enforcer(string modelPath, string policyPath, bool autoLoadPolicy = true, Filter filter = null)
+            : this(modelPath, new FileAdapter(policyPath), autoLoadPolicy, filter)
         {
         }
 
-        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null, bool lazyLoadPolicy = false)
-            : this(DefaultModel.CreateFromFile(modelPath), adapter, lazyLoadPolicy)
+        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null, bool autoLoadPolicy = true, Filter filter = null)
+            : this(DefaultModel.CreateFromFile(modelPath), adapter, autoLoadPolicy, filter)
         {
         }
 
-        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, bool lazyLoadPolicy = false)
+        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, bool autoLoadPolicy = true, Filter filter = null)
         {
             this.SetModel(model);
             if (adapter is not null)
@@ -35,9 +35,16 @@ namespace Casbin
                 this.SetAdapter(adapter);
             }
 
-            if (lazyLoadPolicy is false)
+            if (autoLoadPolicy is true)
             {
-                this.LoadPolicy();
+                if(Adapter is IFilteredAdapter && filter is not null)
+                {
+                    this.LoadFilteredPolicy(filter);
+                }
+                else
+                {
+                    this.LoadPolicy();
+                }
             }
 
             model.SortPolicy();
