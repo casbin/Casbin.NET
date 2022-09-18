@@ -13,6 +13,8 @@ namespace Casbin.Util
         private static readonly Regex s_keyMatch2Regex = new(@":[^/]+");
         private static readonly Regex s_keyMatch3Regex = new(@"\{[^/]+\}");
         private static readonly Regex s_keyMatch4Regex = new(@"\{([^/]+)\}");
+        private static readonly Regex s_keyGet2Regex = new(@":[^/]+");
+        private static readonly Regex s_keyGet3Regex = new(@"\{[^/]+?\}");
         private delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
@@ -49,12 +51,11 @@ namespace Casbin.Util
         public static string KeyGet2(string key1, string key2, string pathVar)
         {
             var replacedKey2 = key2.Replace("/*", "/.*");
-            var regex1 = new Regex(@":[^/]+");
-            var keys = regex1.Matches(replacedKey2);
-            replacedKey2 = regex1.Replace(replacedKey2, @"([^/]+)");
+            var keys = s_keyGet2Regex.Matches(replacedKey2);
+            replacedKey2 = s_keyGet2Regex.Replace(replacedKey2, @"([^/]+)");
             replacedKey2 = "^" + replacedKey2 + "$";
-            var regex2 = new Regex(replacedKey2);
-            var values = regex2.Matches(key1);
+            var regex = new Regex(replacedKey2);
+            var values = regex.Matches(key1);
             if(values.Count == 0)
             {
                 return "";
@@ -65,6 +66,38 @@ namespace Casbin.Util
                 if(keys[i].Value.AsSpan(1).SequenceEqual(pathVarSpan))
                 {
                     return values[0].Groups[i+1].Value;
+                }
+            }
+            return "";
+        }
+
+        /// <summary>
+        /// KeyGet3 returns value matched pattern
+        /// For example, "project/proj_project1_admin/" matches "project/proj_{project}_admin/"
+        /// if the pathVar == "project", then "project1" will be returned
+        /// </summary>
+        /// <param name="key1">The first argument.</param>
+        /// <param name="key2">The second argument.</param>
+        /// /// <param name="pathVar">The path variable.</param>
+        /// <returns>Whether key1 matches key2.</returns>
+        public static string KeyGet3(string key1, string key2, string pathVar)
+        {
+            var replacedKey2 = key2.Replace("/*", "/.*");
+            var keys = s_keyGet3Regex.Matches(replacedKey2);
+            replacedKey2 = s_keyGet3Regex.Replace(replacedKey2, @"([^/]+?)");
+            replacedKey2 = "^" + replacedKey2 + "$";
+            var regex = new Regex(replacedKey2);
+            var values = regex.Matches(key1);
+            if (values.Count == 0)
+            {
+                return "";
+            }
+            var pathVarSpan = pathVar.AsSpan();
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (keys[i].Value.AsSpan(1, keys[i].Value.Length - 2).SequenceEqual(pathVarSpan))
+                {
+                    return values[0].Groups[i + 1].Value;
                 }
             }
             return "";
