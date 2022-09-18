@@ -71,7 +71,7 @@ public interface IWatcherEx : IWatcher
     /// <summary>
     ///     UpdateForSavePolicy calls the update callback of other instances to synchronize their policy.
     ///     It is called after Enforcer.RemoveFilteredNamedGroupingPolicy()
-    /// </summary
+    /// </summary>
     void UpdateForSavePolicy();
 
     /// <summary>

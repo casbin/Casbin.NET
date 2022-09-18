@@ -16,7 +16,7 @@ public class EffectorHolder
         }
     }
 
-    public IChainEffector ChainEffector { get; private set; }
+    internal IChainEffector ChainEffector { get; private set; }
 
     private void DetermineEffector(IEffector effector) => ChainEffector = effector as IChainEffector;
 }

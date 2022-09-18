@@ -70,8 +70,8 @@ public partial class Enforcer
         IExpressionHandler expressionHandler = Model.ExpressionHandler;
         PolicyScanner<TRequest> scanner = context.View.PolicyAssertion.Scan(in requestValues);
 
-        EffectChain effectChain = default;
-        if (Effector is IChainEffector<EffectChain> effector)
+        EffectChain effectChain = new();
+        if (Effector is IChainEffector effector)
         {
             session.IsChainEffector = true;
             effectChain = effector.CreateChain(context.View.Effect, context.View.EffectExpressionType);
@@ -88,18 +88,17 @@ public partial class Enforcer
                 TPolicy policyValues = (TPolicy)outValues;
                 session.PolicyIndex = policyIndex;
 
-                HandleBeforeExpression(in context, ref session, in requestValues, in policyValues, ref effectChain);
+                HandleBeforeExpression(in context, ref session, in effectChain, in requestValues, policyValues);
                 session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
                     in requestValues, in policyValues);
 
                 if (session.IsChainEffector)
                 {
-                    HandleExpressionResult(in context, ref session, in requestValues, in policyValues,
-                        ref effectChain);
+                    HandleExpressionResult(in context, ref session, ref effectChain, in requestValues, policyValues);
                 }
                 else
                 {
-                    HandleExpressionResult(in context, ref session, in requestValues, in policyValues, Effector);
+                    HandleExpressionResult(in context, ref session, Effector, in requestValues, policyValues);
                 }
 
                 if (session.Determined)
@@ -114,17 +113,17 @@ public partial class Enforcer
         else
         {
             StringPolicyValues policyValues = StringPolicyValues.Empty;
-            HandleBeforeExpression(in context, ref session, in requestValues, in policyValues, ref effectChain);
+            HandleBeforeExpression(in context, ref session, in effectChain, in requestValues, policyValues);
             session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
                 in requestValues, in policyValues);
 
             if (session.IsChainEffector)
             {
-                HandleExpressionResult(in context, ref session, in requestValues, in policyValues, ref effectChain);
+                HandleExpressionResult(in context, ref session, ref effectChain, in requestValues, policyValues);
             }
             else
             {
-                HandleExpressionResult(in context, ref session, in requestValues, in policyValues, Effector);
+                HandleExpressionResult(in context, ref session, Effector, in requestValues, policyValues);
             }
         }
 
@@ -150,12 +149,11 @@ public partial class Enforcer
         }
     }
 
-    private static void HandleBeforeExpression<TRequest, TPolicy, TChain>(
-        in EnforceContext context, ref EnforceSession session,
-        in TRequest request, scoped in TPolicy policy, scoped ref TChain effectChain)
+    private static void HandleBeforeExpression<TRequest, TPolicy>(
+        in EnforceContext context, ref EnforceSession session, in EffectChain effectChain,
+        in TRequest request, scoped in TPolicy policy)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
-        where TChain : IEffectChain
     {
         int policyTokenCount = context.View.PolicyAssertion.Tokens.Count;
 
@@ -209,8 +207,8 @@ public partial class Enforcer
     }
 
     private static void HandleExpressionResult<TRequest, TPolicy>(
-        in EnforceContext context, ref EnforceSession session,
-        in TRequest request, scoped in TPolicy policy, IEffector effector)
+        in EnforceContext context, ref EnforceSession session, IEffector effector,
+        in TRequest request, scoped in TPolicy policy)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
     {
@@ -256,12 +254,11 @@ public partial class Enforcer
         session.EnforceResult = false;
     }
 
-    private static void HandleExpressionResult<TRequest, TPolicy, TChain>(
-        in EnforceContext context, ref EnforceSession session,
-        in TRequest request, scoped in TPolicy policy, scoped ref TChain effectChain)
+    private static void HandleExpressionResult<TRequest, TPolicy>(
+        in EnforceContext context, ref EnforceSession session, ref EffectChain effectChain,
+        in TRequest request, scoped in TPolicy policy)
         where TRequest : IRequestValues
         where TPolicy : IPolicyValues
-        where TChain : IEffectChain
     {
         PolicyEffect nowEffect;
         if (session.HasNextPolicy is false)
@@ -331,6 +328,7 @@ public partial class Enforcer
         {
             return expressionString;
         }
+
         expressionString = StringUtil.ReplaceInOperator(expressionString);
         return expressionString;
     }
