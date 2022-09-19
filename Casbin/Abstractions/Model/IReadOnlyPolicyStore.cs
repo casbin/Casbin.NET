@@ -12,7 +12,11 @@ public interface IReadOnlyPolicyStore
 
     public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType);
 
-    public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section);
+    public IEnumerable<string> GetPolicyTypes(string section);
+
+    public IDictionary<string, IEnumerable<string>> GetPolicyTypesAllSections();
+
+    public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section); 
 
     public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
         IPolicyValues fieldValues);

@@ -40,6 +40,19 @@ namespace Casbin.Model
         public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType)
             => GetNode(section, policyType).GetPolicy();
 
+        public IEnumerable<string> GetPolicyTypes(string section)
+            => GetNodes(section).Select(x => x.Key);
+
+        public IDictionary<string, IEnumerable<string>> GetPolicyTypesAllSections()
+        {
+            Dictionary<string, IEnumerable<string>> res = new Dictionary<string, IEnumerable<string>>();
+            foreach (var keyValuePair in _nodesMap)
+            {
+                res.Add(keyValuePair.Key, keyValuePair.Value.Select(x => x.Key));
+            }
+            return res;
+        }
+
         public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section)
             => GetNodes(section).ToDictionary(kv =>
                 kv.Key, x => GetPolicy(section, x.Key));
