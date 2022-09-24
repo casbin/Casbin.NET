@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Concurrent;
+
 
 namespace Casbin.Caching;
 
 public class GFunctionCache : IGFunctionCache
 {
-    private readonly Dictionary<string, bool> _cache = new();
+    private readonly ConcurrentDictionary<string, bool> _cache = new();
 
     public void Set(string name1, string name2, bool result, string domain = null)
     {
