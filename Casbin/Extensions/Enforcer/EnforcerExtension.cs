@@ -271,7 +271,8 @@ namespace Casbin
                 return false;
             }
 
-            enforcer.Watcher?.Update();
+            PolicyChangedMessage message = PolicyChangedMessage.CreateSavePolicy();
+            enforcer.TryNotifyPolicyChanged(message);
             return true;
         }
 
@@ -292,11 +293,8 @@ namespace Casbin
                 return false;
             }
 
-            if (enforcer.Watcher is not null)
-            {
-                await enforcer.Watcher.UpdateAsync();
-            }
-
+            PolicyChangedMessage message = PolicyChangedMessage.CreateSavePolicy();
+            await enforcer.TryNotifyPolicyChangedAsync(message);
             return true;
         }
 

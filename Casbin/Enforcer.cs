@@ -56,8 +56,18 @@ namespace Casbin
 
         #region Extensions
 
-        public IEffector Effector { get; set; } = new DefaultEffector();
-        public IWatcher Watcher { get; set; }
+        public IEffector Effector
+        {
+            get => Model.EffectorHolder.Effector;
+            set => Model.EffectorHolder.Effector = value;
+        }
+
+        public IReadOnlyWatcher Watcher
+        {
+            get => Model.WatcherHolder.Watcher;
+            set => Model.WatcherHolder.Watcher = value;
+        }
+
         public IModel Model { get; set; }
 
         public IReadOnlyAdapter Adapter
@@ -192,10 +202,11 @@ namespace Casbin
         }
 
 #if !NET452
-        public async IAsyncEnumerable<bool> BatchEnforceAsync<TRequest>(EnforceContext context, IEnumerable<TRequest> requestValues)
+        public async IAsyncEnumerable<bool> BatchEnforceAsync<TRequest>(EnforceContext context,
+            IEnumerable<TRequest> requestValues)
             where TRequest : IRequestValues
         {
-            foreach(var requestValue in requestValues)
+            foreach (var requestValue in requestValues)
             {
                 bool result = await EnforceAsync(context, requestValue);
                 yield return result;

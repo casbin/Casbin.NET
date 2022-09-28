@@ -6,16 +6,6 @@ public class AdapterHolder
 {
     private IReadOnlyAdapter _adapter;
 
-    public AdapterHolder()
-    {
-    }
-
-    public AdapterHolder(IReadOnlyAdapter adapter)
-    {
-        _adapter = adapter;
-        DetermineAdapter(adapter);
-    }
-
     public IReadOnlyAdapter Adapter
     {
         get => _adapter;

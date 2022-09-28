@@ -8,12 +8,16 @@ namespace Casbin.Model
     {
         public string Path { get; }
         public ISections Sections { get; }
+
+        public PolicyStoreHolder PolicyStoreHolder { get; }
+        public AdapterHolder AdapterHolder { get; }
+        public EffectorHolder EffectorHolder { get; }
+        public WatcherHolder WatcherHolder { get; }
+
         public IExpressionHandler ExpressionHandler { get; set; }
         public IEnforceViewCache EnforceViewCache { get; set; }
         public IEnforceCache EnforceCache { get; set; }
         public IGFunctionCachePool GFunctionCachePool { get; set; }
-        public PolicyStoreHolder PolicyStoreHolder { get; }
-        public AdapterHolder AdapterHolder { get; }
 
         public void LoadModelFromFile(string path);
         public void LoadModelFromText(string text);

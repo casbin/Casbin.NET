@@ -45,6 +45,9 @@ public class TestModelFixture
     internal readonly string _priorityPolicyText = ReadTestFile("priority_policy.csv");
     internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
 
+    internal readonly string _rbacInOperatorModelText = ReadTestFile("rbac_in_operator_model.conf");
+    internal readonly string _rbacInOperatorPolicyText = ReadTestFile("rbac_in_operator_policy.csv");
+
     // https://github.com/casbin/Casbin.NET/issues/106
     internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
     internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");

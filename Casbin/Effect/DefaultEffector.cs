@@ -7,8 +7,13 @@ namespace Casbin.Effect
     /// <summary>
     /// DefaultEffector is default effector for Casbin.
     /// </summary>
-    public class DefaultEffector : IEffector, IChainEffector<EffectChain>
+    public class DefaultEffector : IEffector, IChainEffector
     {
+        public EffectChain CreateChain(string effectExpression) => new(effectExpression);
+
+        public EffectChain CreateChain(string effectExpression, EffectExpressionType effectExpressionType) =>
+            new(effectExpression, effectExpressionType);
+
         /// <summary>
         /// Merges all matching results collected by the enforcer into a single decision.
         /// </summary>
@@ -19,10 +24,12 @@ namespace Casbin.Effect
         /// <param name="policyCount"></param>
         /// <param name="hitPolicyIndex"></param>
         /// <returns></returns>
-        public PolicyEffect MergeEffects(string effectExpression, IReadOnlyList<PolicyEffect> effects, IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
+        public PolicyEffect MergeEffects(string effectExpression, IReadOnlyList<PolicyEffect> effects,
+            IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
         {
             EffectExpressionType effectExpressionType = ParseEffectExpressionType(effectExpression);
-            bool? result = MergeEffects(effectExpressionType, effects, matches, policyIndex, policyCount, out hitPolicyIndex);
+            bool? result = MergeEffects(effectExpressionType, effects, matches, policyIndex, policyCount,
+                out hitPolicyIndex);
             return result.ToPolicyEffect();
         }
 
@@ -36,7 +43,8 @@ namespace Casbin.Effect
         /// <param name="hitPolicyIndex"></param>
         /// <param name="policyIndex"></param>
         /// <returns></returns>
-        private static bool? MergeEffects(EffectExpressionType effectExpressionType, IReadOnlyList<PolicyEffect> effects,
+        private static bool? MergeEffects(EffectExpressionType effectExpressionType,
+            IReadOnlyList<PolicyEffect> effects,
             IReadOnlyList<float> matches, int policyIndex, int policyCount, out int hitPolicyIndex)
         {
             hitPolicyIndex = -1;
@@ -45,13 +53,14 @@ namespace Casbin.Effect
 
             for (int index = 0; index < effectCount; index++)
             {
-                if (EffectEvaluator.TryEvaluate(effects[index] , effectExpressionType,
-                    ref finalResult, out bool hitPolicy))
+                if (EffectEvaluator.TryEvaluate(effects[index], effectExpressionType,
+                        ref finalResult, out bool hitPolicy))
                 {
                     if (hitPolicy)
                     {
                         hitPolicyIndex = index;
                     }
+
                     return finalResult;
                 }
             }
@@ -60,6 +69,7 @@ namespace Casbin.Effect
             {
                 return finalResult;
             }
+
             return null;
         }
 
@@ -69,13 +79,9 @@ namespace Casbin.Effect
             PermConstants.PolicyEffect.DenyOverride => EffectExpressionType.DenyOverride,
             PermConstants.PolicyEffect.AllowAndDeny => EffectExpressionType.AllowAndDeny,
             PermConstants.PolicyEffect.Priority => EffectExpressionType.Priority,
-            PermConstants.PolicyEffect.SubjectPriority => EffectExpressionType.PriorityAllOverride, 
+            PermConstants.PolicyEffect.SubjectPriority => EffectExpressionType.PriorityAllOverride,
             PermConstants.PolicyEffect.PriorityDenyOverride => EffectExpressionType.PriorityDenyOverride,
             _ => throw new NotSupportedException("Not supported policy effect.")
         };
-
-        public EffectChain CreateChain(string effectExpression) => new(effectExpression);
-
-        public EffectChain CreateChain(string effectExpression, EffectExpressionType effectExpressionType) => new(effectExpression, effectExpressionType);
     }
 }

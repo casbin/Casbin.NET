@@ -1,0 +1,2 @@
+﻿p, Assistant, r.sub.Amount <= 5000, authorization, grant
+p, Manager, r.sub.Amount > 5000, authorization, grant

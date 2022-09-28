@@ -3,7 +3,7 @@ using Casbin.Evaluation;
 
 namespace Casbin.Effect
 {
-    public struct EffectChain : IEffectChain
+    public ref struct EffectChain
     {
         public EffectChain(string effectExpression)
         {
@@ -51,7 +51,7 @@ namespace Casbin.Effect
             bool result = Result;
 
             if (EffectEvaluator.TryEvaluate(effect, EffectExpressionType,
-                ref result, out bool hitPolicy))
+                    ref result, out bool hitPolicy))
             {
                 CanChain = false;
                 Result = result;
@@ -73,7 +73,7 @@ namespace Casbin.Effect
 
             bool result = Result;
             if (EffectEvaluator.TryEvaluate(effect, EffectExpressionType,
-                ref result, out bool hitPolicy))
+                    ref result, out bool hitPolicy))
             {
                 CanChain = false;
                 Result = result;
@@ -82,6 +82,7 @@ namespace Casbin.Effect
                 {
                     HitPolicyCount++;
                 }
+
                 return true;
             }
 
@@ -91,6 +92,7 @@ namespace Casbin.Effect
             {
                 HitPolicyCount++;
             }
+
             return true;
         }
 

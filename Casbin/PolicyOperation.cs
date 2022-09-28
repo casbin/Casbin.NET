@@ -2,8 +2,13 @@
 {
     public enum PolicyOperation
     {
-        PolicyAdd,
-        PolicyRemove,
-        PolicyUpdate
+        AddPolicy,
+        RemovePolicy,
+        UpdatePolicy,
+        SavePolicy,
+        AddPolicies,
+        RemovePolicies,
+        UpdatePolicies,
+        RemoveFilteredPolicy
     }
 }
