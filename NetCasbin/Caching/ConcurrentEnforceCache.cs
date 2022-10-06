@@ -17,7 +17,8 @@ namespace NetCasbin.Caching
         public Task<bool?> TryGetResultAsync(IReadOnlyList<object> requestValues, string key)
         {
             return TryGetResult(requestValues, key, out bool result)
-                ? Task.FromResult((bool?) result) : Task.FromResult((bool?) null);
+                ? Task.FromResult((bool?)result)
+                : Task.FromResult((bool?)null);
         }
 
         public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result)
@@ -36,7 +37,7 @@ namespace NetCasbin.Caching
             _memoryCache.Clear();
         }
 
-#if !NET45
+#if !NET452
         public Task ClearAsync()
         {
             Clear();

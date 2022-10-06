@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if !NET45
+using NetCasbin.Model;
+#if !NET452
 using Microsoft.Extensions.Logging;
 #endif
-using NetCasbin.Model;
 
 namespace NetCasbin
 {
@@ -148,7 +148,7 @@ namespace NetCasbin
             return true;
         }
 
-                
+
         /// <summary>
         /// Adds rules to the current policy.
         /// </summary>
@@ -336,7 +336,8 @@ namespace NetCasbin
         /// <param name="ptype"></param>
         /// <param name="rules"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalRemovePoliciesAsync(string sec, string ptype, IEnumerable<List<string>> rules)
+        protected async Task<bool> InternalRemovePoliciesAsync(string sec, string ptype,
+            IEnumerable<List<string>> rules)
         {
             var ruleArray = rules as List<string>[] ?? rules.ToArray();
 
@@ -383,7 +384,8 @@ namespace NetCasbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected bool InternalRemoveFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        protected bool InternalRemoveFilteredPolicy(string sec, string ptype, int fieldIndex,
+            params string[] fieldValues)
         {
             if (adapter is not null && autoSave)
             {
@@ -422,7 +424,8 @@ namespace NetCasbin
         /// <param name="fieldIndex"></param>
         /// <param name="fieldValues"></param>
         /// <returns></returns>
-        protected async Task<bool> InternalRemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        protected async Task<bool> InternalRemoveFilteredPolicyAsync(string sec, string ptype, int fieldIndex,
+            params string[] fieldValues)
         {
             if (adapter is not null && autoSave)
             {
@@ -458,7 +461,7 @@ namespace NetCasbin
             if (autoCleanEnforceCache)
             {
                 EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
@@ -474,7 +477,7 @@ namespace NetCasbin
             if (autoCleanEnforceCache && EnforceCache is not null)
             {
                 await EnforceCache.ClearAsync();
-#if !NET45
+#if !NET452
                 Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }

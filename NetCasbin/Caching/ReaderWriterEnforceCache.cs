@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using NetCasbin.Abstractions;
-#if !NET45
+#if !NET452
 using Microsoft.Extensions.Options;
 #endif
 
@@ -14,7 +14,7 @@ namespace NetCasbin.Caching
         private readonly ReaderWriterLockSlim _lockSlim = new();
         private Dictionary<string, bool> _memoryCache = new();
 
-#if !NET45
+#if !NET452
         public ReaderWriterEnforceCache(IOptions<ReaderWriterEnforceCacheOptions> options)
         {
             if (options?.Value is not null)
@@ -60,7 +60,8 @@ namespace NetCasbin.Caching
         public Task<bool?> TryGetResultAsync(IReadOnlyList<object> requestValues, string key)
         {
             return TryGetResult(requestValues, key, out bool result)
-                ? Task.FromResult((bool?) result) : Task.FromResult((bool?) null);
+                ? Task.FromResult((bool?)result)
+                : Task.FromResult((bool?)null);
         }
 
         public bool TrySetResult(IReadOnlyList<object> requestValues, string key, bool result)
@@ -96,7 +97,7 @@ namespace NetCasbin.Caching
             _memoryCache = new Dictionary<string, bool>();
         }
 
-#if !NET45
+#if !NET452
         public Task ClearAsync()
         {
             Clear();

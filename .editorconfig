@@ -177,6 +177,10 @@ indent_size = 2
 [*.{xml,stylecop,resx,ruleset}]
 indent_size = 2
 
+# Yml files
+[*.yml]
+indent_size = 2
+
 # Xml config files
 [*.{props,targets,config,nuspec}]
 indent_size = 2
@@ -184,5 +188,6 @@ indent_size = 2
 # Shell scripts
 [*.sh]
 end_of_line = lf
+
 [*.{cmd, bat}]
 end_of_line = crlf

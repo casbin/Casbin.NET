@@ -1,26 +1,23 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-#if !NET45
-using Microsoft.Extensions.Logging;
-#endif
 using NetCasbin.Rbac;
 using NetCasbin.Util;
+#if !NET452
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace NetCasbin.Model
 {
     public class Policy
     {
+        protected Policy() => Model = new Dictionary<string, Dictionary<string, Assertion>>();
+
         public Dictionary<string, Dictionary<string, Assertion>> Model { get; }
 
-#if !NET45
+#if !NET452
         internal ILogger Logger { get; set; }
 #endif
-
-        protected Policy()
-        {
-            Model = new Dictionary<string, Dictionary<string, Assertion>>();
-        }
 
         /// <summary>
         /// Provides incremental build the role inheritance relation.
@@ -125,7 +122,7 @@ namespace NetCasbin.Model
         public void RefreshPolicyStringSet()
         {
             foreach (Assertion assertion in Model.Values
-                .SelectMany(pair => pair.Values))
+                         .SelectMany(pair => pair.Values))
             {
                 assertion.RefreshPolicyStringSet();
             }
@@ -134,7 +131,7 @@ namespace NetCasbin.Model
         public void SortPoliciesByPriority()
         {
             foreach (Assertion assertion in Model.Values
-                .SelectMany(pair => pair.Values))
+                         .SelectMany(pair => pair.Values))
             {
                 assertion.TrySortPoliciesByPriority();
             }
@@ -164,7 +161,8 @@ namespace NetCasbin.Model
             return Model[sec][ptype].Policy;
         }
 
-        public List<List<string>> GetFilteredPolicy(string sec, string ptype, int fieldIndex, params string[] fieldValues)
+        public List<List<string>> GetFilteredPolicy(string sec, string ptype, int fieldIndex,
+            params string[] fieldValues)
         {
             if (fieldValues == null)
             {
@@ -234,6 +232,7 @@ namespace NetCasbin.Model
             {
                 assertion.TryAddPolicy(rule);
             }
+
             return true;
         }
 
@@ -262,6 +261,7 @@ namespace NetCasbin.Model
             {
                 assertion.TryRemovePolicy(rule);
             }
+
             return true;
         }
 
@@ -324,7 +324,8 @@ namespace NetCasbin.Model
             return GetValuesForFieldInPolicy(Model[sec], ptype, fieldIndex);
         }
 
-        private static List<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section, string ptype, int fieldIndex)
+        private static List<string> GetValuesForFieldInPolicy(IDictionary<string, Assertion> section, string ptype,
+            int fieldIndex)
         {
             var values = section[ptype].Policy
                 .Select(rule => rule[fieldIndex])
@@ -339,8 +340,10 @@ namespace NetCasbin.Model
             bool exist = TryGetExistAssertion(section, policyType, out var assertion);
             if (exist is false)
             {
-                throw new ArgumentException($"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
+                throw new ArgumentException(
+                    $"Can not find the assertion at the {nameof(section)} {section} and {nameof(policyType)} {policyType}.");
             }
+
             return assertion;
         }
 
@@ -351,16 +354,19 @@ namespace NetCasbin.Model
                 returnAssertion = default;
                 return false;
             }
+
             if (assertions.TryGetValue(policyType, out var assertion) is false)
             {
                 returnAssertion = default;
                 return false;
             }
+
             if (assertion is null)
             {
                 returnAssertion = default;
                 return false;
             }
+
             returnAssertion = assertion;
             return true;
         }

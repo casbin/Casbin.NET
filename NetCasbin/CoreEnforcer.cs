@@ -2,19 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-#if !NET45
-using Microsoft.Extensions.Logging;
-#endif
-using DynamicExpresso;
 using NetCasbin.Abstractions;
+using NetCasbin.Caching;
 using NetCasbin.Effect;
 using NetCasbin.Evaluation;
+using NetCasbin.Extensions;
 using NetCasbin.Model;
 using NetCasbin.Persist;
 using NetCasbin.Rbac;
 using NetCasbin.Util;
-using NetCasbin.Extensions;
-using NetCasbin.Caching;
+#if !NET452
+using Microsoft.Extensions.Logging;
+#endif
 
 namespace NetCasbin
 {
@@ -39,7 +38,7 @@ namespace NetCasbin
 
         private bool _enableCache;
         public IEnforceCache EnforceCache { get; private set; }
-#if !NET45
+#if !NET452
         public ILogger Logger { get; set; }
 #endif
 
@@ -58,7 +57,8 @@ namespace NetCasbin
         /// Creates a model.
         /// </summary>
         /// <returns></returns>
-        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
+        [Obsolete(
+            "The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel()
         {
             var model = new Model.Model();
@@ -70,7 +70,8 @@ namespace NetCasbin
         /// </summary>
         /// <param name="text"></param>
         /// <returns></returns>
-        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
+        [Obsolete(
+            "The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel(string text)
         {
             var model = new Model.Model();
@@ -84,7 +85,8 @@ namespace NetCasbin
         /// <param name="modelPath">The path of the model file.</param>
         /// <param name="unused">Unused parameter, just for differentiating with  NewModel(String text).</param>
         /// <returns></returns>
-        [Obsolete("The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
+        [Obsolete(
+            "The method will be moved to Model class at next mainline version, you can see https://github.com/casbin/Casbin.NET/issues/52 to know more information.")]
         public static Model.Model NewModel(string modelPath, string unused)
         {
             var model = new Model.Model();
@@ -92,6 +94,7 @@ namespace NetCasbin
             {
                 model.LoadModel(modelPath);
             }
+
             return model;
         }
 
@@ -123,7 +126,7 @@ namespace NetCasbin
             if (autoCleanEnforceCache)
             {
                 EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
@@ -157,6 +160,7 @@ namespace NetCasbin
                 watcher?.SetUpdateCallback(LoadPolicyAsync);
                 return;
             }
+
             watcher?.SetUpdateCallback(LoadPolicy);
         }
 
@@ -212,11 +216,11 @@ namespace NetCasbin
             if (autoCleanEnforceCache)
             {
                 EnforceCache?.Clear();
-#if !NET45
+#if !NET452
                 Logger?.LogInformation("Enforcer Cache, Cleared all enforce cache.");
 #endif
             }
-#if !NET45
+#if !NET452
             Logger?.LogInformation("Policy Management, Cleared all policy.");
 #endif
         }
@@ -287,6 +291,7 @@ namespace NetCasbin
             {
                 BuildRoleLinks();
             }
+
             return true;
         }
 
@@ -312,6 +317,7 @@ namespace NetCasbin
             {
                 BuildRoleLinks();
             }
+
             return true;
         }
 
@@ -325,6 +331,7 @@ namespace NetCasbin
             {
                 return filteredAdapter.IsFiltered;
             }
+
             return false;
         }
 
@@ -343,6 +350,7 @@ namespace NetCasbin
             {
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
+
             adapter.SavePolicy(model);
             watcher?.Update();
         }
@@ -357,6 +365,7 @@ namespace NetCasbin
             {
                 throw new InvalidOperationException("Cannot save a filtered policy");
             }
+
             await adapter.SavePolicyAsync(model);
             if (watcher is not null)
             {
@@ -423,11 +432,12 @@ namespace NetCasbin
         }
 
         #region Enforce
+
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public bool Enforce(params object[] requestValues)
@@ -451,7 +461,7 @@ namespace NetCasbin
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
-#if !NET45
+#if !NET452
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
 #endif
                 return cachedResult;
@@ -467,7 +477,7 @@ namespace NetCasbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public async Task<bool> EnforceAsync(params object[] requestValues)
@@ -493,7 +503,7 @@ namespace NetCasbin
             if (tryGetCachedResult.HasValue)
             {
                 bool cachedResult = tryGetCachedResult.Value;
-#if !NET45
+#if !NET452
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
 #endif
                 return cachedResult;
@@ -545,7 +555,7 @@ namespace NetCasbin
             EnforceCache ??= new ReaderWriterEnforceCache(new ReaderWriterEnforceCacheOptions());
             if (EnforceCache.TryGetResult(requestValues, key, out bool cachedResult))
             {
-#if !NET45
+#if !NET452
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
 #endif
                 return cachedResult;
@@ -561,7 +571,8 @@ namespace NetCasbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="matcher"></param>
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request.</returns>
         public async Task<bool> EnforceWithMatcherAsync(string matcher, params object[] requestValues)
@@ -597,7 +608,7 @@ namespace NetCasbin
             if (tryGetCachedResult.HasValue)
             {
                 bool cachedResult = tryGetCachedResult.Value;
-#if !NET45
+#if !NET452
                 Logger?.LogEnforceCachedResult(requestValues, cachedResult);
 #endif
                 return cachedResult;
@@ -609,16 +620,18 @@ namespace NetCasbin
             await EnforceCache.TrySetResultAsync(requestValues, key, result);
             return result;
         }
+
         #endregion
 
         #region EnforceEx
+
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceEx(params object[] requestValues)
         {
@@ -664,10 +677,10 @@ namespace NetCasbin
         /// <summary>
         /// Explains enforcement by informing matched rules
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExAsync(params object[] requestValues)
         {
@@ -714,10 +727,10 @@ namespace NetCasbin
         /// Explains enforcement by informing matched rules
         /// </summary>
         /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public (bool Result, IEnumerable<IEnumerable<string>> Explains)
             EnforceExWithMatcher(string matcher, params object[] requestValues)
         {
@@ -764,10 +777,10 @@ namespace NetCasbin
         /// Explains enforcement by informing matched rules
         /// </summary>
         /// <param name="matcher">The custom matcher.</param>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <returns>Whether to allow the request and explains.</returns>
-#if !NET45
+#if !NET452
         public async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
             EnforceExWithMatcherAsync(string matcher, params object[] requestValues)
         {
@@ -809,18 +822,20 @@ namespace NetCasbin
             return new Tuple<bool, IEnumerable<IEnumerable<string>>>(result, explains);
         }
 #endif
+
         #endregion
 
         /// <summary>
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="explains"></param>
         /// <returns>Whether to allow the request.</returns>
-        private Task<bool> InternalEnforceAsync(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
+        private Task<bool> InternalEnforceAsync(IReadOnlyList<object> requestValues, string matcher = null,
+            ICollection<IEnumerable<string>> explains = null)
         {
             return Task.FromResult(InternalEnforce(requestValues, matcher, explains));
         }
@@ -829,18 +844,20 @@ namespace NetCasbin
         /// Decides whether a "subject" can access a "object" with the operation
         /// "action", input parameters are usually: (sub, obj, act).
         /// </summary>
-        /// <param name="requestValues">The request needs to be mediated, usually an array of strings, 
+        /// <param name="requestValues">The request needs to be mediated, usually an array of strings,
         /// can be class instances if ABAC is used.</param>
         /// <param name="matcher">The custom matcher.</param>
         /// <param name="explains">Collection of matched policy explains</param>
         /// <returns>Whether to allow the request.</returns>
-        private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null, ICollection<IEnumerable<string>> explains = null)
+        private bool InternalEnforce(IReadOnlyList<object> requestValues, string matcher = null,
+            ICollection<IEnumerable<string>> explains = null)
         {
             var context = EnforceContext.Create(model, matcher, explains is not null);
 
             if (context.RequestTokens.Count != requestValues.Count)
             {
-                throw new ArgumentException($"Invalid request size: expected {context.RequestTokens.Count}, got {requestValues.Count}.");
+                throw new ArgumentException(
+                    $"Invalid request size: expected {context.RequestTokens.Count}, got {requestValues.Count}.");
             }
 
             ExpressionHandler.SetRequest(requestValues);
@@ -855,7 +872,8 @@ namespace NetCasbin
 
             if (effectType is PolicyEffectType.PriorityDenyOverride)
             {
-                ThrowHelper.ThrowNotSupportException($"Only {nameof(IChainEffector)} support {nameof(PolicyEffectType.PriorityDenyOverride)} policy effect expression.");
+                ThrowHelper.ThrowNotSupportException(
+                    $"Only {nameof(IChainEffector)} support {nameof(PolicyEffectType.PriorityDenyOverride)} policy effect expression.");
             }
 
             bool finalResult = false;
@@ -871,7 +889,8 @@ namespace NetCasbin
 
                     if (context.PolicyTokens.Count != policyValues.Count)
                     {
-                        throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
+                        throw new ArgumentException(
+                            $"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
                     }
 
                     ExpressionHandler.SetPolicy(policyValues);
@@ -880,7 +899,8 @@ namespace NetCasbin
 
                     if (context.HasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
+                        string expressionStringWithRule =
+                            RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
                         expressionResult = ExpressionHandler.Invoke(expressionStringWithRule);
                     }
                     else
@@ -924,7 +944,8 @@ namespace NetCasbin
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
+                IReadOnlyList<string> policyValues =
+                    Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
                 ExpressionHandler.SetPolicy(policyValues);
                 Effect.Effect nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher));
                 finalResult = _effector.MergeEffects(context.Effect, new[] { nowEffect }, null, out hitPolicyIndex);
@@ -935,7 +956,7 @@ namespace NetCasbin
                 explains.Add(context.Policies[hitPolicyIndex]);
             }
 
-#if !NET45
+#if !NET452
             if (context.Explain)
             {
                 Logger?.LogEnforceResult(requestValues, finalResult, explains);
@@ -953,6 +974,7 @@ namespace NetCasbin
         /// "action", input parameters are usually: (sub, obj, act). Works specifically with IChainEffector
         /// </summary>
         /// <param name="context">Storage of enforcer variables</param>
+        /// <param name="chainEffector"></param>
         /// <param name="requestValues">The request needs to be mediated, usually an array of strings, can be class instances if ABAC is used.</param>
         /// <param name="explains">Collection of matched policy explains</param>
         /// <returns>Whether to allow the request.</returns>
@@ -976,7 +998,8 @@ namespace NetCasbin
                 {
                     if (context.PolicyTokens.Count != policyValues.Count)
                     {
-                        throw new ArgumentException($"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
+                        throw new ArgumentException(
+                            $"Invalid policy size: expected {context.PolicyTokens.Count}, got {policyValues.Count}.");
                     }
 
                     if (hasPriority && isPriorityDenyOverrideEfffet)
@@ -984,10 +1007,11 @@ namespace NetCasbin
                         if (int.TryParse(policyValues[priorityIndex], out int nowPriority))
                         {
                             if (priority.HasValue && nowPriority != priority.Value
-                                && chainEffector.HitPolicyCount > 0)
+                                                  && chainEffector.HitPolicyCount > 0)
                             {
                                 break;
                             }
+
                             priority = nowPriority;
                         }
                     }
@@ -998,7 +1022,8 @@ namespace NetCasbin
 
                     if (context.HasEval)
                     {
-                        string expressionStringWithRule = RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
+                        string expressionStringWithRule =
+                            RewriteEval(context.Matcher, ExpressionHandler.PolicyTokens, policyValues);
                         expressionResult = ExpressionHandler.Invoke(expressionStringWithRule);
                     }
                     else
@@ -1042,7 +1067,8 @@ namespace NetCasbin
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
 
-                IReadOnlyList<string> policyValues = Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
+                IReadOnlyList<string> policyValues =
+                    Enumerable.Repeat(string.Empty, context.PolicyTokens.Count).ToArray();
                 ExpressionHandler.SetPolicy(policyValues);
                 nowEffect = GetEffect(ExpressionHandler.Invoke(context.Matcher));
 
@@ -1057,7 +1083,7 @@ namespace NetCasbin
                 }
             }
 
-#if !NET45
+#if !NET452
             if (context.Explain)
             {
                 Logger?.LogEnforceResult(requestValues, finalResult, explains);
@@ -1075,7 +1101,8 @@ namespace NetCasbin
             return expressionResult ? Effect.Effect.Allow : Effect.Effect.Indeterminate;
         }
 
-        private static string RewriteEval(string expressionString, IReadOnlyDictionary<string, int> policyTokens, IReadOnlyList<string> policyValues)
+        private static string RewriteEval(string expressionString, IReadOnlyDictionary<string, int> policyTokens,
+            IReadOnlyList<string> policyValues)
         {
             if (Utility.TryGetEvalRuleNames(expressionString, out IEnumerable<string> ruleNames) is false)
             {
@@ -1089,6 +1116,7 @@ namespace NetCasbin
                 {
                     throw new ArgumentException("Please make sure rule exists in policy when using eval() in matcher");
                 }
+
                 rules[ruleName] = Utility.EscapeAssertion(policyValues[ruleIndex]);
             }
 
