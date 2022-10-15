@@ -22,6 +22,18 @@ namespace Casbin
     /// </summary>
     public interface IEnforcer
     {
+        public class EnforcerOptions
+        {
+            public bool Enabled { get; set; } = true;
+            public bool EnabledCache { get; set; } = true;
+
+            public bool AutoBuildRoleLinks { get; set; } = true;
+            public bool AutoNotifyWatcher { get; set; } = true;
+            public bool AutoCleanEnforceCache { get; set; } = true;
+            public bool AutoLoadPolicy { get; set; } = true;
+            public Filter AutoLoadPolicyFilter { get; set; } = null;
+        }
+
         /// <summary>
         ///     Decides whether a "subject" can access a "object" with the operation
         ///     "action", input parameters are usually: (sub, obj, act).
@@ -76,6 +88,7 @@ namespace Casbin
 
         #region Options
 
+        public EnforcerOptions Options { get; set; }
         public bool Enabled { get; set; }
         public bool EnabledCache { get; set; }
         public bool AutoBuildRoleLinks { get; set; }
