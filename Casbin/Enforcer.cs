@@ -18,33 +18,42 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath, Action<IEnforcer.EnforcerOptions> optionSettings = null)
+        public Enforcer(string modelPath, string policyPath, Action<EnforcerOptions> optionSettings = null)
             : this(modelPath, new FileAdapter(policyPath), optionSettings)
         {
         }
 
-        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null, Action<IEnforcer.EnforcerOptions> optionSettings = null)
+        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null,
+            Action<EnforcerOptions> optionSettings = null)
             : this(DefaultModel.CreateFromFile(modelPath), adapter, optionSettings)
         {
         }
 
-        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, Action<IEnforcer.EnforcerOptions> optionSettings = null)
+        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, Action<EnforcerOptions> optionSettings = null)
         {
-            if(optionSettings is not null)
+            EnforcerOptions options = new();
+            if (optionSettings is not null)
             {
-                optionSettings(Options);
+                optionSettings(options);
             }
+
+            Enabled = options.Enabled;
+            EnabledCache = options.EnabledCache;
+            AutoNotifyWatcher = options.AutoNotifyWatcher;
+            AutoBuildRoleLinks = options.AutoBuildRoleLinks;
+            AutoCleanEnforceCache = options.AutoCleanEnforceCache;
+
             this.SetModel(model);
             if (adapter is not null)
             {
                 this.SetAdapter(adapter);
             }
 
-            if (Options.AutoLoadPolicy is true)
+            if (options.AutoLoadPolicy)
             {
-                if(Adapter is IFilteredAdapter && Options.AutoLoadPolicyFilter is not null)
+                if (Adapter is IFilteredAdapter && options.AutoLoadPolicyFilter is not null)
                 {
-                    this.LoadFilteredPolicy(Options.AutoLoadPolicyFilter);
+                    this.LoadFilteredPolicy(options.AutoLoadPolicyFilter);
                 }
                 else
                 {
@@ -57,12 +66,11 @@ namespace Casbin
 
         #region Options
 
-        public IEnforcer.EnforcerOptions Options { get; set; } = new IEnforcer.EnforcerOptions();
-        public bool Enabled { get => Options.Enabled; set => Options.Enabled = value; }
-        public bool EnabledCache { get => Options.EnabledCache; set => Options.EnabledCache = value; }
-        public bool AutoBuildRoleLinks { get => Options.AutoBuildRoleLinks; set => Options.AutoBuildRoleLinks = value; }
-        public bool AutoNotifyWatcher { get => Options.AutoNotifyWatcher; set => Options.AutoNotifyWatcher = value; }
-        public bool AutoCleanEnforceCache { get => Options.AutoCleanEnforceCache; set => Options.AutoCleanEnforceCache = value; }
+        public bool Enabled { get; set; }
+        public bool EnabledCache { get; set; }
+        public bool AutoBuildRoleLinks { get; set; }
+        public bool AutoNotifyWatcher { get; set; }
+        public bool AutoCleanEnforceCache { get; set; }
 
         #endregion
 
@@ -115,12 +123,12 @@ namespace Casbin
                 return InternalEnforce(in context, in requestValues);
             }
 
-            if (Options.Enabled is false)
+            if (Enabled is false)
             {
                 return true;
             }
 
-            if (Options.EnabledCache)
+            if (EnabledCache)
             {
                 if (EnforceCache.TryGetResult(requestValues, out bool cachedResult))
                 {
@@ -133,7 +141,7 @@ namespace Casbin
 
             bool result = InternalEnforce(in context, in requestValues);
 
-            if (Options.EnabledCache)
+            if (EnabledCache)
             {
                 EnforceCache.TrySetResult(requestValues, result);
             }
@@ -159,12 +167,12 @@ namespace Casbin
                 return await InternalEnforceAsync(context, requestValues);
             }
 
-            if (Options.Enabled is false)
+            if (Enabled is false)
             {
                 return true;
             }
 
-            if (Options.EnabledCache)
+            if (EnabledCache)
             {
                 bool? cachedResult = await EnforceCache.TryGetResultAsync(requestValues);
                 if (cachedResult.HasValue)
@@ -179,7 +187,7 @@ namespace Casbin
             context.HandleOptionAndCached = true;
             bool result = await InternalEnforceAsync(context, requestValues);
 
-            if (Options.EnabledCache)
+            if (EnabledCache)
             {
                 await EnforceCache.TrySetResultAsync(requestValues, result);
             }

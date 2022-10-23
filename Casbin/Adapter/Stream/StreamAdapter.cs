@@ -1,152 +1,137 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
 
-namespace Casbin.Adapter.File
+namespace Casbin.Adapter.Stream;
+
+internal class StreamAdapter : IEpochAdapter
 {
-    public class StreamAdapter : IEpochAdapter
+    protected readonly System.IO.Stream InputStream;
+    protected readonly System.IO.Stream OutputStream;
+
+    public StreamAdapter(System.IO.Stream inputStream, System.IO.Stream outputStream)
     {
-        protected readonly Stream _byteArrayInputStream;
-        protected readonly Stream _byteArrayOutputStream;
-        public StreamAdapter(Stream inputStream, Stream outputStream)
+        InputStream = inputStream;
+        OutputStream = outputStream;
+    }
+
+    public void LoadPolicy(IPolicyStore store)
+    {
+        using StreamReader streamReader = new StreamReader(InputStream);
+        if (InputStream is not null)
         {
-            _byteArrayInputStream = inputStream;
-            _byteArrayOutputStream = outputStream;
+            LoadPolicyData(store, streamReader);
+        }
+    }
+
+    public async Task LoadPolicyAsync(IPolicyStore store)
+    {
+        using StreamReader streamReader = new StreamReader(InputStream);
+        if (InputStream is not null)
+        {
+            await LoadPolicyDataAsync(store, streamReader);
+        }
+    }
+
+    public void SavePolicy(IPolicyStore store)
+    {
+        if (OutputStream is null)
+        {
+            throw new Exception("Store file can not write, because use outputStream has not been set.");
         }
 
-        public void LoadPolicy(IPolicyStore store)
-        {
-            try
-            {
-                var streamReader = new StreamReader(_byteArrayInputStream);
-                if (_byteArrayInputStream is not null)
-                {
-                    LoadPolicyData(store, streamReader);
-                }
-                streamReader.Dispose();
-            }
-            catch (Exception)
-            {
+        IEnumerable<string> policy = ConvertToPolicyStrings(store);
+        SavePolicyFile(string.Join("\n", policy));
+    }
 
-            }
+    public Task SavePolicyAsync(IPolicyStore store)
+    {
+        if (OutputStream is null)
+        {
+            throw new Exception("Store file can not write, because use outputStream has not been set.");
         }
 
-        public async Task LoadPolicyAsync(IPolicyStore store)
-        {
-            try
-            {
-                var streamReader = new StreamReader(_byteArrayInputStream);
-                if (_byteArrayInputStream is not null)
-                {
-                    await LoadPolicyDataAsync(store, streamReader);
-                }
-                streamReader.Dispose();
-            }
-            catch (Exception)
-            {
+        IEnumerable<string> policy = ConvertToPolicyStrings(store);
+        return SavePolicyFileAsync(string.Join("\n", policy));
+    }
 
-            }
+    private static IEnumerable<string> GetModelPolicy(IPolicyStore store, string section)
+    {
+        List<string> policy = new List<string>();
+        foreach (KeyValuePair<string, IEnumerable<IPolicyValues>> kv in store.GetPolicyAllType(section))
+        {
+            string key = kv.Key;
+            IEnumerable<IPolicyValues> value = kv.Value;
+            policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
         }
 
-        public void SavePolicy(IPolicyStore store)
-        {
-            if (_byteArrayOutputStream is null)
-            {
-                throw new Exception("Store file can not write, because use outputStream has not been set.");
-            }
+        return policy;
+    }
 
-            var policy = ConvertToPolicyStrings(store);
-            SavePolicyFile(string.Join("\n", policy));
+    private static void LoadPolicyData(IPolicyStore store, StreamReader inputStream)
+    {
+        if (inputStream.EndOfStream is true)
+        {
+            inputStream.BaseStream.Position = 0;
         }
 
-        public Task SavePolicyAsync(IPolicyStore store)
+        while (inputStream.EndOfStream is false)
         {
-            if (_byteArrayOutputStream is null)
-            {
-                throw new Exception("Store file can not write, because use outputStream has not been set.");
-            }
+            string line = inputStream.ReadLine();
+            store.TryLoadPolicyLine(line);
+        }
+    }
 
-            var policy = ConvertToPolicyStrings(store);
-            return SavePolicyFileAsync(string.Join("\n", policy));
+    private static async Task LoadPolicyDataAsync(IPolicyStore store, StreamReader inputStream)
+    {
+        if (inputStream.EndOfStream is true)
+        {
+            inputStream.BaseStream.Position = 0;
         }
 
-        private static IEnumerable<string> GetModelPolicy(IPolicyStore store, string section)
+        while (inputStream.EndOfStream is false)
         {
-            var policy = new List<string>();
-            foreach (var kv in store.GetPolicyAllType(section))
-            {
-                var key = kv.Key;
-                var value = kv.Value;
-                policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
-            }
+            string line = await inputStream.ReadLineAsync();
+            store.TryLoadPolicyLine(line);
+        }
+    }
 
-            return policy;
+    private static IEnumerable<string> ConvertToPolicyStrings(IPolicyStore store)
+    {
+        List<string> policy = new List<string>();
+        if (store.ContainsNodes(PermConstants.Section.PolicySection))
+        {
+            policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
         }
 
-        private static void LoadPolicyData(IPolicyStore store, StreamReader inputStream)
+        if (store.ContainsNodes(PermConstants.Section.RoleSection))
         {
-            if (inputStream.EndOfStream is true)
-            {
-                inputStream.BaseStream.Position = 0;
-            }
-            while (inputStream.EndOfStream is false)
-            {
-                string line = inputStream.ReadLine();
-                store.TryLoadPolicyLine(line);
-            }
+            policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
         }
 
-        private static async Task LoadPolicyDataAsync(IPolicyStore store, StreamReader inputStream)
-        {
-            if (inputStream.EndOfStream is true)
-            {
-                inputStream.BaseStream.Position = 0;
-            }
-            while (inputStream.EndOfStream is false)
-            {
-                string line = await inputStream.ReadLineAsync();
-                store.TryLoadPolicyLine(line);
-            }
-        }
+        return policy;
+    }
 
-        private static IEnumerable<string> ConvertToPolicyStrings(IPolicyStore store)
-        {
-            var policy = new List<string>();
-            if (store.ContainsNodes(PermConstants.Section.PolicySection))
-            {
-                policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
-            }
-
-            if (store.ContainsNodes(PermConstants.Section.RoleSection))
-            {
-                policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
-            }
-
-            return policy;
-        }
-
-        private void SavePolicyFile(string text)
-        {
-            var streamWriter = new StreamWriter(_byteArrayOutputStream);
+    private void SavePolicyFile(string text)
+    {
+        StreamWriter streamWriter = new StreamWriter(OutputStream);
 #if (NET6_0 || NET5_0 || NETCOREAPP3_1)
             streamWriter.Write(text.AsSpan());
 #else
-            streamWriter.Write(text.ToCharArray());
+        streamWriter.Write(text.ToCharArray());
 #endif
-            streamWriter.Dispose();
-        }
+        streamWriter.Dispose();
+    }
 
-        private async Task SavePolicyFileAsync(string text)
-        {
-            var streamWriter = new StreamWriter(_byteArrayOutputStream);
-            await streamWriter.WriteAsync(text);
-            streamWriter.Dispose();
-        }
+    private async Task SavePolicyFileAsync(string text)
+    {
+        StreamWriter streamWriter = new StreamWriter(OutputStream);
+        await streamWriter.WriteAsync(text);
+        streamWriter.Dispose();
     }
 }
+

@@ -6,133 +6,107 @@ using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
 
-namespace Casbin.Adapter.File
+namespace Casbin.Adapter.File;
+
+public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
 {
-    public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
+    public FileFilteredAdapter(string filePath) : base(filePath)
     {
-        public bool IsFiltered { get; private set; }
+    }
 
-        public FileFilteredAdapter(string filePath) : base(filePath)
+    public FileFilteredAdapter(System.IO.Stream inputStream) : base(inputStream)
+    {
+    }
+
+    public bool IsFiltered { get; private set; }
+
+    public void LoadFilteredPolicy(IPolicyStore store, IPolicyFilter filter)
+    {
+        if (filter is null)
         {
+            LoadPolicy(store);
+            return;
         }
 
-        public FileFilteredAdapter(Stream inputStream) : base(inputStream)
+        if (string.IsNullOrWhiteSpace(FilePath))
         {
+            throw new InvalidOperationException("invalid file path, file path cannot be empty");
         }
 
-        public void LoadFilteredPolicy(IPolicyStore store, Filter filter)
+        LoadFilteredPolicyFile(store, filter);
+    }
+
+    public Task LoadFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter)
+    {
+        if (filter is null)
         {
-            if (filter is null)
-            {
-                LoadPolicy(store);
-                return;
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new InvalidOperationException("invalid file path, file path cannot be empty");
-            }
-
-            LoadFilteredPolicyFile(store, filter);
+            return LoadPolicyAsync(store);
         }
 
-        public Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter)
+        if (string.IsNullOrWhiteSpace(FilePath))
         {
-            if (filter is null)
-            {
-                return LoadPolicyAsync(store);
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new InvalidOperationException("invalid file path, file path cannot be empty");
-            }
-
-            return LoadFilteredPolicyFileAsync(store, filter);
+            throw new InvalidOperationException("invalid file path, file path cannot be empty");
         }
 
-        private void LoadFilteredPolicyFile(IPolicyStore store, Filter filter)
+        return LoadFilteredPolicyFileAsync(store, filter);
+    }
+
+    public void LoadFilteredPolicy(IPolicyStore store, Filter filter)
+    {
+        IPolicyFilter policyFilter = filter;
+        LoadFilteredPolicy(store, policyFilter);
+    }
+
+    public Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter)
+    {
+        IPolicyFilter policyFilter = filter;
+        return LoadFilteredPolicyAsync(store, policyFilter);
+    }
+
+    private void LoadFilteredPolicyFile(IPolicyStore store, IPolicyFilter filter)
+    {
+        IEnumerable<IPersistantPolicy> policies = ReadPersistantPolicy(FilePath);
+        policies = filter.ApplyFilter(policies.AsQueryable());
+        foreach (IPersistantPolicy policy in policies)
         {
-            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            while (reader.EndOfStream is false)
-            {
-                string line = reader.ReadLine()?.Trim();
-                if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
-                {
-                    return;
-                }
-                store.TryLoadPolicyLine(line);
-            }
-            IsFiltered = true;
+            string section = policy.Type.Substring(0, 1);
+            store.AddPolicy(section, policy.Type, policy.Values);
         }
 
-        private async Task LoadFilteredPolicyFileAsync(IPolicyStore store, Filter filter)
+        IsFiltered = true;
+    }
+
+    private Task LoadFilteredPolicyFileAsync(IPolicyStore store, IPolicyFilter filter)
+    {
+        LoadFilteredPolicyFile(store, filter);
+#if NET452
+            return Task.FromResult(true);
+#else
+        return Task.CompletedTask;
+#endif
+    }
+
+    private static IEnumerable<IPersistantPolicy> ReadPersistantPolicy(string filePath)
+    {
+        using StreamReader reader = new(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+        while (reader.EndOfStream is false)
         {
-            var reader = new StreamReader(new FileStream(FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-            while (reader.EndOfStream is false)
+            string line = reader.ReadLine();
+            if (string.IsNullOrWhiteSpace(line))
             {
-                string line = (await reader.ReadLineAsync())?.Trim();
-                if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
-                {
-                    return;
-                }
-                store.TryLoadPolicyLine(line);
-            }
-            IsFiltered = true;
-        }
-
-        private static bool FilterLine(string line, Filter filter)
-        {
-            if (filter == null)
-            {
-                return false;
+                continue;
             }
 
-            string[] p = line.Split(',');
-            if (p.Length == 0)
+            if (line.StartsWith("/") || line.StartsWith("#"))
             {
-                return true;
+                continue;
             }
 
-            IEnumerable<string> filterSlice = new List<string>();
-            switch (p[0].Trim())
-            {
-                case PermConstants.DefaultPolicyType:
-                    filterSlice = filter.P;
-                    break;
-                case PermConstants.DefaultGroupingPolicyType:
-                    filterSlice = filter.G;
-                    break;
-            }
-
-            return FilterWords(p, filterSlice);
-        }
-
-        private static bool FilterWords(string[] line, IEnumerable<string> filter)
-        {
-            string[] filterArray = filter.ToArray();
-            int length = filterArray.Length;
-
-            if (line.Length < length + 1)
-            {
-                return true;
-            }
-
-            bool skipLine = false;
-            for (int i = 0; i < length; i++)
-            {
-                string current = filterArray.ElementAt(i).Trim();
-                string next = filterArray.ElementAt(i + 1);
-
-                if (string.IsNullOrEmpty(current) || current == next)
-                {
-                    continue;
-                }
-
-                skipLine = true;
-                break;
-            }
-            return skipLine;
+            string[] tokens = line.Split(PermConstants.PolicySeparatorChar).Select(x => x.Trim()).ToArray();
+            string type = tokens[0];
+            IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
+            yield return new PersistantPolicy(type, values);
         }
     }
 }
+

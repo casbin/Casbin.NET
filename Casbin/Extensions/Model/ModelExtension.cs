@@ -92,7 +92,7 @@ namespace Casbin.Model
             return true;
         }
 
-        public static bool LoadFilteredPolicy(this IModel model, Filter filter)
+        public static bool LoadFilteredPolicy(this IModel model, IPolicyFilter filter)
         {
             if (model.AdapterHolder.FilteredAdapter is null)
             {
@@ -103,7 +103,7 @@ namespace Casbin.Model
             return true;
         }
 
-        public static async Task<bool> LoadFilteredPolicyAsync(this IModel model, Filter filter)
+        public static async Task<bool> LoadFilteredPolicyAsync(this IModel model, IPolicyFilter filter)
         {
             if (model.AdapterHolder.FilteredAdapter is null)
             {

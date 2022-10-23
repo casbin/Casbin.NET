@@ -1,9 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
+using Casbin.Adapter.Stream;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Rbac;
@@ -73,10 +73,10 @@ public class EnforcerTest
 
         FileAdapter a = new("examples/keymatch_policy.csv");
 
-        IEnforcer e = DefaultEnforcer.Create(m, a, options => { options.AutoLoadPolicy = false; });
+        IEnforcer e = new Enforcer(m, a, options => { options.AutoLoadPolicy = false; });
         Assert.Empty(e.GetPolicy());
 
-        e = DefaultEnforcer.Create(m, a);
+        e = new Enforcer(m, a);
         Assert.NotEmpty(e.GetPolicy());
     }
 
@@ -257,19 +257,11 @@ public class EnforcerTest
             _testModelFixture._rbacInOperatorModelText,
             _testModelFixture._rbacInOperatorPolicyText));
 
-        TestEnforce(e, new
-        {
-            Name = "Alice",
-            Amount = 5100,
-            Roles = new string[] { "Manager", "DepartmentDirector" }
-        }, "authorization", "grant", true);
+        TestEnforce(e, new { Name = "Alice", Amount = 5100, Roles = new[] { "Manager", "DepartmentDirector" } },
+            "authorization", "grant", true);
 
-        TestEnforce(e, new
-        {
-            Name = "Alice",
-            Amount = 5100,
-            Roles = new string[] { "DepartmentDirector" }
-        }, "authorization", "grant", false);
+        TestEnforce(e, new { Name = "Alice", Amount = 5100, Roles = new[] { "DepartmentDirector" } },
+            "authorization", "grant", false);
     }
 
     [Fact]
@@ -354,16 +346,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), true),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), true),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), false),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), true)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), true),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), true),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), false),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), true)
+            };
 
         TestBatchEnforce(e, testCases);
     }
@@ -388,16 +380,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), true),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), true),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), false),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), true)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), true),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), true),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), false),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), true)
+            };
 
         TestParallelBatchEnforce(e, testCases);
     }
@@ -450,16 +442,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), true),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), true),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), false),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), true)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), true),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), true),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), false),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), true)
+            };
 
         TestBatchEnforceAsync(e, testCases);
     }
@@ -1178,16 +1170,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), false),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), false),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), true),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), false)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), false),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), false),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), true),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), false)
+            };
 
         e.TestBatchEnforceWithMatcher(matcher, testCases);
     }
@@ -1200,16 +1192,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), false),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), false),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), true),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), false)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), false),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), false),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), true),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), false)
+            };
 
         e.TestBatchEnforceWithMatcherParallel(matcher, testCases);
     }
@@ -1238,16 +1230,16 @@ public class EnforcerTest
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
             new (RequestValues<string, string, string>, bool)[]
-        {
-            (Request.CreateValues("alice", "data1", "read"), false),
-            (Request.CreateValues("alice", "data1", "write"), false),
-            (Request.CreateValues("alice", "data2", "read"), false),
-            (Request.CreateValues("alice", "data2", "write"), true),
-            (Request.CreateValues("bob", "data1", "read"), true),
-            (Request.CreateValues("bob", "data1", "write"), false),
-            (Request.CreateValues("bob", "data2", "read"), false),
-            (Request.CreateValues("bob", "data2", "write"), false)
-        };
+            {
+                (Request.CreateValues("alice", "data1", "read"), false),
+                (Request.CreateValues("alice", "data1", "write"), false),
+                (Request.CreateValues("alice", "data2", "read"), false),
+                (Request.CreateValues("alice", "data2", "write"), true),
+                (Request.CreateValues("bob", "data1", "read"), true),
+                (Request.CreateValues("bob", "data1", "write"), false),
+                (Request.CreateValues("bob", "data2", "read"), false),
+                (Request.CreateValues("bob", "data2", "write"), false)
+            };
 
         TestBatchEnforceWithMatcherAsync(e, matcher, testCases);
     }
@@ -1288,3 +1280,5 @@ public class EnforcerTest
 
     #endregion
 }
+
+

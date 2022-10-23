@@ -1,124 +1,86 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
 
-namespace Casbin.Adapter.File
+namespace Casbin.Adapter.Stream;
+
+internal class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
 {
-    public class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
+    public StreamFilteredAdapter(System.IO.Stream inputStream, System.IO.Stream outputStream) : base(inputStream,
+        outputStream)
     {
-        public bool IsFiltered { get; private set; }
+    }
 
-        public StreamFilteredAdapter(Stream inputStream, Stream outputStream) : base(inputStream, outputStream)
+    public bool IsFiltered { get; private set; }
+
+    public void LoadFilteredPolicy(IPolicyStore store, IPolicyFilter filter)
+    {
+        if (filter is null)
         {
+            LoadPolicy(store);
+            return;
         }
 
-        public void LoadFilteredPolicy(IPolicyStore store, Filter filter)
-        {
-            if (filter is null)
-            {
-                LoadPolicy(store);
-                return;
-            }
+        LoadFilteredPolicyFile(store, filter);
+    }
 
-            LoadFilteredPolicyFile(store, filter);
+    public Task LoadFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter)
+    {
+        if (filter is null)
+        {
+            return LoadPolicyAsync(store);
         }
 
-        public Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter)
-        {
-            if (filter is null)
-            {
-                return LoadPolicyAsync(store);
-            }
+        return LoadFilteredPolicyFileAsync(store, filter);
+    }
 
-            return LoadFilteredPolicyFileAsync(store, filter);
+    private void LoadFilteredPolicyFile(IPolicyStore store, IPolicyFilter filter)
+    {
+        IEnumerable<IPersistantPolicy> policies = ReadPersistantPolicy(InputStream);
+        policies = filter.ApplyFilter(policies.AsQueryable());
+        foreach (IPersistantPolicy policy in policies)
+        {
+            string section = policy.Type.Substring(0, 1);
+            store.AddPolicy(section, policy.Type, policy.Values);
         }
 
-        private void LoadFilteredPolicyFile(IPolicyStore store, Filter filter)
+        IsFiltered = true;
+    }
+
+    private Task LoadFilteredPolicyFileAsync(IPolicyStore store, IPolicyFilter filter)
+    {
+        LoadFilteredPolicyFile(store, filter);
+#if NET452
+            return Task.FromResult(true);
+#else
+        return Task.CompletedTask;
+#endif
+    }
+
+    private static IEnumerable<IPersistantPolicy> ReadPersistantPolicy(System.IO.Stream inputStream)
+    {
+        using StreamReader reader = new(inputStream);
+        while (reader.EndOfStream is false)
         {
-            var reader = new StreamReader(_byteArrayInputStream);
-            while (reader.EndOfStream is false)
+            string line = reader.ReadLine();
+            if (string.IsNullOrWhiteSpace(line))
             {
-                string line = reader.ReadLine()?.Trim();
-                if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
-                {
-                    return;
-                }
-                store.TryLoadPolicyLine(line);
-            }
-            IsFiltered = true;
-        }
-
-        private async Task LoadFilteredPolicyFileAsync(IPolicyStore store, Filter filter)
-        {
-            var reader = new StreamReader(_byteArrayInputStream);
-            while (reader.EndOfStream is false)
-            {
-                string line = (await reader.ReadLineAsync())?.Trim();
-                if (string.IsNullOrWhiteSpace(line) || FilterLine(line, filter))
-                {
-                    return;
-                }
-                store.TryLoadPolicyLine(line);
-            }
-            IsFiltered = true;
-        }
-
-        private static bool FilterLine(string line, Filter filter)
-        {
-            if (filter == null)
-            {
-                return false;
+                continue;
             }
 
-            string[] p = line.Split(',');
-            if (p.Length == 0)
+            if (line.StartsWith("/") || line.StartsWith("#"))
             {
-                return true;
+                continue;
             }
 
-            IEnumerable<string> filterSlice = new List<string>();
-            switch (p[0].Trim())
-            {
-                case PermConstants.DefaultPolicyType:
-                    filterSlice = filter.P;
-                    break;
-                case PermConstants.DefaultGroupingPolicyType:
-                    filterSlice = filter.G;
-                    break;
-            }
-
-            return FilterWords(p, filterSlice);
-        }
-
-        private static bool FilterWords(string[] line, IEnumerable<string> filter)
-        {
-            string[] filterArray = filter.ToArray();
-            int length = filterArray.Length;
-
-            if (line.Length < length + 1)
-            {
-                return true;
-            }
-
-            bool skipLine = false;
-            for (int i = 0; i < length; i++)
-            {
-                string current = filterArray.ElementAt(i).Trim();
-                string next = filterArray.ElementAt(i + 1);
-
-                if (string.IsNullOrEmpty(current) || current == next)
-                {
-                    continue;
-                }
-
-                skipLine = true;
-                break;
-            }
-            return skipLine;
+            string[] tokens = line.Split(PermConstants.PolicySeparatorChar).Select(x => x.Trim()).ToArray();
+            string type = tokens[0];
+            IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
+            yield return new PersistantPolicy(type, values);
         }
     }
 }
+

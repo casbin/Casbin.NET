@@ -8,155 +8,155 @@ using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
 
-namespace Casbin.Adapter.File
+namespace Casbin.Adapter.File;
+
+public class FileAdapter : IEpochAdapter
 {
-    public class FileAdapter : IEpochAdapter
+    private readonly StreamReader _byteArrayInputStream;
+    private readonly bool _readOnly;
+    protected readonly string FilePath;
+
+    public FileAdapter(string filePath) => FilePath = filePath;
+
+    public FileAdapter(System.IO.Stream inputStream)
     {
-        private readonly StreamReader _byteArrayInputStream;
-        private readonly bool _readOnly;
-        protected readonly string FilePath;
-
-        public FileAdapter(string filePath)
+        _readOnly = true;
+        try
         {
-            FilePath = filePath;
+            _byteArrayInputStream = new StreamReader(inputStream);
+        }
+        catch (IOException e)
+        {
+            throw new IOException("File adapter init error", e);
+        }
+    }
+
+    public void LoadPolicy(IPolicyStore model)
+    {
+        if (string.IsNullOrWhiteSpace(FilePath) is false)
+        {
+            using StreamReader sr = new StreamReader(new FileStream(
+                FilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
+            LoadPolicyLine(model, sr);
         }
 
-        public FileAdapter(Stream inputStream)
+        if (_byteArrayInputStream is not null)
         {
-            _readOnly = true;
-            try
-            {
-                _byteArrayInputStream = new StreamReader(inputStream);
-            }
-            catch (IOException e)
-            {
-                throw new IOException("File adapter init error", e);
-            }
+            LoadPolicyLine(model, _byteArrayInputStream);
+        }
+    }
+
+    public async Task LoadPolicyAsync(IPolicyStore store)
+    {
+        if (string.IsNullOrWhiteSpace(FilePath) is false)
+        {
+            using StreamReader sr = new StreamReader(new FileStream(
+                FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+            await LoadPolicyLineAsync(store, sr);
+            Debug.WriteLine("xxx");
         }
 
-        public void LoadPolicy(IPolicyStore model)
+        if (_byteArrayInputStream is not null)
         {
-            if (string.IsNullOrWhiteSpace(FilePath) is false)
-            {
-                using var sr = new StreamReader(new FileStream(
-                    FilePath, FileMode.Open, FileAccess.Read, FileShare.Read));
-                LoadPolicyData(model, sr);
-            }
+            await LoadPolicyLineAsync(store, _byteArrayInputStream);
+        }
+    }
 
-            if (_byteArrayInputStream is not null)
-            {
-                LoadPolicyData(model, _byteArrayInputStream);
-            }
+    public void SavePolicy(IPolicyStore store)
+    {
+        if (_byteArrayInputStream != null && _readOnly)
+        {
+            throw new Exception("Store file can not write, because use inputStream is readOnly");
         }
 
-        public async Task LoadPolicyAsync(IPolicyStore store)
+        if (string.IsNullOrWhiteSpace(FilePath))
         {
-            if (string.IsNullOrWhiteSpace(FilePath) is false)
-            {
-                using var sr = new StreamReader(new FileStream(
-                    FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-                await LoadPolicyDataAsync(store, sr);
-                Debug.WriteLine("xxx");
-            }
-
-            if (_byteArrayInputStream is not null)
-            {
-                await LoadPolicyDataAsync(store, _byteArrayInputStream);
-            }
+            throw new ArgumentException("Invalid file path, file path cannot be empty");
         }
 
-        public void SavePolicy(IPolicyStore store)
+        IEnumerable<string> policy = ConvertToPolicyStrings(store);
+        SavePolicyFile(string.Join("\n", policy));
+    }
+
+    public Task SavePolicyAsync(IPolicyStore store)
+    {
+        if (_byteArrayInputStream != null && _readOnly)
         {
-            if (_byteArrayInputStream != null && _readOnly)
-            {
-                throw new Exception("Store file can not write, because use inputStream is readOnly");
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new ArgumentException("Invalid file path, file path cannot be empty");
-            }
-
-            var policy = ConvertToPolicyStrings(store);
-            SavePolicyFile(string.Join("\n", policy));
+            throw new Exception("Store file can not write, because use inputStream is readOnly");
         }
 
-        public Task SavePolicyAsync(IPolicyStore store)
+        if (string.IsNullOrWhiteSpace(FilePath))
         {
-            if (_byteArrayInputStream != null && _readOnly)
-            {
-                throw new Exception("Store file can not write, because use inputStream is readOnly");
-            }
-
-            if (string.IsNullOrWhiteSpace(FilePath))
-            {
-                throw new ArgumentException("Invalid file path, file path cannot be empty");
-            }
-
-            var policy = ConvertToPolicyStrings(store);
-            return SavePolicyFileAsync(string.Join("\n", policy));
+            throw new ArgumentException("Invalid file path, file path cannot be empty");
         }
 
-        private static IEnumerable<string> GetModelPolicy(IPolicyStore store, string section)
-        {
-            var policy = new List<string>();
-            foreach (KeyValuePair<string, IEnumerable<IPolicyValues>> kv in store.GetPolicyAllType(section))
-            {
-                string key = kv.Key;
-                IEnumerable<IPolicyValues> value = kv.Value;
-                policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
-            }
+        IEnumerable<string> policy = ConvertToPolicyStrings(store);
+        return SavePolicyFileAsync(string.Join("\n", policy));
+    }
 
-            return policy;
+    private static IEnumerable<string> GetModelPolicy(IPolicyStore store, string section)
+    {
+        List<string> policy = new List<string>();
+        foreach (KeyValuePair<string, IEnumerable<IPolicyValues>> kv in store.GetPolicyAllType(section))
+        {
+            string key = kv.Key;
+            IEnumerable<IPolicyValues> value = kv.Value;
+            policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
         }
 
-        private static void LoadPolicyData(IPolicyStore store, StreamReader inputStream)
+        return policy;
+    }
+
+    private static void LoadPolicyLine(IPolicyStore store, StreamReader inputStream)
+    {
+        while (inputStream.EndOfStream is false)
         {
-            while (inputStream.EndOfStream is false)
-            {
-                string line = inputStream.ReadLine();
-                store.TryLoadPolicyLine(line);
-            }
+            string line = inputStream.ReadLine();
+            store.TryLoadPolicyLine(line);
+        }
+    }
+
+    private static async Task LoadPolicyLineAsync(IPolicyStore store, StreamReader inputStream)
+    {
+        while (inputStream.EndOfStream is false)
+        {
+            string line = await inputStream.ReadLineAsync();
+            store.TryLoadPolicyLine(line);
+        }
+    }
+
+    private static IEnumerable<string> ConvertToPolicyStrings(IPolicyStore store)
+    {
+        List<string> policy = new List<string>();
+        if (store.ContainsNodes(PermConstants.Section.PolicySection))
+        {
+            policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
         }
 
-        private static async Task LoadPolicyDataAsync(IPolicyStore store, StreamReader inputStream)
+        if (store.ContainsNodes(PermConstants.Section.RoleSection))
         {
-            while (inputStream.EndOfStream is false)
-            {
-                string line = await inputStream.ReadLineAsync();
-                store.TryLoadPolicyLine(line);
-            }
+            policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
         }
 
-        private static IEnumerable<string> ConvertToPolicyStrings(IPolicyStore store)
-        {
-            var policy = new List<string>();
-            if (store.ContainsNodes(PermConstants.Section.PolicySection))
-            {
-                policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
-            }
+        return policy;
+    }
 
-            if (store.ContainsNodes(PermConstants.Section.RoleSection))
-            {
-                policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
-            }
+    private void SavePolicyFile(string text) => System.IO.File.WriteAllText(FilePath, text, Encoding.UTF8);
 
-            return policy;
-        }
-
-        private void SavePolicyFile(string text)
-        {
-            System.IO.File.WriteAllText(FilePath, text, Encoding.UTF8);
-        }
-
-        private async Task SavePolicyFileAsync(string text)
-        {
-            text = text ?? string.Empty;
-            byte[] content = Encoding.UTF8.GetBytes(text);
+    private async Task SavePolicyFileAsync(string text)
+    {
+        text ??= string.Empty;
+        byte[] content = Encoding.UTF8.GetBytes(text);
+#if !NETFRAMEWORK && !NETSTANDARD2_0
+        await using FileStream fs = new(
+            FilePath, FileMode.Create, FileAccess.Write,
+            FileShare.None, 4096, true);
+#else
             using var fs = new FileStream(
                 FilePath, FileMode.Create, FileAccess.Write,
                 FileShare.None, bufferSize: 4096, useAsync: true);
-            await fs.WriteAsync(content, 0, content.Length);
-        }
+#endif
+        await fs.WriteAsync(content, 0, content.Length);
     }
 }
+

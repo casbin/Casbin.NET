@@ -7,8 +7,8 @@ namespace Casbin.Persist
     {
         bool IsFiltered { get; }
 
-        void LoadFilteredPolicy(IPolicyStore store, Filter filter);
+        void LoadFilteredPolicy(IPolicyStore store, IPolicyFilter filter);
 
-        Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter);
+        Task LoadFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter);
     }
 }
