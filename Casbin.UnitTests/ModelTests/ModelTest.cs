@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using Casbin.Model;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
 using Xunit;
@@ -598,6 +599,29 @@ public class ModelTest
 
         Assert.True(e.Enforce(context, new { Age = 30 }, "data2", "read"));
         Assert.False(e.Enforce(context, new { Age = 70 }, "data2", "read"));
+    }
+
+    [Fact]
+    public void TestAbacComment()
+    {
+        var model = TestModelFixture.GetNewTestModel(_testModelFixture._abacCommentText);
+        Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
+        Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
+        Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
+        Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
+        Assert.Equal("r.sub == p.sub && r.obj == p.obj && r.act == p.act", model.Sections.GetMatcherAssertion("m").Value);
+    }
+
+    [Fact]
+    public void TestRbacComment()
+    {
+        var model = TestModelFixture.GetNewTestModel(_testModelFixture._rbacCommentText);
+        Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
+        Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
+        Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
+        Assert.Equal("_, _", model.Sections.GetRoleAssertion("g").Value);
+        Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
+        Assert.Equal("g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act", model.Sections.GetMatcherAssertion("m").Value);
     }
 
     public class TestResource

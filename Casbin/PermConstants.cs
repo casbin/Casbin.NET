@@ -5,6 +5,7 @@
         public const char PolicySeparatorChar = ',';
         public const string PolicySeparatorString = ", "; // include a white space
         internal const string SubjectPrioritySeparatorString = "::";
+        public const char PolicyCommentChar = '#';
 
         public const string DefaultRequestType = "r";
         public const string RequestType2 = "r2";
