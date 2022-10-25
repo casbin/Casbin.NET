@@ -52,6 +52,9 @@ public class TestModelFixture
     internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
     internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
 
+    internal readonly string _abacCommentText = ReadTestFile("abac_comment.conf");
+    internal readonly string _rbacCommentText = ReadTestFile("rbac_comment.conf");
+
     // https://github.com/casbin/Casbin.NET/issues/154
     internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
     internal readonly string _rbacMultiplePolicyText = ReadTestFile("rbac_multiple_rolemanager_policy.csv");

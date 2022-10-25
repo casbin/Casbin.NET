@@ -215,7 +215,9 @@ namespace Casbin.Config
                     }
                     string option = optionVal[0].Trim();
                     string value = optionVal[1].Trim();
-                    AddConfig(section, option, value);
+                    int commentStartIdx = value.IndexOf(PermConstants.PolicyCommentChar);
+                    var processedValue = (commentStartIdx == -1 ? value : value.Remove(commentStartIdx)).Trim();
+                    AddConfig(section, option, processedValue);
                 }
             }
         }
