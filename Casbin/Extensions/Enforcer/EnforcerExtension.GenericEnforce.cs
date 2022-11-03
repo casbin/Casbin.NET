@@ -6,6 +6,84 @@ namespace Casbin;
 
 public static partial class EnforcerExtension
 {
+    #region Generic List Enforce
+
+    public static bool Enforce<T>(this IEnforcer enforcer, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        return enforcer.Enforce(enforcer.CreateContext(), request);
+    }
+
+    public static Task<bool> EnforceAsync<T>(this IEnforcer enforcer, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        return enforcer.EnforceAsync(enforcer.CreateContext(), request);
+    }
+
+    public static bool Enforce<T>(this IEnforcer enforcer, EnforceContext context, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceAsync<T>(this IEnforcer enforcer, EnforceContext context, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceEx<T>(this IEnforcer enforcer, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExAsync<T>(this IEnforcer enforcer, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static bool EnforceWithMatcher<T>(this IEnforcer enforcer, string matcher, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceWithMatcherAsync<T>(this IEnforcer enforcer, string matcher, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceExWithMatcher<T>(this IEnforcer enforcer, string matcher, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExWithMatcherAsync<T>(this IEnforcer enforcer, string matcher, params T[] value)
+    {
+        var request = Request.CreateValues(value);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    #endregion
+
     #region Generic Enforce Count 1
 
     public static bool Enforce<T>(this IEnforcer enforcer, T value)

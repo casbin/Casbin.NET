@@ -838,7 +838,6 @@ public struct StringRequestValues : IRequestValues
         {
             return TrySetValue(index, v);
         }
-
         return false;
     }
 
@@ -888,12 +887,25 @@ public struct StringRequestValues : IRequestValues
     }
 }
 
-public readonly struct ObjectListRequestValues : IRequestValues
+public readonly struct ListRequestValues<TValue> : IRequestValues
 {
-    private readonly IList<object> _values;
+    private readonly IList<TValue> _values;
 
-    public ObjectListRequestValues(IReadOnlyList<object> values) =>
-        _values = values as IList<object> ?? values.ToList();
+    public ListRequestValues(IEnumerable<TValue> values) =>
+        _values = values as IList<TValue> ?? values.ToArray();
+
+    public TValue Value1 => _values[0];
+    public TValue Value2 => _values[1];
+    public TValue Value3 => _values[2];
+    public TValue Value4 => _values[3];
+    public TValue Value5 => _values[4];
+    public TValue Value6 => _values[5];
+    public TValue Value7 => _values[6];
+    public TValue Value8 => _values[7];
+    public TValue Value9 => _values[8];
+    public TValue Value10 => _values[9];
+    public TValue Value11 => _values[10];
+    public TValue Value12 => _values[11];
 
     public string this[int index] => RequestValues.ToStringValue(_values[index]);
     public int Count => _values.Count;
@@ -905,7 +917,12 @@ public readonly struct ObjectListRequestValues : IRequestValues
             return false;
         }
 
-        _values[index] = value;
+        if (value is not TValue v)
+        {
+            return false;
+        }
+
+        _values[index] = v;
         return true;
     }
 }

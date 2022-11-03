@@ -9,7 +9,6 @@ public static class Request
         return count is >= 1 and <= 12;
     }
 
-
     public static RequestValues<T> CreateValues<T>(T value)
     {
         return new RequestValues<T>(value);
@@ -101,9 +100,10 @@ public static class Request
             value4, value5, value6, value7, value8, value9, value10, value11, value12);
     }
 
-    public static ObjectListRequestValues CreateValues(params object[] values) => new(values);
-
-    public static ObjectListRequestValues CreateValues(IReadOnlyList<object> values) => new(values);
+    public static ListRequestValues<T> CreateValues<T>(params T[] value)
+    {
+        return new ListRequestValues<T>(value);
+    }
 
     public static bool TryGetStringKey<TRequest>(TRequest requestValues, out string key) where TRequest : IRequestValues
     {

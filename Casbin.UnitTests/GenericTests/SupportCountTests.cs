@@ -41,56 +41,78 @@ public class SupportCountTests
         {
             case 1:
                 Assert.True(enforcer.Enforce(context, "value1"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1" }));
                 break;
             case 2:
                 Assert.True(enforcer.Enforce(context, "value1", "value2"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2" }));
                 break;
             case 3:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3" }));
                 break;
             case 4:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3", "value4" }));
                 break;
             case 5:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5" }));
                 break;
             case 6:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6" }));
                 break;
             case 7:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7" }));
                 break;
             case 8:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8" }));
                 break;
             case 9:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8", "value9"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9" }));
                 break;
             case 10:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8", "value9",
                     "value10"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9", "value10" }));
                 break;
             case 11:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8", "value9",
                     "value10", "value11"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9", "value10", "value11" }));
                 break;
             case 12:
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8", "value9",
                     "value10", "value11", "value12"));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9", "value10", "value11", "value12" }));
                 break;
             case 13:
                 Assert.True(enforcer.Enforce(context, Request.CreateValues("value1", "value2", "value3",
                     "value4", "value5", "value6", "value7", "value8", "value9",
                     "value10", "value11", "value12", "value13")));
+                Assert.True(enforcer.Enforce(context, new[] { "value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9", "value10", "value11", "value12", "value13" }));
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(requestCount));
