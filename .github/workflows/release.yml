@@ -74,7 +74,7 @@ jobs:
 
         if($LastExitCode -ne 0)
         {
-            Write-Warning -Message "Can not upload coverage, laat exit code is ${LastExitCode}."
+            Write-Warning -Message "Can not upload coverage, last exit code is ${LastExitCode}."
             $LastExitCode = 0;
         }
 
@@ -151,6 +151,12 @@ jobs:
         $Version = ($LastTag).TrimStart('v');
         echo "Publishing version: $Version";
         dotnet pack -c Release -o packages /p:PackageVersion=$Version /p:Version=$Version;
+
+        if($LastExitCode -ne 0)
+        {
+            Write-Warning -Message "Pack packages warming, last exit code is ${LastExitCode}."
+            $LastExitCode = 0;
+        }
 
     - name: Upload packages artefacts
       uses: actions/upload-artifact@v1.0.0
