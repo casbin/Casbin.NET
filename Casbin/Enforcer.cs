@@ -18,23 +18,23 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath, Action<EnforcerOptions> optionSettings = null)
-            : this(modelPath, new FileAdapter(policyPath), optionSettings)
+        public Enforcer(string modelPath, string policyPath, Action<EnforcerOptions> optionAction = null)
+            : this(modelPath, new FileAdapter(policyPath), optionAction)
         {
         }
 
         public Enforcer(string modelPath, IReadOnlyAdapter adapter = null,
-            Action<EnforcerOptions> optionSettings = null)
-            : this(DefaultModel.CreateFromFile(modelPath), adapter, optionSettings)
+            Action<EnforcerOptions> optionAction = null)
+            : this(DefaultModel.CreateFromFile(modelPath), adapter, optionAction)
         {
         }
 
-        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, Action<EnforcerOptions> optionSettings = null)
+        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, Action<EnforcerOptions> optionAction = null)
         {
             EnforcerOptions options = new();
-            if (optionSettings is not null)
+            if (optionAction is not null)
             {
-                optionSettings(options);
+                optionAction(options);
             }
 
             Enabled = options.Enabled;

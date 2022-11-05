@@ -13,13 +13,11 @@ namespace Casbin.Model
 {
     public class DefaultModel : IModel
     {
-        private DefaultModel(ISections sections) => Sections = sections;
-
         public string Path { get; private set; }
-        public ISections Sections { get; }
-        public PolicyStoreHolder PolicyStoreHolder { get; } = new();
+        public ISections Sections { get; } = new DefaultSections();
+        public PolicyStoreHolder PolicyStoreHolder { get; } = new() { PolicyStore = new DefaultPolicyStore() };
+        public EffectorHolder EffectorHolder { get; } = new() { Effector = new DefaultEffector() };
         public AdapterHolder AdapterHolder { get; } = new();
-        public EffectorHolder EffectorHolder { get; } = new();
         public WatcherHolder WatcherHolder { get; } = new();
         public IEnforceViewCache EnforceViewCache { get; set; } = new EnforceViewCache();
         public IEnforceCache EnforceCache { get; set; } = new EnforceCache(new EnforceCacheOptions());
@@ -64,15 +62,7 @@ namespace Casbin.Model
         ///     Creates a default model.
         /// </summary>
         /// <returns></returns>
-        public static IModel Create()
-        {
-            DefaultModel model = new(new DefaultSections())
-            {
-                PolicyStoreHolder = { PolicyStore = new DefaultPolicyStore() },
-                EffectorHolder = { Effector = new DefaultEffector() }
-            };
-            return model;
-        }
+        public static IModel Create() => new DefaultModel();
 
         /// <summary>
         ///     Creates a default model from file.
