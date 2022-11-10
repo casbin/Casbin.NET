@@ -39,12 +39,13 @@ internal class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
 
     private void LoadFilteredPolicyFile(IPolicyStore store, IPolicyFilter filter)
     {
-        IEnumerable<IPersistantPolicy> policies = ReadPersistantPolicy(InputStream);
-        policies = filter.ApplyFilter(policies.AsQueryable());
-        foreach (IPersistantPolicy policy in policies)
+        IEnumerable<IPersistPolicy> policies = ReadPersistantPolicy(InputStream);
+        policies = filter.Apply(policies.AsQueryable());
+        foreach (IPersistPolicy policy in policies)
         {
-            string section = policy.Type.Substring(0, 1);
-            store.AddPolicy(section, policy.Type, policy.Values);
+            string section = policy.Section;
+            IPolicyValues values = Policy.ValuesFrom(policy);
+            store.AddPolicy(section, policy.Type, values);
         }
 
         IsFiltered = true;
@@ -60,7 +61,7 @@ internal class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
 #endif
     }
 
-    private static IEnumerable<IPersistantPolicy> ReadPersistantPolicy(System.IO.Stream inputStream)
+    private static IEnumerable<IPersistPolicy> ReadPersistantPolicy(System.IO.Stream inputStream)
     {
         using StreamReader reader = new(inputStream);
         while (reader.EndOfStream is false)
@@ -79,8 +80,10 @@ internal class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
             string[] tokens = line.Split(PermConstants.PolicySeparatorChar).Select(x => x.Trim()).ToArray();
             string type = tokens[0];
             IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
-            yield return new PersistantPolicy(type, values);
+            yield return PersistPolicy.Create<PersistPolicy>(type, values);
         }
     }
 }
+
+
 

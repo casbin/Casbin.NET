@@ -1,9 +1,8 @@
-﻿using Casbin.Model;
+﻿namespace Casbin.Persist;
 
-namespace Casbin.Persist;
-
-public interface IPersistantPolicy
+public interface IPersistPolicy
 {
+    public string Section { get; set; }
     public string Type { get; set; }
     public string Value1 { get; set; }
     public string Value2 { get; set; }
@@ -17,6 +16,7 @@ public interface IPersistantPolicy
     public string Value10 { get; set; }
     public string Value11 { get; set; }
     public string Value12 { get; set; }
-    public IPolicyValues Values { get; }
 }
+
+
 

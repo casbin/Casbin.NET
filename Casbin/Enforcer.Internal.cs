@@ -112,7 +112,7 @@ public partial class Enforcer
         }
         else
         {
-            StringPolicyValues policyValues = StringPolicyValues.Empty;
+            DummyPolicyValues policyValues = DummyPolicyValues.Empty;
             HandleBeforeExpression(in context, ref session, in effectChain, in requestValues, policyValues);
             session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
                 in requestValues, in policyValues);
@@ -333,5 +333,6 @@ public partial class Enforcer
         return expressionString;
     }
 }
+
 
 

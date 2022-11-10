@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using Casbin.Persist;
 
 namespace Casbin.Model;
 
@@ -130,12 +132,95 @@ public static class Policy
             12 => CreateValues(values[0], values[1], values[2], values[3],
                 values[4], values[5], values[6], values[7], values[8],
                 values[9], values[10], values[11]),
-            _ => new StringListPolicy(values)
+            _ => new StringListPolicyValues(values)
         };
     }
 
     public static IPolicyValues ValuesFrom(IEnumerable<string> values) =>
         ValuesFrom(values as IReadOnlyList<string> ?? values.ToArray());
+
+    public static IPolicyValues ValuesFrom(IPersistPolicy values)
+    {
+        // Find the latest not empty value as the count.
+        int count;
+        if (string.IsNullOrWhiteSpace(values.Value12) is false)
+        {
+            count = 12;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value11) is false)
+        {
+            count = 11;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value10) is false)
+        {
+            count = 10;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value9) is false)
+        {
+            count = 9;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value8) is false)
+        {
+            count = 8;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value7) is false)
+        {
+            count = 7;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value6) is false)
+        {
+            count = 6;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value5) is false)
+        {
+            count = 5;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value4) is false)
+        {
+            count = 4;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value3) is false)
+        {
+            count = 3;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value2) is false)
+        {
+            count = 2;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value1) is false)
+        {
+            count = 1;
+        }
+        else
+        {
+            count = 0;
+        }
+
+        return count switch
+        {
+            1 => CreateValues(values.Value1),
+            2 => CreateValues(values.Value1, values.Value2),
+            3 => CreateValues(values.Value1, values.Value2, values.Value3),
+            4 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4),
+            5 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5),
+            6 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6),
+            7 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7),
+            8 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8),
+            9 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9),
+            10 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9, values.Value10),
+            11 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9, values.Value10, values.Value11),
+            12 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9, values.Value10, values.Value11,
+                values.Value12),
+            _ => throw new ArgumentOutOfRangeException(nameof(count), count, null)
+        };
+    }
 
     public static IReadOnlyList<IPolicyValues> ValuesListFrom(IEnumerable<IEnumerable<string>> rules)
     {
@@ -143,3 +228,5 @@ public static class Policy
         return policies as IReadOnlyList<IPolicyValues> ?? policies.ToArray();
     }
 }
+
+

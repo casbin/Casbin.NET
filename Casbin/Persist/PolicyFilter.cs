@@ -4,44 +4,44 @@ using Casbin.Model;
 
 namespace Casbin.Persist;
 
-public class PolicyFilter : PolicyFilter<IPersistantPolicy>
+public class PolicyFilter
 {
-    public static new readonly PolicyFilter Empty = new();
+    public static readonly PolicyFilter Empty = new();
+    private readonly int _fieldIndex;
 
-    protected PolicyFilter()
+    private readonly string _policyType;
+    private readonly IPolicyValues _values;
+
+    public PolicyFilter()
     {
     }
-
-    internal PolicyFilter(Func<IQueryable<IPersistantPolicy>, IQueryable<IPersistantPolicy>> filter) : base(filter)
-    {
-    }
-
-    public PolicyFilter(string policyType, int fieldIndex, IPolicyValues values) : base(policyType, fieldIndex, values)
-    {
-    }
-}
-
-public class PolicyFilter<T> : IPolicyFilter<T> where T : IPersistantPolicy
-{
-    public static readonly PolicyFilter<T> Empty = new();
-
-    private readonly Func<IQueryable<T>, IQueryable<T>> _filter;
-
-    protected PolicyFilter()
-    {
-    }
-
-    internal PolicyFilter(Func<IQueryable<T>, IQueryable<T>> filter) => _filter = filter;
 
     public PolicyFilter(string policyType, int fieldIndex, IPolicyValues values)
-        : this(p => FilterValues(p, policyType, fieldIndex, values))
     {
+        _policyType = policyType;
+        _fieldIndex = fieldIndex;
+        _values = values;
     }
 
-    public IQueryable<T> ApplyFilter(IQueryable<T> policies) => _filter is null ? policies : _filter(policies);
+    public IQueryable<T> Apply<T>(IQueryable<T> policies)
+        where T : IPersistPolicy
+    {
+        if (_policyType is null)
+        {
+            return policies;
+        }
 
-    private static IQueryable<T> FilterValues(IQueryable<T> query,
+        if (_values is null)
+        {
+            return policies;
+        }
+
+        return FilterValues(policies, _policyType, _fieldIndex, _values);
+    }
+
+    private static IQueryable<T> FilterValues<T>(IQueryable<T> query,
         string policyType, int fieldIndex, IPolicyValues values)
+        where T : IPersistPolicy
     {
         if (fieldIndex > 12)
         {
@@ -174,4 +174,6 @@ public class PolicyFilter<T> : IPolicyFilter<T> where T : IPersistantPolicy
         return query;
     }
 }
+
+
 

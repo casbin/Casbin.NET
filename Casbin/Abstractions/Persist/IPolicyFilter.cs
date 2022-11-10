@@ -2,12 +2,11 @@
 
 namespace Casbin.Persist;
 
-public interface IPolicyFilter : IPolicyFilter<IPersistantPolicy>
+public interface IPolicyFilter
 {
+    public IQueryable<T> Apply<T>(IQueryable<T> policies) where T : IPersistPolicy;
 }
 
-public interface IPolicyFilter<T> where T : IPersistantPolicy
-{
-    public IQueryable<T> ApplyFilter(IQueryable<T> policies);
-}
+
+
 

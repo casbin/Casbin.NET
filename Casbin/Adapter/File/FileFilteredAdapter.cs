@@ -65,12 +65,13 @@ public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
 
     private void LoadFilteredPolicyFile(IPolicyStore store, IPolicyFilter filter)
     {
-        IEnumerable<IPersistantPolicy> policies = ReadPersistantPolicy(FilePath);
-        policies = filter.ApplyFilter(policies.AsQueryable());
-        foreach (IPersistantPolicy policy in policies)
+        IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(FilePath);
+        policies = filter.Apply(policies.AsQueryable());
+        foreach (IPersistPolicy policy in policies)
         {
-            string section = policy.Type.Substring(0, 1);
-            store.AddPolicy(section, policy.Type, policy.Values);
+            string section = policy.Section;
+            IPolicyValues values = Policy.ValuesFrom(policy);
+            store.AddPolicy(section, policy.Type, values);
         }
 
         IsFiltered = true;
@@ -86,7 +87,7 @@ public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
 #endif
     }
 
-    private static IEnumerable<IPersistantPolicy> ReadPersistantPolicy(string filePath)
+    private static IEnumerable<IPersistPolicy> ReadPersistPolicy(string filePath)
     {
         using StreamReader reader = new(new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
         while (reader.EndOfStream is false)
@@ -105,8 +106,10 @@ public class FileFilteredAdapter : FileAdapter, IFilteredAdapter
             string[] tokens = line.Split(PermConstants.PolicySeparatorChar).Select(x => x.Trim()).ToArray();
             string type = tokens[0];
             IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
-            yield return new PersistantPolicy(type, values);
+            yield return PersistPolicy.Create<PersistPolicy>(type, values);
         }
     }
 }
+
+
 

@@ -8,52 +8,64 @@ namespace Casbin.Persist;
 [Obsolete("Please use PolicyFilter instead")]
 public class Filter : IPolicyFilter
 {
-    private readonly PolicyFilter _filter;
+    private PolicyFilter _filterG;
 
-    public Filter() => _filter = this;
 
-    public IEnumerable<string> G { get; set; }
+    private PolicyFilter _filterP;
+    private IEnumerable<string> _g;
+    private IEnumerable<string> _p;
 
-    public IEnumerable<string> P { get; set; }
-
-    public IQueryable<IPersistantPolicy> ApplyFilter(IQueryable<IPersistantPolicy> policies) =>
-        _filter is not null ? _filter.ApplyFilter(policies) : policies;
-
-    public static implicit operator PolicyFilter(Filter filter)
+    public IEnumerable<string> P
     {
-        if (filter is null)
+        get => _p;
+        set
         {
-            return PolicyFilter.Empty;
+            _p = value;
+            _filterP = new PolicyFilter(PermConstants.DefaultPolicyType, 0,
+                Policy.CreateValues(value));
+        }
+    }
+
+    public IEnumerable<string> G
+    {
+        get => _g;
+        set
+        {
+            _g = value;
+            _filterG = new PolicyFilter(PermConstants.DefaultGroupingPolicyType, 0,
+                Policy.CreateValues(value));
+        }
+    }
+
+    public IQueryable<T> Apply<T>(IQueryable<T> policies) where T : IPersistPolicy
+    {
+        if (_filterP is null && _filterG is null)
+        {
+            return policies;
         }
 
-        if (filter.P is null && filter.G is null)
+        if (_filterP is not null && _filterG is not null)
         {
-            return PolicyFilter.Empty;
+            IQueryable<T> policiesP = _filterP.Apply(policies);
+            IQueryable<T> policiesG = _filterG.Apply(policies);
+            return policiesP.Union(policiesG);
         }
 
-        if (filter.P is not null && filter.G is not null)
+        if (_filterP is not null)
         {
-            PolicyFilter filterP = new(PermConstants.DefaultPolicyType, 0,
-                Policy.CreateValues(filter.P));
-            PolicyFilter filterG = new(PermConstants.DefaultGroupingPolicyType, 0,
-                Policy.CreateValues(filter.G));
-            return filterP.Or(filterG) as PolicyFilter;
+            return _filterP.Apply(policies);
         }
 
-        if (filter.P is not null)
+        if (_filterG is not null)
         {
-            return new PolicyFilter(PermConstants.DefaultPolicyType, 0,
-                Policy.CreateValues(filter.P));
+            return _filterG.Apply(policies);
         }
 
-        if (filter.G is not null)
-        {
-            return new PolicyFilter(PermConstants.DefaultPolicyType, 0,
-                Policy.CreateValues(filter.P));
-        }
-
-        return PolicyFilter.Empty;
+        return policies;
     }
 }
+
+
+
 
 
