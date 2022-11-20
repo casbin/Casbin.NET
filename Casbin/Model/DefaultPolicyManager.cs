@@ -20,7 +20,7 @@ namespace Casbin.Model
             _adapterHolder = adapterHolder;
         }
 
-        private bool HasAdapter => _adapterHolder.Adapter is null;
+        private bool HasAdapter => _adapterHolder.Adapter is not null;
 
         public bool AutoSave { get; set; } = true;
 
