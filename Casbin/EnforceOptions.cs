@@ -10,7 +10,9 @@ public class EnforcerOptions
     public bool AutoNotifyWatcher { get; set; } = true;
     public bool AutoCleanEnforceCache { get; set; } = true;
     public bool AutoLoadPolicy { get; set; } = true;
-    public IPolicyFilter AutoLoadPolicyFilter { get; set; } = new Filter();
+    public IPolicyFilter AutoLoadPolicyFilter { get; set; } = null;
 }
+
+
 
 

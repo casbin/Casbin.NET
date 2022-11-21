@@ -22,7 +22,7 @@ public class Filter : IPolicyFilter
         {
             _p = value;
             _filterP = new PolicyFilter(PermConstants.DefaultPolicyType, 0,
-                Policy.CreateValues(value));
+                Policy.ValuesFrom(value));
         }
     }
 
@@ -33,7 +33,7 @@ public class Filter : IPolicyFilter
         {
             _g = value;
             _filterG = new PolicyFilter(PermConstants.DefaultGroupingPolicyType, 0,
-                Policy.CreateValues(value));
+                Policy.ValuesFrom(value));
         }
     }
 
@@ -64,6 +64,7 @@ public class Filter : IPolicyFilter
         return policies;
     }
 }
+
 
 
 
