@@ -54,7 +54,7 @@ namespace Casbin
         /// <param name="autoSave"></param>
         public static IEnforcer EnableAutoSave(this IEnforcer enforcer, bool autoSave)
         {
-            enforcer.Model.EnableAutoSave(autoSave);
+            enforcer.Model.SetAutoSave(autoSave);
             return enforcer;
         }
 
