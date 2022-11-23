@@ -5,10 +5,10 @@ namespace Casbin.Persist;
 
 public static class AdapterExtension
 {
-    public static void LoadPolicy(this IEpochAdapter adapter, IModel model) =>
+    public static void LoadPolicy(this IReadOnlyAdapter adapter, IModel model) =>
         adapter.LoadPolicy(model.PolicyStoreHolder.PolicyStore);
 
-    public static Task LoadPolicyAsync(this IEpochAdapter adapter, IModel model) =>
+    public static Task LoadPolicyAsync(this IReadOnlyAdapter adapter, IModel model) =>
         adapter.LoadPolicyAsync(model.PolicyStoreHolder.PolicyStore);
 
     public static void SavePolicy(this IEpochAdapter adapter, IModel model) =>
@@ -17,3 +17,4 @@ public static class AdapterExtension
     public static Task SavePolicyAsync(this IEpochAdapter adapter, IModel model) =>
         adapter.SavePolicyAsync(model.PolicyStoreHolder.PolicyStore);
 }
+
