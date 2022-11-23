@@ -18,34 +18,44 @@ namespace NetCasbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath)
-            : this(modelPath, new DefaultFileAdapter(policyPath))
+        public Enforcer(string modelPath, string policyPath, EnforcerOptions options = default)
+            : this(modelPath, new DefaultFileAdapter(policyPath), options)
         {
         }
 
-        public Enforcer(string modelPath, IAdapter adapter)
-            : this(NewModel(modelPath, string.Empty), adapter)
+        public Enforcer(string modelPath, IAdapter adapter, EnforcerOptions options = default)
+            : this(NewModel(modelPath, string.Empty), adapter, options)
         {
             this.modelPath = modelPath;
-        }
-
-        public Enforcer(Model.Model model, IAdapter adapter)
-        {
-            this.adapter = adapter;
-            watcher = null;
-            SetModel(model);
-            Initialize();
-            LoadPolicy();
-        }
-
-        public Enforcer(Model.Model m)
-            : this(m, null)
-        {
         }
 
         public Enforcer(string modelPath)
             : this(modelPath, string.Empty)
         {
+        }
+
+        public Enforcer(Model.Model model, IAdapter adapter = null, EnforcerOptions options = default)
+        {
+            this.adapter = adapter;
+            watcher = null;
+            SetModel(model);
+
+            options ??= new EnforcerOptions();
+            Initialize(options);
+
+            if (options.AutoLoadPolicy is false)
+            {
+                return;
+            }
+
+            if (options.AutoLoadPolicyFilter is not null)
+            {
+                LoadFilteredPolicy(options.AutoLoadPolicyFilter);
+            }
+            else
+            {
+                LoadPolicy();
+            }
         }
 
         [Obsolete(

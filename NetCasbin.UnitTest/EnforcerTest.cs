@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using NetCasbin.Extensions;
@@ -18,8 +17,8 @@ namespace NetCasbin.UnitTest
     [Collection("Model collection")]
     public class EnforcerTest
     {
-        private readonly ITestOutputHelper _testOutputHelper;
         private readonly TestModelFixture _testModelFixture;
+        private readonly ITestOutputHelper _testOutputHelper;
 
         public EnforcerTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
         {
@@ -27,7 +26,70 @@ namespace NetCasbin.UnitTest
             _testModelFixture = testModelFixture;
         }
 
+        [Fact]
+        public void TestEnforceWithMultipleRoleManager()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleModelText,
+                _testModelFixture._rbacMultiplePolicyText));
+
+            var roleManager = new DefaultRoleManager(5);
+            roleManager.AddMatchingFunc((arg1, arg2) => arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            bool result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.True(result);
+
+            roleManager.AddMatchingFunc((arg1, arg2) => !arg1.Equals(arg2));
+            e.SetRoleManager(roleManager);
+            result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void TestEnforceWithMultipleEval()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacMultipleEvalModelText,
+                _testModelFixture._rbacMultipleEvalPolicyText));
+
+            bool result = e.Enforce(
+                "domain1",
+                new { Role = "admin" },
+                new { Name = "admin_panel" },
+                "view");
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void TestEnforceWithDomainsPattern()
+        {
+            var e = new Enforcer(TestModelFixture.GetNewTestModel(
+                _testModelFixture._rbacWithDomainsPatternModelText,
+                _testModelFixture._rbacWithDomainsPatternPolicyText));
+
+            var rm = new DefaultRoleManager(10);
+            rm.AddDomainMatchingFunc(BuiltInFunctions.KeyMatch);
+            e.SetRoleManager(rm);
+            e.BuildRoleLinks();
+
+            bool result = e.Enforce("user||1", "tenant||1", "menu||2", "*");
+            Assert.True(result);
+
+            result = e.Enforce("user||1", "tenant||2", "menu||2", "*");
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void TestEnforceOptions()
+        {
+            Enforcer e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv",
+                new EnforcerOptions { AutoLoadPolicy = false });
+            TestGetPolicy(e, new List<List<string>>());
+        }
+
         #region In memory model
+
         [Fact]
         public void TestKeyMatchModelInMemory()
         {
@@ -433,9 +495,11 @@ namespace NetCasbin.UnitTest
             Assert.False(await e.EnforceAsync("alice", "data2", "read"));
             Assert.True(await e.EnforceAsync("alice", "data2", "write"));
         }
+
         #endregion
 
         #region Init enmpty
+
         [Fact]
         public void TestInitEmpty()
         {
@@ -487,7 +551,8 @@ namespace NetCasbin.UnitTest
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
+                       FileShare.ReadWrite))
             {
                 IAdapter a = new DefaultFileAdapter(fs);
                 e.SetModel(m);
@@ -509,7 +574,8 @@ namespace NetCasbin.UnitTest
             m.AddDef("e", "e", "some(where (p.eft == allow))");
             m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (var fs = new FileStream("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
+                       FileShare.ReadWrite))
             {
                 IAdapter a = new DefaultFileAdapter(fs);
                 e.SetModel(m);
@@ -519,16 +585,22 @@ namespace NetCasbin.UnitTest
                 await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
             }
         }
+
         #endregion
 
         #region Policy management
+
         [Fact]
         public void TestReloadPolicy()
         {
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             e.LoadPolicy();
-            TestGetPolicy(e, AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
+            TestGetPolicy(e, AsList(
+                AsList("alice", "data1", "read"),
+                AsList("bob", "data2", "write"),
+                AsList("data2_admin", "data2", "read"),
+                AsList("data2_admin", "data2", "write")));
         }
 
         [Fact]
@@ -537,7 +609,9 @@ namespace NetCasbin.UnitTest
             var e = new Enforcer("examples/rbac_model.conf", "examples/rbac_policy.csv");
 
             await e.LoadPolicyAsync();
-            TestGetPolicy(e, AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
+            TestGetPolicy(e,
+                AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"),
+                    AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
         }
 
         [Fact]
@@ -579,9 +653,11 @@ namespace NetCasbin.UnitTest
 
             e.ClearPolicy();
         }
+
         #endregion
 
         #region Extension features
+
         [Fact]
         public void TestEnableEnforce()
         {
@@ -819,43 +895,44 @@ namespace NetCasbin.UnitTest
         #endregion
 
         #region EnforceEx API
+
         [Fact]
         public void TestEnforceExApi()
         {
             var e = new Enforcer(_testModelFixture.GetBasicTestModel());
 
-            TestEnforceEx(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
             TestEnforceEx(e, "alice", "data1", "write", new List<string>());
             TestEnforceEx(e, "alice", "data2", "read", new List<string>());
             TestEnforceEx(e, "alice", "data2", "write", new List<string>());
             TestEnforceEx(e, "bob", "data1", "read", new List<string>());
             TestEnforceEx(e, "bob", "data1", "write", new List<string>());
             TestEnforceEx(e, "bob", "data2", "read", new List<string>());
-            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
             e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
 
-            TestEnforceEx(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
             TestEnforceEx(e, "alice", "data1", "write", new List<string>());
-            TestEnforceEx(e, "alice", "data2", "read", new List<string> {"data2_admin", "data2", "read"});
-            TestEnforceEx(e, "alice", "data2", "write", new List<string> {"data2_admin", "data2", "write"});
+            TestEnforceEx(e, "alice", "data2", "read", new List<string> { "data2_admin", "data2", "read" });
+            TestEnforceEx(e, "alice", "data2", "write", new List<string> { "data2_admin", "data2", "write" });
             TestEnforceEx(e, "bob", "data1", "read", new List<string>());
             TestEnforceEx(e, "bob", "data1", "write", new List<string>());
             TestEnforceEx(e, "bob", "data2", "read", new List<string>());
-            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
             e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
             e.BuildRoleLinks();
 
-            TestEnforceEx(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read", "allow"});
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read", "allow" });
             TestEnforceEx(e, "alice", "data1", "write",
-                new List<string> {"data1_deny_group", "data1", "write", "deny"});
+                new List<string> { "data1_deny_group", "data1", "write", "deny" });
             TestEnforceEx(e, "alice", "data2", "read", new List<string>());
             TestEnforceEx(e, "alice", "data2", "write", new List<string>());
             TestEnforceEx(e, "bob", "data1", "write", new List<string>());
             TestEnforceEx(e, "bob", "data2", "read",
-                new List<string> {"data2_allow_group", "data2", "read", "allow"});
-            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
+                new List<string> { "data2_allow_group", "data2", "read", "allow" });
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write", "deny" });
         }
 
         [Fact]
@@ -863,38 +940,40 @@ namespace NetCasbin.UnitTest
         {
             var e = new Enforcer(_testModelFixture.GetBasicTestModel());
 
-            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
             await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
             await TestEnforceExAsync(e, "alice", "data2", "read", new List<string>());
             await TestEnforceExAsync(e, "alice", "data2", "write", new List<string>());
             await TestEnforceExAsync(e, "bob", "data1", "read", new List<string>());
             await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
             await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
-            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
             e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
 
-            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read"});
+            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
             await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
-            await TestEnforceExAsync(e, "alice", "data2", "read", new List<string> {"data2_admin", "data2", "read"});
-            await TestEnforceExAsync(e, "alice", "data2", "write", new List<string> {"data2_admin", "data2", "write"});
+            await TestEnforceExAsync(e, "alice", "data2", "read", new List<string> { "data2_admin", "data2", "read" });
+            await TestEnforceExAsync(e, "alice", "data2", "write",
+                new List<string> { "data2_admin", "data2", "write" });
             await TestEnforceExAsync(e, "bob", "data1", "read", new List<string>());
             await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
             await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
-            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
             e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
             e.BuildRoleLinks();
 
-            await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> {"alice", "data1", "read", "allow"});
+            await TestEnforceExAsync(e, "alice", "data1", "read",
+                new List<string> { "alice", "data1", "read", "allow" });
             await TestEnforceExAsync(e, "alice", "data1", "write",
-                new List<string> {"data1_deny_group", "data1", "write", "deny"});
+                new List<string> { "data1_deny_group", "data1", "write", "deny" });
             await TestEnforceExAsync(e, "alice", "data2", "read", new List<string>());
             await TestEnforceExAsync(e, "alice", "data2", "write", new List<string>());
             await TestEnforceExAsync(e, "bob", "data1", "write", new List<string>());
             await TestEnforceExAsync(e, "bob", "data2", "read",
-                new List<string> {"data2_allow_group", "data2", "read", "allow"});
-            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write", "deny"});
+                new List<string> { "data2_allow_group", "data2", "read", "allow" });
+            await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write", "deny" });
         }
 
 #if !NET452
@@ -906,21 +985,23 @@ namespace NetCasbin.UnitTest
                 Logger = new MockLogger<Enforcer>(_testOutputHelper)
             };
 
-            TestEnforceEx(e, "alice", "data1", "read", new List<string>{"alice", "data1", "read"});
+            TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
             TestEnforceEx(e, "alice", "data1", "write", new List<string>());
             TestEnforceEx(e, "alice", "data2", "read", new List<string>());
             TestEnforceEx(e, "alice", "data2", "write", new List<string>());
             TestEnforceEx(e, "bob", "data1", "read", new List<string>());
             TestEnforceEx(e, "bob", "data1", "write", new List<string>());
             TestEnforceEx(e, "bob", "data2", "read", new List<string>());
-            TestEnforceEx(e, "bob", "data2", "write", new List<string> {"bob", "data2", "write"});
+            TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
             e.Logger = null;
         }
 #endif
+
         #endregion
 
         #region EnforceWithMatcher and EnforceExWithMatcher API
+
         [Fact]
         public void TestEnforceWithMatcherApi()
         {
@@ -962,7 +1043,8 @@ namespace NetCasbin.UnitTest
             e.TestEnforceExWithMatcher(matcher, "alice", "data1", "read", new List<string>());
             e.TestEnforceExWithMatcher(matcher, "alice", "data1", "write", new List<string>());
             e.TestEnforceExWithMatcher(matcher, "alice", "data2", "read", new List<string>());
-            e.TestEnforceExWithMatcher(matcher, "alice", "data2", "write", new List<string> { "bob", "data2", "write" });
+            e.TestEnforceExWithMatcher(matcher, "alice", "data2", "write",
+                new List<string> { "bob", "data2", "write" });
             e.TestEnforceExWithMatcher(matcher, "bob", "data1", "read", new List<string> { "alice", "data1", "read" });
             e.TestEnforceExWithMatcher(matcher, "bob", "data1", "write", new List<string>());
             e.TestEnforceExWithMatcher(matcher, "bob", "data2", "read", new List<string>());
@@ -978,66 +1060,15 @@ namespace NetCasbin.UnitTest
             await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data1", "read", new List<string>());
             await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data1", "write", new List<string>());
             await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data2", "read", new List<string>());
-            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data2", "write", new List<string> { "bob", "data2", "write" });
-            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "read", new List<string> { "alice", "data1", "read" });
+            await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data2", "write",
+                new List<string> { "bob", "data2", "write" });
+            await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "read",
+                new List<string> { "alice", "data1", "read" });
             await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "write", new List<string>());
             await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "read", new List<string>());
             await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "write", new List<string>());
         }
+
         #endregion
-
-        [Fact]
-        public void TestEnforceWithMultipleRoleManager()
-        {
-            var e = new Enforcer(TestModelFixture.GetNewTestModel(
-                _testModelFixture._rbacMultipleModelText,
-                _testModelFixture._rbacMultiplePolicyText));
-
-            var roleManager = new DefaultRoleManager(5);
-            roleManager.AddMatchingFunc((arg1, arg2) => arg1.Equals(arg2));
-            e.SetRoleManager(roleManager);
-            bool result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
-            Assert.True(result);
-
-            roleManager.AddMatchingFunc((arg1, arg2) => !arg1.Equals(arg2));
-            e.SetRoleManager(roleManager);
-            result = e.Enforce("@adm-user", "org::customer1", "cust1", "manage");
-            Assert.False(result);
-        }
-
-        [Fact]
-        public void TestEnforceWithMultipleEval()
-        {
-            var e = new Enforcer(TestModelFixture.GetNewTestModel(
-                _testModelFixture._rbacMultipleEvalModelText,
-                _testModelFixture._rbacMultipleEvalPolicyText));
-
-            bool result = e.Enforce(
-                "domain1",
-                new { Role = "admin" },
-                new { Name = "admin_panel" },
-                "view");
-
-            Assert.True(result);
-        }
-
-        [Fact]
-        public void TestEnforceWithDomainsPattern()
-        {
-            var e = new Enforcer(TestModelFixture.GetNewTestModel(
-                _testModelFixture._rbacWithDomainsPatternModelText,
-                _testModelFixture._rbacWithDomainsPatternPolicyText));
-
-            var rm = new DefaultRoleManager(10);
-            rm.AddDomainMatchingFunc(BuiltInFunctions.KeyMatch);
-            e.SetRoleManager(rm);
-            e.BuildRoleLinks();
-
-            bool result = e.Enforce("user||1", "tenant||1", "menu||2", "*");
-            Assert.True(result);
-
-            result = e.Enforce("user||1", "tenant||2", "menu||2", "*");
-            Assert.False(result);
-        }
     }
 }

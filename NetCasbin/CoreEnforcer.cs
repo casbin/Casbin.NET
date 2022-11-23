@@ -42,15 +42,15 @@ namespace NetCasbin
         public ILogger Logger { get; set; }
 #endif
 
-        protected void Initialize()
+        protected void Initialize(EnforcerOptions options)
         {
             _effector = new DefaultEffector();
             watcher = null;
 
-            _enabled = true;
+            _enabled = options.Enabled;
             autoSave = true;
-            autoBuildRoleLinks = true;
-            autoNotifyWatcher = true;
+            autoBuildRoleLinks = options.AutoBuildRoleLinks;
+            autoNotifyWatcher = options.AutoNotifyWatcher;
         }
 
         /// <summary>
