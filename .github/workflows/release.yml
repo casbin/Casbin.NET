@@ -43,7 +43,7 @@ jobs:
         run: dotnet build -c Release --no-restore
 
       - name: Test solution
-        run: dotnet test -c Release --no-build --no-restore --verbosity normal -r test-results --collect:"XPlat Code Coverage" `
+        run: dotnet test -c Release --no-build --no-restore --results-directory test-results --verbosity normal --collect:"XPlat Code Coverage" `
           -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=json,cobertura,lcov,teamcity,opencover
 
       - name: Upload coverage
