@@ -72,8 +72,7 @@ public class EnforcerTest
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
         FileAdapter a = new("examples/keymatch_policy.csv");
-
-        IEnforcer e = new Enforcer(m, a, options => { options.AutoLoadPolicy = false; });
+        IEnforcer e = new Enforcer(m, a, new EnforcerOptions { AutoLoadPolicy = false });
         Assert.Empty(e.GetPolicy());
 
         e = new Enforcer(m, a);
@@ -1280,5 +1279,6 @@ public class EnforcerTest
 
     #endregion
 }
+
 
 
