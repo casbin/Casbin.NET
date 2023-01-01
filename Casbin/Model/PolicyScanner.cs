@@ -22,7 +22,7 @@ public ref struct PolicyScanner<TRequest> where TRequest : IRequestValues
     private PolicyScanner _scanner;
     private readonly TRequest _request;
 
-    internal PolicyScanner(in PolicyScanner scanner, in TRequest request)
+    internal PolicyScanner(PolicyScanner scanner, in TRequest request)
     {
         _scanner = scanner;
         _request = request;
