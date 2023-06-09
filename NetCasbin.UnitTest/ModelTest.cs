@@ -564,7 +564,6 @@ namespace NetCasbin.UnitTest
         public void TestModelWithCommaAndQuotations()
         {
             var e = new Enforcer(_testModelFixture.GetNewCommaAndQuotationsModel());
-            e.BuildRoleLinks();
 
             TestEnforce(e, "alice", "Comma,Test", "Get", true);
             TestEnforce(e, "alice", "Comma,Test", "Post", false);
