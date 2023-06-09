@@ -572,10 +572,10 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Post", false);
             TestEnforce(e, "bob", "\"\"Comma\"\",\"\"Quotations\"\",Test", "Get", false);
             TestEnforce(e, "bob", "\"\"\"Comma\"\",\"\"Quotations\"\",Test\"", "Get", false);
-            TestEnforce(e, "cindy", "\"\"\"Muti Quotations Test\"", "Get", true);
-            TestEnforce(e, "cindy", "\"\"\"Muti Quotations Test\"", "Post", false);
-            TestEnforce(e, "cindy", "\"\"Muti Quotations Test\"", "Get", false);
+            TestEnforce(e, "cindy", "\"Muti Quotations Test", "Get", true);
+            TestEnforce(e, "cindy", "\"Muti Quotations Test", "Post", false);
             TestEnforce(e, "cindy", "\"\"Muti Quotations Test", "Get", false);
+            TestEnforce(e, "cindy", "\"\"Muti Quotations Test\"", "Get", false);
         }
         public class TestResource
         {
