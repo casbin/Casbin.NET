@@ -39,14 +39,13 @@ namespace NetCasbin.Persist
                 IgnoreBlankLines = true,
                 BadDataFound = null
             });
-            while (parser.Read())
+            if (parser.Read())
             {
                 string[] tokens = parser.Record;
                 return model.TryLoadPolicyLine(tokens);
             };
             return false;
         }
-
         public static bool TryLoadPolicyLine(this Model.Model model, IReadOnlyList<string> lineTokens)
         {
             string type = lineTokens[0];
