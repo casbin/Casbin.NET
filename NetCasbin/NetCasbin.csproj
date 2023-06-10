@@ -36,51 +36,52 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="casbin.snk"/>
-    <None Remove="Casbin.csproj.DotSettings"/>
+    <None Remove="casbin.snk" />
+    <None Remove="Casbin.csproj.DotSettings" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DynamicExpresso.Core" Version="2.4.1"/>
-    <PackageReference Include="DotNet.Glob" Version="3.1.3"/>
-    <PackageReference Include="System.Memory" Version="4.5.4"/>
-    <PackageReference Include="Microsoft.SourceLink.Github" Version="1.1.1" PrivateAssets="All"/>
+    <PackageReference Include="CsvHelper" Version="30.0.1" />
+    <PackageReference Include="DynamicExpresso.Core" Version="2.4.1" />
+    <PackageReference Include="DotNet.Glob" Version="3.1.3" />
+    <PackageReference Include="System.Memory" Version="4.5.4" />
+    <PackageReference Include="Microsoft.SourceLink.Github" Version="1.1.1" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0-rc.1.22426.10"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0-rc.1.22426.10" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.18" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net452'">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0"/>
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="casbin.png" Pack="true" Visible="false" PackagePath=""/>
+    <None Include="casbin.png" Pack="true" Visible="false" PackagePath="" />
   </ItemGroup>
 
 </Project>

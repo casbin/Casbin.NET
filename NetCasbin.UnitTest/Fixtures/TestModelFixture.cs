@@ -58,6 +58,10 @@ namespace NetCasbin.UnitTest.Fixtures
         internal readonly string _rbacWithDomainsPatternModelText = ReadTestFile("rbac_with_domains_pattern_model.conf");
         internal readonly string _rbacWithDomainsPatternPolicyText = ReadTestFile("rbac_with_domains_pattern_policy.csv");
 
+        //https://github.com/casbin/Casbin.NET/issues/310
+        internal readonly string _commaAndQuotationsModelText = ReadTestFile("comma_quotations_model.conf");
+        internal readonly string _commaAndQuotationsPolicyText = ReadTestFile("comma_quotations_policy.csv");
+
         public Model.Model GetNewAbacModel()
         {
             return GetNewTestModel(_abacModelText);
@@ -136,6 +140,11 @@ namespace NetCasbin.UnitTest.Fixtures
         public static Model.Model GetNewTestModel(string modelText, string policyText)
         {
             return LoadModelFromMemory(GetNewTestModel(modelText), policyText);
+        }
+
+        public Model.Model GetNewCommaAndQuotationsModel()
+        {
+            return GetNewTestModel(_commaAndQuotationsModelText, _commaAndQuotationsPolicyText);
         }
 
         public static string GetTestFile(string fileName)

@@ -560,6 +560,23 @@ namespace NetCasbin.UnitTest
             TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
         }
 
+        [Fact]
+        public void TestModelWithCommaAndQuotations()
+        {
+            var e = new Enforcer(_testModelFixture.GetNewCommaAndQuotationsModel());
+
+            TestEnforce(e, "alice", "Comma,Test", "Get", true);
+            TestEnforce(e, "alice", "Comma,Test", "Post", false);
+            TestEnforce(e, "alice", "\"Comma,Test\"", "Get", false);
+            TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Get", true);
+            TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Post", false);
+            TestEnforce(e, "bob", "\"\"Comma\"\",\"\"Quotations\"\",Test", "Get", false);
+            TestEnforce(e, "bob", "\"\"\"Comma\"\",\"\"Quotations\"\",Test\"", "Get", false);
+            TestEnforce(e, "cindy", "\"Muti Quotations Test", "Get", true);
+            TestEnforce(e, "cindy", "\"Muti Quotations Test", "Post", false);
+            TestEnforce(e, "cindy", "\"\"Muti Quotations Test", "Get", false);
+            TestEnforce(e, "cindy", "\"\"Muti Quotations Test\"", "Get", false);
+        }
         public class TestResource
         {
             public TestResource(string name, string owner)

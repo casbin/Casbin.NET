@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
+using CsvHelper.Configuration;
+using CsvHelper;
 using NetCasbin.Model;
 
 namespace NetCasbin.Persist
@@ -28,16 +32,35 @@ namespace NetCasbin.Persist
                 return false;
             }
 
-            string[] tokens = line.Split(',').Select(x => x.Trim()).ToArray();
-            return model.TryLoadPolicyLine(tokens);
+            CsvParser parser = new(new StringReader(line), new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                HasHeaderRecord = false,
+                TrimOptions = TrimOptions.Trim,
+                IgnoreBlankLines = true,
+                BadDataFound = null
+            });
+            if (parser.Read())
+            {
+                string[] tokens = parser.Record;
+                return model.TryLoadPolicyLine(tokens);
+            };
+            return false;
         }
-
         public static bool TryLoadPolicyLine(this Model.Model model, IReadOnlyList<string> lineTokens)
         {
             string type = lineTokens[0];
             string sec = type.Substring(0, 1);
-            return model.TryGetExistAssertion(sec, type, out Assertion assertion)
-                   && assertion.TryAddPolicy(lineTokens.Skip(1).ToList());
+            if (model.TryGetExistAssertion(sec, type, out Assertion assertion) is false)
+            {
+                return false;
+            }
+
+            var tokens = lineTokens.Skip(1).ToList();
+            if (assertion.Tokens is not null && assertion.Tokens.Count != tokens.Count)
+            {
+                return false;
+            }
+            return assertion.TryAddPolicy(tokens);
         }
     }
 }
