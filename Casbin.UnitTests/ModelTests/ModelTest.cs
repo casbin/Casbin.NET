@@ -609,7 +609,8 @@ public class ModelTest
         Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
         Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
-        Assert.Equal("r.sub == p.sub && r.obj == p.obj && r.act == p.act", model.Sections.GetMatcherAssertion("m").Value);
+        Assert.Equal("r.sub == p.sub && r.obj == p.obj && r.act == p.act",
+            model.Sections.GetMatcherAssertion("m").Value);
     }
 
     [Fact]
@@ -621,7 +622,26 @@ public class ModelTest
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
         Assert.Equal("_, _", model.Sections.GetRoleAssertion("g").Value);
         Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
-        Assert.Equal("g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act", model.Sections.GetMatcherAssertion("m").Value);
+        Assert.Equal("g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act",
+            model.Sections.GetMatcherAssertion("m").Value);
+    }
+
+    [Fact]
+    public void TestModelWithCommaAndQuotations()
+    {
+        Enforcer e = new Enforcer(_testModelFixture.GetNewCommaAndQuotationsModel());
+
+        TestEnforce(e, "alice", "Comma,Test", "Get", true);
+        TestEnforce(e, "alice", "Comma,Test", "Post", false);
+        TestEnforce(e, "alice", "\"Comma,Test\"", "Get", false);
+        TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Get", true);
+        TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Post", false);
+        TestEnforce(e, "bob", "\"\"Comma\"\",\"\"Quotations\"\",Test", "Get", false);
+        TestEnforce(e, "bob", "\"\"\"Comma\"\",\"\"Quotations\"\",Test\"", "Get", false);
+        TestEnforce(e, "cindy", "\"Muti Quotations Test", "Get", true);
+        TestEnforce(e, "cindy", "\"Muti Quotations Test", "Post", false);
+        TestEnforce(e, "cindy", "\"\"Muti Quotations Test", "Get", false);
+        TestEnforce(e, "cindy", "\"\"Muti Quotations Test\"", "Get", false);
     }
 
     public class TestResource

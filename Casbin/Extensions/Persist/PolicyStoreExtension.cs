@@ -1,6 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using Casbin.Model;
+using CsvHelper;
+using CsvHelper.Configuration;
 
 namespace Casbin.Persist;
 
@@ -13,12 +17,26 @@ public static class PolicyStoreExtension
             return false;
         }
 
-        if (line.StartsWith("/") || line.StartsWith("#"))
+        if (line.StartsWith("#"))
         {
             return false;
         }
 
-        string[] tokens = line.Split(',').Select(x => x.Trim()).ToArray();
+        CsvParser parser = new(new StringReader(line),
+            new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                AllowComments = true,
+                HasHeaderRecord = false,
+                TrimOptions = TrimOptions.Trim,
+                IgnoreBlankLines = true,
+                BadDataFound = null
+            });
+        if (parser.Read() is false)
+        {
+            return false;
+        }
+
+        string[] tokens = parser.Record;
         return store.TryLoadPolicyLine(tokens);
     }
 

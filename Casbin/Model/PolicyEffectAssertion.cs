@@ -2,4 +2,5 @@
 
 public class PolicyEffectAssertion : Assertion
 {
+    public PolicyEffectAssertion() => Section = PermConstants.Section.PolicyEffectSection;
 }
