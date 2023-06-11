@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Casbin.Adapter.File;
 using Casbin.Caching;
@@ -7,6 +6,7 @@ using Casbin.Effect;
 using Casbin.Model;
 using Casbin.Persist;
 #if !NET452
+using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -18,24 +18,19 @@ namespace Casbin
         {
         }
 
-        public Enforcer(string modelPath, string policyPath, Action<EnforcerOptions> optionAction = null)
-            : this(modelPath, new FileAdapter(policyPath), optionAction)
+        public Enforcer(string modelPath, string policyPath, EnforcerOptions options = default)
+            : this(modelPath, new FileAdapter(policyPath), options)
         {
         }
 
-        public Enforcer(string modelPath, IReadOnlyAdapter adapter = null,
-            Action<EnforcerOptions> optionAction = null)
-            : this(DefaultModel.CreateFromFile(modelPath), adapter, optionAction)
+        public Enforcer(string modelPath, IReadOnlyAdapter adapter = default, EnforcerOptions options = default)
+            : this(DefaultModel.CreateFromFile(modelPath), adapter, options)
         {
         }
 
-        public Enforcer(IModel model, IReadOnlyAdapter adapter = null, Action<EnforcerOptions> optionAction = null)
+        public Enforcer(IModel model, IReadOnlyAdapter adapter = default, EnforcerOptions options = default)
         {
-            EnforcerOptions options = new();
-            if (optionAction is not null)
-            {
-                optionAction(options);
-            }
+            options ??= new EnforcerOptions();
 
             Enabled = options.Enabled;
             EnabledCache = options.EnabledCache;

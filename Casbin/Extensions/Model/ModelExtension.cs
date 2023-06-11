@@ -94,24 +94,64 @@ namespace Casbin.Model
 
         public static bool LoadFilteredPolicy(this IModel model, IPolicyFilter filter)
         {
+            if (model.AdapterHolder.Adapter is null)
+            {
+                return false;
+            }
+
             if (model.AdapterHolder.FilteredAdapter is null)
             {
                 return false;
             }
 
-            model.AdapterHolder.FilteredAdapter.LoadFilteredPolicy(model.PolicyStoreHolder.PolicyStore, filter);
+            DefaultPolicyStore policyStore = new();
+            foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
+            {
+                policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
+            }
+
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
+            {
+                foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                {
+                    policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
+                }
+            }
+
+            model.AdapterHolder.FilteredAdapter.LoadFilteredPolicy(policyStore, filter);
+            model.PolicyStoreHolder.PolicyStore = policyStore;
             return true;
         }
 
         public static async Task<bool> LoadFilteredPolicyAsync(this IModel model, IPolicyFilter filter)
         {
+            if (model.AdapterHolder.Adapter is null)
+            {
+                return false;
+            }
+
             if (model.AdapterHolder.FilteredAdapter is null)
             {
                 return false;
             }
 
-            await model.AdapterHolder.FilteredAdapter.LoadFilteredPolicyAsync(model.PolicyStoreHolder.PolicyStore,
+            DefaultPolicyStore policyStore = new();
+            foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
+            {
+                policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
+            }
+
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
+            {
+                foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                {
+                    policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
+                }
+            }
+
+            await model.AdapterHolder.FilteredAdapter.LoadFilteredPolicyAsync(policyStore,
                 filter);
+            model.PolicyStoreHolder.PolicyStore = policyStore;
             return true;
         }
 
@@ -157,7 +197,7 @@ namespace Casbin.Model
             return true;
         }
 
-        public static void EnableAutoSave(this IModel model, bool autoSave)
+        public static void SetAutoSave(this IModel model, bool autoSave)
         {
             foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
             {
@@ -165,81 +205,22 @@ namespace Casbin.Model
             }
         }
 
-        /// <summary>
-        ///     Provides incremental build the role inheritance relation.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="roleType"></param>
-        /// <param name="rule"></param>
-        public static void BuildIncrementalRoleLink(this IModel model, PolicyOperation policyOperation,
-            string section, string roleType, IPolicyValues rule)
+        public static IPolicyManager GetPolicyManger(this IModel model, string section,
+            string policyType = PermConstants.DefaultPolicyType) =>
+            model.Sections.GetPolicyAssertion(section, policyType).PolicyManager;
+
+        public static IRoleManager
+            GetRoleManger(this IModel model, string roleType = PermConstants.DefaultRoleType) =>
+            model.Sections.GetRoleAssertion(roleType).RoleManager;
+
+        public static void SetRoleManager(this IModel model, string roleType, IRoleManager roleManager)
         {
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
             RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
-            assertion.BuildIncrementalRoleLink(policyOperation, rule);
+            assertion.RoleManager = roleManager;
+            model.EnforceCache.Clear();
             model.GFunctionCachePool.Clear(roleType);
-        }
-
-        /// <summary>
-        ///     Provides incremental build the role inheritance relation.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="roleType"></param>
-        /// <param name="oldRule"></param>
-        /// <param name="newRule"></param>
-        public static void BuildIncrementalRoleLink(this IModel model, PolicyOperation policyOperation,
-            string section, string roleType, IPolicyValues oldRule, IPolicyValues newRule)
-        {
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
-            assertion.BuildIncrementalRoleLink(policyOperation, oldRule, newRule);
-            model.GFunctionCachePool.Clear(roleType);
-        }
-
-        /// <summary>
-        ///     Provides incremental build the role inheritance relations.
-        /// </summary>
-        /// <param name="model"></param>
-        /// <param name="policyOperation"></param>
-        /// <param name="section"></param>
-        /// <param name="roleType"></param>
-        /// <param name="rules"></param>
-        public static void BuildIncrementalRoleLinks(this IModel model, PolicyOperation policyOperation,
-            string section, string roleType, IEnumerable<IPolicyValues> rules)
-        {
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
-            assertion.BuildIncrementalRoleLinks(policyOperation, rules);
-            model.GFunctionCachePool.Clear(roleType);
-        }
-
-        public static void BuildIncrementalRoleLinks(this IModel model, PolicyOperation policyOperation,
-            string section, string roleType, IEnumerable<IPolicyValues> oldRules, IEnumerable<IPolicyValues> newRules)
-        {
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
-            {
-                return;
-            }
-
-            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
-            assertion.BuildIncrementalRoleLinks(policyOperation, oldRules, newRules);
-            model.GFunctionCachePool.Clear(roleType);
+            model.ExpressionHandler.SetFunction(roleType, BuiltInFunctions.GenerateGFunction(
+                assertion.RoleManager, model.GFunctionCachePool.GetCache(roleType)));
         }
 
         /// <summary>
@@ -276,22 +257,86 @@ namespace Casbin.Model
             }
         }
 
-        internal static IPolicyManager GetPolicyManger(this IModel model, string section,
-            string policyType = PermConstants.DefaultPolicyType) =>
-            model.Sections.GetPolicyAssertion(section, policyType).PolicyManager;
-
-        public static void SetRoleManager(this IModel model, string roleType, IRoleManager roleManager)
+        /// <summary>
+        ///     Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="roleType"></param>
+        /// <param name="rule"></param>
+        public static void BuildIncrementalRoleLink(this IModel model, PolicyOperation policyOperation,
+            string roleType, IPolicyValues rule)
         {
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
             RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
-            assertion.RoleManager = roleManager;
-            model.EnforceCache.Clear();
+            assertion.BuildIncrementalRoleLink(policyOperation, rule);
             model.GFunctionCachePool.Clear(roleType);
-            model.ExpressionHandler.SetFunction(roleType, BuiltInFunctions.GenerateGFunction(
-                assertion.RoleManager, model.GFunctionCachePool.GetCache(roleType)));
         }
 
-        internal static IRoleManager
-            GetRoleManger(this IModel model, string roleType = PermConstants.DefaultRoleType) =>
-            model.Sections.GetRoleAssertion(roleType).RoleManager;
+        /// <summary>
+        ///     Provides incremental build the role inheritance relation.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRule"></param>
+        /// <param name="newRule"></param>
+        public static void BuildIncrementalRoleLink(this IModel model, PolicyOperation policyOperation,
+            string roleType, IPolicyValues oldRule, IPolicyValues newRule)
+        {
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
+            assertion.BuildIncrementalRoleLink(policyOperation, oldRule, newRule);
+            model.GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
+        ///     Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="roleType"></param>
+        /// <param name="rules"></param>
+        public static void BuildIncrementalRoleLinks(this IModel model, PolicyOperation policyOperation,
+            string roleType, IEnumerable<IPolicyValues> rules)
+        {
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
+            assertion.BuildIncrementalRoleLinks(policyOperation, rules);
+            model.GFunctionCachePool.Clear(roleType);
+        }
+
+        /// <summary>
+        ///     Provides incremental build the role inheritance relations.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="policyOperation"></param>
+        /// <param name="roleType"></param>
+        /// <param name="oldRules"></param>
+        /// <param name="newRules"></param>
+        public static void BuildIncrementalRoleLinks(this IModel model, PolicyOperation policyOperation,
+            string roleType, IEnumerable<IPolicyValues> oldRules, IEnumerable<IPolicyValues> newRules)
+        {
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection) is false)
+            {
+                return;
+            }
+
+            RoleAssertion assertion = model.Sections.GetRoleAssertion(roleType);
+            assertion.BuildIncrementalRoleLinks(policyOperation, oldRules, newRules);
+            model.GFunctionCachePool.Clear(roleType);
+        }
     }
 }

@@ -45,26 +45,26 @@ namespace Casbin
             {
                 if (message.NewValuesList is null)
                 {
-                    enforcer.Model.BuildIncrementalRoleLinks(message.Operation, message.Section,
-                        message.PolicyType, message.ValuesList);
+                    enforcer.Model.BuildIncrementalRoleLinks(message.Operation, message.PolicyType,
+                        message.ValuesList);
                 }
                 else
                 {
-                    enforcer.Model.BuildIncrementalRoleLinks(message.Operation, message.Section,
-                        message.PolicyType, message.ValuesList, message.NewValuesList);
+                    enforcer.Model.BuildIncrementalRoleLinks(message.Operation, message.PolicyType,
+                        message.ValuesList, message.NewValuesList);
                 }
             }
             else
             {
                 if (message.NewValues is null)
                 {
-                    enforcer.Model.BuildIncrementalRoleLink(message.Operation, message.Section,
-                        message.PolicyType, message.Values);
+                    enforcer.Model.BuildIncrementalRoleLink(message.Operation, message.PolicyType,
+                        message.Values);
                 }
                 else
                 {
-                    enforcer.Model.BuildIncrementalRoleLink(message.Operation, message.Section,
-                        message.PolicyType, message.Values, message.NewValues);
+                    enforcer.Model.BuildIncrementalRoleLink(message.Operation, message.PolicyType,
+                        message.Values, message.NewValues);
                 }
             }
         }
