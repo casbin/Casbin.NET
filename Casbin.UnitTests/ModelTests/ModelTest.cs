@@ -624,6 +624,22 @@ public class ModelTest
         Assert.Equal("g(r.sub, p.sub) && r.obj == p.obj && r.act == p.act", model.Sections.GetMatcherAssertion("m").Value);
     }
 
+    [Fact]
+    public void TestTokensWithSubstringRelation()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            _testModelFixture._TokensWithSubstringRelationModelText,
+            _testModelFixture._TokensWithSubstringRelationPolicyText));
+
+        TestEnforce(e, "alice", "data1", "read", true);
+        TestEnforce(e, "alice", "data1", "write", false);
+        TestEnforce(e, "alice", "data2", "read", false);
+        TestEnforce(e, "alice", "data2", "write", false);
+        TestEnforce(e, "bob", "data1", "read", false);
+        TestEnforce(e, "bob", "data1", "write", false);
+        TestEnforce(e, "bob", "data2", "read", false);
+        TestEnforce(e, "bob", "data2", "write", true);
+    }
     public class TestResource
     {
         public TestResource(string name, string owner)

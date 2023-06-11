@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.RegularExpressions;
 using Casbin.Effect;
 using Casbin.Model;
 using Casbin.Util;
@@ -121,14 +123,14 @@ namespace Casbin
             {
                 foreach (KeyValuePair<string, int> tokenPair in view.RequestAssertion.Tokens)
                 {
-                    matcher = matcher.Replace($"{view.RequestType}.{tokenPair.Key}",
-                        $"{view.RequestType}[{tokenPair.Value}]");
+                    Regex reg = new Regex($@"(?<=(^|\s|\W)){view.RequestType}\.{tokenPair.Key}(?=($|\s|\W))");
+                    matcher = reg.Replace(matcher, $"{view.RequestType}[{tokenPair.Value}]");
                 }
 
                 foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
                 {
-                    matcher = matcher.Replace($"{view.PolicyType}.{tokenPair.Key}",
-                        $"{view.PolicyType}[{tokenPair.Value}]");
+                    Regex reg = new Regex($@"(?<=(^|\s|\W)){view.PolicyType}\.{tokenPair.Key}(?=($|\s|\W))");
+                    matcher = reg.Replace(matcher, $"{view.PolicyType}[{tokenPair.Value}]");
                 }
 
                 return matcher;
@@ -136,14 +138,14 @@ namespace Casbin
 
             foreach (KeyValuePair<string, int> tokenPair in view.RequestAssertion.Tokens)
             {
-                matcher = matcher.Replace($"{view.RequestType}.{tokenPair.Key}",
-                    $"{view.RequestType}.Value{tokenPair.Value + 1}");
+                Regex reg = new Regex($@"(?<=(^|\s|\W)){view.RequestType}\.{tokenPair.Key}(?=($|\s|\W))");
+                matcher = reg.Replace(matcher, $"{view.RequestType}.Value{tokenPair.Value + 1}");
             }
 
             foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
             {
-                matcher = matcher.Replace($"{view.PolicyType}.{tokenPair.Key}",
-                    $"{view.PolicyType}.Value{tokenPair.Value + 1}");
+                Regex reg = new Regex($@"(?<=(^|\s|\W)){view.PolicyType}\.{tokenPair.Key}(?=($|\s|\W))");
+                matcher = reg.Replace(matcher, $"{view.PolicyType}.Value{tokenPair.Value + 1}");
             }
 
             return matcher;
