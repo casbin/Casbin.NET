@@ -6,7 +6,6 @@ using Casbin.Effect;
 using Casbin.Model;
 using Casbin.Persist;
 #if !NET452
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging;
 #endif
 
@@ -237,7 +236,6 @@ namespace Casbin
             {
                 results.Add(await EnforceAsync(context, requestValue));
             }
-
             return results;
         }
 #endif

@@ -8,6 +8,7 @@ namespace Casbin.UnitTests.Fixtures;
 
 public class TestModelFixture
 {
+    internal readonly string _abacCommentText = ReadTestFile("abac_comment.conf");
     internal readonly string _abacModelText = ReadTestFile("abac_model.conf");
     internal readonly string _abacWithEvalModelText = ReadTestFile("abac_rule_model.conf");
 
@@ -19,6 +20,10 @@ public class TestModelFixture
     internal readonly string _basicWithoutUserModelText = ReadTestFile("basic_without_users_model.conf");
     internal readonly string _basicWithoutUserPolicyText = ReadTestFile("basic_without_users_policy.csv");
     internal readonly string _basicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
+
+    //https://github.com/casbin/Casbin.NET/issues/310
+    internal readonly string _commaAndQuotationsModelText = ReadTestFile("comma_quotations_model.conf");
+    internal readonly string _commaAndQuotationsPolicyText = ReadTestFile("comma_quotations_policy.csv");
     internal readonly string _ipMatchModelText = ReadTestFile("ipmatch_model.conf");
     internal readonly string _ipMatchPolicyText = ReadTestFile("ipmatch_policy.csv");
     internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
@@ -43,17 +48,15 @@ public class TestModelFixture
     internal readonly string _priorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
     internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
     internal readonly string _priorityPolicyText = ReadTestFile("priority_policy.csv");
-    internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
+    internal readonly string _rbacCommentText = ReadTestFile("rbac_comment.conf");
 
     internal readonly string _rbacInOperatorModelText = ReadTestFile("rbac_in_operator_model.conf");
     internal readonly string _rbacInOperatorPolicyText = ReadTestFile("rbac_in_operator_policy.csv");
+    internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
 
     // https://github.com/casbin/Casbin.NET/issues/106
     internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
     internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
-
-    internal readonly string _abacCommentText = ReadTestFile("abac_comment.conf");
-    internal readonly string _rbacCommentText = ReadTestFile("rbac_comment.conf");
 
     // https://github.com/casbin/Casbin.NET/issues/154
     internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
@@ -120,6 +123,9 @@ public class TestModelFixture
         GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
 
     public IModel GetNewMultipleTypeTestModel() => GetNewTestModel(_multipleTypeModelText, _multipleTypePolicyText);
+
+    public IModel GetNewCommaAndQuotationsModel() =>
+        GetNewTestModel(_commaAndQuotationsModelText, _commaAndQuotationsPolicyText);
 
     public static IModel GetNewTestModel(string modelText) => DefaultModel.CreateFromText(modelText);
 

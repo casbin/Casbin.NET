@@ -1,9 +1,5 @@
-// Policies
-
-// role and functions to permissions
+# role and functions to permissions
 p, grp::system_admin, org::customer1, cust1, manage
 
-//
-// user => group mappings & group hierarchies
-//
+# user => group mappings & group hierarchies
 g, @adm-user, grp::system_admin, org::customer1
