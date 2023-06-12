@@ -119,17 +119,19 @@ namespace Casbin
         [SuppressMessage("ReSharper", "UseDeconstruction")]
         public static string TransformMatcher(in EnforceView view, string matcher)
         {
+            string perfix = @"(?<=(\s|^|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\)\s*)";
+            string suffix = @"(?=\s*(\s|$|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\|\.|in))";
             if (view.SupportGeneric is false)
             {
                 foreach (KeyValuePair<string, int> tokenPair in view.RequestAssertion.Tokens)
                 {
-                    Regex reg = new Regex($@"(?<=(^|\s|\W)){view.RequestType}\.{tokenPair.Key}(?=($|\s|\W))");
+                    Regex reg = new Regex(perfix + $@"{view.RequestType}\.{tokenPair.Key}" + suffix);
                     matcher = reg.Replace(matcher, $"{view.RequestType}[{tokenPair.Value}]");
                 }
 
                 foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
                 {
-                    Regex reg = new Regex($@"(?<=(^|\s|\W)){view.PolicyType}\.{tokenPair.Key}(?=($|\s|\W))");
+                    Regex reg = new Regex(perfix + $@"{view.PolicyType}\.{tokenPair.Key}" + suffix);
                     matcher = reg.Replace(matcher, $"{view.PolicyType}[{tokenPair.Value}]");
                 }
 
@@ -138,13 +140,13 @@ namespace Casbin
 
             foreach (KeyValuePair<string, int> tokenPair in view.RequestAssertion.Tokens)
             {
-                Regex reg = new Regex($@"(?<=(^|\s|\W)){view.RequestType}\.{tokenPair.Key}(?=($|\s|\W))");
+                Regex reg = new Regex(perfix + $@"{view.RequestType}\.{tokenPair.Key}" + suffix);
                 matcher = reg.Replace(matcher, $"{view.RequestType}.Value{tokenPair.Value + 1}");
             }
 
             foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
             {
-                Regex reg = new Regex($@"(?<=(^|\s|\W)){view.PolicyType}\.{tokenPair.Key}(?=($|\s|\W))");
+                Regex reg = new Regex(perfix + $@"{view.PolicyType}\.{tokenPair.Key}" + suffix);
                 matcher = reg.Replace(matcher, $"{view.PolicyType}.Value{tokenPair.Value + 1}");
             }
 

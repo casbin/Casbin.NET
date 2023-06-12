@@ -625,20 +625,52 @@ public class ModelTest
     }
 
     [Fact]
-    public void TestTokensWithSubstringRelation()
+    public void TestRbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._TokensWithSubstringRelationModelText,
-            _testModelFixture._TokensWithSubstringRelationPolicyText));
+            _testModelFixture._RbacTokensWithSubstringRelationModelText,
+            _testModelFixture._RbacTokensWithSubstringRelationPolicyText));
+        e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        TestDomainEnforce(e, "alice", "tenant1", "data1", "read", true);
+        TestDomainEnforce(e, "alice", "tenant1", "freeread", "read", true);
+        TestDomainEnforce(e, "alice", "tenant2", "data2", "read", false);
+        TestDomainEnforce(e, "alice", "tenant1", "data1", "write", false);
+        TestDomainEnforce(e, "bob", "tenant1", "data1", "read", false);
+        TestDomainEnforce(e, "alice", "tenant3", "freeread", "read", false);
+        TestDomainEnforce(e, "alice", "tenant1", "freeread", "write", false);
+
+    }
+
+    [Fact]
+    public void TestAbacTokensWithSubstringRelation()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            _testModelFixture._AbacTokensWithSubstringRelationModelText,
+            _testModelFixture._AbacTokensWithSubstringRelationPolicyText));
+
+        TestResource data1 = new("data1", "alice");
+        TestResource data2 = new("data2", "bob");
+        TestSubject subjecta = new("alice", 16);
+        TestSubject subjectb = new("bob", 65);
+        TestSubject subjectc = new("candy", 30);
+        TestSubject subjectd = new("donale", -1);
+        TestSubject subjecte = new("eleena", 1000000009);
+
+        TestEnforce(e, subjecta, data1, "read", true);
+        TestEnforce(e, subjectb, data2, "write", true);
+        TestEnforce(e, subjectc, data1, "read", true);
+        TestEnforce(e, subjectc, data2, "write", true);
+        TestEnforce(e, subjecta, data2, "write", true);
+        TestEnforce(e, subjectb, data1, "read", true);
+        
+        TestEnforce(e, subjecta, data1, "write", true);
+        TestEnforce(e, subjectb, data2, "read", true);
+
+        TestEnforce(e, subjectc, data1, "write", false);
+        TestEnforce(e, subjectc, data2, "read", false);
+        TestEnforce(e, subjectd, data1, "read", false);
+        TestEnforce(e, subjecte, data2, "write", false);
     }
     public class TestResource
     {
