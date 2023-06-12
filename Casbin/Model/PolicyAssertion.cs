@@ -2,6 +2,8 @@
 
 public class PolicyAssertion : Assertion
 {
+    public PolicyAssertion() => Section = PermConstants.Section.PolicySection;
+
     public IPolicyManager PolicyManager { get; internal set; }
 
     public PolicyScanner<TRequest> Scan<TRequest>(in TRequest request) where TRequest : IRequestValues =>

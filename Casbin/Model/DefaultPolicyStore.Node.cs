@@ -10,7 +10,6 @@ public partial class DefaultPolicyStore
     {
         private readonly PolicyAssertion _assertion;
 
-
         public List<IPolicyValues> Policy = new();
         public Node(PolicyAssertion assertion) => _assertion = assertion;
         public HashSet<string> PolicyTextSet { get; } = new();
@@ -45,8 +44,23 @@ public partial class DefaultPolicyStore
         public bool ContainsPolicy(IPolicyValues values)
             => PolicyTextSet.Contains(values.ToText());
 
+        public bool ValidatePolicy(IPolicyValues values)
+        {
+            if (_assertion.Section is PermConstants.Section.RoleSection)
+            {
+                return _assertion.Tokens.Count <= values.Count;
+            }
+
+            return _assertion.Tokens.Count == values.Count;
+        }
+
         public bool TryAddPolicy(IPolicyValues values)
         {
+            if (ValidatePolicy(values) is false)
+            {
+                return false;
+            }
+
             if (ContainsPolicy(values))
             {
                 return false;
@@ -73,6 +87,11 @@ public partial class DefaultPolicyStore
 
         public bool TryUpdatePolicy(IPolicyValues oldValues, IPolicyValues newValues)
         {
+            if (ValidatePolicy(newValues) is false)
+            {
+                return false;
+            }
+
             if (ContainsPolicy(oldValues) is false)
             {
                 return false;
