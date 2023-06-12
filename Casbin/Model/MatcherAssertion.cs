@@ -2,4 +2,5 @@
 
 public class MatcherAssertion : Assertion
 {
+    public MatcherAssertion() => Section = PermConstants.Section.MatcherSection;
 }

@@ -16,7 +16,7 @@ public interface IReadOnlyPolicyStore
 
     public IDictionary<string, IEnumerable<string>> GetPolicyTypesAllSections();
 
-    public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section); 
+    public IDictionary<string, IEnumerable<IPolicyValues>> GetPolicyAllType(string section);
 
     public IEnumerable<IPolicyValues> GetFilteredPolicy(string section, string policyType, int fieldIndex,
         IPolicyValues fieldValues);
@@ -25,9 +25,9 @@ public interface IReadOnlyPolicyStore
 
     public IEnumerable<string> GetValuesForFieldInPolicyAllTypes(string section, int fieldIndex);
 
-    public bool HasPolicy(string section, string policyType, IPolicyValues rule);
+    public bool HasPolicy(string section, string policyType, IPolicyValues values);
 
-    public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules);
+    public bool HasPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList);
 
-    public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> rules);
+    public bool HasAllPolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList);
 }

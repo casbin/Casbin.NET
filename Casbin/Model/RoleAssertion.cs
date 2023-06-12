@@ -7,6 +7,8 @@ namespace Casbin.Model;
 
 public class RoleAssertion : PolicyAssertion
 {
+    public RoleAssertion() => Section = PermConstants.Section.RoleSection;
+
     public IRoleManager RoleManager { get; internal set; }
 
     public void BuildRoleLinks()
