@@ -1,8 +1,8 @@
 ﻿using System.IO;
 using System.Text;
-using Casbin.Adapter.File;
 using Casbin.Model;
 using Casbin.Persist;
+using Casbin.Persist.Adapter.File;
 
 namespace Casbin.UnitTests.Fixtures;
 
@@ -10,6 +10,13 @@ public class TestModelFixture
 {
     internal readonly string _abacCommentText = ReadTestFile("abac_comment.conf");
     internal readonly string _abacModelText = ReadTestFile("abac_model.conf");
+
+    internal readonly string _AbacTokensWithSubstringRelationModelText =
+        ReadTestFile("tokens_with_substring_relation_abac.conf");
+
+    internal readonly string _AbacTokensWithSubstringRelationPolicyText =
+        ReadTestFile("tokens_with_substring_relation_abac.csv");
+
     internal readonly string _abacWithEvalModelText = ReadTestFile("abac_rule_model.conf");
 
     internal readonly string _abacWithEvalPolicyText = ReadTestFile("abac_rule_policy.csv");
@@ -62,6 +69,14 @@ public class TestModelFixture
     internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
     internal readonly string _rbacMultiplePolicyText = ReadTestFile("rbac_multiple_rolemanager_policy.csv");
     internal readonly string _rbacPolicyText = ReadTestFile("rbac_policy.csv");
+
+    // https://github.com/casbin/Casbin.NET/issues/308
+    internal readonly string _RbacTokensWithSubstringRelationModelText =
+        ReadTestFile("tokens_with_substring_relation_rbac.conf");
+
+    internal readonly string _RbacTokensWithSubstringRelationPolicyText =
+        ReadTestFile("tokens_with_substring_relation_rbac.csv");
+
     internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
     internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_policy.csv");
     internal readonly string _rbacWithDomainsModelText = ReadTestFile("rbac_with_domains_model.conf");
@@ -87,12 +102,6 @@ public class TestModelFixture
 
     // https://github.com/casbin/Casbin.NET/issues/229
     internal readonly string _supportCountModelText = ReadTestFile("support_count_model.conf");
-
-    // https://github.com/casbin/Casbin.NET/issues/308
-    internal readonly string _RbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_rbac.conf");
-    internal readonly string _RbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_rbac.csv");
-    internal readonly string _AbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_abac.conf");
-    internal readonly string _AbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_abac.csv");
 
     public IModel GetNewAbacModel() => GetNewTestModel(_abacModelText);
 

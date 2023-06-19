@@ -6,11 +6,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Casbin.Model;
-using Casbin.Persist;
 using CsvHelper;
 using CsvHelper.Configuration;
 
-namespace Casbin.Adapter.File;
+namespace Casbin.Persist.Adapter.File;
 
 public class FileAdapter : IEpochAdapter, IFilteredAdapter
 {
@@ -106,9 +105,9 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
 
     public void SavePolicy(IPolicyStore store)
     {
-        if (_inputStream != null && _readOnly)
+        if (_inputStream is not null && _readOnly)
         {
-            throw new Exception("Store file can not write, because use inputStream is readOnly");
+            throw new InvalidOperationException("Store file can not write, because use inputStream is readOnly");
         }
 
         if (string.IsNullOrWhiteSpace(OriginalPath))
@@ -122,7 +121,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
 
     public Task SavePolicyAsync(IPolicyStore store)
     {
-        if (_inputStream != null && _readOnly)
+        if (_inputStream is not null && _readOnly)
         {
             throw new InvalidOperationException("Store file can not write, because use inputStream is readOnly");
         }

@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using Casbin.Adapter.File;
 using Casbin.Caching;
 using Casbin.Effect;
 using Casbin.Model;
 using Casbin.Persist;
+using Casbin.Persist.Adapter.File;
 #if !NET452
 using Microsoft.Extensions.Logging;
 #endif

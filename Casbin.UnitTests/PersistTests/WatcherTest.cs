@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Casbin.Adapter.File;
 using Casbin.Persist;
+using Casbin.Persist.Adapter.File;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 

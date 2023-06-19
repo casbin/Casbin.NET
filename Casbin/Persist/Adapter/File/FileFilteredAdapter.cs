@@ -1,4 +1,4 @@
-﻿namespace Casbin.Adapter.File;
+﻿namespace Casbin.Persist.Adapter.File;
 
 public class FileFilteredAdapter : FileAdapter
 {
