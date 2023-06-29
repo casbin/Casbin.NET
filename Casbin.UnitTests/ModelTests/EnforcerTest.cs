@@ -2,10 +2,10 @@
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Casbin.Adapter.File;
-using Casbin.Adapter.Stream;
 using Casbin.Model;
 using Casbin.Persist;
+using Casbin.Persist.Adapter.File;
+using Casbin.Persist.Adapter.Stream;
 using Casbin.Rbac;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
@@ -1279,6 +1279,3 @@ public class EnforcerTest
 
     #endregion
 }
-
-
-

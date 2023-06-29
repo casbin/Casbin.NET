@@ -4,9 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Model;
-using Casbin.Persist;
 
-namespace Casbin.Adapter.Stream;
+namespace Casbin.Persist.Adapter.Stream;
 
 internal class StreamAdapter : IEpochAdapter
 {
@@ -134,4 +133,3 @@ internal class StreamAdapter : IEpochAdapter
         streamWriter.Dispose();
     }
 }
-
