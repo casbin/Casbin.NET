@@ -648,8 +648,8 @@ public class ModelTest
     public void TestRbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._RbacTokensWithSubstringRelationModelText,
-            _testModelFixture._RbacTokensWithSubstringRelationPolicyText));
+            _testModelFixture._rbacTokensWithSubstringRelationModelText,
+            _testModelFixture._rbacTokensWithSubstringRelationPolicyText));
         e.BuildRoleLinks();
 
         TestDomainEnforce(e, "alice", "tenant1", "data1", "read", true);
@@ -666,8 +666,8 @@ public class ModelTest
     public void TestAbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._AbacTokensWithSubstringRelationModelText,
-            _testModelFixture._AbacTokensWithSubstringRelationPolicyText));
+            _testModelFixture._abacTokensWithSubstringRelationModelText,
+            _testModelFixture._abacTokensWithSubstringRelationPolicyText));
 
         TestResource data1 = new("data1", "alice");
         TestResource data2 = new("data2", "bob");
@@ -692,6 +692,24 @@ public class ModelTest
         TestEnforce(e, subjectd, data1, "read", false);
         TestEnforce(e, subjecte, data2, "write", false);
     }
+
+    [Fact]
+    public void TestBackslashLineFeed()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            _testModelFixture._backslashLineFeedModelText,
+            _testModelFixture._backslashLineFeedPolicyText));
+
+        TestEnforce(e, "alice", "data1", "read", true);
+        TestEnforce(e, "alice", "data1", "write", false);
+        TestEnforce(e, "alice", "data2", "read", false);
+        TestEnforce(e, "alice", "data2", "write", false);
+        TestEnforce(e, "bob", "data1", "read", false);
+        TestEnforce(e, "bob", "data1", "write", false);
+        TestEnforce(e, "bob", "data2", "read", false);
+        TestEnforce(e, "bob", "data2", "write", true);
+    }
+
     public class TestResource
     {
         public TestResource(string name, string owner)

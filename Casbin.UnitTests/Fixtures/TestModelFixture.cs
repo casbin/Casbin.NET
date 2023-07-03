@@ -103,6 +103,16 @@ public class TestModelFixture
     // https://github.com/casbin/Casbin.NET/issues/229
     internal readonly string _supportCountModelText = ReadTestFile("support_count_model.conf");
 
+    // https://github.com/casbin/Casbin.NET/issues/308
+    internal readonly string _rbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_rbac.conf");
+    internal readonly string _rbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_rbac.csv");
+    internal readonly string _abacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_abac.conf");
+    internal readonly string _abacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_abac.csv");
+
+    // https://github.com/casbin/Casbin.NET/issues/321
+    internal readonly string _backslashLineFeedModelText = ReadTestFile("backslash_feed_model.conf");
+    internal readonly string _backslashLineFeedPolicyText = ReadTestFile("backslash_feed_policy.csv");
+
     public IModel GetNewAbacModel() => GetNewTestModel(_abacModelText);
 
     public IModel GetNewAbacWithEvalModel() => GetNewTestModel(_abacWithEvalModelText, _abacWithEvalPolicyText);

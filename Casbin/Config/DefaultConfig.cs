@@ -9,6 +9,7 @@ namespace Casbin.Config
         private static readonly string _defaultSection = "default";
         private static readonly string _defaultComment = "#";
         private static readonly string _defaultCommentSem = ";";
+        private static readonly string _defaultFeed = "\\";
 
         // Section:key=value
         private readonly IDictionary<string, IDictionary<string, string>> _data;
@@ -169,6 +170,9 @@ namespace Casbin.Config
             string section = string.Empty;
             int lineNum = 0;
             string line;
+            bool inSuccessiveLine = false;
+            string option = string.Empty;
+            string processedValue = string.Empty;
             while (true)
             {
                 lineNum++;
@@ -207,17 +211,50 @@ namespace Casbin.Config
                 }
                 else
                 {
-                    var optionVal = line.Split("=".ToCharArray(), 2);
-                    if (optionVal.Length != 2)
+                    if (inSuccessiveLine == false)
                     {
-                        throw new Exception(
-                                string.Format("parse the content error : line {0} , {1} = ? ", lineNum, optionVal[0]));
+                        var optionVal = line.Split("=".ToCharArray(), 2);
+                        if (optionVal.Length != 2)
+                        {
+                            throw new Exception(
+                                    string.Format("parse the content error : line {0} , {1} = ? ", lineNum, optionVal[0]));
+                        }
+                        option = optionVal[0].Trim();
+                        string value = optionVal[1].Trim();
+                        int commentStartIdx = value.IndexOf(PermConstants.PolicyCommentChar);
+                        string lineProcessedValue = (commentStartIdx == -1 ? value : value.Remove(commentStartIdx)).Trim();
+                        if (lineProcessedValue.EndsWith(_defaultFeed))
+                        {
+                            inSuccessiveLine = true;
+                            processedValue = lineProcessedValue.Substring(0, lineProcessedValue.Length - 1);
+                        }
+                        else
+                        {
+                            inSuccessiveLine = false;
+                            processedValue = lineProcessedValue;
+                        }
                     }
-                    string option = optionVal[0].Trim();
-                    string value = optionVal[1].Trim();
-                    int commentStartIdx = value.IndexOf(PermConstants.PolicyCommentChar);
-                    var processedValue = (commentStartIdx == -1 ? value : value.Remove(commentStartIdx)).Trim();
-                    AddConfig(section, option, processedValue);
+                    else
+                    {
+                        string value = line.Trim();
+                        int commentStartIdx = value.IndexOf(PermConstants.PolicyCommentChar);
+                        string lineProcessedValue = (commentStartIdx == -1 ? value : value.Remove(commentStartIdx)).Trim();
+                        if (lineProcessedValue.EndsWith(_defaultFeed))
+                        {
+                            inSuccessiveLine = true;
+                            processedValue += lineProcessedValue.Substring(0, lineProcessedValue.Length - 1);
+                        }
+                        else
+                        {
+                            inSuccessiveLine = false;
+                            processedValue += lineProcessedValue;
+                        }
+                    }
+
+                    if (inSuccessiveLine == false)
+                    {
+                        AddConfig(section, option, processedValue);
+                    }
                 }
             }
         }
