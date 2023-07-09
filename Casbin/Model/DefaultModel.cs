@@ -103,6 +103,20 @@ namespace Casbin.Model
             return model;
         }
 
+        /// <summary>
+        ///     Creates a default model from file. (go like API)
+        /// </summary>
+        /// <param name="path">The path of the model file.</param>
+        /// <returns></returns>
+        public static IModel NewModelFromFile(string path) => CreateFromFile(path);
+
+        /// <summary>
+        ///     Creates a default model from text. (go like API)
+        /// </summary>
+        /// <param name="text"></param>
+        /// <returns></returns>
+        public static IModel NewModelFromText(string text) => CreateFromText(text);
+
         private void LoadModel(IConfig config)
         {
             Sections.LoadSection(config, PermConstants.Section.RequestSection);

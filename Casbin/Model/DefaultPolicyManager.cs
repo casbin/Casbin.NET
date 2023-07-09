@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using Casbin.Model.Holder;
+using JetBrains.Annotations;
 
 namespace Casbin.Model
 {
+    [PublicAPI]
     public class DefaultPolicyManager : IPolicyManager
     {
         private readonly AdapterHolder _adapterHolder;
