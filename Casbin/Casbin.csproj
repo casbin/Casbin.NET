@@ -2,7 +2,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net7.0;net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net462;net461;net452;</TargetFrameworks>
+    <TargetFrameworks>net8.0;net7.0;net6.0;net5.0;netcoreapp3.1;netstandard2.1;netstandard2.0;net462;net461;net452;</TargetFrameworks>
     <NoWarn>$(NoWarn);CS1591;CS0618</NoWarn>
     <LangVersion>11</LangVersion>
   </PropertyGroup>
@@ -48,47 +48,52 @@
     <PackageReference Include="Microsoft.SourceLink.Github" Version="1.1.1" PrivateAssets="All"/>
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net8.0'">
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0-preview.5.23280.8"/>
+  </ItemGroup>
+
   <ItemGroup Condition="'$(TargetFramework)' == 'net7.0'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0-preview.6.22324.4"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net6.0'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net5.0'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netcoreapp3.1'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.22"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.32"/>
     <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.1'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
     <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
     <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
     <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all"/>
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net461'">
-    <PackageReference Include="DynamicExpresso.Core" Version="2.13.0"/>
+    <PackageReference Include="DynamicExpresso.Core" Version="2.16.1"/>
     <PackageReference Include="Microsoft.Extensions.Logging" Version="6.0.0"/>
     <PackageReference Include="IsExternalInit" Version="1.0.3" PrivateAssets="all"/>
   </ItemGroup>
@@ -101,10 +106,6 @@
 
   <ItemGroup>
     <None Include="casbin.png" Pack="true" Visible="false" PackagePath=""/>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Compile Remove="Util\Function\GlobMatchFunc.cs"/>
   </ItemGroup>
 
 </Project>

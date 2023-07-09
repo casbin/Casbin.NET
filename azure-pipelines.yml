@@ -13,7 +13,7 @@ stages:
         displayName: Build and Test
         pool:
           vmImage: 'windows-latest'
-        
+
         steps:
           - task: UseDotNet@2
             displayName: Setup 3.1.x .NET SDK
@@ -38,8 +38,13 @@ stages:
             inputs:
               packageType: 'sdk'
               version: '7.0.x'
-              includePreviewVersions: true
 
+          - task: UseDotNet@2
+            displayName: Setup 8.0.x .NET SDKs
+            inputs:
+              packageType: 'sdk'
+              version: '8.0.x'
+              includePreviewVersions: true
 
           - task: DotNetCoreCLI@2
             displayName: Restore projects

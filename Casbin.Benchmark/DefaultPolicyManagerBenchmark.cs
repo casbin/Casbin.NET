@@ -1,19 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Casbin.Model;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using Casbin.Model;
 
 namespace Casbin.Benchmark
 {
     [MemoryDiagnoser]
     [BenchmarkCategory("Model")]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net50)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net60)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net48)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net60, baseline: true)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net70)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net80)]
     public class DefaultPolicyManagerBenchmark
     {
         private readonly Enforcer _enforcer;
@@ -22,7 +22,8 @@ namespace Casbin.Benchmark
         public DefaultPolicyManagerBenchmark()
         {
             _enforcer = new Enforcer(TestHelper.GetTestFilePath("rbac_model.conf"));
-            _policyManager = (DefaultPolicyManager)_enforcer.Model.Sections.GetPolicyAssertion(PermConstants.DefaultPolicyType).PolicyManager;
+            _policyManager = (DefaultPolicyManager)_enforcer.Model.Sections
+                .GetPolicyAssertion(PermConstants.DefaultPolicyType).PolicyManager;
         }
 
         private string NowTestUserName { get; set; }
@@ -31,10 +32,10 @@ namespace Casbin.Benchmark
         private List<IPolicyValues> NowTestExistedPolicyList { get; set; } = new List<IPolicyValues>();
         private List<IPolicyValues> NowTestNullPolicyList { get; set; } = new List<IPolicyValues>();
 
-        [Params(10, 100, 1000, 10000)]
-        public int NowPolicyCount { get; set; }
+        [Params(10, 100, 1000, 10000)] public int NowPolicyCount { get; set; }
 
-        [GlobalSetup(Targets = new[] {
+        [GlobalSetup(Targets = new[]
+        {
             nameof(AddPolicyAsync), nameof(RemovePolicyAsync), nameof(UpdatePolicyAsync),
             nameof(RemovePoliciesAsync), nameof(AddPoliciesAsync), nameof(UpdatePoliciesAsync)
         })]
@@ -47,10 +48,13 @@ namespace Casbin.Benchmark
                 int num = rd.Next(1000);
                 if (num == 0)
                 {
-                    NowTestExistedPolicyList.Add(new PolicyValues<string, string, string>($"group{i}", $"obj{i / 10}", "read"));
-                    NowTestNullPolicyList.Add(new PolicyValues<string, string, string>($"name{i}", $"data{i / 10}", "read"));
+                    NowTestExistedPolicyList.Add(
+                        new PolicyValues<string, string, string>($"group{i}", $"obj{i / 10}", "read"));
+                    NowTestNullPolicyList.Add(
+                        new PolicyValues<string, string, string>($"name{i}", $"data{i / 10}", "read"));
                 }
             }
+
             Console.WriteLine($"// Already set {NowPolicyCount} policies.");
 
             NowTestUserName = $"name{NowPolicyCount / 2 + 1}";
@@ -78,7 +82,8 @@ namespace Casbin.Benchmark
         [BenchmarkCategory("ModelManagement")]
         public async Task UpdatePolicyAsync()
         {
-            await _policyManager.UpdatePolicyAsync(NowTestPolicy, new PolicyValues<string, string, string>(NowTestUserName + "up", NowTestDataName + "up", "read"));
+            await _policyManager.UpdatePolicyAsync(NowTestPolicy,
+                new PolicyValues<string, string, string>(NowTestUserName + "up", NowTestDataName + "up", "read"));
         }
 
         [Benchmark]

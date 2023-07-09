@@ -10,10 +10,9 @@ namespace Casbin.Benchmark
 {
     [MemoryDiagnoser]
     [BenchmarkCategory("EnforcerWithCache")]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net48)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.NetCoreApp31, baseline: true)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net60)]
-    [SimpleJob(RunStrategy.Throughput, targetCount: 10, runtimeMoniker: RuntimeMoniker.Net70)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net60, baseline: true)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net70)]
+    [SimpleJob(RunStrategy.Throughput, RuntimeMoniker.Net80)]
     public class EnforcerWithCacheBenchmark
     {
         private Enforcer NowEnforcer { get; set; }

@@ -360,7 +360,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
         var list = new List<PersistPolicy>();
         while (await parser.ReadAsync())
         {
-            string[]? tokens = parser.Record;
+            string[] tokens = parser.Record;
             if (tokens is null || tokens.Length is 0)
             {
                 continue;
