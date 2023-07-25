@@ -1,4 +1,4 @@
-name: Release
+name: Push
 
 on: workflow_dispatch
 
@@ -16,7 +16,6 @@ env:
 jobs:
   push-packages:
     runs-on: windows-latest
-    needs: run-semantic-release
 
     steps:
       - name: Checkout
