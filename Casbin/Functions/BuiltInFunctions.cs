@@ -6,7 +6,7 @@ using Casbin.Caching;
 using Casbin.Rbac;
 using DotNet.Globbing;
 
-namespace Casbin.Util
+namespace Casbin.Functions
 {
     public static class BuiltInFunctions
     {
@@ -15,7 +15,6 @@ namespace Casbin.Util
         private static readonly Regex s_keyMatch4Regex = new(@"\{([^/]+)\}");
         private static readonly Regex s_keyGet2Regex = new(@":[^/]+");
         private static readonly Regex s_keyGet3Regex = new(@"\{[^/]+?\}");
-        private delegate bool GFunction(string subject1, string subject2, string domain = null);
 
         /// <summary>
         /// KeyGet returns the matched part
@@ -28,14 +27,15 @@ namespace Casbin.Util
         public static string KeyGet(string key1, string key2)
         {
             int m = key1.Length, n = key2.Length;
-            if(m < n) return "";
+            if (m < n) return "";
             var span1 = key1.AsSpan();
             var span2 = key2.AsSpan();
             for (int i = 0; i < n; i++)
             {
-                if(span1[i] != span2[i])
+                if (span1[i] != span2[i])
                     return span2[i] == '*' ? span1.Slice(i, m - i).ToString() : "";
             }
+
             return "";
         }
 
@@ -56,18 +56,20 @@ namespace Casbin.Util
             replacedKey2 = "^" + replacedKey2 + "$";
             var regex = new Regex(replacedKey2);
             var values = regex.Matches(key1);
-            if(values.Count == 0)
+            if (values.Count == 0)
             {
                 return "";
             }
+
             var pathVarSpan = pathVar.AsSpan();
             for (int i = 0; i < keys.Count; i++)
             {
-                if(keys[i].Value.AsSpan(1).SequenceEqual(pathVarSpan))
+                if (keys[i].Value.AsSpan(1).SequenceEqual(pathVarSpan))
                 {
-                    return values[0].Groups[i+1].Value;
+                    return values[0].Groups[i + 1].Value;
                 }
             }
+
             return "";
         }
 
@@ -92,6 +94,7 @@ namespace Casbin.Util
             {
                 return "";
             }
+
             var pathVarSpan = pathVar.AsSpan();
             for (int i = 0; i < keys.Count; i++)
             {
@@ -100,6 +103,7 @@ namespace Casbin.Util
                     return values[0].Groups[i + 1].Value;
                 }
             }
+
             return "";
         }
 
@@ -208,6 +212,7 @@ namespace Casbin.Util
                     valueDictionary.Add(token, group[i + 1].Value);
                     continue;
                 }
+
                 if (valueDictionary[token] != group[i + 1].Value)
                 {
                     return false;
@@ -216,6 +221,7 @@ namespace Casbin.Util
 
             return true;
         }
+
         /// <summary>
         /// KeyMatch determines whether key1 matches the pattern of key2 and ignores the parameters in key2.
         /// For example, "/foo/bar?status=1&amp;type=2" matches "/foo/bar"
@@ -323,7 +329,10 @@ namespace Casbin.Util
                 cache.Set(name1, name2, result, domain);
                 return result;
             }
-            return (GFunction) GFunction;
+
+            return (GFunction)GFunction;
         }
+
+        private delegate bool GFunction(string subject1, string subject2, string domain = null);
     }
 }

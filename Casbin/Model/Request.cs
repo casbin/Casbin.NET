@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace Casbin.Model;
+﻿namespace Casbin.Model;
 
 public static class Request
 {

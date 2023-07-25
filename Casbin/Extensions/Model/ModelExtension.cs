@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Casbin.Functions;
 using Casbin.Persist;
 using Casbin.Rbac;
-using Casbin.Util;
 
 namespace Casbin.Model
 {

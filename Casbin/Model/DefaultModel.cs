@@ -5,9 +5,9 @@ using Casbin.Caching;
 using Casbin.Config;
 using Casbin.Effect;
 using Casbin.Evaluation;
+using Casbin.Functions;
 using Casbin.Model.Holder;
 using Casbin.Rbac;
-using Casbin.Util;
 
 namespace Casbin.Model
 {

@@ -1,8 +1,7 @@
 using System;
 using System.Collections.Generic;
-using Casbin.Util;
 
-namespace Casbin.Model
+namespace Casbin.Functions
 {
     internal class FunctionMap
     {
@@ -15,10 +14,7 @@ namespace Casbin.Model
 
         internal static FunctionMap LoadFunctionMap()
         {
-            var map = new FunctionMap
-            {
-                FunctionDict = new Dictionary<string, Delegate>()
-            };
+            var map = new FunctionMap { FunctionDict = new Dictionary<string, Delegate>() };
 
             map.AddFunction("keyGet", BuiltInFunctions.KeyGet);
             map.AddFunction("keyGet2", BuiltInFunctions.KeyGet2);

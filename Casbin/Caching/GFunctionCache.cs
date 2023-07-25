@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Collections.Concurrent;
-
+﻿using System.Collections.Concurrent;
 
 namespace Casbin.Caching;
 
@@ -18,16 +16,16 @@ public class GFunctionCache : IGFunctionCache
         return _cache.TryGetValue(Key(name1, name2, domain), out result);
     }
 
+    public void Clear()
+    {
+        _cache.Clear();
+    }
+
     private static string Key(string name1, string name2, string domain = null)
     {
         bool hasDomain = domain is not null;
         return hasDomain
             ? string.Join(":", name1, name2, domain)
             : string.Join(":", name1, name2);
-    }
-
-    public void Clear()
-    {
-        _cache.Clear();
     }
 }

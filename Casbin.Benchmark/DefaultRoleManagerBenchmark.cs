@@ -4,9 +4,9 @@ using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
+using Casbin.Functions;
 using Casbin.Model;
 using Casbin.Rbac;
-using Casbin.Util;
 using static Casbin.Benchmark.TestHelper;
 
 namespace Casbin.Benchmark

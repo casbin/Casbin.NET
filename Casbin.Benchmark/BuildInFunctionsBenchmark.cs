@@ -2,7 +2,7 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Engines;
 using BenchmarkDotNet.Jobs;
-using Casbin.Util;
+using Casbin.Functions;
 
 namespace Casbin.Benchmark
 {

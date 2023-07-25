@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Casbin.Util;
+using Casbin.Functions;
 using Xunit;
 
 namespace Casbin.UnitTests.UtilTests;
@@ -34,97 +34,66 @@ public class BuiltInFunctionTest
 
     public static IEnumerable<object[]> KeyGetTestData = new[]
     {
-        new object[] { "/foo", "/foo", "" },
-        new object[] { "/foo", "/foo*", "" },
-        new object[] { "/foo", "/foo/*", "" },
-        new object[] { "/foo/bar", "/foo", "" },
-        new object[] { "/foo/bar", "/foo*", "/bar" },
-        new object[] { "/foo/bar", "/foo/*", "bar" },
-        new object[] { "/foobar", "/foo", "" },
-        new object[] { "/foobar", "/foo*", "bar" },
+        new object[] { "/foo", "/foo", "" }, new object[] { "/foo", "/foo*", "" },
+        new object[] { "/foo", "/foo/*", "" }, new object[] { "/foo/bar", "/foo", "" },
+        new object[] { "/foo/bar", "/foo*", "/bar" }, new object[] { "/foo/bar", "/foo/*", "bar" },
+        new object[] { "/foobar", "/foo", "" }, new object[] { "/foobar", "/foo*", "bar" },
         new object[] { "/foobar", "/foo/*", "" }
     };
 
     public static IEnumerable<object[]> KeyGet2TestData = new[]
     {
-        new object[] { "/foo", "/foo", "id", ""},
-        new object[] { "/foo", "/foo*", "id", ""},
-        new object[] { "/foo", "/foo/*", "id", ""},
-        new object[] { "/foo/bar", "/foo", "id", ""},
-        new object[] { "/foo/bar", "/foo*", "id", ""}, // different with KeyMatch.
-        new object[] { "/foo/bar", "/foo/*", "id", ""},
-        new object[] { "/foobar", "/foo", "id", ""},
-        new object[] { "/foobar", "/foo*", "id", ""}, // different with KeyMatch.
-        new object[] { "/foobar", "/foo/*", "id", ""},
-
-        new object[] { "/", "/:resource", "resource", ""},
-        new object[] { "/resource1", "/:resource", "resource", "resource1"},
-        new object[] { "/myid", "/:id/using/:resId", "id", ""},
-        new object[] { "/myid/using/myresid", "/:id/using/:resId", "id", "myid"},
-        new object[] { "/myid/using/myresid", "/:id/using/:resId", "resId", "myresid"},
-
-        new object[] { "/proxy/myid", "/proxy/:id/*", "id", ""},
-        new object[] { "/proxy/myid/", "/proxy/:id/*", "id", "myid"},
-        new object[] { "/proxy/myid/res", "/proxy/:id/*", "id", "myid"},
-        new object[] { "/proxy/myid/res/res2", "/proxy/:id/*", "id", "myid"},
-        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/*", "id", "myid"},
-        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/res/*", "id", "myid"},
-        new object[] { "/proxy/", "/proxy/:id/*", "id", ""},
-
-        new object[] { "/alice", "/:id", "id", "alice"},
-        new object[] { "/alice/all", "/:id/all", "id", "alice"},
-        new object[] { "/alice", "/:id/all", "id", ""},
-        new object[] { "/alice/all", "/:id", "id", ""},
-
-        new object[] { "/alice/all", "/:/all", "", ""}
+        new object[] { "/foo", "/foo", "id", "" }, new object[] { "/foo", "/foo*", "id", "" },
+        new object[] { "/foo", "/foo/*", "id", "" }, new object[] { "/foo/bar", "/foo", "id", "" },
+        new object[] { "/foo/bar", "/foo*", "id", "" }, // different with KeyMatch.
+        new object[] { "/foo/bar", "/foo/*", "id", "" }, new object[] { "/foobar", "/foo", "id", "" },
+        new object[] { "/foobar", "/foo*", "id", "" }, // different with KeyMatch.
+        new object[] { "/foobar", "/foo/*", "id", "" }, new object[] { "/", "/:resource", "resource", "" },
+        new object[] { "/resource1", "/:resource", "resource", "resource1" },
+        new object[] { "/myid", "/:id/using/:resId", "id", "" },
+        new object[] { "/myid/using/myresid", "/:id/using/:resId", "id", "myid" },
+        new object[] { "/myid/using/myresid", "/:id/using/:resId", "resId", "myresid" },
+        new object[] { "/proxy/myid", "/proxy/:id/*", "id", "" },
+        new object[] { "/proxy/myid/", "/proxy/:id/*", "id", "myid" },
+        new object[] { "/proxy/myid/res", "/proxy/:id/*", "id", "myid" },
+        new object[] { "/proxy/myid/res/res2", "/proxy/:id/*", "id", "myid" },
+        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/*", "id", "myid" },
+        new object[] { "/proxy/myid/res/res2/res3", "/proxy/:id/res/*", "id", "myid" },
+        new object[] { "/proxy/", "/proxy/:id/*", "id", "" }, new object[] { "/alice", "/:id", "id", "alice" },
+        new object[] { "/alice/all", "/:id/all", "id", "alice" }, new object[] { "/alice", "/:id/all", "id", "" },
+        new object[] { "/alice/all", "/:id", "id", "" }, new object[] { "/alice/all", "/:/all", "", "" }
     };
 
     public static IEnumerable<object[]> KeyGet3TestData = new[]
     {
         new object[] { "/", "/{resource}", "resource", "" },
-
         new object[] { "/resource1", "/{resource}", "resource", "resource1" },
-
         new object[] { "/myid", "/{id}/using/{resId}", "id", "" },
-
         new object[] { "/myid/using/myresid", "/{id}/using/{resId}", "id", "myid" },
-
         new object[] { "/myid/using/myresid", "/{id}/using/{resId}", "resId", "myresid" },
-
-
         new object[] { "/proxy/myid", "/proxy/{id}/*", "id", "" },
-
         new object[] { "/proxy/myid/", "/proxy/{id}/*", "id", "myid" },
-
         new object[] { "/proxy/myid/res", "/proxy/{id}/*", "id", "myid" },
-
         new object[] { "/proxy/myid/res/res2", "/proxy/{id}/*", "id", "myid" },
-
         new object[] { "/proxy/myid/res/res2/res3", "/proxy/{id}/*", "id", "myid" },
-
         new object[] { "/proxy/", "/proxy/{id}/*", "id", "" },
-
-
-        new object[] { "/api/group1_group_name/project1_admin/info", "/api/{proj}_admin/info",
-            "proj", "" },
-
+        new object[] { "/api/group1_group_name/project1_admin/info", "/api/{proj}_admin/info", "proj", "" },
         new object[] { "/{id/using/myresid", "/{id/using/{resId}", "resId", "myresid" },
-
         new object[] { "/{id/using/myresid/status}", "/{id/using/{resId}/status}", "resId", "myresid" },
-
-
         new object[] { "/proxy/myid/res/res2/res3", "/proxy/{id}/*/{res}", "res", "res3" },
-
         new object[] { "/api/project1_admin/info", "/api/{proj}_admin/info", "proj", "project1" },
-
-        new object[] { "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info",
-            "g", "group1" },
-
-        new object[] { "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info",
-            "gn", "group_name" },
-
-        new object[] { "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info",
-            "proj", "project1" }
+        new object[]
+        {
+            "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info", "g", "group1"
+        },
+        new object[]
+        {
+            "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info", "gn", "group_name"
+        },
+        new object[]
+        {
+            "/api/group1_group_name/project1_admin/info", "/api/{g}_{gn}/{proj}_admin/info", "proj", "project1"
+        }
     };
 
     public static IEnumerable<object[]> keyMatchTestData = new[]

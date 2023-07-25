@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
+using Casbin.Functions;
 using Casbin.Rbac;
-using Casbin.Util;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
 
