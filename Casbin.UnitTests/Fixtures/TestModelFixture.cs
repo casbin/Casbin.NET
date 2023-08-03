@@ -31,6 +31,8 @@ public class TestModelFixture
     //https://github.com/casbin/Casbin.NET/issues/310
     internal readonly string _commaAndQuotationsModelText = ReadTestFile("comma_quotations_model.conf");
     internal readonly string _commaAndQuotationsPolicyText = ReadTestFile("comma_quotations_policy.csv");
+    internal readonly string _tabsModelText = ReadTestFile("tabs_model.conf");
+    internal readonly string _tabsPolicyText = ReadTestFile("tabs_policy.csv");
     internal readonly string _ipMatchModelText = ReadTestFile("ipmatch_model.conf");
     internal readonly string _ipMatchPolicyText = ReadTestFile("ipmatch_policy.csv");
     internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
@@ -151,6 +153,9 @@ public class TestModelFixture
 
     public IModel GetNewCommaAndQuotationsModel() =>
         GetNewTestModel(_commaAndQuotationsModelText, _commaAndQuotationsPolicyText);
+
+    public IModel GetNewTabsModel() =>
+        GetNewTestModel(_tabsModelText, _tabsPolicyText);
 
     public static IModel GetNewTestModel(string modelText) => DefaultModel.CreateFromText(modelText);
 
