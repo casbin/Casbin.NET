@@ -29,7 +29,8 @@ public static class PolicyStoreExtension
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
         if (parser.Read() is false)
         {
