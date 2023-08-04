@@ -266,7 +266,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
 
         while (parser.Read())
@@ -293,7 +294,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
 
         while (parser.Read())
@@ -327,7 +329,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
 
         while (await parser.ReadAsync())
@@ -355,7 +358,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
         var list = new List<PersistPolicy>();
         while (await parser.ReadAsync())
@@ -386,7 +390,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
 
         while (await parser.ReadAsync())
@@ -413,7 +418,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 HasHeaderRecord = false,
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
-                BadDataFound = null
+                BadDataFound = null,
+                WhiteSpaceChars = new []{' ', '\t'}
             });
         var list = new List<PersistPolicy>();
         while (await parser.ReadAsync())

@@ -645,6 +645,15 @@ public class ModelTest
     }
 
     [Fact]
+    public void TestModelWithTabs()
+    {
+        Enforcer e = new Enforcer(_testModelFixture.GetNewTabsModel());
+        e.AddRoleForUserInDomain("/user/john", "admin", "/tenant/1");
+
+        Assert.True(e.Enforce("/user/john", "/tenant/1", "/tenant/1/resource", "Write"));
+    }
+
+    [Fact]
     public void TestRbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
