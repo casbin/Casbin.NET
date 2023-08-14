@@ -1,4 +1,4 @@
-﻿<!--EXTERNAL_PROPERTIES: TargetFramework-->
+<!--EXTERNAL_PROPERTIES: TargetFramework-->
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
@@ -11,6 +11,7 @@
     <PackageId>Casbin.NET</PackageId>
     <PackageIcon>casbin.png</PackageIcon>
     <Description>Casbin.NET is a powerful and efficient open-source access control library for .NET (C#) projects. It provides support for enforcing authorization based on various access control models.</Description>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <Authors>Casbin, Zhikui H</Authors>
     <Product>Casbin.NET</Product>
     <RepositoryType>GIT</RepositoryType>
@@ -105,6 +106,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="../README.md" Pack="true" PackagePath="" />
     <None Include="casbin.png" Pack="true" Visible="false" PackagePath=""/>
   </ItemGroup>
 
