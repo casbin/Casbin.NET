@@ -13,15 +13,15 @@ Casbin.NET is a powerful and efficient open-source access control library for .N
 
 ## All the languages supported by Casbin:
 
-| [![golang](https://casbin.org/img/langs/golang.png)](https://github.com/casbin/casbin) | [![java](https://casbin.org/img/langs/java.png)](https://github.com/casbin/jcasbin) | [![nodejs](https://casbin.org/img/langs/nodejs.png)](https://github.com/casbin/node-casbin) | [![php](https://casbin.org/img/langs/php.png)](https://github.com/php-casbin/php-casbin) |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| [Casbin](https://github.com/casbin/casbin)                                             | [jCasbin](https://github.com/casbin/jcasbin)                                        | [node-Casbin](https://github.com/casbin/node-casbin)                                        | [PHP-Casbin](https://github.com/php-casbin/php-casbin)                                   |
-| production-ready                                                                       | production-ready                                                                    | production-ready                                                                            | production-ready                                                                         |
+| [![golang](https://github.com/casbin/casbin.io/blob/master/img/langs/golang.png?raw=true)](https://github.com/casbin/casbin) | [![java](https://github.com/casbin/casbin.io/blob/master/img/langs/java.png?raw=true)](https://github.com/casbin/jcasbin) | [![nodejs](https://github.com/casbin/casbin.io/blob/master/img/langs/nodejs.png?raw=true)](https://github.com/casbin/node-casbin) | [![php](https://github.com/casbin/casbin.io/blob/master/img/langs/php.png?raw=true)](https://github.com/php-casbin/php-casbin) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [Casbin](https://github.com/casbin/casbin)                   | [jCasbin](https://github.com/casbin/jcasbin)                 | [node-Casbin](https://github.com/casbin/node-casbin)         | [PHP-Casbin](https://github.com/php-casbin/php-casbin)       |
+| production-ready                                             | production-ready                                             | production-ready                                             | production-ready                                             |
 
-| [![python](https://casbin.org/img/langs/python.png)](https://github.com/casbin/pycasbin) | [![dotnet](https://casbin.org/img/langs/dotnet.png)](https://github.com/casbin/Casbin.NET) | [![delphi](https://casbin.org/img/langs/delphi.png)](https://github.com/casbin4d/Casbin4D) | [![rust](https://casbin.org/img/langs/rust.png)](https://github.com/casbin/casbin-rs) |
-| ---------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
-| [PyCasbin](https://github.com/casbin/pycasbin)                                           | [Casbin.NET](https://github.com/casbin/Casbin.NET)                                         | [Casbin4D](https://github.com/casbin4d/Casbin4D)                                           | [Casbin-RS](https://github.com/casbin/casbin-rs)                                      |
-| production-ready                                                                         | production-ready                                                                               | experimental                                                                               | production-ready                                                                                        |
+| [![python](https://github.com/casbin/casbin.io/blob/master/img/langs/python.png?raw=true)](https://github.com/casbin/pycasbin) | [![dotnet](https://github.com/casbin/casbin.io/blob/master/img/langs/dotnet.png?raw=true)](https://github.com/casbin/Casbin.NET) | [![delphi](https://github.com/casbin/casbin.io/blob/master/img/langs/delphi.png?raw=true)](https://github.com/casbin4d/Casbin4D) | [![rust](https://github.com/casbin/casbin.io/blob/master/img/langs/rust.png?raw=true)](https://github.com/casbin/casbin-rs) |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| [PyCasbin](https://github.com/casbin/pycasbin)               | [Casbin.NET](https://github.com/casbin/Casbin.NET)           | [Casbin4D](https://github.com/casbin4d/Casbin4D)             | [Casbin-RS](https://github.com/casbin/casbin-rs)             |
+| production-ready                                             | production-ready                                             | experimental                                                 | production-ready                                             |
 
 ## Table of contents
 
@@ -190,9 +190,9 @@ Casbin provides two sets of APIs to manage permissions:
 
 We also provide a web-based UI for model management and policy management:
 
-![model editor](https://hsluoyz.github.io/casbin/ui_model_editor.png)
+![model editor](https://github.com/hsluoyz/hsluoyz.github.io/blob/master/casbin/ui_model_editor.png?raw=true)
 
-![policy editor](https://hsluoyz.github.io/casbin/ui_policy_editor.png)
+![policy editor](https://github.com/hsluoyz/hsluoyz.github.io/blob/master/casbin/ui_policy_editor.png?raw=true)
 
 ## Policy persistence
 
@@ -237,19 +237,19 @@ https://casbin.org/docs/adopters
 ## Contributors
 
 This project exists thanks to all the people who contribute. 
-<a href="https://github.com/casbin/Casbin.NET/graphs/contributors"><img src="https://opencollective.com/casbinnet/contributors.svg?width=890&button=false" /></a>
+<p><a href="https://github.com/casbin/Casbin.NET/graphs/contributors"><img src="https://opencollective.com/casbinnet/contributors.svg?width=890&button=false"></a></p>
 
 ## Backers
 
 Thank you to all our backers! 🙏 [[Become a backer](https://opencollective.com/casbin#backer)]
 
-<a href="https://opencollective.com/casbin#backers" target="_blank"><img src="https://opencollective.com/casbin/backers.svg?width=890"></a>
+<p><a href="https://opencollective.com/casbin#backers" target="_blank"><img src="https://opencollective.com/casbin/backers.svg?width=890"></a></p>
 
 ## Sponsors
 
 Support this project by becoming a sponsor. Your logo will show up here with a link to your website. [[Become a sponsor](https://opencollective.com/casbin#sponsor)]
 
-<a href="https://opencollective.com/casbin/sponsor/0/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/0/avatar.svg"></a>
+<p><a href="https://opencollective.com/casbin/sponsor/0/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/0/avatar.svg"></a>
 <a href="https://opencollective.com/casbin/sponsor/1/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/1/avatar.svg"></a>
 <a href="https://opencollective.com/casbin/sponsor/2/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/2/avatar.svg"></a>
 <a href="https://opencollective.com/casbin/sponsor/3/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/3/avatar.svg"></a>
@@ -259,6 +259,7 @@ Support this project by becoming a sponsor. Your logo will show up here with a l
 <a href="https://opencollective.com/casbin/sponsor/7/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/7/avatar.svg"></a>
 <a href="https://opencollective.com/casbin/sponsor/8/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/8/avatar.svg"></a>
 <a href="https://opencollective.com/casbin/sponsor/9/website" target="_blank"><img src="https://opencollective.com/casbin/sponsor/9/avatar.svg"></a>
+</p>
 
 ## License
 
