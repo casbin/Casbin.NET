@@ -719,6 +719,16 @@ public class ModelTest
         TestEnforce(e, "bob", "data2", "write", true);
     }
 
+    [Fact]
+    public void TestAccidentalCacheRead()
+    {
+        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+
+        TestEnforce(e, "alice", "data1", "read", true);
+        TestEnforce(e, "aliced", "ata1", "read", false);
+        TestEnforce(e, "alice", "data", "1read", false);
+    }
+
     public class TestResource
     {
         public TestResource(string name, string owner)
