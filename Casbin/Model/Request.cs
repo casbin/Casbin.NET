@@ -129,7 +129,7 @@ public static class Request
                     return false;
                 }
 
-                key = string.Concat(values2.Value1, "$", values2.Value2);
+                key = string.Concat(values2.Value1, "$$", values2.Value2);
                 return true;
             case 3:
                 if (requestValues is not RequestValues<string, string, string> values3)
@@ -138,7 +138,7 @@ public static class Request
                     return false;
                 }
 
-                key = string.Concat(values3.Value1, "$", values3.Value2, "$", values3.Value3);
+                key = string.Concat(values3.Value1, "$$", values3.Value2, "$$", values3.Value3);
                 return true;
             case 4:
                 if (requestValues is not RequestValues<string, string, string, string> values4)
@@ -147,7 +147,7 @@ public static class Request
                     return false;
                 }
 
-                key = string.Concat(values4.Value1, "$", values4.Value2, "$", values4.Value3, "$", values4.Value4);
+                key = string.Concat(values4.Value1, "$$", values4.Value2, "$$", values4.Value3, "$$", values4.Value4);
                 return true;
         }
 
