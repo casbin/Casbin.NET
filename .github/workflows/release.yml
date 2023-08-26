@@ -1,6 +1,12 @@
 name: Release
 
-on: workflow_dispatch
+on:
+  push:
+    branches:
+      - master
+      - main
+      - 1.x
+  workflow_dispatch:
 
 env:
   SHA: ${{ GITHUB.SHA }}
