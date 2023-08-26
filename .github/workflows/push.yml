@@ -1,6 +1,11 @@
 name: Push
 
-on: workflow_dispatch
+on:
+  push:
+    tags:
+      - v2.*
+      - v1.*
+  workflow_dispatch:
 
 env:
   SHA: ${{ GITHUB.SHA }}
