@@ -5,11 +5,11 @@ namespace Casbin.Persist;
 
 public interface IIncrementalWatcher
 {
-    void SetUpdateCallback(Action<PolicyChangedMessage> callback);
+    void SetUpdateCallback(Action<IPolicyChangeMessage> callback);
 
-    void SetUpdateCallback(Func<PolicyChangedMessage, Task> callback);
+    void SetUpdateCallback(Func<IPolicyChangeMessage, Task> callback);
 
-    void Update(PolicyChangedMessage message);
+    void Update(IPolicyChangeMessage message);
 
-    Task UpdateAsync(PolicyChangedMessage message);
+    Task UpdateAsync(IPolicyChangeMessage message);
 }

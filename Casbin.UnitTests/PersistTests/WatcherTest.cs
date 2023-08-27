@@ -72,18 +72,24 @@ public class WatcherTest
             AsyncCalled = true;
         }
 
-        public void SetUpdateCallback(Action<PolicyChangedMessage> callback) => throw new NotImplementedException();
+        public void SetUpdateCallback(Action<IPolicyChangeMessage> callback) => throw new NotImplementedException();
 
-        public void SetUpdateCallback(Func<PolicyChangedMessage, Task> callback) => throw new NotImplementedException();
+        public void SetUpdateCallback(Func<IPolicyChangeMessage, Task> callback) => throw new NotImplementedException();
 
-        public void Update(PolicyChangedMessage message) => Update();
+        public void Update(IPolicyChangeMessage message) => Update();
 
-        public Task UpdateAsync(PolicyChangedMessage message) => UpdateAsync();
+        public Task UpdateAsync(IPolicyChangeMessage message) => UpdateAsync();
 
-        public void Close() => _callback = () => { };
+        public void Close() => _callback = null;
 
-        public void SetUpdateCallback<TMessage>(Func<TMessage> callback) => throw new NotImplementedException();
-
-        public void SetUpdateCallback<TMessage>(Func<TMessage, Task> callback) => throw new NotImplementedException();
+        public Task CloseAsync()
+        {
+            _asyncCallback = null;
+#if !NET452
+            return Task.CompletedTask;
+#else
+            return Task.FromResult(true);
+#endif
+        }
     }
 }

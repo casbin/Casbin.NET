@@ -3,7 +3,7 @@ using Casbin.Model;
 
 namespace Casbin.Persist;
 
-public class PolicyChangedMessage
+public class PolicyChangedMessage : IPolicyChangeMessage
 {
     public PolicyOperation Operation { get; private init; }
     public string Section { get; private init; }

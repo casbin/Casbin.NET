@@ -16,7 +16,7 @@ public class WatcherMessageTest
 
     public WatcherMessageTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
 
-    private void MessageEquals(PolicyChangedMessage message, PolicyChangedMessage message2)
+    private void MessageEquals(IPolicyChangeMessage message, IPolicyChangeMessage message2)
     {
         Assert.Equal(message.Operation, message2.Operation);
         Assert.Equal(message.Section, message2.Section);
@@ -366,13 +366,14 @@ public class WatcherMessageTest
         private Func<Task> _asyncCallback;
         private Action _callback;
 
-        public PolicyChangedMessage WatcherMessage { get; private set; }
+        public IPolicyChangeMessage WatcherMessage { get; private set; }
 
-        public PolicyChangedMessage AsyncWatcherMessage { get; private set; }
+        public IPolicyChangeMessage AsyncWatcherMessage { get; private set; }
 
         public void SetUpdateCallback(Action callback) => _callback = callback;
 
         public void SetUpdateCallback(Func<Task> callback) => _asyncCallback = callback;
+
         public void Update() => _callback?.Invoke();
 
         public async Task UpdateAsync()
@@ -383,17 +384,17 @@ public class WatcherMessageTest
             }
         }
 
-        public void SetUpdateCallback(Action<PolicyChangedMessage> callback) => throw new NotImplementedException();
+        public void SetUpdateCallback(Action<IPolicyChangeMessage> callback) => throw new NotImplementedException();
 
-        public void SetUpdateCallback(Func<PolicyChangedMessage, Task> callback) => throw new NotImplementedException();
+        public void SetUpdateCallback(Func<IPolicyChangeMessage, Task> callback) => throw new NotImplementedException();
 
-        public void Update(PolicyChangedMessage watcherMessage)
+        public void Update(IPolicyChangeMessage watcherMessage)
         {
             _callback?.Invoke();
             WatcherMessage = watcherMessage;
         }
 
-        public async Task UpdateAsync(PolicyChangedMessage watcherMessage)
+        public async Task UpdateAsync(IPolicyChangeMessage watcherMessage)
         {
             if (_asyncCallback is not null)
             {
@@ -403,8 +404,16 @@ public class WatcherMessageTest
             AsyncWatcherMessage = watcherMessage;
         }
 
-        public void Close()
+        public void Close() => _callback = null;
+
+        public Task CloseAsync()
         {
+            _asyncCallback = null;
+#if !NET452
+            return Task.CompletedTask;
+#else
+            return Task.FromResult(true);
+#endif
         }
     }
 }
