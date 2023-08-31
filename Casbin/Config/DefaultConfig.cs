@@ -5,7 +5,6 @@ using System.Linq;
 using System.Text;
 #if !NET452
 using Microsoft.Extensions.Configuration;
-using static System.Net.Mime.MediaTypeNames;
 #endif
 
 namespace Casbin.Config
