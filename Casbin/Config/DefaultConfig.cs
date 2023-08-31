@@ -1,6 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Text;
+#if !NET452
+using Microsoft.Extensions.Configuration;
+using static System.Net.Mime.MediaTypeNames;
+#endif
 
 namespace Casbin.Config
 {
@@ -48,7 +54,7 @@ namespace Casbin.Config
         public static IConfig CreateFromText(string text)
         {
             var config = new DefaultConfig();
-            config.ParseBuffer(new StringReader(text));
+            config.ParseBuffer(config.ParseStringInit(new StringReader(text)));
             return config;
         }
 
@@ -159,26 +165,51 @@ namespace Casbin.Config
 
         private void Parse(string configFilePath)
         {
-            using (var sr = new StreamReader(configFilePath))
-            {
-                ParseBuffer(sr);
-            }
+            ParseBuffer(ParseStringInit(new StreamReader(configFilePath)));
         }
 
-        private void ParseBuffer(TextReader reader)
+        private MemoryStream ParseStringInit(TextReader textReader)
         {
-            string section = string.Empty;
+            TextWriter textWriter = new StringWriter();
+            string line;
+            string processedValue = string.Empty;
+            while ((line = textReader.ReadLine()) != null)
+            {
+                line = line.Split(_defaultComment[0]).First().Trim();
+                if (line.EndsWith(_defaultFeed))
+                {
+                    processedValue += line.Split(_defaultFeed[0]).First();
+                }
+                else
+                {
+                    processedValue += line;
+                    textWriter.WriteLine(processedValue);
+                    processedValue = string.Empty;
+                }
+            }
+            if (processedValue != string.Empty)
+            {
+                textWriter.WriteLine(processedValue);
+            }
+            return new MemoryStream(Encoding.UTF8.GetBytes(textWriter.ToString()));
+        }
+
+        private void ParseBuffer(Stream reader)
+        {
+#if NET452
+string section = string.Empty;
             int lineNum = 0;
             string line;
             bool inSuccessiveLine = false;
             string option = string.Empty;
             string processedValue = string.Empty;
+            TextReader textReader = new StreamReader(reader);
             while (true)
             {
                 lineNum++;
                 try
                 {
-                    if ((line = reader.ReadLine()) != null)
+                    if ((line = textReader.ReadLine()) != null)
                     {
                         if (string.IsNullOrEmpty(line))
                         {
@@ -257,7 +288,22 @@ namespace Casbin.Config
                     }
                 }
             }
-        }
+#else
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(reader);
+            IConfigurationRoot configuration = builder.Build();
+            var sections = configuration.GetChildren().ToList();
 
+            foreach (var section in sections)
+            {
+                foreach (var kvPair in section.AsEnumerable())
+                {
+                    if (kvPair.Value is not null)
+                    {
+                        AddConfig(section.Path, kvPair.Key.Split(':').Last().Trim(), kvPair.Value.Trim());
+                    }
+                }
+            }
+#endif
+        }
     }
 }
