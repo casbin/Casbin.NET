@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
 using System.Linq;
 using System.Text;
 #if !NET452
@@ -53,7 +55,8 @@ namespace Casbin.Config
         public static IConfig CreateFromText(string text)
         {
             var config = new DefaultConfig();
-            config.ParseBuffer(config.ParseStringInit(new StringReader(text)));
+            using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            config.AddStream(config.RemoveComment(memoryStream));
             return config;
         }
 
@@ -164,15 +167,17 @@ namespace Casbin.Config
 
         private void Parse(string configFilePath)
         {
-            ParseBuffer(ParseStringInit(new StreamReader(configFilePath)));
+            using FileStream fileStream = File.OpenRead(configFilePath);
+            AddStream(RemoveComment(fileStream));
         }
 
-        private MemoryStream ParseStringInit(TextReader textReader)
+        private Stream RemoveComment(Stream stream)
         {
             TextWriter textWriter = new StringWriter();
             string line;
             string processedValue = string.Empty;
-            while ((line = textReader.ReadLine()) != null)
+            StreamReader streamreader = new StreamReader(stream);
+            while ((line = streamreader.ReadLine()) != null)
             {
                 line = line.Split(_defaultComment[0]).First().Trim();
                 if (line.EndsWith(_defaultFeed))
@@ -193,16 +198,16 @@ namespace Casbin.Config
             return new MemoryStream(Encoding.UTF8.GetBytes(textWriter.ToString()));
         }
 
-        private void ParseBuffer(Stream reader)
+        private void AddStream(Stream steam)
         {
 #if NET452
-string section = string.Empty;
+            string section = string.Empty;
             int lineNum = 0;
             string line;
             bool inSuccessiveLine = false;
             string option = string.Empty;
             string processedValue = string.Empty;
-            TextReader textReader = new StreamReader(reader);
+            TextReader textReader = new StreamReader(steam);
             while (true)
             {
                 lineNum++;
@@ -288,7 +293,7 @@ string section = string.Empty;
                 }
             }
 #else
-            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(reader);
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(steam);
             IConfigurationRoot configuration = builder.Build();
             var sections = configuration.GetChildren().ToList();
 
