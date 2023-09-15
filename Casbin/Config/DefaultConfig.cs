@@ -176,8 +176,8 @@ namespace Casbin.Config
             TextWriter textWriter = new StringWriter();
             string line;
             string processedValue = string.Empty;
-            StreamReader streamreader = new StreamReader(stream);
-            while ((line = streamreader.ReadLine()) != null)
+            using var streamReader = new StreamReader(stream);
+            while ((line = streamReader.ReadLine()) != null)
             {
                 line = line.Split(_defaultComment[0]).First().Trim();
                 if (line.EndsWith(_defaultFeed))
@@ -198,7 +198,7 @@ namespace Casbin.Config
             return new MemoryStream(Encoding.UTF8.GetBytes(textWriter.ToString()));
         }
 
-        private void AddStream(Stream steam)
+        private void AddStream(Stream stream)
         {
 #if NET452
             string section = string.Empty;
@@ -207,13 +207,13 @@ namespace Casbin.Config
             bool inSuccessiveLine = false;
             string option = string.Empty;
             string processedValue = string.Empty;
-            TextReader textReader = new StreamReader(steam);
+            using var streamReader = new StreamReader(stream);
             while (true)
             {
                 lineNum++;
                 try
                 {
-                    if ((line = textReader.ReadLine()) != null)
+                    if ((line = streamReader.ReadLine()) != null)
                     {
                         if (string.IsNullOrEmpty(line))
                         {
@@ -293,7 +293,7 @@ namespace Casbin.Config
                 }
             }
 #else
-            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(steam);
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(stream);
             IConfigurationRoot configuration = builder.Build();
             var sections = configuration.GetChildren().ToList();
 
