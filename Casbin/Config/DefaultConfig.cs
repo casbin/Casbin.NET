@@ -1,6 +1,13 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Pipes;
+using System.Linq;
+using System.Text;
+#if !NET452
+using Microsoft.Extensions.Configuration;
+#endif
 
 namespace Casbin.Config
 {
@@ -48,7 +55,8 @@ namespace Casbin.Config
         public static IConfig CreateFromText(string text)
         {
             var config = new DefaultConfig();
-            config.ParseBuffer(new StringReader(text));
+            using MemoryStream memoryStream = new MemoryStream(Encoding.UTF8.GetBytes(text));
+            config.AddStream(config.RemoveComment(memoryStream));
             return config;
         }
 
@@ -159,26 +167,53 @@ namespace Casbin.Config
 
         private void Parse(string configFilePath)
         {
-            using (var sr = new StreamReader(configFilePath))
-            {
-                ParseBuffer(sr);
-            }
+            using FileStream fileStream = File.OpenRead(configFilePath);
+            AddStream(RemoveComment(fileStream));
         }
 
-        private void ParseBuffer(TextReader reader)
+        private Stream RemoveComment(Stream stream)
         {
+            TextWriter textWriter = new StringWriter();
+            string line;
+            string processedValue = string.Empty;
+            using var streamReader = new StreamReader(stream);
+            while ((line = streamReader.ReadLine()) != null)
+            {
+                line = line.Split(_defaultComment[0]).First().Trim();
+                if (line.EndsWith(_defaultFeed))
+                {
+                    processedValue += line.Split(_defaultFeed[0]).First();
+                }
+                else
+                {
+                    processedValue += line;
+                    textWriter.WriteLine(processedValue);
+                    processedValue = string.Empty;
+                }
+            }
+            if (processedValue != string.Empty)
+            {
+                textWriter.WriteLine(processedValue);
+            }
+            return new MemoryStream(Encoding.UTF8.GetBytes(textWriter.ToString()));
+        }
+
+        private void AddStream(Stream stream)
+        {
+#if NET452
             string section = string.Empty;
             int lineNum = 0;
             string line;
             bool inSuccessiveLine = false;
             string option = string.Empty;
             string processedValue = string.Empty;
+            using var streamReader = new StreamReader(stream);
             while (true)
             {
                 lineNum++;
                 try
                 {
-                    if ((line = reader.ReadLine()) != null)
+                    if ((line = streamReader.ReadLine()) != null)
                     {
                         if (string.IsNullOrEmpty(line))
                         {
@@ -257,7 +292,22 @@ namespace Casbin.Config
                     }
                 }
             }
-        }
+#else
+            IConfigurationBuilder builder = new ConfigurationBuilder().AddIniStream(stream);
+            IConfigurationRoot configuration = builder.Build();
+            var sections = configuration.GetChildren().ToList();
 
+            foreach (var section in sections)
+            {
+                foreach (var kvPair in section.AsEnumerable())
+                {
+                    if (kvPair.Value is not null)
+                    {
+                        AddConfig(section.Path, kvPair.Key.Split(':').Last().Trim(), kvPair.Value.Trim());
+                    }
+                }
+            }
+#endif
+        }
     }
 }
