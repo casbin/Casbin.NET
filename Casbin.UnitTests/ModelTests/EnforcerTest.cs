@@ -589,6 +589,31 @@ public class EnforcerTest
         IModel m = DefaultModel.Create();
         m.AddDef("r", "r", "sub, obj, act");
         m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("g", "g", "_, _");
+        m.AddDef("g", "g2", "_, _");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "g(r.sub, p.sub) && g2(r.obj, p.obj) && r.act == p.act");
+
+        Enforcer e = new(m);
+        e.AddPolicy("alice", "data1", "read");
+        e.AddPolicy("bob", "data2", "write");
+        e.AddPolicy("data_group_admin", "data_group", "write");
+        e.AddNamedGroupingPolicy("g", "alice", "data_group_admin");
+        e.AddNamedGroupingPolicy("g2", "data1", "data_group");
+        e.AddNamedGroupingPolicy("g2", "data2", "data_group");
+
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.True(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+    }
+
+    [Fact]
+    public void TestNonGNamedMultipleGroupTypeModelInMemory()
+    {
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
         m.AddDef("g", "g1", "_, _");
         m.AddDef("g", "g2", "_, _");
         m.AddDef("e", "e", "some(where (p.eft == allow))");
