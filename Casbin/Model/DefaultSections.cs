@@ -84,13 +84,7 @@ public class DefaultSections : ISections
 
         Dictionary<string, IReadOnlyAssertion> assertionMap = new() { [key] = assertion };
 
-        // TryAdd is not supported in .NET 4.5
-        if (_assertionsMap.ContainsKey(key))
-        {
-            return false;
-        }
-
-        _assertionsMap.Add(key, assertionMap);
+        _assertionsMap.Add(section, assertionMap);
         return true;
     }
 

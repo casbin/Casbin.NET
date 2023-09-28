@@ -609,6 +609,31 @@ public class EnforcerTest
     }
 
     [Fact]
+    public async Task TestNonGNamedMultipleGroupTypeModelInMemoryAsync()
+    {
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("g", "firstGroup", "_, _");
+        m.AddDef("g", "secondGroup", "_, _");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "firstGroup(r.sub, p.sub) && secondGroup(r.obj, p.obj) && r.act == p.act");
+
+        Enforcer e = new(m);
+        await e.AddPolicyAsync("alice", "data1", "read");
+        await e.AddPolicyAsync("bob", "data2", "write");
+        await e.AddPolicyAsync("data_group_admin", "data_group", "write");
+        await e.AddNamedGroupingPolicyAsync("firstGroup", "alice", "data_group_admin");
+        await e.AddNamedGroupingPolicyAsync("secondGroup", "data1", "data_group");
+        await e.AddNamedGroupingPolicyAsync("secondGroup", "data2", "data_group");
+
+        Assert.True(await e.EnforceAsync("alice", "data1", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data1", "write"));
+        Assert.False(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "write"));
+    }
+
+    [Fact]
     public async Task TestMultipleGroupTypeModelInMemoryAsync()
     {
         IModel m = DefaultModel.Create();
