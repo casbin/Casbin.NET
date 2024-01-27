@@ -143,51 +143,51 @@ public static class Policy
     {
         // Find the latest not empty value as the count.
         int count;
-        if (string.IsNullOrWhiteSpace(values.Value12) is false)
+        if (values.Value12 != null)
         {
             count = 12;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value11) is false)
+        else if (values.Value11 != null)
         {
             count = 11;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value10) is false)
+        else if (values.Value10 != null)
         {
             count = 10;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value9) is false)
+        else if (values.Value9 != null)
         {
             count = 9;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value8) is false)
+        else if (values.Value8 != null)
         {
             count = 8;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value7) is false)
+        else if (values.Value7 != null)
         {
             count = 7;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value6) is false)
+        else if (values.Value6 != null)
         {
             count = 6;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value5) is false)
+        else if (values.Value5 != null)
         {
             count = 5;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value4) is false)
+        else if (values.Value4 != null)
         {
             count = 4;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value3) is false)
+        else if (values.Value3 != null)
         {
             count = 3;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value2) is false)
+        else if (values.Value2 != null)
         {
             count = 2;
         }
-        else if (string.IsNullOrWhiteSpace(values.Value1) is false)
+        else if (values.Value1 != null)
         {
             count = 1;
         }
