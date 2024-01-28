@@ -30,36 +30,8 @@ public partial class Enforcer
             return InternalEnforce<IRequestValues, IPolicyValues>(in context, requestValues);
         }
 
-        return context.View.PolicyTokens.Count switch
-        {
-            1 => InternalEnforce<TRequest, PolicyValues<string>>(in context, requestValues),
-            2 => InternalEnforce<TRequest, PolicyValues<string, string>>(in context, requestValues),
-            3 => InternalEnforce<TRequest, PolicyValues<string, string, string>>(in context, requestValues),
-            4 => InternalEnforce<TRequest, PolicyValues<string, string, string, string>>(in context,
-                requestValues),
-            5 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string>>(in context,
-                requestValues),
-            6 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string>>(
-                in context,
-                requestValues),
-            7 => InternalEnforce<TRequest,
-                PolicyValues<string, string, string, string, string, string, string>>(
-                in context, requestValues),
-            8 => InternalEnforce<TRequest,
-                PolicyValues<string, string, string, string, string, string, string, string>>(in context,
-                requestValues),
-            9 => InternalEnforce<TRequest,
-                PolicyValues<string, string, string, string, string, string, string, string, string>>(
-                in context,
-                requestValues),
-            10 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
-                string, string, string>>(in context, requestValues),
-            11 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
-                string, string, string, string>>(in context, requestValues),
-            12 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
-                string, string, string, string, string>>(in context, requestValues),
-            _ => InternalEnforce<IRequestValues, IPolicyValues>(in context, requestValues)
-        };
+        return InternalEnforce<TRequest, PolicyValues>(in context, requestValues);
+
     }
 
     private bool InternalEnforce<TRequest, TPolicy>(in EnforceContext context, in TRequest requestValues)

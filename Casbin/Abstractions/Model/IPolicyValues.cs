@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Casbin.Model;
 
-public interface IPolicyValues : IReadOnlyList<string>
+public interface IPolicyValues : IList<string>
 {
     public new string this[int index] { get; }
 
