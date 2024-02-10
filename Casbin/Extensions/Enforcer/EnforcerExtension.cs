@@ -342,26 +342,26 @@ namespace Casbin
             }
         }
 
-        public static Enforcer AddMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
+        public static IEnforcer AddMatchingFunc(this IEnforcer enforcer, Func<string, string, bool> func)
         {
             enforcer.AddNamedMatchingFunc(PermConstants.DefaultRoleType, func);
             return enforcer;
         }
 
-        public static Enforcer AddDomainMatchingFunc(this Enforcer enforcer, Func<string, string, bool> func)
+        public static IEnforcer AddDomainMatchingFunc(this IEnforcer enforcer, Func<string, string, bool> func)
         {
             enforcer.AddNamedDomainMatchingFunc(PermConstants.DefaultRoleType, func);
             return enforcer;
         }
 
-        public static Enforcer AddNamedMatchingFunc(this Enforcer enforcer, string roleType,
+        public static IEnforcer AddNamedMatchingFunc(this IEnforcer enforcer, string roleType,
             Func<string, string, bool> func)
         {
             enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
             return enforcer;
         }
 
-        public static Enforcer AddNamedDomainMatchingFunc(this Enforcer enforcer, string roleType,
+        public static IEnforcer AddNamedDomainMatchingFunc(this IEnforcer enforcer, string roleType,
             Func<string, string, bool> func)
         {
             enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
