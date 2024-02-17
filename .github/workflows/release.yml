@@ -1,12 +1,6 @@
 name: Release
 
-on:
-  push:
-    branches:
-      - master
-      - main
-      - 1.x
-  workflow_dispatch:
+on: push
 
 env:
   SHA: ${{ GITHUB.SHA }}
@@ -97,6 +91,7 @@ jobs:
   push-packages:
       runs-on: windows-latest
       needs: run-semantic-release
+      if: github.repository_owner == 'casbin' && github.event_name == 'push'
 
       steps:
         - name: Checkout
