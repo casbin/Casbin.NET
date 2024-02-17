@@ -97,7 +97,6 @@ jobs:
   push-packages:
       runs-on: windows-latest
       needs: run-semantic-release
-      if: github.repository_owner == 'casdoor' && github.event_name == 'push'
 
       steps:
         - name: Checkout
