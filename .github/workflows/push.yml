@@ -14,7 +14,6 @@ env:
   RUN_NUMBER: ${{ GITHUB.RUN_NUMBER }}
   BUILD_RUN_NUMBER: build.${{ GITHUB.RUN_NUMBER }}
   GITHUB_TOKEN: ${{ SECRETS.GITHUB_TOKEN }}
-  MYGET_API_TOKEN: ${{ SECRETS.MYGET_API_TOKEN }}
   NUGET_API_TOKEN: ${{ SECRETS.NUGET_API_KEY }}
   COVERALLS_REPO_TOKEN: ${{ SECRETS.COVERALLS_REPO_TOKEN }}
 
@@ -73,12 +72,6 @@ jobs:
         with:
           name: "drop-ci-packages"
           path: './packages'
-
-      - name: Add myget nuget source
-        run: dotnet nuget add source https://www.myget.org/F/casbin-net/api/v2/package --name myget.org
-
-      - name: Push packages to myget.org
-        run: dotnet nuget push .\packages\*.nupkg -s myget.org -k $env:MYGET_API_TOKEN --skip-duplicate
 
       - name: Add github nuget source
         run: dotnet nuget add source https://nuget.pkg.github.com/casbin/index.json --name github.com --username casbin --password $env:GITHUB_TOKEN
