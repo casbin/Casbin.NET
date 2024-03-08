@@ -361,7 +361,7 @@ namespace Casbin
         public static void AddNamedDomainMatchingFunc(this IEnforcer enforcer, string roleType,
             Func<string, string, bool> func)
         {
-            enforcer.Model.GetRoleManager(roleType).AddMatchingFunc(func);
+            enforcer.Model.GetRoleManager(roleType).AddDomainMatchingFunc(func);
         }
 
         #endregion
