@@ -328,7 +328,7 @@ namespace Casbin
         }
 
         public static IRoleManager GetRoleManager(this IEnforcer enforcer, string roleType) =>
-            enforcer.Model.GetRoleManger(roleType);
+            enforcer.Model.GetRoleManager(roleType);
 
         public static void SetRoleManager(this IEnforcer enforcer, IRoleManager roleManager) =>
             enforcer.SetRoleManager(PermConstants.DefaultRoleType, roleManager);
@@ -355,13 +355,13 @@ namespace Casbin
         public static void AddNamedMatchingFunc(this IEnforcer enforcer, string roleType,
             Func<string, string, bool> func)
         {
-            enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
+            enforcer.Model.GetRoleManager(roleType).AddMatchingFunc(func);
         }
 
         public static void AddNamedDomainMatchingFunc(this IEnforcer enforcer, string roleType,
             Func<string, string, bool> func)
         {
-            enforcer.Model.GetRoleManger(roleType).AddMatchingFunc(func);
+            enforcer.Model.GetRoleManager(roleType).AddMatchingFunc(func);
         }
 
         #endregion

@@ -3,7 +3,7 @@ using Casbin.Rbac;
 
 namespace Casbin
 {
-    public static class RoleMangerExtension
+    public static class RoleManagerExtension
     {
         public static IRoleManager AddMatchingFunc(this IRoleManager roleManager,
             Func<string, string, bool> matchingFunc)

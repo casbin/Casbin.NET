@@ -46,7 +46,7 @@ namespace Casbin
         internal static bool InternalAddPolicy(this IEnforcer enforcer, string section, string policyType,
             IPolicyValues values)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             bool ruleAdded = policyManager.AddPolicy(values);
 
             if (ruleAdded is false)
@@ -69,13 +69,13 @@ namespace Casbin
         internal static async Task<bool> InternalAddPolicyAsync(this IEnforcer enforcer, string section,
             string policyType, IPolicyValues values)
         {
-            IPolicyManager policyManger = enforcer.Model.GetPolicyManger(section, policyType);
-            if (policyManger.HasPolicy(values))
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
+            if (policyManager.HasPolicy(values))
             {
                 return false;
             }
 
-            bool ruleAdded = await policyManger.AddPolicyAsync(values);
+            bool ruleAdded = await policyManager.AddPolicyAsync(values);
 
             if (ruleAdded is false)
             {
@@ -97,7 +97,7 @@ namespace Casbin
         internal static bool InternalAddPolicies(this IEnforcer enforcer, string section, string policyType,
             IReadOnlyList<IPolicyValues> valuesList)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicies(valuesList))
             {
                 return false;
@@ -126,7 +126,7 @@ namespace Casbin
         internal static async Task<bool> InternalAddPoliciesAsync(this IEnforcer enforcer, string section,
             string policyType, IReadOnlyList<IPolicyValues> valuesList)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicies(valuesList))
             {
                 return false;
@@ -156,7 +156,7 @@ namespace Casbin
         internal static bool InternalUpdatePolicy(this IEnforcer enforcer, string section, string policyType,
             IPolicyValues oldValues, IPolicyValues newValues)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicy(oldValues) is false)
             {
                 return false;
@@ -186,7 +186,7 @@ namespace Casbin
         internal static async Task<bool> InternalUpdatePolicyAsync(this IEnforcer enforcer, string section,
             string policyType, IPolicyValues oldValues, IPolicyValues newValues)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicy(oldValues) is false)
             {
                 return false;
@@ -216,7 +216,7 @@ namespace Casbin
         internal static bool InternalUpdatePolicies(this IEnforcer enforcer, string section, string policyType,
             IReadOnlyList<IPolicyValues> oldValuesList, IReadOnlyList<IPolicyValues> newValuesList)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasAllPolicies(oldValuesList) is false)
             {
                 return false;
@@ -246,7 +246,7 @@ namespace Casbin
         internal static async Task<bool> InternalUpdatePoliciesAsync(this IEnforcer enforcer, string section,
             string policyType, IReadOnlyList<IPolicyValues> oldValuesList, IReadOnlyList<IPolicyValues> newValuesList)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasAllPolicies(oldValuesList) is false)
             {
                 return false;
@@ -275,7 +275,7 @@ namespace Casbin
         internal static bool InternalRemovePolicy(this IEnforcer enforcer, string section, string policyType,
             IPolicyValues values)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicy(values) is false)
             {
                 return false;
@@ -303,7 +303,7 @@ namespace Casbin
         internal static async Task<bool> InternalRemovePolicyAsync(this IEnforcer enforcer, string section,
             string policyType, IPolicyValues rule)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicy(rule) is false)
             {
                 return false;
@@ -331,7 +331,7 @@ namespace Casbin
         internal static bool InternalRemovePolicies(this IEnforcer enforcer, string section, string policyType,
             IReadOnlyList<IPolicyValues> rules)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicies(rules) is false)
             {
                 return false;
@@ -359,7 +359,7 @@ namespace Casbin
         internal static async Task<bool> InternalRemovePoliciesAsync(this IEnforcer enforcer, string section,
             string policyType, IReadOnlyList<IPolicyValues> rules)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             if (policyManager.HasPolicies(rules) is false)
             {
                 return false;
@@ -389,7 +389,7 @@ namespace Casbin
         internal static bool InternalRemoveFilteredPolicy(this IEnforcer enforcer, string section, string policyType,
             int fieldIndex, IPolicyValues fieldValues)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             IEnumerable<IPolicyValues> effectPolicies = policyManager.RemoveFilteredPolicy(fieldIndex, fieldValues);
 
             if (effectPolicies is null)
@@ -416,7 +416,7 @@ namespace Casbin
         internal static async Task<bool> InternalRemoveFilteredPolicyAsync(this IEnforcer enforcer, string section,
             string policyType, int fieldIndex, IPolicyValues fieldValues)
         {
-            IPolicyManager policyManager = enforcer.Model.GetPolicyManger(section, policyType);
+            IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
             IEnumerable<IPolicyValues> effectPolicies =
                 await policyManager.RemoveFilteredPolicyAsync(fieldIndex, fieldValues);
 
