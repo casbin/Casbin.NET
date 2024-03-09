@@ -205,12 +205,12 @@ namespace Casbin.Model
             }
         }
 
-        public static IPolicyManager GetPolicyManger(this IModel model, string section,
+        public static IPolicyManager GetPolicyManager(this IModel model, string section,
             string policyType = PermConstants.DefaultPolicyType) =>
             model.Sections.GetPolicyAssertion(section, policyType).PolicyManager;
 
         public static IRoleManager
-            GetRoleManger(this IModel model, string roleType = PermConstants.DefaultRoleType) =>
+            GetRoleManager(this IModel model, string roleType = PermConstants.DefaultRoleType) =>
             model.Sections.GetRoleAssertion(roleType).RoleManager;
 
         public static void SetRoleManager(this IModel model, string roleType, IRoleManager roleManager)

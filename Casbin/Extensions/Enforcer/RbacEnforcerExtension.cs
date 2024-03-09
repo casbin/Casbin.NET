@@ -55,8 +55,8 @@ namespace Casbin
         public static IEnumerable<string> GetRolesForUser(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
-                ? enforcer.Model.GetRoleManger().GetRoles(name)
-                : enforcer.Model.GetRoleManger().GetRoles(name, domain);
+                ? enforcer.Model.GetRoleManager().GetRoles(name)
+                : enforcer.Model.GetRoleManager().GetRoles(name, domain);
         }
 
         /// <summary>
@@ -69,8 +69,8 @@ namespace Casbin
         public static IEnumerable<string> GetUsersForRole(this IEnforcer enforcer, string name, string domain = null)
         {
             return domain is null
-                ? enforcer.Model.GetRoleManger().GetUsers(name)
-                : enforcer.Model.GetRoleManger().GetUsers(name, domain);
+                ? enforcer.Model.GetRoleManager().GetUsers(name)
+                : enforcer.Model.GetRoleManager().GetUsers(name, domain);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace Casbin
             var userIds = new List<string>();
             foreach (string name in names)
             {
-                userIds.AddRange(enforcer.Model.GetRoleManger().GetUsers(name));
+                userIds.AddRange(enforcer.Model.GetRoleManager().GetUsers(name));
             }
 
             return userIds;
@@ -649,7 +649,7 @@ namespace Casbin
             string roleType = null)
         {
             roleType ??= PermConstants.DefaultRoleType;
-            return enforcer.Model.GetRoleManger(roleType).GetDomains(name);
+            return enforcer.Model.GetRoleManager(roleType).GetDomains(name);
         }
 
         /// <summary>
@@ -661,7 +661,7 @@ namespace Casbin
         /// <returns></returns>
         public static IEnumerable<string>
             GetRolesForUserInDomain(this IEnforcer enforcer, string name, string domain) =>
-            enforcer.Model.GetRoleManger().GetRoles(name, domain);
+            enforcer.Model.GetRoleManager().GetRoles(name, domain);
 
         /// <summary>
         ///
