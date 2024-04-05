@@ -47,8 +47,12 @@ namespace Casbin
             IPolicyValues values)
         {
             IPolicyManager policyManager = enforcer.Model.GetPolicyManager(section, policyType);
-            bool ruleAdded = policyManager.AddPolicy(values);
+            if (policyManager.HasPolicy(values))
+            {
+                return false;
+            }
 
+            bool ruleAdded = policyManager.AddPolicy(values);
             if (ruleAdded is false)
             {
                 return false;
@@ -76,7 +80,6 @@ namespace Casbin
             }
 
             bool ruleAdded = await policyManager.AddPolicyAsync(values);
-
             if (ruleAdded is false)
             {
                 return false;
@@ -104,7 +107,6 @@ namespace Casbin
             }
 
             bool ruleAdded = policyManager.AddPolicies(valuesList);
-
             if (ruleAdded is false)
             {
                 return false;
@@ -133,7 +135,6 @@ namespace Casbin
             }
 
             bool ruleAdded = await policyManager.AddPoliciesAsync(valuesList);
-
             if (ruleAdded is false)
             {
                 return false;
@@ -163,7 +164,6 @@ namespace Casbin
             }
 
             bool ruleUpdated = policyManager.UpdatePolicy(oldValues, newValues);
-
             if (ruleUpdated is false)
             {
                 return false;
@@ -193,7 +193,6 @@ namespace Casbin
             }
 
             bool ruleUpdated = await policyManager.UpdatePolicyAsync(oldValues, newValues);
-
             if (ruleUpdated is false)
             {
                 return false;
@@ -223,7 +222,6 @@ namespace Casbin
             }
 
             bool ruleUpdated = policyManager.UpdatePolicies(oldValuesList, newValuesList);
-
             if (ruleUpdated is false)
             {
                 return false;
@@ -253,7 +251,6 @@ namespace Casbin
             }
 
             bool ruleUpdated = await policyManager.UpdatePoliciesAsync(oldValuesList, newValuesList);
-
             if (ruleUpdated is false)
             {
                 return false;
@@ -282,7 +279,6 @@ namespace Casbin
             }
 
             bool ruleRemoved = policyManager.RemovePolicy(values);
-
             if (ruleRemoved is false)
             {
                 return false;
@@ -310,7 +306,6 @@ namespace Casbin
             }
 
             bool ruleRemoved = await policyManager.RemovePolicyAsync(rule);
-
             if (ruleRemoved is false)
             {
                 return false;
@@ -338,7 +333,6 @@ namespace Casbin
             }
 
             bool ruleRemoved = policyManager.RemovePolicies(rules);
-
             if (ruleRemoved is false)
             {
                 return false;
@@ -366,7 +360,6 @@ namespace Casbin
             }
 
             bool ruleRemoved = await policyManager.RemovePoliciesAsync(rules);
-
             if (ruleRemoved is false)
             {
                 return false;
