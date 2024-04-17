@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 
 namespace Casbin.Model;
@@ -45,24 +44,19 @@ public partial class DefaultPolicyStore
         public bool ContainsPolicy(IPolicyValues values)
             => PolicyTextSet.Contains(values.ToText());
 
-        public bool ValidatePolicy(ref IPolicyValues values)
+        public bool ValidatePolicy(IPolicyValues values)
         {
             if (_assertion.Section is PermConstants.Section.RoleSection)
             {
                 return _assertion.Tokens.Count <= values.Count;
             }
 
-            while(_assertion.Tokens.Count > values.Count)
-            {
-                values.Add("");
-            }
-
-            return _assertion.Tokens.Count >= values.Count;
+            return _assertion.Tokens.Count == values.Count;
         }
 
         public bool TryAddPolicy(IPolicyValues values)
         {
-            if (ValidatePolicy(ref values) is false)
+            if (ValidatePolicy(values) is false)
             {
                 return false;
             }
@@ -93,7 +87,7 @@ public partial class DefaultPolicyStore
 
         public bool TryUpdatePolicy(IPolicyValues oldValues, IPolicyValues newValues)
         {
-            if (ValidatePolicy(ref newValues) is false)
+            if (ValidatePolicy(newValues) is false)
             {
                 return false;
             }

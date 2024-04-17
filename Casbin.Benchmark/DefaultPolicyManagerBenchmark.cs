@@ -49,9 +49,9 @@ namespace Casbin.Benchmark
                 if (num == 0)
                 {
                     NowTestExistedPolicyList.Add(
-                        new PolicyValues($"group{i}", $"obj{i / 10}", "read"));
+                        new PolicyValues<string, string, string>($"group{i}", $"obj{i / 10}", "read"));
                     NowTestNullPolicyList.Add(
-                        new PolicyValues($"name{i}", $"data{i / 10}", "read"));
+                        new PolicyValues<string, string, string>($"name{i}", $"data{i / 10}", "read"));
                 }
             }
 
@@ -59,7 +59,7 @@ namespace Casbin.Benchmark
 
             NowTestUserName = $"name{NowPolicyCount / 2 + 1}";
             NowTestDataName = $"data{NowPolicyCount / 2 + 1}";
-            NowTestPolicy = new PolicyValues(NowTestUserName, NowTestDataName, "read");
+            NowTestPolicy = new PolicyValues<string, string, string>(NowTestUserName, NowTestDataName, "read");
             Console.WriteLine($"// Already set user name to {NowTestUserName}.");
             Console.WriteLine($"// Already set data name to {NowTestDataName}.");
         }
@@ -83,7 +83,7 @@ namespace Casbin.Benchmark
         public async Task UpdatePolicyAsync()
         {
             await _policyManager.UpdatePolicyAsync(NowTestPolicy,
-                new PolicyValues(NowTestUserName + "up", NowTestDataName + "up", "read"));
+                new PolicyValues<string, string, string>(NowTestUserName + "up", NowTestDataName + "up", "read"));
         }
 
         [Benchmark]
