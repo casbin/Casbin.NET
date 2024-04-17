@@ -17,9 +17,6 @@ public record PolicyValues : IPolicyValues
     public bool IsReadOnly => false;
 
     int ICollection<string>.Count => Values.Count;
- 
-
-    int IPolicyValues.GetRealCount() => Count;
 
     string IList<string>.this[int index] { get => Values[index]; set => new NotImplementedException(); }
 
@@ -37,22 +34,7 @@ public record PolicyValues : IPolicyValues
         => string.Join(PermConstants.PolicySeparatorString, values);
 
     internal static bool Equals<T>(T values, T other) where T : IPolicyValues
-    {
-        if (values.GetRealCount() != other.GetRealCount())
-        {
-            return false;
-        }
-
-        for(int i = 0; i< values.GetRealCount(); i++)
-        {
-            if (values[i] != other[i])
-            {
-                return false;
-            }
-        }
-
-        return true;
-    }
+        => values.Count == other.Count && values.ToText().Equals(other.ToText());
 
     internal static string ToStringValue<T>(T value) => value as string ?? value.ToString();
 

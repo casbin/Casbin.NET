@@ -31,7 +31,7 @@ public class PersistPolicy : IPersistPolicy, IReadOnlyPersistPolicy
         where TPersistPolicy : IPersistPolicy, new()
     {
         TPersistPolicy persistPolicy = new TPersistPolicy { Section = section, Type = type };
-        switch (values.GetRealCount())
+        switch (values.Count)
         {
             case 1:
                 persistPolicy.Value1 = values[0];
@@ -136,7 +136,7 @@ public class PersistPolicy : IPersistPolicy, IReadOnlyPersistPolicy
                 persistPolicy.Value12 = values[11];
                 break;
             default:
-                throw new ArgumentOutOfRangeException(nameof(values), values.GetRealCount(),
+                throw new ArgumentOutOfRangeException(nameof(values), values.Count,
                     "The number of values must be between 1 and 12.");
         }
 

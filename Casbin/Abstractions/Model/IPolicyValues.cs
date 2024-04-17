@@ -10,6 +10,4 @@ public interface IPolicyValues : IList<string>
     public string ToText();
 
     public bool Equals(IPolicyValues other);
-
-    int GetRealCount();
 }
