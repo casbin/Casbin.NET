@@ -6,38 +6,31 @@ namespace Casbin.Model;
 
 public record PolicyValues : IPolicyValues
 {
-    protected string Text;
+    private string _text;
 
     public static PolicyValues Empty { get; } = new();
     public virtual int Count => 0;
     public virtual string this[int index] => throw new ArgumentOutOfRangeException(nameof(index));
     public virtual IEnumerator<string> GetEnumerator() => new PolicyEnumerator<PolicyValues>(this);
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-    public string ToText() => Text ??= ToText((IEnumerable<string>)this);
+    public string ToText() => _text ??= ToText(this);
     public bool Equals(IPolicyValues other) => Equals(this, other);
 
     internal static string ToText<T>(T values) where T : IPolicyValues
         => string.Join(PermConstants.PolicySeparatorString, values);
 
-    internal static string ToText(IEnumerable<string> values)
-        => string.Join(PermConstants.PolicySeparatorString, values);
-
     internal static bool Equals<T>(T values, T other) where T : IPolicyValues
         => values.Count == other.Count && values.ToText().Equals(other.ToText());
 
-    internal static string ToStringValue<T>(T value) => value as string ?? value.ToString();
+    internal static string ToStringValue<T>(T value) =>
+        value is not null
+            ? value as string ?? value.ToString()
+            : string.Empty;
 }
 
 public record PolicyValues<T1>(T1 Value1) : PolicyValues
 {
     private string _stringValue1;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1) : this(value1)
-    {
-        _stringValue1 = stringValue1;
-        Text = text;
-    }
-
     public override int Count => 1;
 
     public override string this[int index] => index switch
@@ -52,15 +45,6 @@ public record PolicyValues<T1>(T1 Value1) : PolicyValues
 public record PolicyValues<T1, T2>(T1 Value1, T2 Value2) : PolicyValues
 {
     private string _stringValue1, _stringValue2;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2) : this(value1,
-        value2)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        Text = text;
-    }
-
     public override int Count => 2;
 
     public override string this[int index] => index switch
@@ -76,16 +60,6 @@ public record PolicyValues<T1, T2>(T1 Value1, T2 Value2) : PolicyValues
 public record PolicyValues<T1, T2, T3>(T1 Value1, T2 Value2, T3 Value3) : PolicyValues
 {
     private string _stringValue1, _stringValue2, _stringValue3;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2,
-        T3 value3, string stringValue3) : this(value1, value2, value3)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        _stringValue3 = stringValue3;
-        Text = text;
-    }
-
     public override int Count => 3;
 
     public override string this[int index] => index switch
@@ -102,17 +76,6 @@ public record PolicyValues<T1, T2, T3>(T1 Value1, T2 Value2, T3 Value3) : Policy
 public record PolicyValues<T1, T2, T3, T4>(T1 Value1, T2 Value2, T3 Value3, T4 Value4) : PolicyValues
 {
     private string _stringValue1, _stringValue2, _stringValue3, _stringValue4;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2,
-        T3 value3, string stringValue3, T4 value4, string stringValue4) : this(value1, value2, value3, value4)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        _stringValue3 = stringValue3;
-        _stringValue4 = stringValue4;
-        Text = text;
-    }
-
     public override int Count => 4;
 
     public override string this[int index] => index switch
@@ -130,19 +93,6 @@ public record PolicyValues<T1, T2, T3, T4>(T1 Value1, T2 Value2, T3 Value3, T4 V
 public record PolicyValues<T1, T2, T3, T4, T5>(T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5) : PolicyValues
 {
     private string _stringValue1, _stringValue2, _stringValue3, _stringValue4, _stringValue5;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2,
-        T3 value3, string stringValue3, T4 value4, string stringValue4, T5 value5, string stringValue5)
-        : this(value1, value2, value3, value4, value5)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        _stringValue3 = stringValue3;
-        _stringValue4 = stringValue4;
-        _stringValue5 = stringValue5;
-        Text = text;
-    }
-
     public override int Count => 5;
 
     public override string this[int index] => index switch
@@ -162,20 +112,6 @@ public record PolicyValues<T1, T2, T3, T4, T5, T6>
     (T1 Value1, T2 Value2, T3 Value3, T4 Value4, T5 Value5, T6 Value6) : PolicyValues
 {
     private string _stringValue1, _stringValue2, _stringValue3, _stringValue4, _stringValue5, _stringValue6;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2,
-        T3 value3, string stringValue3, T4 value4, string stringValue4, T5 value5, string stringValue5,
-        T6 value6, string stringValue6) : this(value1, value2, value3, value4, value5, value6)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        _stringValue3 = stringValue3;
-        _stringValue4 = stringValue4;
-        _stringValue5 = stringValue5;
-        _stringValue6 = stringValue6;
-        Text = text;
-    }
-
     public override int Count => 6;
 
     public override string this[int index] => index switch
@@ -203,21 +139,6 @@ public record PolicyValues<T1, T2, T3, T4, T5, T6, T7>(T1 Value1, T2 Value2, T3 
         _stringValue5,
         _stringValue6,
         _stringValue7;
-
-    internal PolicyValues(string text, T1 value1, string stringValue1, T2 value2, string stringValue2,
-        T3 value3, string stringValue3, T4 value4, string stringValue4, T5 value5, string stringValue5,
-        T6 value6, string stringValue6, T7 value7, string stringValue7) : this(value1, value2, value3, value4, value5,
-        value6, value7)
-    {
-        _stringValue1 = stringValue1;
-        _stringValue2 = stringValue2;
-        _stringValue3 = stringValue3;
-        _stringValue4 = stringValue4;
-        _stringValue5 = stringValue5;
-        _stringValue6 = stringValue6;
-        _stringValue7 = stringValue7;
-        Text = text;
-    }
 
     public override int Count => 7;
 
@@ -393,11 +314,24 @@ internal record StringListPolicyValues : PolicyValues
 {
     private readonly IReadOnlyList<string> _values;
 
-    public StringListPolicyValues(IReadOnlyList<string> values) => _values = values;
+    public StringListPolicyValues(IReadOnlyList<string> values)
+    {
+        _values = values;
+        Count = values.Count;
+    }
 
-    public override int Count => _values.Count;
-    public override string this[int index] => _values[index];
-    public override IEnumerator<string> GetEnumerator() => _values.GetEnumerator();
+    public StringListPolicyValues(IReadOnlyList<string> values, int requiredCount)
+    {
+        _values = values;
+        Count = requiredCount;
+    }
+
+    public override int Count { get; }
+
+    public override string this[int index] => _values.GetValueOrDefault(index);
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<StringListPolicyValues>(this);
 }
 
 internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValues
@@ -421,5 +355,3 @@ internal struct PolicyEnumerator<T> : IEnumerator<string> where T : IPolicyValue
     public bool MoveNext() => ++_index < _value.Count;
     public void Reset() => _index = -1;
 }
-
-

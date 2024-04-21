@@ -42,9 +42,9 @@ internal class StreamFilteredAdapter : StreamAdapter, IFilteredAdapter
         policies = filter.Apply(policies.AsQueryable());
         foreach (IPersistPolicy policy in policies)
         {
-            string section = policy.Section;
-            IPolicyValues values = Policy.ValuesFrom(policy);
-            store.AddPolicy(section, policy.Type, values);
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
 
         IsFiltered = true;

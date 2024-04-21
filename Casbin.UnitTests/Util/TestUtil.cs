@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Casbin.Rbac;
 using Casbin.Model;
+using Casbin.Rbac;
 using Casbin.Util;
 using Xunit;
 
 namespace Casbin.UnitTests.Util;
 
-public static class TestUtil
+internal static class TestUtil
 {
     internal static List<T> AsList<T>(params T[] values) => values.ToList();
 

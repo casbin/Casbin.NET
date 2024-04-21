@@ -39,7 +39,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(OriginalPath);
             foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -49,7 +50,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(_inputStream);
             foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -63,7 +65,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             IAsyncEnumerable<IPersistPolicy> policies = ReadPersistPolicyAsync(OriginalPath);
             await foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -73,7 +76,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             IAsyncEnumerable<IPersistPolicy> policies = ReadPersistPolicyAsync(_inputStream);
             await foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -86,7 +90,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             var policies = await ReadPersistPolicyAsync(OriginalPath);
             foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -96,7 +101,8 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             var policies = await ReadPersistPolicyAsync(_inputStream);
             foreach (IPersistPolicy policy in policies)
             {
-                IPolicyValues values = Policy.ValuesFrom(policy);
+                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
                 store.AddPolicy(policy.Section, policy.Type, values);
             }
         }
@@ -237,9 +243,9 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
         policies = filter.Apply(policies.AsQueryable());
         foreach (IPersistPolicy policy in policies)
         {
-            string section = policy.Section;
-            IPolicyValues values = Policy.ValuesFrom(policy);
-            store.AddPolicy(section, policy.Type, values);
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
 
         IsFiltered = true;
@@ -267,7 +273,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
                 BadDataFound = null,
-                WhiteSpaceChars = new []{' ', '\t'}
+                WhiteSpaceChars = new[] { ' ', '\t' }
             });
 
         while (parser.Read())
@@ -295,7 +301,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
                 BadDataFound = null,
-                WhiteSpaceChars = new []{' ', '\t'}
+                WhiteSpaceChars = new[] { ' ', '\t' }
             });
 
         while (parser.Read())
@@ -330,7 +336,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
                 BadDataFound = null,
-                WhiteSpaceChars = new []{' ', '\t'}
+                WhiteSpaceChars = new[] { ' ', '\t' }
             });
 
         while (await parser.ReadAsync())
@@ -391,7 +397,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
                 TrimOptions = TrimOptions.Trim,
                 IgnoreBlankLines = true,
                 BadDataFound = null,
-                WhiteSpaceChars = new []{' ', '\t'}
+                WhiteSpaceChars = new[] { ' ', '\t' }
             });
 
         while (await parser.ReadAsync())

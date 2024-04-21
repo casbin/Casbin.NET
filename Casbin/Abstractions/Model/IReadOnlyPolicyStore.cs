@@ -8,6 +8,12 @@ public interface IReadOnlyPolicyStore
 
     public bool ContainsNode(string section, string policyType);
 
+    public int GetRequiredValuesCount(string section, string policyType);
+
+    public bool ValidatePolicy(string section, string policyType, IPolicyValues values);
+
+    public bool ValidatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList);
+
     public PolicyScanner Scan(string section, string policyType);
 
     public IEnumerable<IPolicyValues> GetPolicy(string section, string policyType);

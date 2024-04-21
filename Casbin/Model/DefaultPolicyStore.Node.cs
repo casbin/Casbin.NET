@@ -14,15 +14,7 @@ public partial class DefaultPolicyStore
         public Node(PolicyAssertion assertion) => _assertion = assertion;
         public HashSet<string> PolicyTextSet { get; } = new();
         public ReaderWriterLockSlim Lock { get; } = new();
-
-        public void RefreshPolicyStringSet()
-        {
-            PolicyTextSet.Clear();
-            foreach (IPolicyValues policy in GetPolicy())
-            {
-                PolicyTextSet.Add(policy.ToText());
-            }
-        }
+        public int RequiredValuesCount => _assertion.Tokens.Count;
 
         public Iterator Iterate() => new(this);
 
@@ -48,10 +40,10 @@ public partial class DefaultPolicyStore
         {
             if (_assertion.Section is PermConstants.Section.RoleSection)
             {
-                return _assertion.Tokens.Count <= values.Count;
+                return RequiredValuesCount <= values.Count;
             }
 
-            return _assertion.Tokens.Count == values.Count;
+            return RequiredValuesCount == values.Count;
         }
 
         public bool TryAddPolicy(IPolicyValues values)

@@ -34,6 +34,21 @@ namespace Casbin.Model
         public bool ContainsNode(string section, string policyType) =>
             _nodesMap.TryGetValue(section, out IDictionary<string, Node> nodes) && nodes.ContainsKey(policyType);
 
+        public int GetRequiredValuesCount(string section, string policyType) =>
+            GetNode(section, policyType).RequiredValuesCount;
+
+        public bool ValidatePolicy(string section, string policyType, IPolicyValues values)
+        {
+            Node node = GetNode(section, policyType);
+            return node.ValidatePolicy(values);
+        }
+
+        public bool ValidatePolicies(string section, string policyType, IReadOnlyList<IPolicyValues> valuesList)
+        {
+            Node node = GetNode(section, policyType);
+            return valuesList.Count == 0 || valuesList.All(node.ValidatePolicy);
+        }
+
         public PolicyScanner Scan(string section, string policyType) =>
             new(GetNode(section, policyType).Iterate());
 
@@ -45,11 +60,12 @@ namespace Casbin.Model
 
         public IDictionary<string, IEnumerable<string>> GetPolicyTypesAllSections()
         {
-            Dictionary<string, IEnumerable<string>> res = new Dictionary<string, IEnumerable<string>>();
+            Dictionary<string, IEnumerable<string>> res = new();
             foreach (var keyValuePair in _nodesMap)
             {
                 res.Add(keyValuePair.Key, keyValuePair.Value.Select(x => x.Key));
             }
+
             return res;
         }
 
