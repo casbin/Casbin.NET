@@ -146,8 +146,7 @@ namespace Casbin
             foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
             {
                 Regex reg = new Regex(perfix + $@"{view.PolicyType}\.{tokenPair.Key}" + suffix);
-                //matcher = reg.Replace(matcher, $"{view.PolicyType}.Value{tokenPair.Value + 1}");
-                matcher = reg.Replace(matcher, $"{view.PolicyType}[{tokenPair.Value}]");
+                matcher = reg.Replace(matcher, $"{view.PolicyType}.Value{tokenPair.Value + 1}");
             }
 
             return matcher;

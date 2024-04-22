@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Casbin.Rbac;
 using Casbin.Model;
+using Casbin.Rbac;
 using Casbin.Util;
 using Xunit;
 
 namespace Casbin.UnitTests.Util;
 
-public static class TestUtil
+internal static class TestUtil
 {
     internal static List<T> AsList<T>(params T[] values) => values.ToList();
 
@@ -29,10 +29,13 @@ public static class TestUtil
     internal static void TestBatchEnforce<T>(IEnforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues =>
         Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforce(values.Select(x => x.Item1))));
 
-    internal static void TestParallelBatchEnforce<T>(Enforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues =>
-        Assert.True(values.Select(x => x.Item2).SequenceEqual(e.ParallelBatchEnforce(values.Select(x => x.Item1).ToList())));
+    internal static void TestParallelBatchEnforce<T>(Enforcer e, IEnumerable<(T, bool)> values)
+        where T : IRequestValues =>
+        Assert.True(values.Select(x => x.Item2)
+            .SequenceEqual(e.ParallelBatchEnforce(values.Select(x => x.Item1).ToList())));
 
-    internal static async void TestBatchEnforceAsync<T>(IEnforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues
+    internal static async void TestBatchEnforceAsync<T>(IEnforcer e, IEnumerable<(T, bool)> values)
+        where T : IRequestValues
     {
 #if !NET452
         var res = e.BatchEnforceAsync(values.Select(x => x.Item1));
@@ -63,13 +66,17 @@ public static class TestUtil
 
     internal static void TestBatchEnforceWithMatcher<T>(this IEnforcer e, string matcher, IEnumerable<(T, bool)> values)
         where T : IRequestValues =>
-            Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforceWithMatcher(matcher, values.Select(x => x.Item1))));
+        Assert.True(values.Select(x => x.Item2)
+            .SequenceEqual(e.BatchEnforceWithMatcher(matcher, values.Select(x => x.Item1))));
 
-    internal static void TestBatchEnforceWithMatcherParallel<T>(this Enforcer e, string matcher, IEnumerable<(T, bool)> values)
+    internal static void TestBatchEnforceWithMatcherParallel<T>(this Enforcer e, string matcher,
+        IEnumerable<(T, bool)> values)
         where T : IRequestValues =>
-            Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforceWithMatcherParallel<T>(matcher, values.Select(x => x.Item1).ToList())));
+        Assert.True(values.Select(x => x.Item2)
+            .SequenceEqual(e.BatchEnforceWithMatcherParallel<T>(matcher, values.Select(x => x.Item1).ToList())));
 
-    internal static async void TestBatchEnforceWithMatcherAsync<T>(IEnforcer e, string matcher, IEnumerable<(T, bool)> values)
+    internal static async void TestBatchEnforceWithMatcherAsync<T>(IEnforcer e, string matcher,
+        IEnumerable<(T, bool)> values)
         where T : IRequestValues
     {
 #if !NET452

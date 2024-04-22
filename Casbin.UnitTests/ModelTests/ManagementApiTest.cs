@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Casbin.Model;
+using Casbin.UnitTests.Extensions;
 using Casbin.UnitTests.Fixtures;
 using Xunit;
 using static Casbin.UnitTests.Util.TestUtil;
@@ -550,5 +552,38 @@ public class ManagementApiTest
         Assert.False(res);
         TestGetRoles(e, "admin", AsList("data5_admin"));
         TestGetRoles(e, "eve", AsList("admin_groups"));
+    }
+
+    [Fact]
+    public void TestModifySpecialPolicy()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._rbacModelText));
+
+        e.AddPolicy("alice", "data1");
+        e.AddPolicy("alice", "data1", "read");
+        e.AddPolicy("alice", "data1", "read", "dump1");
+
+        e.TestGetPolicy(Policy.ValuesListFrom(new[]
+            {
+                Policy.CreateValues("alice", "data1", ""), Policy.CreateValues("alice", "data1", "read")
+            }
+        ));
+    }
+
+    [Fact]
+    public async Task TestModifySpecialPolicyAsync()
+    {
+        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        e.ClearPolicy();
+
+        await e.AddPolicyAsync("alice", "data1");
+        await e.AddPolicyAsync("alice", "data1", "read");
+        await e.AddPolicyAsync("alice", "data1", "read", "dump1");
+
+        e.TestGetPolicy(Policy.ValuesListFrom(new[]
+            {
+                Policy.CreateValues("alice", "data1", ""), Policy.CreateValues("alice", "data1", "read")
+            }
+        ));
     }
 }
