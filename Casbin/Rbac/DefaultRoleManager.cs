@@ -230,15 +230,6 @@ namespace Casbin.Rbac
         public virtual void AddLink(string name1, string name2, string domain = null)
         {
             domain ??= _defaultDomain;
-            if (HasDomainPattern)
-            {
-                foreach (string matchDomain in GetPatternDomains(domain))
-                {
-                    AddLinkInDomain(name1, name2, matchDomain);
-                }
-                _cachedAllDomains = null;
-                return;
-            }
             _cachedAllDomains = null;
             AddLinkInDomain(name1, name2, domain);
         }
@@ -249,9 +240,24 @@ namespace Casbin.Rbac
                 ? _defaultRoles
                 : _allDomains.GetOrAdd(domain, new ConcurrentDictionary<string, Role>());
 
+            bool role1IsNew = roles.ContainsKey(name1) is false;
+            bool role2IsNew = roles.ContainsKey(name2) is false;
+
             Role role1 = roles.GetOrAdd(name1, new Role(name1, domain));
             Role role2 = roles.GetOrAdd(name2, new Role(name2, domain));
             role1.AddRole(role2);
+
+            if (HasDomainPattern)
+            {
+                if (role1IsNew)
+                {
+                    AddLinksFromMatchingDomains(role1);
+                }
+                if (role2IsNew)
+                {
+                    AddLinksToMatchingDomains(role2);
+                }
+            }
 
             if (HasPattern is false)
             {
@@ -273,6 +279,87 @@ namespace Casbin.Rbac
                 {
                     role2.AddRole(role.Value);
                 }
+            }
+        }
+
+        private void AddLinksFromMatchingDomains(Role role)
+        {
+            if (HasDomainPattern is false)
+            {
+                return;
+            }
+
+            IEnumerable<string> matchingDomains = GetMatchingDomains(role.Domain);
+
+            foreach (string domain in matchingDomains)
+            {
+                if (domain == role.Domain || _allDomains.TryGetValue(domain, out var matchingDomain) is false)
+                {
+                    continue;
+                }
+
+                if (HasPattern is false)
+                {
+                    if (matchingDomain.TryGetValue(role.Name, out var matchingRole) && role != matchingRole)
+                    {
+                        matchingRole.AddRole(role);
+                    };
+                    continue;
+                }
+
+                var roleNames = matchingDomain.Keys;
+                foreach (string roleName in roleNames)
+                {
+                    if (MatchingFunc(roleName, role.Name) is false)
+                    {
+                        continue;
+                    }
+                    if (matchingDomain.TryGetValue(roleName, out var matchingRole) && role != matchingRole)
+                    {
+                        matchingRole.AddRole(role);
+                    }
+                }
+            }
+        }
+
+        private void AddLinksToMatchingDomains(Role role)
+        {
+            if (HasDomainPattern is false)
+            {
+                return;
+            }
+
+            IEnumerable<string> matchingDomains = GetPatternDomains(role.Domain);
+
+            foreach (string domain in matchingDomains)
+            {
+                if (domain == role.Domain || _allDomains.TryGetValue(domain, out var matchingDomain) is false)
+                {
+                    continue;
+                }
+
+                if (HasPattern is false)
+                {
+                    if (matchingDomain.TryGetValue(role.Name, out var matchingRole) && role != matchingRole)
+                    {
+                        role.AddRole(matchingRole);
+                    };
+                    continue;
+                }
+
+                var roleNames = matchingDomain.Keys;
+                foreach (string roleName in roleNames)
+                {
+                    if (MatchingFunc(role.Name, roleName) is false)
+                    {
+                        continue;
+                    }
+                    if (matchingDomain.TryGetValue(roleName, out var matchingRole) && matchingRole != role)
+                    {
+                        role.AddRole(matchingRole);
+                    }
+                }
+
             }
         }
 
@@ -318,6 +405,18 @@ namespace Casbin.Rbac
             {
                 matchDomains.AddRange(_cachedAllDomains.Where(key =>
                     DomainMatchingFunc(domain, key) && key != domain));
+            }
+            return matchDomains;
+        }
+
+        private IEnumerable<string> GetMatchingDomains(string domainPattern)
+        {
+            List<string> matchDomains = new() { domainPattern };
+            _cachedAllDomains ??= _allDomains.Keys;
+            if (HasDomainPattern)
+            {
+                matchDomains.AddRange(_cachedAllDomains.Where(key =>
+                    DomainMatchingFunc(key, domainPattern) && key != domainPattern));
             }
             return matchDomains;
         }
