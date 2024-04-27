@@ -293,7 +293,7 @@ namespace Casbin.Rbac
 
             foreach (string domain in matchingDomains)
             {
-                if (_allDomains.TryGetValue(domain, out var matchingDomain) is false)
+                if (domain == role.Domain || _allDomains.TryGetValue(domain, out var matchingDomain) is false)
                 {
                     continue;
                 }
@@ -333,7 +333,7 @@ namespace Casbin.Rbac
 
             foreach (string domain in matchingDomains)
             {
-                if (_allDomains.TryGetValue(domain, out var matchingDomain) is false)
+                if (domain == role.Domain || _allDomains.TryGetValue(domain, out var matchingDomain) is false)
                 {
                     continue;
                 }
