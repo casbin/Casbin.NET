@@ -11,14 +11,10 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class ManagementApiTest
 {
-    private readonly TestModelFixture _testModelFixture;
-
-    public ManagementApiTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
-
     [Fact]
     public void TestGetList()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
         TestStringList(e.GetAllSubjects, AsList("alice", "bob", "data2_admin"));
         TestStringList(e.GetAllObjects, AsList("data1", "data2"));
@@ -29,7 +25,7 @@ public class ManagementApiTest
     [Fact]
     public void TestGetPolicyApi()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetPolicy(e, AsList(
@@ -80,7 +76,7 @@ public class ManagementApiTest
     [Fact]
     public void TestModifyPolicy()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetPolicy(e, AsList(
@@ -207,7 +203,7 @@ public class ManagementApiTest
     [Fact]
     public async Task TestModifyPolicyAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetPolicy(e, AsList(
@@ -330,7 +326,7 @@ public class ManagementApiTest
     [Fact]
     public void TestModifyGroupingPolicy()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetRoles(e, "alice", AsList("data2_admin"));
@@ -443,7 +439,7 @@ public class ManagementApiTest
     [Fact]
     public async Task TestModifyGroupingPolicyAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetRoles(e, "alice", AsList("data2_admin"));
@@ -557,7 +553,7 @@ public class ManagementApiTest
     [Fact]
     public void TestModifySpecialPolicy()
     {
-        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._rbacModelText));
+        Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.RbacModelText));
 
         e.AddPolicy("alice", "data1");
         e.AddPolicy("alice", "data1", "read");
@@ -573,7 +569,7 @@ public class ManagementApiTest
     [Fact]
     public async Task TestModifySpecialPolicyAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.ClearPolicy();
 
         await e.AddPolicyAsync("alice", "data1");

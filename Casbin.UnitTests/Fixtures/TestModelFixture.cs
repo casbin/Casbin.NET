@@ -8,154 +8,130 @@ namespace Casbin.UnitTests.Fixtures;
 
 public class TestModelFixture
 {
-    internal readonly string _abacCommentText = ReadTestFile("abac_comment.conf");
-    internal readonly string _abacModelText = ReadTestFile("abac_model.conf");
+    public static readonly string BasicModelText = ReadTestFile("basic_model.conf");
+    public static readonly string BasicPolicyText = ReadTestFile("basic_policy.csv");
+    public static readonly string BasicWithoutResourceModelText = ReadTestFile("basic_without_resources_model.conf");
+    public static readonly string BasicWithoutResourcePolicyText = ReadTestFile("basic_without_resources_policy.csv");
+    public static readonly string BasicWithoutUserModelText = ReadTestFile("basic_without_users_model.conf");
+    public static readonly string BasicWithoutUserPolicyText = ReadTestFile("basic_without_users_policy.csv");
+    public static readonly string BasicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
 
-    internal readonly string _AbacTokensWithSubstringRelationModelText =
-        ReadTestFile("tokens_with_substring_relation_abac.conf");
+    public static readonly string RbacPolicyText = ReadTestFile("rbac_policy.csv");
+    public static readonly string RbacCommentText = ReadTestFile("rbac_comment.conf");
+    public static readonly string RbacInOperatorModelText = ReadTestFile("rbac_in_operator_model.conf");
+    public static readonly string RbacInOperatorPolicyText = ReadTestFile("rbac_in_operator_policy.csv");
+    public static readonly string RbacModelText = ReadTestFile("rbac_model.conf");
+    public static readonly string RbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
+    public static readonly string RbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_policy.csv");
+    public static readonly string RbacWithDomainsModelText = ReadTestFile("rbac_with_domains_model.conf");
+    public static readonly string RbacWithDomainsPolicy2Text = ReadTestFile("rbac_with_domains_policy2.csv");
+    public static readonly string RbacWithDomainsPolicyText = ReadTestFile("rbac_with_domains_policy.csv");
+    public static readonly string RbacWithHierarchyPolicyText = ReadTestFile("rbac_with_hierarchy_policy.csv");
+    public static readonly string RbacWithHierarchyWithDomainsPolicyText = ReadTestFile("rbac_with_hierarchy_with_domains_policy.csv");
+    public static readonly string RbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
+    public static readonly string RbacWithResourceRoleModelText = ReadTestFile("rbac_with_resource_roles_model.conf");
+    public static readonly string RbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_policy.csv");
 
-    internal readonly string _AbacTokensWithSubstringRelationPolicyText =
-        ReadTestFile("tokens_with_substring_relation_abac.csv");
+    public static readonly string AbacModelText = ReadTestFile("abac_model.conf");
+    public static readonly string AbacCommentText = ReadTestFile("abac_comment.conf");
+    public static readonly string AbacWithEvalModelText = ReadTestFile("abac_rule_model.conf");
+    public static readonly string AbacWithEvalPolicyText = ReadTestFile("abac_rule_policy.csv");
 
-    internal readonly string _abacWithEvalModelText = ReadTestFile("abac_rule_model.conf");
+    public static readonly string PriorityExplicitModelText = ReadTestFile("priority_explicit_model.conf");
+    public static readonly string PriorityExplicitPolicyText = ReadTestFile("priority_explicit_policy.csv");
+    public static readonly string PriorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
+    public static readonly string PriorityModelText = ReadTestFile("priority_model.conf");
+    public static readonly string PriorityPolicyText = ReadTestFile("priority_policy.csv");
 
-    internal readonly string _abacWithEvalPolicyText = ReadTestFile("abac_rule_policy.csv");
-    internal readonly string _basicModelText = ReadTestFile("basic_model.conf");
-    internal readonly string _basicPolicyText = ReadTestFile("basic_policy.csv");
-    internal readonly string _basicWithoutResourceModelText = ReadTestFile("basic_without_resources_model.conf");
-    internal readonly string _basicWithoutResourcePolicyText = ReadTestFile("basic_without_resources_policy.csv");
-    internal readonly string _basicWithoutUserModelText = ReadTestFile("basic_without_users_model.conf");
-    internal readonly string _basicWithoutUserPolicyText = ReadTestFile("basic_without_users_policy.csv");
-    internal readonly string _basicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
+    public static readonly string SubjectPriorityModelText = ReadTestFile("subject_priority_model.conf");
+    public static readonly string SubjectPriorityPolicyText = ReadTestFile("subject_priority_policy.csv");
+    public static readonly string SubjectPriorityWithDomainModelText = ReadTestFile("subject_priority_model_with_domain.conf");
+    public static readonly string SubjectPriorityWithDomainPolicyText = ReadTestFile("subject_priority_policy_with_domain.csv");
+
+    public static readonly string TabsModelText = ReadTestFile("tabs_model.conf");
+    public static readonly string TabsPolicyText = ReadTestFile("tabs_policy.csv");
+    public static readonly string IpMatchModelText = ReadTestFile("ipmatch_model.conf");
+    public static readonly string IpMatchPolicyText = ReadTestFile("ipmatch_policy.csv");
+    public static readonly string KeyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
+    public static readonly string KeyMatch2PolicyText = ReadTestFile("keymatch2_policy.csv");
+    public static readonly string KeyMatchCustomModelText = ReadTestFile("keymatch_custom_model.conf");
+    public static readonly string KeyMatchModelText = ReadTestFile("keymatch_model.conf");
+    public static readonly string KeyMatchPolicyText = ReadTestFile("keymatch_policy.csv");
 
     //https://github.com/casbin/Casbin.NET/issues/310
-    internal readonly string _commaAndQuotationsModelText = ReadTestFile("comma_quotations_model.conf");
-    internal readonly string _commaAndQuotationsPolicyText = ReadTestFile("comma_quotations_policy.csv");
-    internal readonly string _tabsModelText = ReadTestFile("tabs_model.conf");
-    internal readonly string _tabsPolicyText = ReadTestFile("tabs_policy.csv");
-    internal readonly string _ipMatchModelText = ReadTestFile("ipmatch_model.conf");
-    internal readonly string _ipMatchPolicyText = ReadTestFile("ipmatch_policy.csv");
-    internal readonly string _keyMatch2ModelText = ReadTestFile("keymatch2_model.conf");
-    internal readonly string _keyMatch2PolicyText = ReadTestFile("keymatch2_policy.csv");
-    internal readonly string _keyMatchCustomModelText = ReadTestFile("keymatch_custom_model.conf");
-    internal readonly string _keyMatchModelText = ReadTestFile("keymatch_model.conf");
-    internal readonly string _keyMatchPolicyText = ReadTestFile("keymatch_policy.csv");
+    public static readonly string CommaAndQuotationsModelText = ReadTestFile("comma_quotations_model.conf");
+    public static readonly string CommaAndQuotationsPolicyText = ReadTestFile("comma_quotations_policy.csv");
 
     // https://github.com/casbin/Casbin.NET/issues/134
-    internal readonly string _multipleTypeModelText = ReadTestFile("multiple_type_model.conf");
-    internal readonly string _multipleTypePolicyText = ReadTestFile("multiple_type_policy.csv");
-
-    // https://github.com/casbin/Casbin.NET/issues/188
-    internal readonly string _priorityExplicitDenyOverrideModelText =
-        ReadTestFile("priority_explicit_deny_override_model.conf");
-
-    internal readonly string _priorityExplicitDenyOverridePolicyText =
-        ReadTestFile("priority_explicit_deny_override_policy.csv");
-
-    internal readonly string _priorityExplicitModelText = ReadTestFile("priority_explicit_model.conf");
-    internal readonly string _priorityExplicitPolicyText = ReadTestFile("priority_explicit_policy.csv");
-    internal readonly string _priorityIndeterminatePolicyText = ReadTestFile("priority_indeterminate_policy.csv");
-    internal readonly string _priorityModelText = ReadTestFile("priority_model.conf");
-    internal readonly string _priorityPolicyText = ReadTestFile("priority_policy.csv");
-    internal readonly string _rbacCommentText = ReadTestFile("rbac_comment.conf");
-
-    internal readonly string _rbacInOperatorModelText = ReadTestFile("rbac_in_operator_model.conf");
-    internal readonly string _rbacInOperatorPolicyText = ReadTestFile("rbac_in_operator_policy.csv");
-    internal readonly string _rbacModelText = ReadTestFile("rbac_model.conf");
+    public static readonly string MultipleTypeModelText = ReadTestFile("multiple_type_model.conf");
+    public static readonly string MultipleTypePolicyText = ReadTestFile("multiple_type_policy.csv");
 
     // https://github.com/casbin/Casbin.NET/issues/106
-    internal readonly string _rbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
-    internal readonly string _rbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
+    public static readonly string RbacMultipleEvalModelText = ReadTestFile("rbac_multiple_eval_model.conf");
+    public static readonly string RbacMultipleEvalPolicyText = ReadTestFile("rbac_multiple_eval_policy.csv");
 
     // https://github.com/casbin/Casbin.NET/issues/154
-    internal readonly string _rbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
-    internal readonly string _rbacMultiplePolicyText = ReadTestFile("rbac_multiple_rolemanager_policy.csv");
-    internal readonly string _rbacPolicyText = ReadTestFile("rbac_policy.csv");
+    public static readonly string RbacMultipleModelText = ReadTestFile("rbac_multiple_rolemanager_model.conf");
+    public static readonly string RbacMultiplePolicyText = ReadTestFile("rbac_multiple_rolemanager_policy.csv");
 
-    // https://github.com/casbin/Casbin.NET/issues/308
-    internal readonly string _RbacTokensWithSubstringRelationModelText =
-        ReadTestFile("tokens_with_substring_relation_rbac.conf");
-
-    internal readonly string _RbacTokensWithSubstringRelationPolicyText =
-        ReadTestFile("tokens_with_substring_relation_rbac.csv");
-
-    internal readonly string _rbacWithDenyModelText = ReadTestFile("rbac_with_deny_model.conf");
-    internal readonly string _rbacWithDenyPolicyText = ReadTestFile("rbac_with_deny_policy.csv");
-    internal readonly string _rbacWithDomainsModelText = ReadTestFile("rbac_with_domains_model.conf");
-    internal readonly string _rbacWithDomainsPolicy2Text = ReadTestFile("rbac_with_domains_policy2.csv");
-    internal readonly string _rbacWithDomainsPolicyText = ReadTestFile("rbac_with_domains_policy.csv");
-    internal readonly string _rbacWithHierarchyPolicyText = ReadTestFile("rbac_with_hierarchy_policy.csv");
-
-    internal readonly string _rbacWithHierarchyWithDomainsPolicyText =
-        ReadTestFile("rbac_with_hierarchy_with_domains_policy.csv");
-
-    internal readonly string _rbacWithNotDenyModelText = ReadTestFile("rbac_with_not_deny_model.conf");
-    internal readonly string _rbacWithResourceRoleModelText = ReadTestFile("rbac_with_resource_roles_model.conf");
-
-    internal readonly string _rbacWithResourceRolePolicyText = ReadTestFile("rbac_with_resource_roles_policy.csv");
-    internal readonly string _subjectPriorityModelText = ReadTestFile("subject_priority_model.conf");
-    internal readonly string _subjectPriorityPolicyText = ReadTestFile("subject_priority_policy.csv");
-
-    internal readonly string _subjectPriorityWithDomainModelText =
-        ReadTestFile("subject_priority_model_with_domain.conf");
-
-    internal readonly string _subjectPriorityWithDomainPolicyText =
-        ReadTestFile("subject_priority_policy_with_domain.csv");
+    // https://github.com/casbin/Casbin.NET/issues/188
+    public static readonly string PriorityExplicitDenyOverrideModelText = ReadTestFile("priority_explicit_deny_override_model.conf");
+    public static readonly string PriorityExplicitDenyOverridePolicyText = ReadTestFile("priority_explicit_deny_override_policy.csv");
 
     // https://github.com/casbin/Casbin.NET/issues/229
-    internal readonly string _supportCountModelText = ReadTestFile("support_count_model.conf");
+    public static readonly string SupportCountModelText = ReadTestFile("support_count_model.conf");
 
     // https://github.com/casbin/Casbin.NET/issues/308
-    internal readonly string _rbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_rbac.conf");
-    internal readonly string _rbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_rbac.csv");
-    internal readonly string _abacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_abac.conf");
-    internal readonly string _abacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_abac.csv");
+    public static readonly string RbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_rbac.conf");
+    public static readonly string RbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_rbac.csv");
+    public static readonly string AbacTokensWithSubstringRelationModelText = ReadTestFile("tokens_with_substring_relation_abac.conf");
+    public static readonly string AbacTokensWithSubstringRelationPolicyText = ReadTestFile("tokens_with_substring_relation_abac.csv");
 
     // https://github.com/casbin/Casbin.NET/issues/321
-    internal readonly string _backslashLineFeedModelText = ReadTestFile("backslash_feed_model.conf");
-    internal readonly string _backslashLineFeedPolicyText = ReadTestFile("backslash_feed_policy.csv");
+    public static readonly string BackslashLineFeedModelText = ReadTestFile("backslash_feed_model.conf");
+    public static readonly string BackslashLineFeedPolicyText = ReadTestFile("backslash_feed_policy.csv");
 
-    public IModel GetNewAbacModel() => GetNewTestModel(_abacModelText);
+    public static IModel GetNewAbacModel() => GetNewTestModel(AbacModelText);
 
-    public IModel GetNewAbacWithEvalModel() => GetNewTestModel(_abacWithEvalModelText, _abacWithEvalPolicyText);
+    public static IModel GetNewAbacWithEvalModel() => GetNewTestModel(AbacWithEvalModelText, AbacWithEvalPolicyText);
 
-    public IModel GetBasicTestModel() => GetNewTestModel(_basicModelText, _basicPolicyText);
+    public static IModel GetBasicTestModel() => GetNewTestModel(BasicModelText, BasicPolicyText);
 
-    public IModel GetBasicWithoutResourceTestModel() =>
-        GetNewTestModel(_basicWithoutResourceModelText, _basicWithoutResourcePolicyText);
+    public static IModel GetBasicWithoutResourceTestModel() =>
+        GetNewTestModel(BasicWithoutResourceModelText, BasicWithoutResourcePolicyText);
 
-    public IModel GetBasicWithoutUserTestModel() =>
-        GetNewTestModel(_basicWithoutUserModelText, _basicWithoutUserPolicyText);
+    public static IModel GetBasicWithoutUserTestModel() =>
+        GetNewTestModel(BasicWithoutUserModelText, BasicWithoutUserPolicyText);
 
-    public IModel GetNewKeyMatchTestModel() => GetNewTestModel(_keyMatchModelText, _keyMatchPolicyText);
+    public static IModel GetNewKeyMatchTestModel() => GetNewTestModel(KeyMatchModelText, KeyMatchPolicyText);
 
-    public IModel GetNewKeyMatch2TestModel() => GetNewTestModel(_keyMatch2ModelText, _keyMatch2PolicyText);
+    public static IModel GetNewKeyMatch2TestModel() => GetNewTestModel(KeyMatch2ModelText, KeyMatch2PolicyText);
 
-    public IModel GetNewPriorityTestModel() => GetNewTestModel(_priorityModelText, _priorityPolicyText);
+    public static IModel GetNewPriorityTestModel() => GetNewTestModel(PriorityModelText, PriorityPolicyText);
 
-    public IModel GetNewPriorityExplicitTestModel() =>
-        GetNewTestModel(_priorityExplicitModelText, _priorityExplicitPolicyText);
+    public static IModel GetNewPriorityExplicitTestModel() =>
+        GetNewTestModel(PriorityExplicitModelText, PriorityExplicitPolicyText);
 
-    public IModel GetNewPriorityExplicitDenyOverrideModel() => GetNewTestModel(_priorityExplicitDenyOverrideModelText,
-        _priorityExplicitDenyOverridePolicyText);
+    public static IModel GetNewPriorityExplicitDenyOverrideModel() => GetNewTestModel(PriorityExplicitDenyOverrideModelText,
+        PriorityExplicitDenyOverridePolicyText);
 
-    public IModel GetNewRbacTestModel() => GetNewTestModel(_rbacModelText, _rbacPolicyText);
+    public static IModel GetNewRbacTestModel() => GetNewTestModel(RbacModelText, RbacPolicyText);
 
-    public IModel GetNewRbacWithDenyTestModel() => GetNewTestModel(_rbacWithDenyModelText, _rbacWithDenyPolicyText);
+    public static IModel GetNewRbacWithDenyTestModel() => GetNewTestModel(RbacWithDenyModelText, RbacWithDenyPolicyText);
 
-    public IModel GetNewRbacWithDomainsTestModel() =>
-        GetNewTestModel(_rbacWithDomainsModelText, _rbacWithDomainsPolicyText);
+    public static IModel GetNewRbacWithDomainsTestModel() =>
+        GetNewTestModel(RbacWithDomainsModelText, RbacWithDomainsPolicyText);
 
-    public IModel GetNewRbacWithResourceRoleTestModel() =>
-        GetNewTestModel(_rbacWithResourceRoleModelText, _rbacWithResourceRolePolicyText);
+    public static IModel GetNewRbacWithResourceRoleTestModel() =>
+        GetNewTestModel(RbacWithResourceRoleModelText, RbacWithResourceRolePolicyText);
 
-    public IModel GetNewMultipleTypeTestModel() => GetNewTestModel(_multipleTypeModelText, _multipleTypePolicyText);
+    public static IModel GetNewMultipleTypeTestModel() => GetNewTestModel(MultipleTypeModelText, MultipleTypePolicyText);
 
-    public IModel GetNewCommaAndQuotationsModel() =>
-        GetNewTestModel(_commaAndQuotationsModelText, _commaAndQuotationsPolicyText);
+    public static IModel GetNewCommaAndQuotationsModel() =>
+        GetNewTestModel(CommaAndQuotationsModelText, CommaAndQuotationsPolicyText);
 
-    public IModel GetNewTabsModel() =>
-        GetNewTestModel(_tabsModelText, _tabsPolicyText);
+    public static IModel GetNewTabsModel() =>
+        GetNewTestModel(TabsModelText, TabsPolicyText);
 
     public static IModel GetNewTestModel(string modelText) => DefaultModel.CreateFromText(modelText);
 
@@ -173,5 +149,6 @@ public class TestModelFixture
         return model;
     }
 
-    private static string ReadTestFile(string fileName) => File.ReadAllText(GetTestFile(fileName));
+    private static string ReadTestFile(string fileName) =>
+        File.ReadAllText(GetTestFile(fileName));
 }

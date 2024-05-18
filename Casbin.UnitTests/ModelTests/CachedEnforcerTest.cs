@@ -9,25 +9,25 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class CachedEnforcerTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
     private readonly ITestOutputHelper _testOutputHelper;
 
     public CachedEnforcerTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
     {
         _testOutputHelper = testOutputHelper;
-        _testModelFixture = testModelFixture;
+        TestModelFixture = testModelFixture;
     }
 
     [Fact]
     public void TestEnforceWithCache()
     {
 #if !NET452
-        Enforcer e = new(_testModelFixture.GetBasicTestModel())
+        Enforcer e = new(TestModelFixture.GetBasicTestModel())
         {
             Logger = new MockLogger<Enforcer>(_testOutputHelper)
         };
 #else
-            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            var e = new Enforcer(TestModelFixture.GetBasicTestModel());
 #endif
         e.EnableCache(true);
         e.EnableAutoCleanEnforceCache(false);
@@ -60,12 +60,12 @@ public class CachedEnforcerTest
     public void TestAutoCleanCache()
     {
 #if !NET452
-        Enforcer e = new(_testModelFixture.GetBasicTestModel())
+        Enforcer e = new(TestModelFixture.GetBasicTestModel())
         {
             Logger = new MockLogger<Enforcer>(_testOutputHelper)
         };
 #else
-            var e = new Enforcer(_testModelFixture.GetBasicTestModel());
+            var e = new Enforcer(TestModelFixture.GetBasicTestModel());
 #endif
         e.EnableCache(true);
 

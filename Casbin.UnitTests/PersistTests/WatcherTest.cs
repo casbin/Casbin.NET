@@ -10,9 +10,9 @@ namespace Casbin.UnitTests.PersistTests;
 [Collection("Model collection")]
 public class WatcherTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
 
-    public WatcherTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
+    public WatcherTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
 
     [Fact]
     public void ShouldUpdate()
@@ -20,7 +20,7 @@ public class WatcherTest
         SampleWatcher sampleWatcher = new();
         Assert.False(sampleWatcher.Called);
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -34,7 +34,7 @@ public class WatcherTest
         SampleWatcher sampleWatcher = new();
         Assert.False(sampleWatcher.AsyncCalled);
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_async_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);

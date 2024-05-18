@@ -8,16 +8,16 @@ using static Casbin.UnitTests.Util.TestUtil;
 namespace Casbin.UnitTests.ModelTests;
 
 [Collection("Model collection")]
-public class ModelTest
+public partial class ModelTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
 
-    public ModelTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
+    public ModelTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
 
     [Fact]
     public void TestBasicModel()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -32,7 +32,7 @@ public class ModelTest
     [Fact]
     public void TestBasicModelNoPolicy()
     {
-        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._basicModelText));
+        Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.BasicModelText));
 
         TestEnforce(e, "alice", "data1", "read", false);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -48,8 +48,8 @@ public class ModelTest
     public void TestBasicModelWithRoot()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._basicWithRootModelText,
-            _testModelFixture._basicPolicyText));
+            TestModelFixture.BasicWithRootModelText,
+            TestModelFixture.BasicPolicyText));
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -68,7 +68,7 @@ public class ModelTest
     [Fact]
     public void TestBasicModelWithRootNoPolicy()
     {
-        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._basicWithRootModelText));
+        Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.BasicWithRootModelText));
 
         TestEnforce(e, "alice", "data1", "read", false);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -87,7 +87,7 @@ public class ModelTest
     [Fact]
     public void TestBasicModelWithoutUsers()
     {
-        Enforcer e = new(_testModelFixture.GetBasicWithoutUserTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicWithoutUserTestModel());
 
         TestEnforceWithoutUsers(e, "data1", "read", true);
         TestEnforceWithoutUsers(e, "data1", "write", false);
@@ -98,7 +98,7 @@ public class ModelTest
     [Fact]
     public void TestBasicModelWithoutResources()
     {
-        Enforcer e = new(_testModelFixture.GetBasicWithoutResourceTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
 
         TestEnforceWithoutUsers(e, "alice", "read", true);
         TestEnforceWithoutUsers(e, "alice", "write", false);
@@ -109,7 +109,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "read", true);
@@ -125,7 +125,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithResourceRoles()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithResourceRoleTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithResourceRoleTestModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "read", true);
@@ -141,7 +141,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithDomains()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
         TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
@@ -157,7 +157,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithDomainsAtRuntime()
     {
-        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+        Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.RbacWithDomainsModelText));
         e.BuildRoleLinks();
 
         e.AddPolicy("admin", "domain1", "data1", "read");
@@ -205,7 +205,7 @@ public class ModelTest
     [Fact]
     public async Task TestRbacModelWithDomainsAtRuntimeAsync()
     {
-        Enforcer e = new(TestModelFixture.GetNewTestModel(_testModelFixture._rbacWithDomainsModelText));
+        Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.RbacWithDomainsModelText));
         e.BuildRoleLinks();
 
         await e.AddPolicyAsync("admin", "domain1", "data1", "read");
@@ -253,7 +253,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithDeny()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDenyTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDenyTestModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "read", true);
@@ -270,8 +270,8 @@ public class ModelTest
     public void TestRbacModelWithOnlyDeny()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacWithNotDenyModelText,
-            _testModelFixture._rbacWithDenyPolicyText));
+            TestModelFixture.RbacWithNotDenyModelText,
+            TestModelFixture.RbacWithDenyPolicyText));
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data2", "write", false);
@@ -280,7 +280,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithCustomData()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         // You can add custom data to a grouping policy, Casbin will ignore it. It is only meaningful to the caller.
@@ -315,7 +315,7 @@ public class ModelTest
     [Fact]
     public async Task TestRbacModelWithCustomDataAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         // You can add custom data to a grouping policy, Casbin will ignore it. It is only meaningful to the caller.
@@ -350,7 +350,7 @@ public class ModelTest
     [Fact]
     public void TestRbacModelWithCustomRoleManager()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.SetRoleManager(new MockCustomRoleManager());
         e.BuildRoleLinks();
 
@@ -367,7 +367,7 @@ public class ModelTest
     [Fact]
     public void TestAbacModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewAbacModel());
+        Enforcer e = new(TestModelFixture.GetNewAbacModel());
 
         TestResource data1 = new("data1", "alice");
         TestResource data2 = new("data2", "bob");
@@ -385,7 +385,7 @@ public class ModelTest
     [Fact]
     public void TestAbacWithEvalModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewAbacWithEvalModel());
+        Enforcer e = new(TestModelFixture.GetNewAbacWithEvalModel());
         TestSubject subject1 = new("alice", 16);
         TestSubject subject2 = new("alice", 20);
         TestSubject subject3 = new("alice", 65);
@@ -409,7 +409,7 @@ public class ModelTest
     [Fact]
     public void TestKeyMatchModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewKeyMatchTestModel());
+        Enforcer e = new(TestModelFixture.GetNewKeyMatchTestModel());
 
         TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
         TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
@@ -438,8 +438,8 @@ public class ModelTest
     public void TestPriorityModelIndeterminate()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._priorityModelText,
-            _testModelFixture._priorityIndeterminatePolicyText));
+            TestModelFixture.PriorityModelText,
+            TestModelFixture.PriorityIndeterminatePolicyText));
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "read", false);
@@ -448,7 +448,7 @@ public class ModelTest
     [Fact]
     public void TestPriorityModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewPriorityTestModel());
+        Enforcer e = new(TestModelFixture.GetNewPriorityTestModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "read", true);
@@ -464,7 +464,7 @@ public class ModelTest
     [Fact]
     public void TestPriorityExplicitModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewPriorityExplicitTestModel());
+        Enforcer e = new(TestModelFixture.GetNewPriorityExplicitTestModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data1", "write", true);
@@ -492,7 +492,7 @@ public class ModelTest
     [Fact]
     public void TestPriorityExplicitDenyOverrideModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewPriorityExplicitDenyOverrideModel());
+        Enforcer e = new(TestModelFixture.GetNewPriorityExplicitDenyOverrideModel());
         e.BuildRoleLinks();
 
         TestEnforce(e, "alice", "data2", "write", true);
@@ -531,7 +531,7 @@ public class ModelTest
     [Fact]
     public void TestKeyMatch2Model()
     {
-        Enforcer e = new(_testModelFixture.GetNewKeyMatch2TestModel());
+        Enforcer e = new(TestModelFixture.GetNewKeyMatch2TestModel());
 
         TestEnforce(e, "alice", "/alice_data", "GET", false);
         TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
@@ -549,8 +549,8 @@ public class ModelTest
         }
 
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._keyMatchCustomModelText,
-            _testModelFixture._keyMatch2PolicyText));
+            TestModelFixture.KeyMatchCustomModelText,
+            TestModelFixture.KeyMatch2PolicyText));
 
         e.AddFunction("keyMatchCustom", CustomFunction);
 
@@ -561,7 +561,7 @@ public class ModelTest
     [Fact]
     public void TestMultipleTypeModel()
     {
-        Enforcer e = new(_testModelFixture.GetNewMultipleTypeTestModel());
+        Enforcer e = new(TestModelFixture.GetNewMultipleTypeTestModel());
         e.BuildRoleLinks();
 
         // Use default types
@@ -604,7 +604,7 @@ public class ModelTest
     [Fact]
     public void TestAbacComment()
     {
-        var model = TestModelFixture.GetNewTestModel(_testModelFixture._abacCommentText);
+        var model = TestModelFixture.GetNewTestModel(TestModelFixture.AbacCommentText);
         Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
         Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
@@ -616,7 +616,7 @@ public class ModelTest
     [Fact]
     public void TestRbacComment()
     {
-        var model = TestModelFixture.GetNewTestModel(_testModelFixture._rbacCommentText);
+        var model = TestModelFixture.GetNewTestModel(TestModelFixture.RbacCommentText);
         Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
         Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
@@ -629,7 +629,7 @@ public class ModelTest
     [Fact]
     public void TestModelWithCommaAndQuotations()
     {
-        Enforcer e = new Enforcer(_testModelFixture.GetNewCommaAndQuotationsModel());
+        Enforcer e = new Enforcer(TestModelFixture.GetNewCommaAndQuotationsModel());
 
         TestEnforce(e, "alice", "Comma,Test", "Get", true);
         TestEnforce(e, "alice", "Comma,Test", "Post", false);
@@ -647,9 +647,8 @@ public class ModelTest
     [Fact]
     public void TestModelWithTabs()
     {
-        Enforcer e = new Enforcer(_testModelFixture.GetNewTabsModel());
+        Enforcer e = new Enforcer(TestModelFixture.GetNewTabsModel());
         e.AddRoleForUserInDomain("/user/john", "admin", "/tenant/1");
-
         Assert.True(e.Enforce("/user/john", "/tenant/1", "/tenant/1/resource", "Write"));
     }
 
@@ -657,8 +656,8 @@ public class ModelTest
     public void TestRbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacTokensWithSubstringRelationModelText,
-            _testModelFixture._rbacTokensWithSubstringRelationPolicyText));
+            TestModelFixture.RbacTokensWithSubstringRelationModelText,
+            TestModelFixture.RbacTokensWithSubstringRelationPolicyText));
         e.BuildRoleLinks();
 
         TestDomainEnforce(e, "alice", "tenant1", "data1", "read", true);
@@ -675,8 +674,8 @@ public class ModelTest
     public void TestAbacTokensWithSubstringRelation()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._abacTokensWithSubstringRelationModelText,
-            _testModelFixture._abacTokensWithSubstringRelationPolicyText));
+            TestModelFixture.AbacTokensWithSubstringRelationModelText,
+            TestModelFixture.AbacTokensWithSubstringRelationPolicyText));
 
         TestResource data1 = new("data1", "alice");
         TestResource data2 = new("data2", "bob");
@@ -692,7 +691,7 @@ public class ModelTest
         TestEnforce(e, subjectc, data2, "write", true);
         TestEnforce(e, subjecta, data2, "write", true);
         TestEnforce(e, subjectb, data1, "read", true);
-        
+
         TestEnforce(e, subjecta, data1, "write", true);
         TestEnforce(e, subjectb, data2, "read", true);
 
@@ -706,8 +705,8 @@ public class ModelTest
     public void TestBackslashLineFeed()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._backslashLineFeedModelText,
-            _testModelFixture._backslashLineFeedPolicyText));
+            TestModelFixture.BackslashLineFeedModelText,
+            TestModelFixture.BackslashLineFeedPolicyText));
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -722,7 +721,7 @@ public class ModelTest
     [Fact]
     public void TestAccidentalCacheRead()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "aliced", "ata1", "read", false);

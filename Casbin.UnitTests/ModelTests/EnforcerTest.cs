@@ -18,21 +18,19 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class EnforcerTest
 {
-    private readonly TestModelFixture _testModelFixture;
     private readonly ITestOutputHelper _testOutputHelper;
 
-    public EnforcerTest(ITestOutputHelper testOutputHelper, TestModelFixture testModelFixture)
+    public EnforcerTest(ITestOutputHelper testOutputHelper)
     {
         _testOutputHelper = testOutputHelper;
-        _testModelFixture = testModelFixture;
     }
 
     [Fact]
     public void TestEnforceWithMultipleRoleManager()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacMultipleModelText,
-            _testModelFixture._rbacMultiplePolicyText));
+            TestModelFixture.RbacMultipleModelText,
+            TestModelFixture.RbacMultiplePolicyText));
 
         DefaultRoleManager roleManager = new(5);
         roleManager.AddMatchingFunc((arg1, arg2) => arg1.Equals(arg2));
@@ -50,8 +48,8 @@ public class EnforcerTest
     public void TestEnforceWithMultipleEval()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacMultipleEvalModelText,
-            _testModelFixture._rbacMultipleEvalPolicyText));
+            TestModelFixture.RbacMultipleEvalModelText,
+            TestModelFixture.RbacMultipleEvalPolicyText));
 
         bool result = e.Enforce(
             "domain1",
@@ -83,8 +81,8 @@ public class EnforcerTest
     public void TestEnforceSubjectPriority()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._subjectPriorityModelText,
-            _testModelFixture._subjectPriorityPolicyText));
+            TestModelFixture.SubjectPriorityModelText,
+            TestModelFixture.SubjectPriorityPolicyText));
 
         TestEnforce(e, "jane", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "read", true);
@@ -253,8 +251,8 @@ public class EnforcerTest
     public void TestInOperator()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacInOperatorModelText,
-            _testModelFixture._rbacInOperatorPolicyText));
+            TestModelFixture.RbacInOperatorModelText,
+            TestModelFixture.RbacInOperatorPolicyText));
 
         TestEnforce(e, new { Name = "Alice", Amount = 5100, Roles = new[] { "Manager", "DepartmentDirector" } },
             "authorization", "grant", true);
@@ -344,7 +342,7 @@ public class EnforcerTest
         e.AddRoleForUser("alice", "data2_admin");
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), true),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -378,7 +376,7 @@ public class EnforcerTest
         e.AddRoleForUser("alice", "data2_admin");
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), true),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -440,7 +438,7 @@ public class EnforcerTest
         e.AddRoleForUserAsync("alice", "data2_admin");
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), true),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -1069,7 +1067,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnforceExApi()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
         TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
         TestEnforceEx(e, "alice", "data1", "write", new List<string>());
@@ -1080,7 +1078,7 @@ public class EnforcerTest
         TestEnforceEx(e, "bob", "data2", "read", new List<string>());
         TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
-        e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+        e = new Enforcer(TestModelFixture.GetNewRbacTestModel());
 
         TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
         TestEnforceEx(e, "alice", "data1", "write", new List<string>());
@@ -1091,7 +1089,7 @@ public class EnforcerTest
         TestEnforceEx(e, "bob", "data2", "read", new List<string>());
         TestEnforceEx(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
-        e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
+        e = new Enforcer(TestModelFixture.GetNewPriorityTestModel());
         e.BuildRoleLinks();
 
         TestEnforceEx(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read", "allow" });
@@ -1108,7 +1106,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestEnforceExApiAsync()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
         await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
         await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
@@ -1119,7 +1117,7 @@ public class EnforcerTest
         await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
         await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
-        e = new Enforcer(_testModelFixture.GetNewRbacTestModel());
+        e = new Enforcer(TestModelFixture.GetNewRbacTestModel());
 
         await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read" });
         await TestEnforceExAsync(e, "alice", "data1", "write", new List<string>());
@@ -1130,7 +1128,7 @@ public class EnforcerTest
         await TestEnforceExAsync(e, "bob", "data2", "read", new List<string>());
         await TestEnforceExAsync(e, "bob", "data2", "write", new List<string> { "bob", "data2", "write" });
 
-        e = new Enforcer(_testModelFixture.GetNewPriorityTestModel());
+        e = new Enforcer(TestModelFixture.GetNewPriorityTestModel());
         e.BuildRoleLinks();
 
         await TestEnforceExAsync(e, "alice", "data1", "read", new List<string> { "alice", "data1", "read", "allow" });
@@ -1148,7 +1146,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnforceExApiLog()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel())
+        Enforcer e = new(TestModelFixture.GetBasicTestModel())
         {
             Logger = new MockLogger<Enforcer>(_testOutputHelper)
         };
@@ -1173,7 +1171,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnforceWithMatcherApi()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         e.TestEnforceWithMatcher(matcher, "alice", "data1", "read", false);
@@ -1189,11 +1187,11 @@ public class EnforcerTest
     [Fact]
     public void TestBatchEnforceWithMatcherApi()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), false),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -1211,11 +1209,11 @@ public class EnforcerTest
     [Fact]
     public void TestBatchEnforceWithMatcherParallel()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), false),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -1233,7 +1231,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestEnforceWithMatcherAsync()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         await e.TestEnforceWithMatcherAsync(matcher, "alice", "data1", "read", false);
@@ -1249,11 +1247,11 @@ public class EnforcerTest
     [Fact]
     public void TestBatchEnforceWithMatcherApiAsync()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         IEnumerable<(RequestValues<string, string, string>, bool)> testCases =
-            new (RequestValues<string, string, string>, bool)[]
+            new[]
             {
                 (Request.CreateValues("alice", "data1", "read"), false),
                 (Request.CreateValues("alice", "data1", "write"), false),
@@ -1271,7 +1269,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnforceExWithMatcherApi()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         e.TestEnforceExWithMatcher(matcher, "alice", "data1", "read", new List<string>());
@@ -1287,7 +1285,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestEnforceExWithMatcherAsync()
     {
-        Enforcer e = new(_testModelFixture.GetBasicTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
         string matcher = "r.sub != p.sub && r.obj == p.obj && r.act == p.act";
 
         await e.TestEnforceExWithMatcherAsync(matcher, "alice", "data1", "read", new List<string>());

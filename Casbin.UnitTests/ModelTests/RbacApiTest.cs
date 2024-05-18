@@ -8,14 +8,14 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class RbacApiTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
 
-    public RbacApiTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
+    public RbacApiTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
 
     [Fact]
     public void TestRoleApi()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetRoles(e, "alice", AsList("data2_admin"));
@@ -79,7 +79,7 @@ public class RbacApiTest
     [Fact]
     public async Task TestRoleApiAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         TestGetRoles(e, "alice", AsList("data2_admin"));
@@ -143,7 +143,7 @@ public class RbacApiTest
     [Fact]
     public void TestRoleApiWithDomains()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
         TestHasRole(e, "alice", "admin", true, "domain1");
@@ -201,7 +201,7 @@ public class RbacApiTest
     [Fact]
     public async Task TestRoleApiWithDomainsAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
         TestHasRole(e, "alice", "admin", true, "domain1");
@@ -259,7 +259,7 @@ public class RbacApiTest
     [Fact]
     public void TestAddRolesForUser()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         _ = e.AddRolesForUser("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
@@ -278,7 +278,7 @@ public class RbacApiTest
     [Fact]
     public async Task TestAddRolesForUserAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
         _ = await e.AddRolesForUserAsync("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
@@ -297,7 +297,7 @@ public class RbacApiTest
     [Fact]
     public void TestPermissionApi()
     {
-        Enforcer e = new(_testModelFixture.GetBasicWithoutResourceTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
         e.BuildRoleLinks();
 
         TestEnforceWithoutUsers(e, "alice", "read", true);
@@ -345,7 +345,7 @@ public class RbacApiTest
     [Fact]
     public async Task TestPermissionApiAsync()
     {
-        Enforcer e = new(_testModelFixture.GetBasicWithoutResourceTestModel());
+        Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
         e.BuildRoleLinks();
 
         await TestEnforceWithoutUsersAsync(e, "alice", "read", true);
@@ -394,8 +394,8 @@ public class RbacApiTest
     public void TestGetImplicitPermissionsForUser()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacModelText,
-            _testModelFixture._rbacWithHierarchyPolicyText));
+            TestModelFixture.RbacModelText,
+            TestModelFixture.RbacWithHierarchyPolicyText));
         e.BuildRoleLinks();
 
         TestGetPermissions(e, "alice", AsList(
@@ -417,8 +417,8 @@ public class RbacApiTest
     public void TestGetImplicitPermissionsForUserWithDomain()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacWithDomainsModelText,
-            _testModelFixture._rbacWithHierarchyWithDomainsPolicyText));
+            TestModelFixture.RbacWithDomainsModelText,
+            TestModelFixture.RbacWithHierarchyWithDomainsPolicyText));
         e.BuildRoleLinks();
 
         TestGetImplicitPermissions(e, "alice", AsList(
@@ -433,8 +433,8 @@ public class RbacApiTest
     {
         // Arrange
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacModelText,
-            _testModelFixture._rbacWithHierarchyPolicyText));
+            TestModelFixture.RbacModelText,
+            TestModelFixture.RbacWithHierarchyPolicyText));
         e.BuildRoleLinks();
 
         // Assert
@@ -453,8 +453,8 @@ public class RbacApiTest
     {
         // Arrange
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacModelText,
-            _testModelFixture._rbacWithHierarchyPolicyText));
+            TestModelFixture.RbacModelText,
+            TestModelFixture.RbacWithHierarchyPolicyText));
         e.BuildRoleLinks();
 
         Assert.Equal(new[] { "alice" }, e.GetImplicitUsersForPermission("data1", "read"));

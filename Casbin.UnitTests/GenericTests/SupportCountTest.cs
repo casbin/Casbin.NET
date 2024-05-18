@@ -9,16 +9,12 @@ namespace Casbin.UnitTests.GenericTests;
 [Collection("Model collection")]
 public class SupportCountTest
 {
-    private readonly TestModelFixture _testModelFixture;
-
-    public SupportCountTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
-
     [Fact]
     public void TestSupportCount()
     {
         for (int i = 1; i <= 13; i++)
         {
-            IEnforcer enforcer = new Enforcer(DefaultModel.CreateFromText(_testModelFixture._supportCountModelText));
+            IEnforcer enforcer = new Enforcer(DefaultModel.CreateFromText(TestModelFixture.SupportCountModelText));
             string policyType = $"p{i}";
             string requestType = $"r{i}";
             string matcherType = $"m{i}";

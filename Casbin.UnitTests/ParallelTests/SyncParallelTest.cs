@@ -13,22 +13,22 @@ namespace Casbin.UnitTests.ParallelTest
     public class SyncParallelTest
     {
         private readonly ITestOutputHelper _output;
-        private readonly TestModelFixture _testModelFixture;
+        private readonly TestModelFixture TestModelFixture;
         private RbacParallelTestHelper<RbacRequest> _rbacParallelTestHelper;
 
         public SyncParallelTest(ITestOutputHelper output, TestModelFixture testModelFixture)
         {
             _output = output;
-            _testModelFixture = testModelFixture;
+            TestModelFixture = testModelFixture;
         }
 
         private void InitRbacParallelTestHelper()
         {
-            Enforcer e1 = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            Enforcer e1 = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
             e1.BuildRoleLinks();
-            Enforcer e2 = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            Enforcer e2 = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
             e2.BuildRoleLinks();
-            Enforcer e3 = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+            Enforcer e3 = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
             e3.BuildRoleLinks();
             var consumer = new DefaultRbacConsumer<RbacRequest>(e1);
             var transactionFactory = new DefaultTransactionFactory();

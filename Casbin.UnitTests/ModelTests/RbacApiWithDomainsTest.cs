@@ -8,16 +8,16 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class RbacApiWithDomainsTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
 
-    public RbacApiWithDomainsTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
+    public RbacApiWithDomainsTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
 
     [Fact]
     public void TestGetDomainsForUser()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacWithDomainsModelText,
-            _testModelFixture._rbacWithDomainsPolicy2Text));
+            TestModelFixture.RbacWithDomainsModelText,
+            TestModelFixture.RbacWithDomainsPolicy2Text));
 
         e.BuildRoleLinks();
 
@@ -30,8 +30,8 @@ public class RbacApiWithDomainsTest
     public void TestGetRolesFromUserWithDomains()
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(
-            _testModelFixture._rbacWithDomainsModelText,
-            _testModelFixture._rbacWithHierarchyWithDomainsPolicyText));
+            TestModelFixture.RbacWithDomainsModelText,
+            TestModelFixture.RbacWithHierarchyWithDomainsPolicyText));
 
         e.BuildRoleLinks();
 
@@ -45,7 +45,7 @@ public class RbacApiWithDomainsTest
     [Fact]
     public void TestRoleApiWithDomains()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
         TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
@@ -75,7 +75,7 @@ public class RbacApiWithDomainsTest
     [Fact]
     public async Task TestRoleApiWithDomainsAsync()
     {
-        Enforcer e = new(_testModelFixture.GetNewRbacWithDomainsTestModel());
+        Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
         TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));

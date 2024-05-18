@@ -12,9 +12,9 @@ namespace Casbin.UnitTests.PersistTests;
 [Collection("Model collection")]
 public class WatcherMessageTest
 {
-    private readonly TestModelFixture _testModelFixture;
+    private readonly TestModelFixture TestModelFixture;
 
-    public WatcherMessageTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
+    public WatcherMessageTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
 
     private void MessageEquals(IPolicyChangeMessage message, IPolicyChangeMessage message2)
     {
@@ -33,7 +33,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -51,7 +51,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -69,7 +69,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -89,7 +89,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -102,7 +102,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -124,7 +124,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -147,7 +147,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -175,7 +175,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -197,7 +197,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -215,7 +215,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -233,7 +233,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -252,7 +252,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -267,7 +267,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -292,7 +292,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -315,7 +315,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
@@ -344,7 +344,7 @@ public class WatcherMessageTest
     {
         SampleWatcher sampleWatcher = new();
 
-        Enforcer enforcer = new(_testModelFixture.GetNewRbacTestModel(),
+        Enforcer enforcer = new(TestModelFixture.GetNewRbacTestModel(),
             new FileAdapter(TestModelFixture.GetTestFile("rbac_policy_for_watcher_test.csv")));
 
         enforcer.SetWatcher(sampleWatcher);
