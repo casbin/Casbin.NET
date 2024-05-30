@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
@@ -726,6 +728,28 @@ public partial class ModelTest
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "aliced", "ata1", "read", false);
         TestEnforce(e, "alice", "data", "1read", false);
+    }
+
+    [Fact]
+    public void TestRbacWithIndexMatcher()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            TestModelFixture.RbacWithIndexMatcherModelText,
+            TestModelFixture.RbacWithIndexMatcherPolicyText));
+        e.BuildRoleLinks();
+        var rule = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["CompanyData"] = new() { ["CompanyIsActive"] = "True", ["BusinessRole"] = "Role1" }
+        };
+        Assert.True(e.Enforce(rule, "WebApp", "/api/transactions/getTransactions", "POST"));
+        Assert.False(e.Enforce(rule, "Admin", "/api/transactions/getTransactions", "POST"));
+
+        rule = new Dictionary<string, Dictionary<string, string>>
+        {
+            ["CompanyData"] = new() { ["CompanyIsActive"] = "False", ["BusinessRole"] = "Role1" }
+        };
+        Assert.False(e.Enforce(rule, "WebApp", "/api/transactions/getTransactions", "POST"));
+        Assert.True(e.Enforce(rule, "Admin", "/api/transactions/getTransactions", "POST"));
     }
 
     public class TestResource

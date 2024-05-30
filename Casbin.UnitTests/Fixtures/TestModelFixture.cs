@@ -91,6 +91,10 @@ public class TestModelFixture
     public static readonly string BackslashLineFeedModelText = ReadTestFile("backslash_feed_model.conf");
     public static readonly string BackslashLineFeedPolicyText = ReadTestFile("backslash_feed_policy.csv");
 
+    // https://github.com/casbin/Casbin.NET/issues/353
+    public static readonly string RbacWithIndexMatcherModelText = ReadTestFile("rbac_with_index_matcher_model.conf");
+    public static readonly string RbacWithIndexMatcherPolicyText = ReadTestFile("rbac_with_index_matcher_policy.csv");
+
     public static IModel GetNewAbacModel() => GetNewTestModel(AbacModelText);
 
     public static IModel GetNewAbacWithEvalModel() => GetNewTestModel(AbacWithEvalModelText, AbacWithEvalPolicyText);
