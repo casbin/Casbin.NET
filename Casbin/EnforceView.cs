@@ -118,8 +118,8 @@ namespace Casbin
         [SuppressMessage("ReSharper", "UseDeconstruction")]
         public static string TransformMatcher(in EnforceView view, string matcher)
         {
-            string perfix = @"(?<=(\s|^|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\)\s*)";
-            string suffix = @"(?=\s*(\s|$|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\|\.|in))";
+            string perfix = @"(?<=(\s|^|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\|\[)\s*)";
+            string suffix = @"(?=\s*(\s|$|\||&|!|=|\(|\)|<|>|,|\+|-|\*|\/|\\|\[|\]|\.|in))";
             if (view.SupportGeneric is false)
             {
                 foreach (KeyValuePair<string, int> tokenPair in view.RequestAssertion.Tokens)

@@ -1,0 +1,2 @@
+﻿p, r.rule["CompanyData"]["CompanyIsActive"] == "True" && (r.rule["CompanyData"]["BusinessRole"] == "Role1" || r.rule["CompanyData"]["BusinessRole"] == "Role2"), WebApp, /api/transactions/getTransactions, POST
+p, r.rule["CompanyData"]["CompanyIsActive"] == "False" && (r.rule["CompanyData"]["BusinessRole"] == "Role1" || r.rule["CompanyData"]["BusinessRole"] == "Role2"), Admin, /api/transactions/getTransactions, POST
