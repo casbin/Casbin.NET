@@ -46,6 +46,13 @@ stages:
               version: '8.0.x'
               includePreviewVersions: true
 
+          - task: UseDotNet@2
+            displayName: Setup 9.0.x .NET SDKs
+            inputs:
+              packageType: 'sdk'
+              version: '9.0.x'
+              includePreviewVersions: true
+
           - task: DotNetCoreCLI@2
             displayName: Restore projects
             inputs:
