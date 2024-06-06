@@ -22,6 +22,7 @@ jobs:
             6.0.x
             7.0.x
             8.0.x
+            9.0.x
           include-prerelease: true
 
       - name: Check .NET info
@@ -33,11 +34,11 @@ jobs:
       - name: Build solution
         run: dotnet build -c Release --no-restore
 
-      - name: Run net8.0 Infer#      
+      - name: Run net8.0 Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
           binary-path: ./Casbin/bin/Release/net8.0
-      
+
       - name: Print net8.0 Infer# analysis results
         run: cat infer-out/report.txt
 
@@ -47,11 +48,11 @@ jobs:
           name: "infersharp-net8.0-results"
           path: './infer-out/report.txt'
 
-      - name: Run net7.0 Infer#      
+      - name: Run net7.0 Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
           binary-path: ./Casbin/bin/Release/net7.0
-    
+
       - name: Print net7.0 Infer# analysis results
         run: cat infer-out/report.txt
 
@@ -61,39 +62,39 @@ jobs:
           name: "infersharp-net7.0-results"
           path: './infer-out/report.txt'
 
-      - name: Run net6.0 Infer#      
+      - name: Run net6.0 Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
           binary-path: ./Casbin/bin/Release/net6.0
-        
+
       - name: Print net6.0 Infer# analysis results
         run: cat infer-out/report.txt
-        
+
       - name: Upload net6.0 infer# results artefacts
         uses: actions/upload-artifact@v1.0.0
         with:
           name: "infersharp-net6.0-results"
           path: './infer-out/report.txt'
 
-      - name: Run net5.0 Infer#      
+      - name: Run net5.0 Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
           binary-path: ./Casbin/bin/Release/net5.0
-        
+
       - name: Print net5.0 Infer# analysis results
         run: cat infer-out/report.txt
-        
+
       - name: Upload net5.0 infer# results artefacts
         uses: actions/upload-artifact@v1.0.0
         with:
           name: "infersharp-net5.0-results"
           path: './infer-out/report.txt'
 
-      - name: Run net3.1 Infer#      
+      - name: Run net3.1 Infer#
         uses: microsoft/infersharpaction@v1.5
         with:
           binary-path: ./Casbin/bin/Release/netcoreapp3.1
-        
+
       - name: Print net3.1 Infer# analysis results
         run: cat infer-out/report.txt
 
