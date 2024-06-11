@@ -18,6 +18,8 @@ internal class ExpressionHandler : IExpressionHandler
     private Interpreter _interpreter;
 #endif
 
+    private bool TryCompile { get; set; } = true;
+
     public ExpressionHandler()
     {
         _interpreter = CreateInterpreter();
@@ -76,13 +78,23 @@ internal class ExpressionHandler : IExpressionHandler
             return func(request, policy);
         }
 
-        if (_cachePool.TryGetFunc(expressionString,
-                out Func<TRequest, TPolicy, bool> genericFunc) is not false)
+        if (_cachePool.TryGetFunc(expressionString, out Func<TRequest, TPolicy, bool> genericFunc))
         {
+            return genericFunc is not null && genericFunc(request, policy);
+        }
+
+        if (TryCompile is false)
+        {
+            genericFunc = CompileExpression<TRequest, TPolicy>(in context, expressionString);
+            _cachePool.SetFunc(expressionString, genericFunc);
             return genericFunc(request, policy);
         }
 
-        genericFunc = CompileExpression<TRequest, TPolicy>(in context, expressionString);
+        if (TryCompileExpression(in context, expressionString, out genericFunc) is false)
+        {
+            _cachePool.SetFunc(expressionString, genericFunc);
+            return false;
+        }
         _cachePool.SetFunc(expressionString, genericFunc);
         return genericFunc(request, policy);
     }
@@ -94,6 +106,23 @@ internal class ExpressionHandler : IExpressionHandler
     {
         return _interpreter.ParseAsDelegate<Func<TRequest, TPolicy, bool>>(expressionString,
             context.View.RequestType, context.View.PolicyType);
+    }
+
+    private bool TryCompileExpression<TRequest, TPolicy>(in EnforceContext context,
+        string expressionString, out Func<TRequest, TPolicy, bool> func)
+        where TRequest : IRequestValues
+        where TPolicy : IPolicyValues
+    {
+        try
+        {
+            func = CompileExpression<TRequest, TPolicy>(in context, expressionString);
+        }
+        catch (Exception)
+        {
+            func = null;
+            return false;
+        }
+        return true;
     }
 
     private Interpreter CreateInterpreter()
