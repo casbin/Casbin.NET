@@ -16,6 +16,9 @@ public class TestModelFixture
     public static readonly string BasicWithoutUserPolicyText = ReadTestFile("basic_without_users_policy.csv");
     public static readonly string BasicWithRootModelText = ReadTestFile("basic_with_root_model.conf");
 
+    public static readonly string SaaRbacModelText = ReadTestFile("saa_model.conf");
+    public static readonly string SaaRbacPolicyText = ReadTestFile("saa_rbac_policy.csv");
+
     public static readonly string RbacPolicyText = ReadTestFile("rbac_policy.csv");
     public static readonly string RbacCommentText = ReadTestFile("rbac_comment.conf");
     public static readonly string RbacInOperatorModelText = ReadTestFile("rbac_in_operator_model.conf");
@@ -118,6 +121,8 @@ public class TestModelFixture
 
     public static IModel GetNewPriorityExplicitDenyOverrideModel() => GetNewTestModel(PriorityExplicitDenyOverrideModelText,
         PriorityExplicitDenyOverridePolicyText);
+
+    public static IModel GetNewSaaRbacTestModel() => GetNewTestModel(SaaRbacModelText, SaaRbacPolicyText);
 
     public static IModel GetNewRbacTestModel() => GetNewTestModel(RbacModelText, RbacPolicyText);
 
