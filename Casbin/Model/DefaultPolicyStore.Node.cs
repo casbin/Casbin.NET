@@ -34,7 +34,17 @@ public partial class DefaultPolicyStore
             Interlocked.Exchange(ref Policy, valuesList);
 
         public bool ContainsPolicy(IPolicyValues values)
-            => PolicyTextSet.Contains(values.ToText());
+        {
+            Lock.EnterReadLock();
+            try
+            {
+                return PolicyTextSet.Contains(values.ToText());
+            }
+            finally
+            {
+                Lock.ExitReadLock();
+            }
+        }
 
         public bool ValidatePolicy(IPolicyValues values)
         {
@@ -67,13 +77,13 @@ public partial class DefaultPolicyStore
             try
             {
                 Policy.Add(values);
+                PolicyTextSet.Add(values.ToText());
             }
             finally
             {
                 Lock.ExitWriteLock();
             }
 
-            PolicyTextSet.Add(values.ToText());
             return true;
         }
 
@@ -244,13 +254,13 @@ public partial class DefaultPolicyStore
             {
                 int lastIndex = Policy.FindLastIndex(LastLessOrEqualPriority);
                 Policy.Insert(lastIndex + 1, values);
+                PolicyTextSet.Add(values.ToText());
             }
             finally
             {
                 Lock.ExitWriteLock();
             }
 
-            PolicyTextSet.Add(values.ToText());
             return true;
         }
 
