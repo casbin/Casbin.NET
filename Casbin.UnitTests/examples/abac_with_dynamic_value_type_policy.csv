@@ -1,0 +1,2 @@
+p, bob, /data1, read, r.obj.Property1 == "prop-1"
+p, bob, /data2, read, r.obj.Property2 == "prop-2"

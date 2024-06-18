@@ -95,6 +95,10 @@ public class TestModelFixture
     public static readonly string RbacWithIndexMatcherModelText = ReadTestFile("rbac_with_index_matcher_model.conf");
     public static readonly string RbacWithIndexMatcherPolicyText = ReadTestFile("rbac_with_index_matcher_policy.csv");
 
+    // https://github.com/casbin/Casbin.NET/issues/354
+    public static readonly string AbacWithDynamicValueTypeModelText = ReadTestFile("abac_with_dynamic_value_type_model.conf");
+    public static readonly string AbacWithDynamicValueTypePolicyText = ReadTestFile("abac_with_dynamic_value_type_policy.csv");
+
     public static IModel GetNewAbacModel() => GetNewTestModel(AbacModelText);
 
     public static IModel GetNewAbacWithEvalModel() => GetNewTestModel(AbacWithEvalModelText, AbacWithEvalPolicyText);

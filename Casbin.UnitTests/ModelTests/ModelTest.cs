@@ -752,6 +752,25 @@ public partial class ModelTest
         Assert.True(e.Enforce(rule, "Admin", "/api/transactions/getTransactions", "POST"));
     }
 
+    [Fact]
+    public void TestAbacWithDynamicValueType()
+    {
+        Enforcer e = new(TestModelFixture.GetNewTestModel(
+            TestModelFixture.AbacWithDynamicValueTypeModelText,
+            TestModelFixture.AbacWithDynamicValueTypePolicyText));
+        var sub = new { Name = "bob" };
+        var obj1 = new { Object = "/data1", Property1 = "prop-1" };
+        var obj2 = new { Object = "/data2", Property2 = "prop-2" };
+        var obj3 = new { Object = "/data2", Property3 = "prop-3" };
+        Assert.True(e.Enforce(sub, obj1, "read"));
+        Assert.True(e.Enforce(sub, obj2, "read"));
+        Assert.False(e.Enforce(sub, obj3, "read"));
+        // Request again to test the cache hit logic.
+        Assert.True(e.Enforce(sub, obj1, "read"));
+        Assert.True(e.Enforce(sub, obj2, "read"));
+        Assert.False(e.Enforce(sub, obj3, "read"));
+    }
+
     public class TestResource
     {
         public TestResource(string name, string owner)
