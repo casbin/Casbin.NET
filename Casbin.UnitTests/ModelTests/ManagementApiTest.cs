@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.UnitTests.Extensions;
@@ -321,6 +322,46 @@ public class ManagementApiTest
             AsList("leyo", "data4", "write"),
             AsList("ham", "data4", "write")));
         Assert.False(res);
+    }
+
+    private static List<List<string>> GenerateGroupingRules(int numberOfItems)
+    {
+        var groupingRules = new List<List<string>>();
+
+        for (int i = 1; i <= numberOfItems; i++)
+        {
+            string parent = $"Parent{i}";
+            string child = $"Child{i}";
+            groupingRules.Add(new List<string> { parent, child });
+        }
+
+        return groupingRules;
+    }
+
+    [Fact]
+    public void TestConcurrentModifyGroupingPolicy()
+    {
+        Enforcer e = new(TestModelFixture.GetNewSaaRbacTestModel());
+        e.BuildRoleLinks();
+
+        // Arrange
+        var policiesBeforeAct = e.GetNamedGroupingPolicy(PermConstants.GroupingPolicyType2).ToArray();
+        Assert.Empty(policiesBeforeAct);
+
+        var groupingRules = GenerateGroupingRules(1000);
+
+        Task.WaitAll(groupingRules.Select(rule => Task.Run(() =>
+        {
+            bool result = e.AddNamedGroupingPolicies(PermConstants.GroupingPolicyType2, new List<List<string>> { rule });
+            Assert.True(result);
+        })).ToArray());
+
+        // Assert
+        var policiesAfterAct = e.GetNamedGroupingPolicy(PermConstants.GroupingPolicyType2).ToArray();
+        foreach (var policy in groupingRules)
+        {
+            Assert.Contains(policy, policiesAfterAct);
+        }
     }
 
     [Fact]
