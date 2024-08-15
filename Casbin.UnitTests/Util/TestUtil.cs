@@ -210,12 +210,11 @@ internal static class TestUtil
         Assert.True(res.DeepEquals(myRes), message);
     }
 
-    internal static void TestGetImplicitPermissions(IEnforcer e, string name, List<List<string>> res,
+    internal static void TestGetImplicitPermissions(IEnforcer e, string name, List<List<string>> except,
         string domain = null)
     {
-        IEnumerable<IEnumerable<string>> myRes = e.GetImplicitPermissionsForUser(name, domain);
-        string message = "Implicit permissions for " + name + ": " + myRes + ", supposed to be " + res;
-        Assert.True(res.DeepEquals(myRes), message);
+        IEnumerable<IEnumerable<string>> actual = e.GetImplicitPermissionsForUser(name, domain);
+        Assert.True(except.DeepEquals(actual));
     }
 
     internal static void TestHasPermission(IEnforcer e, string name, List<string> permission, bool res)

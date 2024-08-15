@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,7 +10,7 @@ namespace Casbin.Rbac
     /// </summary>
     public class Role
     {
-        private readonly Lazy<Dictionary<string, Role>> _roles = new();
+        private readonly Lazy<ConcurrentDictionary<string, Role>> _roles = new();
 
         public Role(string name)
         {
@@ -28,17 +29,7 @@ namespace Casbin.Rbac
 
         public void AddRole(Role role)
         {
-            if (_roles.IsValueCreated is false)
-            {
-                _roles.Value.Add(role.Name, role);
-            }
-
-            if (_roles.Value.ContainsKey(role.Name))
-            {
-                return;
-            }
-
-            _roles.Value.Add(role.Name, role);
+            _roles.Value.TryAdd(role.Name, role);
         }
 
         public void DeleteRole(Role role)
@@ -47,11 +38,7 @@ namespace Casbin.Rbac
             {
                 return;
             }
-
-            if (_roles.Value.ContainsKey(role.Name))
-            {
-                _roles.Value.Remove(role.Name);
-            }
+            _roles.Value.TryRemove(role.Name, out _);
         }
 
         public bool HasRole(string name, int hierarchyLevel, Func<string, string, bool> matchingFunc = null)
@@ -71,7 +58,8 @@ namespace Casbin.Rbac
                 return false;
             }
 
-            return _roles.Value.Values.Any(role => role.HasRole(name, hierarchyLevel - 1));
+            return _roles.Value.Values.Any(role =>
+                role.HasRole(name, hierarchyLevel - 1));
         }
 
         public bool HasDirectRole(string name, Func<string, string, bool> matchingFunc = null)
@@ -86,7 +74,7 @@ namespace Casbin.Rbac
                 return _roles.Value.ContainsKey(name);
             }
 
-            
+
             foreach (var role in _roles.Value.Values)
             {
                 if (name == role.Name || matchingFunc(role.Name, name) && role.Name != name)
@@ -100,11 +88,6 @@ namespace Casbin.Rbac
         public IEnumerable<string> GetRoles()
         {
             return _roles.IsValueCreated ? _roles.Value.Keys : Enumerable.Empty<string>();
-        }
-
-        public override string ToString()
-        {
-            return $"{Name}{string.Join(",", _roles.Value)}";
         }
     }
 }

@@ -423,8 +423,8 @@ public class RbacApiTest
 
         TestGetImplicitPermissions(e, "alice", AsList(
                 AsList("alice", "domain1", "data2", "read"),
-                AsList("role:reader", "domain1", "data1", "read"),
-                AsList("role:writer", "domain1", "data1", "write")),
+                AsList("role:writer", "domain1", "data1", "write"),
+                AsList("role:reader", "domain1", "data1", "read")),
             "domain1");
     }
 
