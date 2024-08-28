@@ -81,6 +81,7 @@ namespace Casbin
         public bool AutoBuildRoleLinks { get; set; }
         public bool AutoNotifyWatcher { get; set; }
         public bool AutoCleanEnforceCache { get; set; }
+        public bool AcceptJsonRequest { get; set; }
 
         #endregion
 
