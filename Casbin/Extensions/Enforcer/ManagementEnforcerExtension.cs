@@ -14,17 +14,14 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="name">The name of the new function.</param>
         /// <param name="function">The function.</param>
-        public static void AddFunction(this IEnforcer enforcer, string name, Delegate function) =>
+        public static void AddFunction<T>(this IEnforcer enforcer, string name, T function) where T : Delegate
+        {
             enforcer.Model.ExpressionHandler.SetFunction(name, function);
-
-        /// <summary>
-        ///     Adds a customized function.
-        /// </summary>
-        /// <param name="enforcer"></param>
-        /// <param name="name">The name of the new function.</param>
-        /// <param name="function">The function.</param>
-        public static void AddFunction(this IEnforcer enforcer, string name, Func<string, string, bool> function) =>
-            AddFunction(enforcer, name, (Delegate)function);
+            if (enforcer.AutoCleanEnforceCache)
+            {
+                enforcer.ClearCache();
+            }
+        }
 
         #region "p" (Store) Management
 
