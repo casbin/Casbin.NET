@@ -69,7 +69,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
         IEnforcer e = new Enforcer(m, a, new EnforcerOptions { AutoLoadPolicy = false });
         Assert.Empty(e.GetPolicy());
 
@@ -118,7 +118,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
 
         Enforcer e = new(m, a);
 
@@ -179,7 +179,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
 
         Enforcer e = new(m, a);
 
@@ -240,7 +240,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "!some(where (p.eft == deny))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
 
         Enforcer e = new(m, a);
 
@@ -671,7 +671,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
 
         e.SetModel(m);
         e.SetAdapter(a);
@@ -691,7 +691,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        FileAdapter a = new("examples/keymatch_policy.csv");
+        FileAdapter a = new("Examples/keymatch_policy.csv");
 
         e.SetModel(m);
         e.SetAdapter(a);
@@ -711,7 +711,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        using (FileStream fs = new("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
+        using (FileStream fs = new("Examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
                    FileShare.ReadWrite))
         {
             FileAdapter a = new(fs);
@@ -734,7 +734,7 @@ public class EnforcerTest
         m.AddDef("e", "e", "some(where (p.eft == allow))");
         m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
 
-        using (FileStream fs = new("examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
+        using (FileStream fs = new("Examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
                    FileShare.ReadWrite))
         {
             FileAdapter a = new(fs);
@@ -753,7 +753,7 @@ public class EnforcerTest
     [Fact]
     public void TestReloadPolicy()
     {
-        Enforcer e = new("examples/rbac_model.conf", "examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
 
         e.LoadPolicy();
         TestGetPolicy(e,
@@ -764,7 +764,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestReloadPolicyAsync()
     {
-        Enforcer e = new("examples/rbac_model.conf", "examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
 
         await e.LoadPolicyAsync();
         TestGetPolicy(e,
@@ -775,7 +775,7 @@ public class EnforcerTest
     [Fact]
     public void TestSavePolicy()
     {
-        Enforcer e = new("examples/rbac_model.conf", "examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
 
         e.SavePolicy();
     }
@@ -783,7 +783,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestSavePolicyAsync()
     {
-        Enforcer e = new("examples/rbac_model.conf", "examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
 
         await e.SavePolicyAsync();
     }
@@ -791,7 +791,7 @@ public class EnforcerTest
     [Fact]
     public void TestSavePolicyWithoutBasicModel()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
 
         e.SavePolicy();
     }
@@ -799,7 +799,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestSavePolicyWithoutBasicModelAsync()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
 
         await e.SavePolicyAsync();
     }
@@ -807,7 +807,7 @@ public class EnforcerTest
     [Fact]
     public void TestClearPolicy()
     {
-        Enforcer e = new("examples/rbac_model.conf", "examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
 
         e.ClearPolicy();
     }
@@ -819,7 +819,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnableEnforce()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
 
         e.EnableEnforce(false);
         TestEnforce(e, "alice", "data1", "read", true);
@@ -846,7 +846,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnableLog()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv")
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv")
         {
             Logger = new MockLogger<Enforcer>(_testOutputHelper)
         };
@@ -875,7 +875,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnableAutoSave()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
 
         e.EnableAutoSave(false);
         // Because AutoSave is disabled, the policy change only affects the policy in Casbin enforcer,
@@ -914,7 +914,7 @@ public class EnforcerTest
     [Fact]
     public async Task TestEnableAutoSaveAsync()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy_for_async_adapter_test.csv");
 
         e.EnableAutoSave(false);
         // Because AutoSave is disabled, the policy change only affects the policy in Casbin enforcer,
@@ -953,8 +953,8 @@ public class EnforcerTest
     [Fact]
     public void TestInitWithAdapter()
     {
-        FileAdapter adapter = new("examples/basic_policy.csv");
-        Enforcer e = new("examples/basic_model.conf", adapter);
+        FileAdapter adapter = new("Examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", adapter);
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -969,7 +969,7 @@ public class EnforcerTest
     [Fact]
     public void TestRoleLinks()
     {
-        Enforcer e = new("examples/rbac_model.conf");
+        Enforcer e = new("Examples/rbac_model.conf");
         e.EnableAutoBuildRoleLinks(false);
         e.BuildRoleLinks();
         e.Enforce("user501", "data9", "read");
@@ -978,8 +978,8 @@ public class EnforcerTest
     [Fact]
     public void TestGetAndSetModel()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
-        Enforcer e2 = new("examples/basic_with_root_model.conf", "examples/basic_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
+        Enforcer e2 = new("Examples/basic_with_root_model.conf", "Examples/basic_policy.csv");
 
         TestEnforce(e, "root", "data1", "read", false);
 
@@ -991,8 +991,8 @@ public class EnforcerTest
     [Fact]
     public void TestGetAndSetAdapterInMem()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy.csv");
-        Enforcer e2 = new("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy.csv");
+        Enforcer e2 = new("Examples/basic_model.conf", "Examples/basic_inverse_policy.csv");
 
         TestEnforce(e, "alice", "data1", "read", true);
         TestEnforce(e, "alice", "data1", "write", false);
@@ -1008,8 +1008,8 @@ public class EnforcerTest
     [Fact]
     public async Task TestGetAndSetAdapterInMemAsync()
     {
-        Enforcer e = new("examples/basic_model.conf", "examples/basic_policy_for_async_adapter_test.csv");
-        Enforcer e2 = new("examples/basic_model.conf", "examples/basic_inverse_policy.csv");
+        Enforcer e = new("Examples/basic_model.conf", "Examples/basic_policy_for_async_adapter_test.csv");
+        Enforcer e2 = new("Examples/basic_model.conf", "Examples/basic_inverse_policy.csv");
 
         await TestEnforceAsync(e, "alice", "data1", "read", true);
         await TestEnforceAsync(e, "alice", "data1", "write", false);
@@ -1025,11 +1025,11 @@ public class EnforcerTest
     [Fact]
     public void TestSetAdapterFromFile()
     {
-        Enforcer e = new("examples/basic_model.conf");
+        Enforcer e = new("Examples/basic_model.conf");
 
         TestEnforce(e, "alice", "data1", "read", false);
 
-        FileAdapter a = new("examples/basic_policy.csv");
+        FileAdapter a = new("Examples/basic_policy.csv");
         e.SetAdapter(a);
         e.LoadPolicy();
         TestEnforce(e, "alice", "data1", "read", true);
@@ -1046,11 +1046,11 @@ public class EnforcerTest
     [Fact]
     public async Task TestSetAdapterFromFileAsync()
     {
-        Enforcer e = new("examples/basic_model.conf");
+        Enforcer e = new("Examples/basic_model.conf");
 
         await TestEnforceAsync(e, "alice", "data1", "read", false);
 
-        FileAdapter a = new("examples/basic_policy_for_async_adapter_test.csv");
+        FileAdapter a = new("Examples/basic_policy_for_async_adapter_test.csv");
         e.SetAdapter(a);
         await e.LoadPolicyAsync();
         await TestEnforceAsync(e, "alice", "data1", "read", true);
