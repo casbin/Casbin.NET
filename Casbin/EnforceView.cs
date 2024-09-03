@@ -127,13 +127,11 @@ namespace Casbin
                     Regex reg = new Regex(perfix + $@"{view.RequestType}\.{tokenPair.Key}" + suffix);
                     matcher = reg.Replace(matcher, $"{view.RequestType}[{tokenPair.Value}]");
                 }
-
                 foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
                 {
                     Regex reg = new Regex(perfix + $@"{view.PolicyType}\.{tokenPair.Key}" + suffix);
                     matcher = reg.Replace(matcher, $"{view.PolicyType}[{tokenPair.Value}]");
                 }
-
                 return matcher;
             }
 
@@ -142,13 +140,11 @@ namespace Casbin
                 Regex reg = new Regex(perfix + $@"{view.RequestType}\.{tokenPair.Key}" + suffix);
                 matcher = reg.Replace(matcher, $"{view.RequestType}.Value{tokenPair.Value + 1}");
             }
-
             foreach (KeyValuePair<string, int> tokenPair in view.PolicyAssertion.Tokens)
             {
                 Regex reg = new Regex(perfix + $@"{view.PolicyType}\.{tokenPair.Key}" + suffix);
                 matcher = reg.Replace(matcher, $"{view.PolicyType}.Value{tokenPair.Value + 1}");
             }
-
             return matcher;
         }
     }
