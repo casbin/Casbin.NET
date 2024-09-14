@@ -9,12 +9,12 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v1
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: |
             3.1.x
@@ -43,7 +43,7 @@ jobs:
         run: cat infer-out/report.txt
 
       - name: Upload net8.0 infer# results artefacts
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: "infersharp-net8.0-results"
           path: './infer-out/report.txt'
@@ -57,7 +57,7 @@ jobs:
         run: cat infer-out/report.txt
 
       - name: Upload net7.0 infer# results artefacts
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: "infersharp-net7.0-results"
           path: './infer-out/report.txt'
@@ -71,7 +71,7 @@ jobs:
         run: cat infer-out/report.txt
 
       - name: Upload net6.0 infer# results artefacts
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: "infersharp-net6.0-results"
           path: './infer-out/report.txt'
@@ -85,7 +85,7 @@ jobs:
         run: cat infer-out/report.txt
 
       - name: Upload net5.0 infer# results artefacts
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: "infersharp-net5.0-results"
           path: './infer-out/report.txt'
@@ -99,7 +99,7 @@ jobs:
         run: cat infer-out/report.txt
 
       - name: Upload net3.1 infer# results artefacts
-        uses: actions/upload-artifact@v1.0.0
+        uses: actions/upload-artifact@v4
         with:
           name: "infersharp-net3.1-results"
           path: './infer-out/report.txt'
