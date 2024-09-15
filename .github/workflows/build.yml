@@ -84,6 +84,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Dry run semantic-release
         run: |
           export PATH=$PATH:$(yarn global bin)
