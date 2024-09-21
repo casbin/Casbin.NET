@@ -11,107 +11,106 @@ using CsvHelper.Configuration;
 
 namespace Casbin.Persist.Adapter.File;
 
+internal enum ReadSource
+{
+    File,
+    Text,
+    Stream
+}
+
 public class FileAdapter : IEpochAdapter, IFilteredAdapter
 {
-    private readonly System.IO.Stream _inputStream;
-    private readonly bool _readOnly;
+    public string OriginalPath { get; private set; }
 
-    public string OriginalPath { get; }
-    public FileAdapter(string filePath) => OriginalPath = filePath;
+    internal ReadSource ReadSource { get; private set; }
+    private System.IO.Stream OriginalStream { get; set; }
+    private string OriginalText { get; set; }
+    private bool CanWrite { get; set; }
 
-    public FileAdapter(System.IO.Stream inputStream)
+    private FileAdapter()
     {
-        _readOnly = true;
-        try
-        {
-            _inputStream = inputStream;
-        }
-        catch (IOException e)
-        {
-            throw new IOException("File adapter init error", e);
-        }
+    }
+
+    public FileAdapter(string filePath)
+    {
+        SetLoadFromPath(filePath);
+    }
+
+    public FileAdapter(System.IO.Stream originalStream)
+    {
+        SetLoadFromStream(originalStream);
+    }
+
+    private void SetLoadFromPath(string path)
+    {
+        ReadSource = ReadSource.File;
+        OriginalPath = path;
+        CanWrite = true;
+    }
+
+    private void SetLoadFromText(string text)
+    {
+        ReadSource = ReadSource.Text;
+        OriginalText = text;
+        CanWrite = false;
+    }
+
+    private void SetLoadFromStream(System.IO.Stream stream)
+    {
+        ReadSource = ReadSource.Stream;
+        OriginalStream = stream;
+        CanWrite = false;
+    }
+
+    public static FileAdapter CreateFromFile(string filePath)
+    {
+        var adapter = new FileAdapter();
+        adapter.SetLoadFromPath(filePath);
+        return adapter;
+    }
+
+    public static FileAdapter CreateFromText(string text)
+    {
+        var adapter = new FileAdapter();
+        adapter.SetLoadFromText(text);
+        return adapter;
     }
 
     public void LoadPolicy(IPolicyStore store)
     {
-        if (string.IsNullOrWhiteSpace(OriginalPath) is false)
+        foreach (IPersistPolicy policy in ReadPersistPolicy())
         {
-            IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(OriginalPath);
-            foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
-        }
-
-        if (_inputStream is not null)
-        {
-            IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(_inputStream);
-            foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
     }
 
 #if !NET452
     public async Task LoadPolicyAsync(IPolicyStore store)
     {
-        if (string.IsNullOrWhiteSpace(OriginalPath) is false)
+        await foreach (IPersistPolicy policy in ReadPersistPolicyAsync())
         {
-            IAsyncEnumerable<IPersistPolicy> policies = ReadPersistPolicyAsync(OriginalPath);
-            await foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
-        }
-
-        if (_inputStream is not null)
-        {
-            IAsyncEnumerable<IPersistPolicy> policies = ReadPersistPolicyAsync(_inputStream);
-            await foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
     }
 #else
     public async Task LoadPolicyAsync(IPolicyStore store)
     {
-        if (string.IsNullOrWhiteSpace(OriginalPath) is false)
+        foreach (IPersistPolicy policy in await ReadPersistPolicyAsync())
         {
-            var policies = await ReadPersistPolicyAsync(OriginalPath);
-            foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
-        }
-
-        if (_inputStream is not null)
-        {
-            var policies = await ReadPersistPolicyAsync(_inputStream);
-            foreach (IPersistPolicy policy in policies)
-            {
-                int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-                IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-                store.AddPolicy(policy.Section, policy.Type, values);
-            }
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
     }
 #endif
 
     public void SavePolicy(IPolicyStore store)
     {
-        if (_inputStream is not null && _readOnly)
+        if (CanWrite is false)
         {
             throw new InvalidOperationException("Store file can not write, because use inputStream is readOnly");
         }
@@ -122,12 +121,12 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
         }
 
         IEnumerable<string> policy = ConvertToPolicyStrings(store);
-        SavePolicyFile(string.Join("\n", policy));
+        SavePolicyFile(string.Join(Environment.NewLine, policy));
     }
 
     public Task SavePolicyAsync(IPolicyStore store)
     {
-        if (_inputStream is not null && _readOnly)
+        if (CanWrite is false)
         {
             throw new InvalidOperationException("Store file can not write, because use inputStream is readOnly");
         }
@@ -143,14 +142,13 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
 
     private static IEnumerable<string> GetModelPolicy(IReadOnlyPolicyStore store, string section)
     {
-        List<string> policy = new List<string>();
+        List<string> policy = new();
         foreach (KeyValuePair<string, IEnumerable<IPolicyValues>> kv in store.GetPolicyAllType(section))
         {
             string key = kv.Key;
             IEnumerable<IPolicyValues> value = kv.Value;
             policy.AddRange(value.Select(p => $"{key}, {p.ToText()}"));
         }
-
         return policy;
     }
 
@@ -161,12 +159,10 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
         {
             policy.AddRange(GetModelPolicy(store, PermConstants.Section.PolicySection));
         }
-
         if (store.ContainsNodes(PermConstants.Section.RoleSection))
         {
             policy.AddRange(GetModelPolicy(store, PermConstants.Section.RoleSection));
         }
-
         return policy;
     }
 
@@ -201,28 +197,25 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
             return;
         }
 
-        if (string.IsNullOrWhiteSpace(OriginalPath))
+        IEnumerable<IPersistPolicy> policies = ReadPersistPolicy();
+        policies = filter.Apply(policies.AsQueryable());
+        foreach (IPersistPolicy policy in policies)
         {
-            throw new InvalidOperationException("invalid file path, file path cannot be empty");
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
         }
-
-        LoadFilteredPolicyFile(store, filter);
+        IsFiltered = true;
     }
 
     public Task LoadFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter)
     {
-        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
-        if (filter is null)
-        {
-            return LoadPolicyAsync(store);
-        }
-
-        if (string.IsNullOrWhiteSpace(OriginalPath))
-        {
-            throw new InvalidOperationException("invalid file path, file path cannot be empty");
-        }
-
-        return LoadFilteredPolicyFileAsync(store, filter);
+        LoadFilteredPolicy(store, filter);
+#if !NET452
+        return Task.CompletedTask;
+#else
+        return Task.FromResult(true);
+#endif
     }
 
     public void LoadFilteredPolicy(IPolicyStore store, Filter filter)
@@ -233,27 +226,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
 
     public Task LoadFilteredPolicyAsync(IPolicyStore store, Filter filter)
     {
-        IPolicyFilter policyFilter = filter;
-        return LoadFilteredPolicyAsync(store, policyFilter);
-    }
-
-    private void LoadFilteredPolicyFile(IPolicyStore store, IPolicyFilter filter)
-    {
-        IEnumerable<IPersistPolicy> policies = ReadPersistPolicy(OriginalPath);
-        policies = filter.Apply(policies.AsQueryable());
-        foreach (IPersistPolicy policy in policies)
-        {
-            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
-            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
-            store.AddPolicy(policy.Section, policy.Type, values);
-        }
-
-        IsFiltered = true;
-    }
-
-    private Task LoadFilteredPolicyFileAsync(IPolicyStore store, IPolicyFilter filter)
-    {
-        LoadFilteredPolicyFile(store, filter);
+        LoadFilteredPolicy(store, filter);
 #if !NET452
         return Task.CompletedTask;
 #else
@@ -261,36 +234,25 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
 #endif
     }
 
-    private static IEnumerable<IPersistPolicy> ReadPersistPolicy(string filePath)
+
+    private IEnumerable<IPersistPolicy> ReadPersistPolicy()
     {
-        using FileStream stream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        using StreamReader reader = new(stream);
-        CsvParser parser = new(reader,
-            new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                AllowComments = true,
-                HasHeaderRecord = false,
-                TrimOptions = TrimOptions.Trim,
-                IgnoreBlankLines = true,
-                BadDataFound = null,
-                WhiteSpaceChars = new[] { ' ', '\t' }
-            });
-
-        while (parser.Read())
+        switch (ReadSource)
         {
-            string[] tokens = parser.Record;
-            if (tokens is null || tokens.Length is 0)
-            {
-                continue;
-            }
-
-            string type = tokens[0];
-            IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
-            yield return PersistPolicy.Create<PersistPolicy>(type, values);
+            case ReadSource.File:
+                FileStream fileStream = new(OriginalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return ReadPersistPolicyStream(fileStream);
+            case ReadSource.Text:
+                MemoryStream memoryStream = new(Encoding.UTF8.GetBytes(OriginalText));
+                return ReadPersistPolicyStream(memoryStream);
+            case ReadSource.Stream:
+                return ReadPersistPolicyStream(OriginalStream);
+            default:
+                throw new InvalidOperationException("Invalid read source");
         }
     }
 
-    private static IEnumerable<IPersistPolicy> ReadPersistPolicy(System.IO.Stream stream)
+    private static IEnumerable<IPersistPolicy> ReadPersistPolicyStream(System.IO.Stream stream)
     {
         using StreamReader reader = new(stream);
         CsvParser parser = new(reader,
@@ -319,74 +281,43 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
     }
 
 #if !NET452
-    private static async IAsyncEnumerable<IPersistPolicy> ReadPersistPolicyAsync(string filePath)
+    private IAsyncEnumerable<IPersistPolicy> ReadPersistPolicyAsync()
     {
-#if NET6_0_OR_GREATER
-        await using FileStream stream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-#else
-        using FileStream stream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-#endif
-
-        using StreamReader reader = new(stream);
-        CsvParser parser = new(reader,
-            new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                AllowComments = true,
-                HasHeaderRecord = false,
-                TrimOptions = TrimOptions.Trim,
-                IgnoreBlankLines = true,
-                BadDataFound = null,
-                WhiteSpaceChars = new[] { ' ', '\t' }
-            });
-
-        while (await parser.ReadAsync())
+        switch (ReadSource)
         {
-            string[] tokens = parser.Record;
-            if (tokens is null || tokens.Length is 0)
-            {
-                continue;
-            }
-
-            string type = tokens[0];
-            IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
-            yield return PersistPolicy.Create<PersistPolicy>(type, values);
+            case ReadSource.File:
+                FileStream fileStream = new(OriginalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return ReadPersistPolicyStreamAsync(fileStream);
+            case ReadSource.Text:
+                MemoryStream memoryStream = new(Encoding.UTF8.GetBytes(OriginalText));
+                return ReadPersistPolicyStreamAsync(memoryStream);
+            case ReadSource.Stream:
+                return ReadPersistPolicyStreamAsync(OriginalStream);
+            default:
+                throw new InvalidOperationException("Invalid read source");
         }
     }
 #else
-        private static async Task<IEnumerable<IPersistPolicy>> ReadPersistPolicyAsync(string filePath)
+    private Task<IEnumerable<IPersistPolicy>> ReadPersistPolicyAsync()
     {
-        using FileStream stream = new(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-        using StreamReader reader = new(stream);
-        CsvParser parser = new(reader,
-            new CsvConfiguration(CultureInfo.InvariantCulture)
-            {
-                AllowComments = true,
-                HasHeaderRecord = false,
-                TrimOptions = TrimOptions.Trim,
-                IgnoreBlankLines = true,
-                BadDataFound = null,
-                WhiteSpaceChars = new []{' ', '\t'}
-            });
-        var list = new List<PersistPolicy>();
-        while (await parser.ReadAsync())
+        switch (ReadSource)
         {
-            string[] tokens = parser.Record;
-            if (tokens is null || tokens.Length is 0)
-            {
-                continue;
-            }
-
-            string type = tokens[0];
-            IPolicyValues values = Policy.ValuesFrom(tokens.Skip(1));
-            var policy = PersistPolicy.Create<PersistPolicy>(type, values);
-            list.Add(policy);
+            case ReadSource.File:
+                FileStream fileStream = new(OriginalPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                return ReadPersistPolicyStreamAsync(fileStream);
+            case ReadSource.Text:
+                MemoryStream memoryStream = new(Encoding.UTF8.GetBytes(OriginalText));
+                return ReadPersistPolicyStreamAsync(memoryStream);
+            case ReadSource.Stream:
+                return ReadPersistPolicyStreamAsync(OriginalStream);
+            default:
+                throw new InvalidOperationException("Invalid read source");
         }
-        return list;
     }
 #endif
 
 #if !NET452
-    private static async IAsyncEnumerable<IPersistPolicy> ReadPersistPolicyAsync(System.IO.Stream stream)
+    private static async IAsyncEnumerable<IPersistPolicy> ReadPersistPolicyStreamAsync(System.IO.Stream stream)
     {
         using StreamReader reader = new(stream);
         CsvParser parser = new(reader,
@@ -414,7 +345,7 @@ public class FileAdapter : IEpochAdapter, IFilteredAdapter
         }
     }
 #else
-    private static async Task<IEnumerable<IPersistPolicy>> ReadPersistPolicyAsync(System.IO.Stream stream)
+    private static async Task<IEnumerable<IPersistPolicy>> ReadPersistPolicyStreamAsync(System.IO.Stream stream)
     {
         using StreamReader reader = new(stream);
         CsvParser parser = new(reader,
