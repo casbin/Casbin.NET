@@ -6,7 +6,7 @@ public class FileFilteredAdapter : FileAdapter
     {
     }
 
-    public FileFilteredAdapter(System.IO.Stream inputStream) : base(inputStream)
+    public FileFilteredAdapter(System.IO.Stream originalStream) : base(originalStream)
     {
     }
 }
