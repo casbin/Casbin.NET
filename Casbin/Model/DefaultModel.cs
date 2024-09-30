@@ -156,5 +156,12 @@ namespace Casbin.Model
             ExpressionHandler.SetFunction(type, BuiltInFunctions.GenerateGFunction(
                 assertion.RoleManager, GFunctionCachePool.GetCache(type)));
         }
+
+        public bool Validate()
+        {
+            // 1. check assertion is valid
+            // 2. compile expression
+            return false;
+        }
     }
 }
