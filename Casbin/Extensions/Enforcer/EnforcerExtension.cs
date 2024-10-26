@@ -94,6 +94,18 @@ namespace Casbin
             return enforcer;
         }
 
+        /// <summary>
+        /// EnableAcceptJsonRequest controls whether to accept json as a request parameter
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="acceptJsonRequest"></param>
+        /// <returns></returns>
+        public static IEnforcer EnableAcceptJsonRequest(this IEnforcer enforcer, bool acceptJsonRequest)
+        {
+            enforcer.AcceptJsonRequest = acceptJsonRequest;
+            return enforcer;
+        }
+
         #endregion
 
         #region Set extensions
