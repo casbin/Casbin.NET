@@ -11,6 +11,8 @@ public class EnforcerOptions
     public bool AutoCleanEnforceCache { get; set; } = true;
     public bool AutoLoadPolicy { get; set; } = true;
     public IPolicyFilter AutoLoadPolicyFilter { get; set; } = null;
+
+    public bool AcceptJsonRequest { get; set; } = false;
 }
 
 

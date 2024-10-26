@@ -36,6 +36,7 @@ namespace Casbin
             AutoNotifyWatcher = options.AutoNotifyWatcher;
             AutoBuildRoleLinks = options.AutoBuildRoleLinks;
             AutoCleanEnforceCache = options.AutoCleanEnforceCache;
+            AcceptJsonRequest = options.AcceptJsonRequest;
 
             this.SetModel(model);
             if (adapter is not null)
@@ -65,6 +66,7 @@ namespace Casbin
         public bool AutoBuildRoleLinks { get; set; }
         public bool AutoNotifyWatcher { get; set; }
         public bool AutoCleanEnforceCache { get; set; }
+        public bool AcceptJsonRequest { get; set; }
 
         #endregion
 
