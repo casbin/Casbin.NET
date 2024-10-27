@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Casbin.Model;
@@ -700,28 +701,6 @@ public class EnforcerTest
         await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
     }
 
-    [Fact]
-    public void TestInitEmptyByInputStream()
-    {
-        Enforcer e = new();
-
-        IModel m = DefaultModel.Create();
-        m.AddDef("r", "r", "sub, obj, act");
-        m.AddDef("p", "p", "sub, obj, act");
-        m.AddDef("e", "e", "some(where (p.eft == allow))");
-        m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
-
-        using (FileStream fs = new("Examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
-                   FileShare.ReadWrite))
-        {
-            FileAdapter a = new(fs);
-            e.SetModel(m);
-            e.SetAdapter(a);
-            e.LoadPolicy();
-
-            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-        }
-    }
 
     [Fact]
     public async Task TestInitEmptyByInputStreamAsync()
