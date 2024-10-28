@@ -107,12 +107,12 @@ public class WatcherMessageTest
 
         enforcer.SetWatcher(sampleWatcher);
 
-        enforcer.AddPolicies(new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } });
+        enforcer.AddPolicies(new[] { ["data2_admin", "data2", "read"], new[] { "frank", "book4", "read" } });
         Assert.True(sampleWatcher.WatcherMessage is null);
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "cindy", "book5", "write" }, new[] { "frank", "book4", "read" }
+            ["cindy", "book5", "write"], new[] { "frank", "book4", "read" }
         };
         enforcer.AddPolicies(rules);
         MessageEquals(sampleWatcher.WatcherMessage,
@@ -131,12 +131,12 @@ public class WatcherMessageTest
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "data200_admin", "data2", "read" }, new[] { "alice", "book3", "read" }
+            ["data200_admin", "data2", "read"], new[] { "alice", "book3", "read" }
         };
         enforcer.RemovePolicies(rules);
         Assert.True(sampleWatcher.WatcherMessage is null);
 
-        rules = new[] { new[] { "data2_admin", "data2", "read" }, new[] { "alice", "book3", "read" } };
+        rules = new[] { ["data2_admin", "data2", "read"], new[] { "alice", "book3", "read" } };
         enforcer.RemovePolicies(rules);
         MessageEquals(sampleWatcher.WatcherMessage,
             PolicyChangedMessage.CreateRemovePolicies("p", "p", Policy.ValuesListFrom(rules)));
@@ -152,17 +152,17 @@ public class WatcherMessageTest
 
         enforcer.SetWatcher(sampleWatcher);
 
-        enforcer.UpdatePolicies(new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } },
-            new[] { new[] { "data3_admin", "data200", "read" }, new[] { "frank", "book6", "read" } });
+        enforcer.UpdatePolicies(new[] { ["data2_admin", "data2", "read"], new[] { "frank", "book4", "read" } },
+            new[] { ["data3_admin", "data200", "read"], new[] { "frank", "book6", "read" } });
         Assert.True(sampleWatcher.WatcherMessage is null);
 
         IEnumerable<IEnumerable<string>> oldRules = new[]
         {
-            new[] { "data2_admin", "data2", "read" }, new[] { "alice", "data1", "read" }
+            ["data2_admin", "data2", "read"], new[] { "alice", "data1", "read" }
         };
         IEnumerable<IEnumerable<string>> newRules = new[]
         {
-            new[] { "data4_admin", "data2", "read" }, new[] { "alice", "data3", "read" }
+            ["data4_admin", "data2", "read"], new[] { "alice", "data3", "read" }
         };
         enforcer.UpdatePolicies(oldRules, newRules);
         MessageEquals(sampleWatcher.WatcherMessage,
@@ -185,7 +185,7 @@ public class WatcherMessageTest
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "data2_admin", "data2", "read" }, new[] { "data2_admin", "data2", "write" }
+            ["data2_admin", "data2", "read"], new[] { "data2_admin", "data2", "write" }
         };
         enforcer.RemoveFilteredPolicy(0, "data2_admin");
         MessageEquals(sampleWatcher.WatcherMessage,
@@ -274,13 +274,13 @@ public class WatcherMessageTest
 
         await enforcer.AddPoliciesAsync(new[]
         {
-            new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" }
+            ["data2_admin", "data2", "read"], new[] { "frank", "book4", "read" }
         });
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "cindy", "book5", "write" }, new[] { "frank", "book4", "read" }
+            ["cindy", "book5", "write"], new[] { "frank", "book4", "read" }
         };
         await enforcer.AddPoliciesAsync(rules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
@@ -299,12 +299,12 @@ public class WatcherMessageTest
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "data200_admin", "data2", "read" }, new[] { "alice", "book3", "read" }
+            ["data200_admin", "data2", "read"], new[] { "alice", "book3", "read" }
         };
         await enforcer.RemovePoliciesAsync(rules);
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
-        rules = new[] { new[] { "data2_admin", "data2", "read" }, new[] { "alice", "book3", "read" } };
+        rules = new[] { ["data2_admin", "data2", "read"], new[] { "alice", "book3", "read" } };
         await enforcer.RemovePoliciesAsync(rules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
             PolicyChangedMessage.CreateRemovePolicies("p", "p", Policy.ValuesListFrom(rules)));
@@ -321,17 +321,17 @@ public class WatcherMessageTest
         enforcer.SetWatcher(sampleWatcher);
 
         await enforcer.UpdatePoliciesAsync(
-            new[] { new[] { "data2_admin", "data2", "read" }, new[] { "frank", "book4", "read" } },
-            new[] { new[] { "data3_admin", "data200", "read" }, new[] { "frank", "book6", "read" } });
+            new[] { ["data2_admin", "data2", "read"], new[] { "frank", "book4", "read" } },
+            new[] { ["data3_admin", "data200", "read"], new[] { "frank", "book6", "read" } });
         Assert.True(sampleWatcher.AsyncWatcherMessage is null);
 
         IEnumerable<IEnumerable<string>> oldRules = new[]
         {
-            new[] { "data2_admin", "data2", "read" }, new[] { "alice", "data1", "read" }
+            ["data2_admin", "data2", "read"], new[] { "alice", "data1", "read" }
         };
         IEnumerable<IEnumerable<string>> newRules = new[]
         {
-            new[] { "data4_admin", "data2", "read" }, new[] { "alice", "data3", "read" }
+            ["data4_admin", "data2", "read"], new[] { "alice", "data3", "read" }
         };
         await enforcer.UpdatePoliciesAsync(oldRules, newRules);
         MessageEquals(sampleWatcher.AsyncWatcherMessage,
@@ -354,7 +354,7 @@ public class WatcherMessageTest
 
         IEnumerable<IEnumerable<string>> rules = new[]
         {
-            new[] { "data2_admin", "data2", "read" }, new[] { "data2_admin", "data2", "write" }
+            ["data2_admin", "data2", "read"], new[] { "data2_admin", "data2", "write" }
         };
         await enforcer.RemoveFilteredPolicyAsync(0, "data2_admin");
         MessageEquals(sampleWatcher.AsyncWatcherMessage,

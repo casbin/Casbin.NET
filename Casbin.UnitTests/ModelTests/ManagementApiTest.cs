@@ -17,10 +17,11 @@ public class ManagementApiTest
     {
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
-        TestStringList(e.GetAllSubjects, AsList("alice", "bob", "data2_admin"));
-        TestStringList(e.GetAllObjects, AsList("data1", "data2"));
-        TestStringList(e.GetAllActions, AsList("read", "write"));
-        TestStringList(e.GetAllRoles, AsList("data2_admin"));
+
+        Assert.True(e.GetAllSubjects().DeepEquals(new[] { "alice", "bob", "data2_admin" }));
+        Assert.True(e.GetAllObjects().DeepEquals(new[]  { "data1", "data2" }));
+        Assert.True(e.GetAllActions().DeepEquals(new[]  { "read", "write" }));
+        Assert.True(e.GetAllRoles().DeepEquals(new[]  { "data2_admin" }));
     }
 
     [Fact]
@@ -56,22 +57,22 @@ public class ManagementApiTest
         TestGetFilteredPolicy(e, 1,
             AsList(AsList("bob", "data2", "write"), AsList("data2_admin", "data2", "write")), "data2", "write");
 
-        TestHasPolicy(e, AsList("alice", "data1", "read"), true);
-        TestHasPolicy(e, AsList("bob", "data2", "write"), true);
-        TestHasPolicy(e, AsList("alice", "data2", "read"), false);
-        TestHasPolicy(e, AsList("bob", "data3", "write"), false);
+        Assert.True(e.HasPolicy(AsList("alice", "data1", "read")));
+        Assert.True(e.HasPolicy(AsList("bob", "data2", "write")));
+        Assert.False(e.HasPolicy(AsList("alice", "data2", "read")));
+        Assert.False(e.HasPolicy(AsList("bob", "data3", "write")));
 
-        TestGetGroupingPolicy(e, AsList(AsList("alice", "data2_admin")));
+        Assert.True(e.GetGroupingPolicy().DeepEquals(AsList(AsList("alice", "data2_admin"))));
 
         TestGetFilteredGroupingPolicy(e, 0, AsList(AsList("alice", "data2_admin")), "alice");
-        TestGetFilteredGroupingPolicy(e, 0, new List<List<string>>(), "bob");
-        TestGetFilteredGroupingPolicy(e, 1, new List<List<string>>(), "data1_admin");
+        TestGetFilteredGroupingPolicy(e, 0, [], "bob");
+        TestGetFilteredGroupingPolicy(e, 1, [], "data1_admin");
         TestGetFilteredGroupingPolicy(e, 1, AsList(AsList("alice", "data2_admin")), "data2_admin");
         // Note: "" (empty string) in fieldValues means matching all values.
         TestGetFilteredGroupingPolicy(e, 0, AsList(AsList("alice", "data2_admin")), "", "data2_admin");
 
-        TestHasGroupingPolicy(e, AsList("alice", "data2_admin"), true);
-        TestHasGroupingPolicy(e, AsList("bob", "data2_admin"), false);
+        Assert.True(e.HasGroupingPolicy(AsList("alice", "data2_admin")));
+        Assert.False(e.HasGroupingPolicy(AsList("bob", "data2_admin")));
     }
 
     [Fact]
@@ -332,7 +333,7 @@ public class ManagementApiTest
         {
             string parent = $"Parent{i}";
             string child = $"Child{i}";
-            groupingRules.Add(new List<string> { parent, child });
+            groupingRules.Add([parent, child]);
         }
 
         return groupingRules;

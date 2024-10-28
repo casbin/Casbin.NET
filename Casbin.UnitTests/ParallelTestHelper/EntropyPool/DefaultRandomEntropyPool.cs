@@ -40,7 +40,7 @@ namespace Casbin.UnitTests.ParallelTest
             _elementPools = new Dictionary<string, List<string>>();
             for (int i = 0; i < categoryAndCount.Length; i++)
             {
-                List<string> values = new List<string>();
+                List<string> values = [];
                 for (int j = 0; j < categoryAndCount[i].Value; j++)
                 {
                     values.Add(GetRandomString(_defaultRandomStringLength));
@@ -52,7 +52,7 @@ namespace Casbin.UnitTests.ParallelTest
 
         public TRequest Get()
         {
-            List<string> res = new List<string>();
+            List<string> res = [];
             foreach (var keyValue in _elementPools)
             {
                 Random rd = new Random();
@@ -74,7 +74,7 @@ namespace Casbin.UnitTests.ParallelTest
 
         public DefaultRandomEntropyPool<TRequest> Add(string key, int count)
         {
-            List<string> values = new List<string>();
+            List<string> values = [];
             while (count-- > 0)
             {
                 values.Add(GetRandomString(_defaultRandomStringLength));
@@ -92,7 +92,7 @@ namespace Casbin.UnitTests.ParallelTest
             }
             else
             {
-                _elementPools.Add(key, new List<string>() { value });
+                _elementPools.Add(key, [value]);
             }
 
             return this;

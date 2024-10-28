@@ -6,7 +6,7 @@ namespace Casbin.UnitTests.ParallelTest
 {
     public class DefaultExistedEntropyPool<TRequest> : IEntropyPool<TRequest> where TRequest : IRequestValues
     {
-        private readonly List<TRequest> _cachedRequests = new();
+        private readonly List<TRequest> _cachedRequests = [];
         private Func<IPolicyValues, TRequest> _convertFunc;
 
         /// <summary>
