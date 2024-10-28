@@ -15,8 +15,11 @@ namespace Casbin.Config
     {
         private static readonly string _defaultSection = "default";
         private static readonly string _defaultComment = "#";
-        private static readonly string _defaultCommentSem = ";";
         private static readonly string _defaultFeed = "\\";
+
+#if NET452
+        private static readonly string _defaultCommentSem = ";";
+#endif
 
         // Section:key=value
         private readonly IDictionary<string, IDictionary<string, string>> _data;

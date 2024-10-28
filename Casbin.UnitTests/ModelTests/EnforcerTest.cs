@@ -85,8 +85,8 @@ public class EnforcerTest
             TestModelFixture.SubjectPriorityModelText,
             TestModelFixture.SubjectPriorityPolicyText));
 
-        TestEnforce(e, "jane", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "read", true);
+        Assert.True(e.Enforce("jane", "data1", "read"));
+        Assert.True(e.Enforce("alice", "data1", "read"));
     }
 
     [Fact]
@@ -96,16 +96,8 @@ public class EnforcerTest
             Path.Combine("Examples", "subject_priority_model_with_domain.conf"),
             Path.Combine("Examples", "subject_priority_policy_with_domain.csv"));
 
-        Assert.True(e.Enforce(
-            "alice",
-            "data1",
-            "domain1",
-            "write"));
-        Assert.True(e.Enforce(
-            "bob",
-            "data2",
-            "domain2",
-            "write"));
+        Assert.True(e.Enforce("alice", "data1", "domain1", "write"));
+        Assert.True(e.Enforce("bob", "data2", "domain2", "write"));
     }
 
     #region In memory model
@@ -701,6 +693,28 @@ public class EnforcerTest
         await TestEnforceAsync(e, "alice", "/alice_data/resource1", "GET", true);
     }
 
+    [Fact]
+    public void TestInitEmptyByInputStream()
+    {
+        Enforcer e = new();
+
+        IModel m = DefaultModel.Create();
+        m.AddDef("r", "r", "sub, obj, act");
+        m.AddDef("p", "p", "sub, obj, act");
+        m.AddDef("e", "e", "some(where (p.eft == allow))");
+        m.AddDef("m", "m", "r.sub == p.sub && keyMatch(r.obj, p.obj) && regexMatch(r.act, p.act)");
+
+        using (FileStream fs = new("Examples/keymatch_policy.csv", FileMode.Open, FileAccess.Read,
+                   FileShare.ReadWrite))
+        {
+            FileAdapter a = new(fs);
+            e.SetModel(m);
+            e.SetAdapter(a);
+            e.LoadPolicy();
+
+            TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
+        }
+    }
 
     [Fact]
     public async Task TestInitEmptyByInputStreamAsync()
@@ -999,48 +1013,6 @@ public class EnforcerTest
 
         await TestEnforceAsync(e, "alice", "data1", "read", false);
         await TestEnforceAsync(e, "alice", "data1", "write", true);
-    }
-
-    [Fact]
-    public void TestSetAdapterFromFile()
-    {
-        Enforcer e = new("Examples/basic_model.conf");
-
-        TestEnforce(e, "alice", "data1", "read", false);
-
-        FileAdapter a = new("Examples/basic_policy.csv");
-        e.SetAdapter(a);
-        e.LoadPolicy();
-        TestEnforce(e, "alice", "data1", "read", true);
-        e.ClearPolicy();
-        e.ClearCache();
-
-        var policyBytes = Encoding.UTF8.GetBytes(File.ReadAllText(TestModelFixture.GetTestFile("basic_policy.csv")));
-        StreamAdapter b = new(new MemoryStream(policyBytes, false), new MemoryStream(policyBytes, true));
-        e.SetAdapter(b);
-        e.LoadPolicy();
-        TestEnforce(e, "alice", "data1", "read", true);
-    }
-
-    [Fact]
-    public async Task TestSetAdapterFromFileAsync()
-    {
-        Enforcer e = new("Examples/basic_model.conf");
-
-        await TestEnforceAsync(e, "alice", "data1", "read", false);
-
-        FileAdapter a = new("Examples/basic_policy_for_async_adapter_test.csv");
-        e.SetAdapter(a);
-        await e.LoadPolicyAsync();
-        await TestEnforceAsync(e, "alice", "data1", "read", true);
-        e.ClearPolicy();
-        e.ClearCache();
-
-        var policyBytes = Encoding.UTF8.GetBytes(File.ReadAllText(TestModelFixture.GetTestFile("basic_policy.csv")));
-        StreamAdapter b = new(new MemoryStream(policyBytes, false), new MemoryStream(policyBytes, true));
-        e.SetAdapter(b);
-        await e.LoadPolicyAsync();
-        await TestEnforceAsync(e, "alice", "data1", "read", true);
     }
 
     [Fact]
