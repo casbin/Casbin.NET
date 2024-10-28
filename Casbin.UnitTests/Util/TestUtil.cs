@@ -136,14 +136,14 @@ internal static class TestUtil
     internal static void TestGetPermissions(IEnforcer e, string name, List<List<string>> except, string domain = null)
     {
         IEnumerable<IEnumerable<string>> actual = e.GetPermissionsForUser(name, domain);
-        Assert.True(except.DeepEquals(actual));
+        Assert.True(except.DeepEquals(actual)); // TODO: why use SetEquals will be failed?
     }
 
     internal static void TestGetImplicitPermissions(IEnforcer e, string name, List<List<string>> except,
         string domain = null)
     {
         IEnumerable<IEnumerable<string>> actual = e.GetImplicitPermissionsForUser(name, domain);
-        Assert.True(except.DeepEquals(actual));
+        Assert.True(except.DeepEquals(actual)); // TODO: why use SetEquals will be failed?
     }
 
     internal static void TestGetRolesInDomain(IEnforcer e, string name, string domain, List<string> except)
