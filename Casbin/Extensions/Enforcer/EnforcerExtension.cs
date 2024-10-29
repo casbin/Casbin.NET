@@ -417,7 +417,6 @@ namespace Casbin
                 enforcer.Logger?.LogEnforceResult(requestValues, finalResult, context.Explanations);
                 return;
             }
-
             enforcer.Logger?.LogEnforceResult(requestValues, finalResult);
         }
 #endif

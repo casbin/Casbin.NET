@@ -731,22 +731,30 @@ public class EnforcerTest
     public void TestReloadPolicy()
     {
         Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
-
         e.LoadPolicy();
-        TestGetPolicy(e,
-            AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"),
-                AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
+        e.TestGetPolicy(
+            [
+                ["alice", "data1", "read"],
+                ["bob", "data2", "write"],
+                ["data2_admin", "data2", "read"],
+                ["data2_admin", "data2", "write"]
+            ]
+        );
     }
 
     [Fact]
     public async Task TestReloadPolicyAsync()
     {
         Enforcer e = new("Examples/rbac_model.conf", "Examples/rbac_policy.csv");
-
         await e.LoadPolicyAsync();
-        TestGetPolicy(e,
-            AsList(AsList("alice", "data1", "read"), AsList("bob", "data2", "write"),
-                AsList("data2_admin", "data2", "read"), AsList("data2_admin", "data2", "write")));
+        e.TestGetPolicy(
+            [
+                ["alice", "data1", "read"],
+                ["bob", "data2", "write"],
+                ["data2_admin", "data2", "read"],
+                ["data2_admin", "data2", "write"]
+            ]
+        );
     }
 
     [Fact]
@@ -880,7 +888,7 @@ public class EnforcerTest
         // Reload the policy from the storage to see the effect.
         e.LoadPolicy();
 
-        Assert.True(e.Enforce("alice", "data1", "read"));  // Will not be false here.
+        Assert.True(e.Enforce("alice", "data1", "read")); // Will not be false here.
         Assert.False(e.Enforce("alice", "data1", "write"));
         Assert.False(e.Enforce("alice", "data2", "read"));
         Assert.False(e.Enforce("alice", "data2", "write"));
@@ -1068,11 +1076,13 @@ public class EnforcerTest
         e.BuildRoleLinks();
 
         await e.TestEnforceExAsync("alice", "data1", "read", new List<string> { "alice", "data1", "read", "allow" });
-        await e.TestEnforceExAsync("alice", "data1", "write", new List<string> { "data1_deny_group", "data1", "write", "deny" });
+        await e.TestEnforceExAsync("alice", "data1", "write",
+            new List<string> { "data1_deny_group", "data1", "write", "deny" });
         await e.TestEnforceExAsync("alice", "data2", "read", new List<string>());
         await e.TestEnforceExAsync("alice", "data2", "write", new List<string>());
         await e.TestEnforceExAsync("bob", "data1", "write", new List<string>());
-        await e.TestEnforceExAsync("bob", "data2", "read", new List<string> { "data2_allow_group", "data2", "read", "allow" });
+        await e.TestEnforceExAsync("bob", "data2", "read",
+            new List<string> { "data2_allow_group", "data2", "read", "allow" });
         await e.TestEnforceExAsync("bob", "data2", "write", new List<string> { "bob", "data2", "write", "deny" });
     }
 
@@ -1080,10 +1090,7 @@ public class EnforcerTest
     [Fact]
     public void TestEnforceExApiLog()
     {
-        Enforcer e = new(TestModelFixture.GetBasicTestModel())
-        {
-            Logger = new MockLogger<Enforcer>(_testOutputHelper)
-        };
+        Enforcer e = new(TestModelFixture.GetBasicTestModel()) { Logger = new MockLogger<Enforcer>(_testOutputHelper) };
 
         e.TestEnforceEx("alice", "data1", "read", new List<string> { "alice", "data1", "read" });
         e.TestEnforceEx("alice", "data1", "write", new List<string>());

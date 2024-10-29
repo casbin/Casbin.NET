@@ -80,7 +80,7 @@ public partial class Enforcer
         session.HasNextPolicy = scanner.HasNext();
         HandleInitialRequest(in context, ref session, in requestValues);
 
-        if (context.View.HasPolicyParameter && session.HasNextPolicy)
+        if (session.HasNextPolicy && context.View.HasPolicyParameter)
         {
             try
             {
@@ -281,7 +281,9 @@ public partial class Enforcer
 
         nowEffect = GetEffect(session.ExpressionResult);
 
-        if (nowEffect is not PolicyEffect.Indeterminate && context.View.HasEffect)
+        if (nowEffect is not PolicyEffect.Indeterminate
+            && context.View.HasEffect
+            && context.View.HasPolicyParameter)
         {
             string policyEffect = policy[context.View.EffectIndex];
             nowEffect = policyEffect switch
