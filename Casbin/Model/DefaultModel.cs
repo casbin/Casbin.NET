@@ -156,5 +156,18 @@ namespace Casbin.Model
             ExpressionHandler.SetFunction(type, BuiltInFunctions.GenerateGFunction(
                 assertion.RoleManager, GFunctionCachePool.GetCache(type)));
         }
+
+        public bool Validate()
+        {
+            // Required sections check.
+            if (Sections.ContainsSection(PermConstants.Section.RequestSection) is false ||
+                Sections.ContainsSection(PermConstants.Section.PolicySection) is false ||
+                Sections.ContainsSection(PermConstants.Section.PolicyEffectSection) is false ||
+                Sections.ContainsSection(PermConstants.Section.MatcherSection) is false)
+            {
+                return false;
+            }
+            return true;
+        }
     }
 }
