@@ -35,10 +35,10 @@ public class RbacApiWithDomainsTest
         e.BuildRoleLinks();
 
         // This is only able to retrieve the first level of roles.
-        TestGetRolesInDomain(e, "alice", "domain1", AsList("role:global_admin"));
+        TestGetRolesInDomain(e, "alice", "domain1", ["role:global_admin"]);
 
         // Retrieve all inherit roles. It supports domains as well.
-        TestGetImplicitRolesInDomain(e, "alice", "domain1", AsList("role:global_admin", "role:reader", "role:writer"));
+        TestGetImplicitRolesInDomain(e, "alice", "domain1", ["role:global_admin", "role:reader", "role:writer"]);
     }
 
     [Fact]
@@ -47,28 +47,28 @@ public class RbacApiWithDomainsTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
-        TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
-        TestGetRolesInDomain(e, "bob", "domain1", AsList());
-        TestGetRolesInDomain(e, "admin", "domain1", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain1", AsList());
+        TestGetRolesInDomain(e, "alice", "domain1", ["admin"]);
+        TestGetRolesInDomain(e, "bob", "domain1", []);
+        TestGetRolesInDomain(e, "admin", "domain1", []);
+        TestGetRolesInDomain(e, "non_exist", "domain1", []);
 
-        TestGetRolesInDomain(e, "alice", "domain2", AsList());
-        TestGetRolesInDomain(e, "bob", "domain2", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain2", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain2", AsList());
+        TestGetRolesInDomain(e, "alice", "domain2", []);
+        TestGetRolesInDomain(e, "bob", "domain2", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain2", []);
+        TestGetRolesInDomain(e, "non_exist", "domain2", []);
 
         e.DeleteRoleForUserInDomain("alice", "admin", "domain1");
         e.AddRoleForUserInDomain("bob", "admin", "domain1");
 
-        TestGetRolesInDomain(e, "alice", "domain1", AsList());
-        TestGetRolesInDomain(e, "bob", "domain1", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain1", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain1", AsList());
+        TestGetRolesInDomain(e, "alice", "domain1", []);
+        TestGetRolesInDomain(e, "bob", "domain1", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain1", []);
+        TestGetRolesInDomain(e, "non_exist", "domain1", []);
 
-        TestGetRolesInDomain(e, "alice", "domain2", AsList());
-        TestGetRolesInDomain(e, "bob", "domain2", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain2", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain2", AsList());
+        TestGetRolesInDomain(e, "alice", "domain2", []);
+        TestGetRolesInDomain(e, "bob", "domain2", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain2", []);
+        TestGetRolesInDomain(e, "non_exist", "domain2", []);
     }
 
     [Fact]
@@ -77,27 +77,27 @@ public class RbacApiWithDomainsTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
-        TestGetRolesInDomain(e, "alice", "domain1", AsList("admin"));
-        TestGetRolesInDomain(e, "bob", "domain1", AsList());
-        TestGetRolesInDomain(e, "admin", "domain1", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain1", AsList());
+        TestGetRolesInDomain(e, "alice", "domain1", ["admin"]);
+        TestGetRolesInDomain(e, "bob", "domain1", []);
+        TestGetRolesInDomain(e, "admin", "domain1", []);
+        TestGetRolesInDomain(e, "non_exist", "domain1", []);
 
-        TestGetRolesInDomain(e, "alice", "domain2", AsList());
-        TestGetRolesInDomain(e, "bob", "domain2", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain2", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain2", AsList());
+        TestGetRolesInDomain(e, "alice", "domain2", []);
+        TestGetRolesInDomain(e, "bob", "domain2", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain2", []);
+        TestGetRolesInDomain(e, "non_exist", "domain2", []);
 
         await e.DeleteRoleForUserInDomainAsync("alice", "admin", "domain1");
         await e.AddRoleForUserInDomainAsync("bob", "admin", "domain1");
 
-        TestGetRolesInDomain(e, "alice", "domain1", AsList());
-        TestGetRolesInDomain(e, "bob", "domain1", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain1", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain1", AsList());
+        TestGetRolesInDomain(e, "alice", "domain1", []);
+        TestGetRolesInDomain(e, "bob", "domain1", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain1", []);
+        TestGetRolesInDomain(e, "non_exist", "domain1", []);
 
-        TestGetRolesInDomain(e, "alice", "domain2", AsList());
-        TestGetRolesInDomain(e, "bob", "domain2", AsList("admin"));
-        TestGetRolesInDomain(e, "admin", "domain2", AsList());
-        TestGetRolesInDomain(e, "non_exist", "domain2", AsList());
+        TestGetRolesInDomain(e, "alice", "domain2", []);
+        TestGetRolesInDomain(e, "bob", "domain2", ["admin"]);
+        TestGetRolesInDomain(e, "admin", "domain2", []);
+        TestGetRolesInDomain(e, "non_exist", "domain2", []);
     }
 }

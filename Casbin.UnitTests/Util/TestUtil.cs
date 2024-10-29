@@ -5,17 +5,15 @@ using Casbin.Model;
 using Casbin.Rbac;
 using Casbin.Util;
 using Xunit;
+
 // ReSharper disable PossibleMultipleEnumeration
 
 namespace Casbin.UnitTests.Util;
 
 internal static class TestUtil
 {
-    internal static List<T> AsList<T>(params T[] values) => values.ToList();
-
-    internal static List<string> AsList(params string[] values) => values.ToList();
-
-    internal static void TestBatchEnforce<T>(this IEnforcer e, IEnumerable<(T, bool)> values) where T : IRequestValues =>
+    internal static void TestBatchEnforce<T>(this IEnforcer e, IEnumerable<(T, bool)> values)
+        where T : IRequestValues =>
         Assert.True(values.Select(x => x.Item2).SequenceEqual(e.BatchEnforce(values.Select(x => x.Item1))));
 
     internal static void TestParallelBatchEnforce<T>(Enforcer e, IEnumerable<(T, bool)> values)
@@ -49,12 +47,14 @@ internal static class TestUtil
         Assert.True(values.Select(x => x.Item2)
             .SequenceEqual(e.BatchEnforceWithMatcher(matcher, values.Select(x => x.Item1))));
 
-    internal static void TestBatchEnforceWithMatcherParallel<T>(this Enforcer e, string matcher, IEnumerable<(T, bool)> values)
+    internal static void TestBatchEnforceWithMatcherParallel<T>(this Enforcer e, string matcher,
+        IEnumerable<(T, bool)> values)
         where T : IRequestValues =>
         Assert.True(values.Select(x => x.Item2)
             .SequenceEqual(e.BatchEnforceWithMatcherParallel<T>(matcher, values.Select(x => x.Item1).ToList())));
 
-    internal static async void TestBatchEnforceWithMatcherAsync<T>(IEnforcer e, string matcher, IEnumerable<(T, bool)> values)
+    internal static async void TestBatchEnforceWithMatcherAsync<T>(IEnforcer e, string matcher,
+        IEnumerable<(T, bool)> values)
         where T : IRequestValues
     {
 #if !NET452
@@ -81,7 +81,8 @@ internal static class TestUtil
         Assert.True(except.SetEquals(explains.FirstOrDefault() ?? []));
     }
 
-    internal static async Task TestEnforceExAsync<T1, T2, T3>(this IEnforcer e, T1 sub, T2 obj, T3 act, List<string> except)
+    internal static async Task TestEnforceExAsync<T1, T2, T3>(this IEnforcer e, T1 sub, T2 obj, T3 act,
+        List<string> except)
     {
         List<IEnumerable<string>> explains = (await e.EnforceExAsync(sub, obj, act)).Item2.ToList();
         Assert.True(except.SetEquals(explains.FirstOrDefault() ?? []));
@@ -101,7 +102,7 @@ internal static class TestUtil
         Assert.True(except.SetEquals(explains.FirstOrDefault() ?? []));
     }
 
-    internal static void TestGetPolicy(IEnforcer e, List<List<string>> except)
+    internal static void TestGetPolicy(this IEnforcer e, List<List<string>> except)
     {
         IEnumerable<IEnumerable<string>> actual = e.GetPolicy();
         Assert.True(except.DeepEquals(actual));
@@ -165,13 +166,15 @@ internal static class TestUtil
     }
 
     #region RoleManager test
+
     internal static void TestGetRoles(IRoleManager roleManager, string name, List<string> except)
     {
         List<string> actual = roleManager.GetRoles(name).ToList();
         Assert.True(except.SetEquals(actual));
     }
 
-    internal static void TestGetRolesWithDomain(IRoleManager roleManager, string name, string domain, List<string> except)
+    internal static void TestGetRolesWithDomain(IRoleManager roleManager, string name, string domain,
+        List<string> except)
     {
         List<string> actual = roleManager.GetRoles(name, domain).ToList();
         Assert.True(except.SetEquals(actual));

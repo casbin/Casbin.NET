@@ -8,9 +8,9 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class RbacApiTest
 {
-    private readonly TestModelFixture TestModelFixture;
+    private readonly TestModelFixture _testModelFixture;
 
-    public RbacApiTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
+    public RbacApiTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
 
     [Fact]
     public void TestRoleApi()
@@ -18,38 +18,38 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
-        TestGetRoles(e, "alice", AsList("data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
-        TestGetRoles(e, "non_exist", AsList());
+        TestGetRoles(e, "alice", ["data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
+        TestGetRoles(e, "non_exist", []);
 
         Assert.False(e.HasRoleForUser("alice", "data1_admin"));
         Assert.True(e.HasRoleForUser("alice", "data2_admin"));
 
         e.AddRoleForUser("alice", "data1_admin");
 
-        TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", ["data1_admin", "data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         e.DeleteRoleForUser("alice", "data1_admin");
 
-        TestGetRoles(e, "alice", AsList("data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", ["data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         e.DeleteRolesForUser("alice");
 
-        TestGetRoles(e, "alice", AsList());
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", []);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         e.AddRoleForUser("alice", "data1_admin");
         e.DeleteUser("alice");
 
-        TestGetRoles(e, "alice", AsList());
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", []);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         e.AddRoleForUser("alice", "data2_admin");
 
@@ -82,38 +82,38 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
-        TestGetRoles(e, "alice", AsList("data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
-        TestGetRoles(e, "non_exist", AsList());
+        TestGetRoles(e, "alice", ["data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
+        TestGetRoles(e, "non_exist", []);
 
         Assert.False(e.HasRoleForUser("alice", "data1_admin"));
         Assert.True(e.HasRoleForUser("alice", "data2_admin"));
 
         await e.AddRoleForUserAsync("alice", "data1_admin");
 
-        TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", ["data1_admin", "data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         await e.DeleteRoleForUserAsync("alice", "data1_admin");
 
-        TestGetRoles(e, "alice", AsList("data2_admin"));
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", ["data2_admin"]);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         await e.DeleteRolesForUserAsync("alice");
 
-        TestGetRoles(e, "alice", AsList());
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", []);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         await e.AddRoleForUserAsync("alice", "data1_admin");
         await e.DeleteUserAsync("alice");
 
-        TestGetRoles(e, "alice", AsList());
-        TestGetRoles(e, "bob", AsList());
-        TestGetRoles(e, "data2_admin", AsList());
+        TestGetRoles(e, "alice", []);
+        TestGetRoles(e, "bob", []);
+        TestGetRoles(e, "data2_admin", []);
 
         await e.AddRoleForUserAsync("alice", "data2_admin");
 
@@ -149,52 +149,54 @@ public class RbacApiTest
         Assert.True(e.HasRoleForUser("alice", "admin", "domain1"));
         Assert.False(e.HasRoleForUser("alice", "admin", "domain2"));
 
-        TestGetRoles(e, "alice", AsList("admin"), "domain1");
-        TestGetRoles(e, "bob", AsList(), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", ["admin"], "domain1");
+        TestGetRoles(e, "bob", [], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
         _ = e.DeleteRoleForUser("alice", "admin", "domain1");
 
         _ = e.AddRoleForUser("bob", "admin", "domain1");
 
-        TestGetRoles(e, "alice", AsList(), "domain1");
-        TestGetRoles(e, "bob", AsList("admin"), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", [], "domain1");
+        TestGetRoles(e, "bob", ["admin"], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
         _ = e.AddRoleForUser("alice", "admin", "domain1");
 
         _ = e.DeleteRolesForUser("bob", "domain1");
 
-        TestGetRoles(e, "alice", AsList("admin"), "domain1");
-        TestGetRoles(e, "bob", AsList(), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", ["admin"], "domain1");
+        TestGetRoles(e, "bob", [], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
-        _ = e.AddRolesForUser("bob", AsList("admin", "admin1", "admin2"), "domain1");
+        _ = e.AddRolesForUser("bob", ["admin", "admin1", "admin2"], "domain1");
 
-        TestGetRoles(e, "bob", AsList("admin", "admin1", "admin2"), "domain1");
+        TestGetRoles(e, "bob", ["admin", "admin1", "admin2"], "domain1");
 
-        TestGetPermissions(e, "admin", AsList(
-                AsList("admin", "domain1", "data1", "read"),
-                AsList("admin", "domain1", "data1", "write")),
+        TestGetPermissions(e, "admin", [
+                ["admin", "domain1", "data1", "read"],
+                ["admin", "domain1", "data1", "write"]
+            ],
             "domain1");
-        TestGetPermissions(e, "admin", AsList(
-                AsList("admin", "domain2", "data2", "read"),
-                AsList("admin", "domain2", "data2", "write")),
+        TestGetPermissions(e, "admin", [
+                ["admin", "domain2", "data2", "read"],
+                ["admin", "domain2", "data2", "write"]
+            ],
             "domain2");
     }
 
@@ -207,52 +209,54 @@ public class RbacApiTest
         Assert.True(e.HasRoleForUser("alice", "admin", "domain1"));
         Assert.False(e.HasRoleForUser("alice", "admin", "domain2"));
 
-        TestGetRoles(e, "alice", AsList("admin"), "domain1");
-        TestGetRoles(e, "bob", AsList(), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", ["admin"], "domain1");
+        TestGetRoles(e, "bob", [], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
         _ = await e.DeleteRoleForUserAsync("alice", "admin", "domain1");
 
         _ = await e.AddRoleForUserAsync("bob", "admin", "domain1");
 
-        TestGetRoles(e, "alice", AsList(), "domain1");
-        TestGetRoles(e, "bob", AsList("admin"), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", [], "domain1");
+        TestGetRoles(e, "bob", ["admin"], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
         _ = await e.AddRoleForUserAsync("alice", "admin", "domain1");
 
         _ = await e.DeleteRolesForUserAsync("bob", "domain1");
 
-        TestGetRoles(e, "alice", AsList("admin"), "domain1");
-        TestGetRoles(e, "bob", AsList(), "domain1");
-        TestGetRoles(e, "admin", AsList(), "domain1");
-        TestGetRoles(e, "non_exist", AsList(), "domain1");
-        TestGetRoles(e, "alice", AsList(), "domain2");
-        TestGetRoles(e, "bob", AsList("admin"), "domain2");
-        TestGetRoles(e, "admin", AsList(), "domain2");
-        TestGetRoles(e, "non_exist", AsList(), "domain2");
+        TestGetRoles(e, "alice", ["admin"], "domain1");
+        TestGetRoles(e, "bob", [], "domain1");
+        TestGetRoles(e, "admin", [], "domain1");
+        TestGetRoles(e, "non_exist", [], "domain1");
+        TestGetRoles(e, "alice", [], "domain2");
+        TestGetRoles(e, "bob", ["admin"], "domain2");
+        TestGetRoles(e, "admin", [], "domain2");
+        TestGetRoles(e, "non_exist", [], "domain2");
 
-        _ = await e.AddRolesForUserAsync("bob", AsList("admin", "admin1", "admin2"), "domain1");
+        _ = await e.AddRolesForUserAsync("bob", ["admin", "admin1", "admin2"], "domain1");
 
-        TestGetRoles(e, "bob", AsList("admin", "admin1", "admin2"), "domain1");
+        TestGetRoles(e, "bob", ["admin", "admin1", "admin2"], "domain1");
 
-        TestGetPermissions(e, "admin", AsList(
-                AsList("admin", "domain1", "data1", "read"),
-                AsList("admin", "domain1", "data1", "write")),
+        TestGetPermissions(e, "admin", [
+                ["admin", "domain1", "data1", "read"],
+                ["admin", "domain1", "data1", "write"]
+            ],
             "domain1");
-        TestGetPermissions(e, "admin", AsList(
-                AsList("admin", "domain2", "data2", "read"),
-                AsList("admin", "domain2", "data2", "write")),
+        TestGetPermissions(e, "admin", [
+                ["admin", "domain2", "data2", "read"],
+                ["admin", "domain2", "data2", "write"]
+            ],
             "domain2");
     }
 
@@ -262,14 +266,14 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
-        _ = e.AddRolesForUser("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
+        _ = e.AddRolesForUser("alice", ["data1_admin", "data2_admin", "data3_admin"]);
         // The "alice" already has "data2_admin" , it will be return false. So "alice" just has "data2_admin".
-        TestGetRoles(e, "alice", AsList("data2_admin"));
+        TestGetRoles(e, "alice", ["data2_admin"]);
         // delete role
         _ = e.DeleteRoleForUser("alice", "data2_admin");
 
-        _ = e.AddRolesForUser("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
-        TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin", "data3_admin"));
+        _ = e.AddRolesForUser("alice", ["data1_admin", "data2_admin", "data3_admin"]);
+        TestGetRoles(e, "alice", ["data1_admin", "data2_admin", "data3_admin"]);
         Assert.True(e.Enforce("alice", "data1", "read"));
         Assert.True(e.Enforce("alice", "data2", "read"));
         Assert.True(e.Enforce("alice", "data2", "write"));
@@ -281,14 +285,14 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
-        _ = await e.AddRolesForUserAsync("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
+        _ = await e.AddRolesForUserAsync("alice", ["data1_admin", "data2_admin", "data3_admin"]);
         // The "alice" already has "data2_admin" , it will be return false. So "alice" just has "data2_admin".
-        TestGetRoles(e, "alice", AsList("data2_admin"));
+        TestGetRoles(e, "alice", ["data2_admin"]);
         // delete role
         _ = await e.DeleteRoleForUserAsync("alice", "data2_admin");
 
-        _ = await e.AddRolesForUserAsync("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
-        TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin", "data3_admin"));
+        _ = await e.AddRolesForUserAsync("alice", ["data1_admin", "data2_admin", "data3_admin"]);
+        TestGetRoles(e, "alice", ["data1_admin", "data2_admin", "data3_admin"]);
         Assert.True(await e.EnforceAsync("alice", "data1", "read"));
         Assert.True(await e.EnforceAsync("alice", "data2", "read"));
         Assert.True(await e.EnforceAsync("alice", "data2", "write"));
@@ -305,8 +309,8 @@ public class RbacApiTest
         Assert.False(e.Enforce("bob", "read"));
         Assert.True(e.Enforce("bob", "write"));
 
-        TestGetPermissions(e, "alice", AsList(AsList("alice", "read")));
-        TestGetPermissions(e, "bob", AsList(AsList("bob", "write")));
+        TestGetPermissions(e, "alice", [["alice", "read"]]);
+        TestGetPermissions(e, "bob", [["bob", "write"]]);
 
         Assert.True(e.HasPermissionForUser("alice", "read"));
         Assert.False(e.HasPermissionForUser("alice", "write"));
@@ -353,8 +357,8 @@ public class RbacApiTest
         Assert.False(await e.EnforceAsync("bob", "read"));
         Assert.True(await e.EnforceAsync("bob", "write"));
 
-        TestGetPermissions(e, "alice", AsList(AsList("alice", "read")));
-        TestGetPermissions(e, "bob", AsList(AsList("bob", "write")));
+        TestGetPermissions(e, "alice", [["alice", "read"]]);
+        TestGetPermissions(e, "bob", [["bob", "write"]]);
 
         Assert.True(e.HasPermissionForUser("alice", "read"));
         Assert.False(e.HasPermissionForUser("alice", "write"));
@@ -398,19 +402,17 @@ public class RbacApiTest
             TestModelFixture.RbacWithHierarchyPolicyText));
         e.BuildRoleLinks();
 
-        TestGetPermissions(e, "alice", AsList(
-            AsList("alice", "data1", "read")));
-        TestGetPermissions(e, "bob", AsList(
-            AsList("bob", "data2", "write")));
+        TestGetPermissions(e, "alice", [["alice", "data1", "read"]]);
+        TestGetPermissions(e, "bob", [["bob", "data2", "write"]]);
 
-        TestGetImplicitPermissions(e, "alice", AsList(
-            AsList("alice", "data1", "read"),
-            AsList("data1_admin", "data1", "read"),
-            AsList("data1_admin", "data1", "write"),
-            AsList("data2_admin", "data2", "read"),
-            AsList("data2_admin", "data2", "write")));
-        TestGetImplicitPermissions(e, "bob", AsList(
-            AsList("bob", "data2", "write")));
+        TestGetImplicitPermissions(e, "alice", [
+            ["alice", "data1", "read"],
+            ["data1_admin", "data1", "read"],
+            ["data1_admin", "data1", "write"],
+            ["data2_admin", "data2", "read"],
+            ["data2_admin", "data2", "write"]
+        ]);
+        TestGetImplicitPermissions(e, "bob", [["bob", "data2", "write"]]);
     }
 
     [Fact]
@@ -421,10 +423,11 @@ public class RbacApiTest
             TestModelFixture.RbacWithHierarchyWithDomainsPolicyText));
         e.BuildRoleLinks();
 
-        TestGetImplicitPermissions(e, "alice", AsList(
-                AsList("alice", "domain1", "data2", "read"),
-                AsList("role:reader", "domain1", "data1", "read"),
-                AsList("role:writer", "domain1", "data1", "write")),
+        TestGetImplicitPermissions(e, "alice", [
+                ["alice", "domain1", "data2", "read"],
+                ["role:reader", "domain1", "data1", "read"],
+                ["role:writer", "domain1", "data1", "write"]
+            ],
             "domain1");
     }
 
@@ -438,13 +441,11 @@ public class RbacApiTest
         e.BuildRoleLinks();
 
         // Assert
-        TestGetPermissions(e, "alice", AsList(
-            AsList("alice", "data1", "read")));
-        TestGetPermissions(e, "bob", AsList(
-            AsList("bob", "data2", "write")));
+        TestGetPermissions(e, "alice", [["alice", "data1", "read"]]);
+        TestGetPermissions(e, "bob", [["bob", "data2", "write"]]);
         Assert.Equal(["admin", "data1_admin", "data2_admin"],
             e.GetImplicitRolesForUser("alice"));
-        Assert.Equal(new string[0],
+        Assert.Equal([],
             e.GetImplicitRolesForUser("bob"));
     }
 
