@@ -769,4 +769,53 @@ public partial class ModelTest
         Assert.True(e.Enforce(sub, obj2, "read"));
         Assert.False(e.Enforce(sub, obj3, "read"));
     }
+
+#if !NET452 && !NET461 && !NET462 && !NETSTANDARD
+    [Fact]
+    public void TestAbacJsonRequest()
+    {
+        Enforcer e = new(TestModelFixture.GetNewAbacModel());
+
+        JsonValue data1Json = new JsonValue("""{ "Name": "data1", "Owner": "alice"}""");
+        JsonValue data2Json = new JsonValue("""{ "Name": "data2", "Owner": "bob"}""");
+
+        Assert.True(e.Enforce("alice", data1Json, "read"));
+        Assert.True(e.Enforce("alice", data1Json, "write"));
+        Assert.False(e.Enforce("alice", data2Json, "read"));
+        Assert.False(e.Enforce("alice", data2Json, "write"));
+        Assert.False(e.Enforce("bob", data1Json, "read"));
+        Assert.False(e.Enforce("bob", data1Json, "write"));
+        Assert.True(e.Enforce("bob", data2Json, "read"));
+        Assert.True(e.Enforce("bob", data2Json, "write"));
+
+        e = new Enforcer(TestModelFixture.GetNewTestModel(
+            TestModelFixture.AbacNotUsingPolicyModelText,
+            TestModelFixture.AbacRuleEffectPolicyText));
+
+        Assert.True(e.Enforce("alice", data1Json, "read"));
+        Assert.True(e.Enforce("alice", data1Json, "write"));
+        Assert.False(e.Enforce("alice", data2Json, "read"));
+        Assert.False(e.Enforce("alice", data2Json, "write"));
+
+        e = new Enforcer(TestModelFixture.GetNewTestModel(
+            TestModelFixture.AbacRuleModelText,
+            TestModelFixture.AbacRulePolicyText));
+        JsonValue sub1Json = new JsonValue("""{ "Name": "alice", "Age": 16}""");
+        JsonValue sub2Json = new JsonValue("""{ "Name": "alice", "Age": 20}""");
+        JsonValue sub3Json = new JsonValue("""{ "Name": "alice", "Age": 65}""");
+
+        Assert.False(e.Enforce(sub1Json, "/data1", "read"));
+        Assert.False(e.Enforce(sub1Json, "/data2", "read"));
+        Assert.False(e.Enforce(sub1Json, "/data1", "write"));
+        Assert.True(e.Enforce(sub1Json, "/data2", "write"));
+        Assert.True(e.Enforce(sub2Json, "/data1", "read"));
+        Assert.False(e.Enforce(sub2Json, "/data2", "read"));
+        Assert.False(e.Enforce(sub2Json, "/data1", "write"));
+        Assert.True(e.Enforce(sub2Json, "/data2", "write"));
+        Assert.True(e.Enforce(sub3Json, "/data1", "read"));
+        Assert.False(e.Enforce(sub3Json, "/data2", "read"));
+        Assert.False(e.Enforce(sub3Json, "/data1", "write"));
+        Assert.False(e.Enforce(sub3Json, "/data2", "write"));
+    }
+#endif
 }

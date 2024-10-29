@@ -102,6 +102,12 @@ public class TestModelFixture
     public static readonly string AbacWithDynamicValueTypeModelText = ReadTestFile("abac_with_dynamic_value_type_model.conf");
     public static readonly string AbacWithDynamicValueTypePolicyText = ReadTestFile("abac_with_dynamic_value_type_policy.csv");
 
+    // https://github.com/casbin/Casbin.NET/issues/364
+    public static readonly string AbacNotUsingPolicyModelText = ReadTestFile("abac_not_using_policy_model.conf");
+    public static readonly string AbacRuleEffectPolicyText = ReadTestFile("abac_rule_effect_policy.csv");
+    public static readonly string AbacRuleModelText = ReadTestFile("abac_rule_model.conf");
+    public static readonly string AbacRulePolicyText = ReadTestFile("abac_rule_policy.csv");
+
     public static IModel GetNewAbacModel() => GetNewTestModel(AbacModelText);
 
     public static IModel GetNewAbacWithEvalModel() => GetNewTestModel(AbacWithEvalModelText, AbacWithEvalPolicyText);
