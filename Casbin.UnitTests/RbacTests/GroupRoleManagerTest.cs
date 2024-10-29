@@ -13,6 +13,6 @@ public class GroupRoleManagerTest
         GroupRoleManager roleManager = new(10);
         e.SetRoleManager("g", roleManager);
         e.SetRoleManager("g2", roleManager);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
+        Assert.True(e.Enforce("alice", "domain1", "data1", "read"));
     }
 }

@@ -9,8 +9,8 @@ namespace Casbin.UnitTests.ParallelTest
     {
         public IEntropyPool<TRequest> ExistedEntropyPool;
         public IEntropyPool<TRequest> RandomEntropyPool;
-        private List<IEntropyHandler<TRequest>> _handlers = new List<IEntropyHandler<TRequest>>();
-        private List<int> _weightPrefix = new List<int>();
+        private List<IEntropyHandler<TRequest>> _handlers = [];
+        private List<int> _weightPrefix = [];
         public RandomRequestGenerator(IEntropyPool<TRequest> existedEntropyPool, IEntropyPool<TRequest> randomEntropyPool)
         {
             ExistedEntropyPool = existedEntropyPool;

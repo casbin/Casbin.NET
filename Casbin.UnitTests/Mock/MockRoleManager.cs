@@ -14,7 +14,7 @@ public class MockCustomRoleManager : IRoleManager
 
     public IEnumerable<string> GetRoles(string name, string domain = null) => null;
     public IEnumerable<string> GetUsers(string name, string domain = null) => null;
-    public IEnumerable<string> GetDomains(string name) => Enumerable.Empty<string>();
+    public IEnumerable<string> GetDomains(string name) => [];
 
     public bool HasLink(string name1, string name2, string domain = null)
     {

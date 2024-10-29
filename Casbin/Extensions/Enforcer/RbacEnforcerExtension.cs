@@ -560,7 +560,6 @@ namespace Casbin
             {
                 result.AddRange(GetPermissionsForUser(enforcer, role, domain));
             }
-
             return result;
         }
 

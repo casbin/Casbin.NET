@@ -13,8 +13,6 @@ public class UtilityTest
             return arg is not null;
         }
 
-        ;
-
         Interpreter interpreter = new();
         interpreter.SetFunction("GFunction", (GFunction)GetGFunction);
         interpreter.SetVariable("arg", "arg");

@@ -12,23 +12,22 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public partial class ModelTest
 {
-    private readonly TestModelFixture TestModelFixture;
-
-    public ModelTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
+    private readonly TestModelFixture _testModelFixture;
+    public ModelTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
 
     [Fact]
     public void TestBasicModel()
     {
         Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -36,14 +35,14 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.BasicModelText));
 
-        TestEnforce(e, "alice", "data1", "read", false);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", false);
+        Assert.False(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.False(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -53,18 +52,18 @@ public partial class ModelTest
             TestModelFixture.BasicWithRootModelText,
             TestModelFixture.BasicPolicyText));
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
-        TestEnforce(e, "root", "data1", "read", true);
-        TestEnforce(e, "root", "data1", "write", true);
-        TestEnforce(e, "root", "data2", "read", true);
-        TestEnforce(e, "root", "data2", "write", true);
+         Assert.True(e.Enforce("alice", "data1", "read"));
+         Assert.False(e.Enforce("alice", "data1", "write"));
+         Assert.False(e.Enforce("alice", "data2", "read"));
+         Assert.False(e.Enforce("alice", "data2", "write"));
+         Assert.False(e.Enforce("bob", "data1", "read"));
+         Assert.False(e.Enforce("bob", "data1", "write"));
+         Assert.False(e.Enforce("bob", "data2", "read"));
+         Assert.True(e.Enforce("bob", "data2", "write"));
+         Assert.True(e.Enforce("root", "data1", "read"));
+         Assert.True(e.Enforce("root", "data1", "write"));
+         Assert.True(e.Enforce("root", "data2", "read"));
+         Assert.True(e.Enforce("root", "data2", "write"));
     }
 
     [Fact]
@@ -72,18 +71,18 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetNewTestModel(TestModelFixture.BasicWithRootModelText));
 
-        TestEnforce(e, "alice", "data1", "read", false);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", false);
-        TestEnforce(e, "root", "data1", "read", true);
-        TestEnforce(e, "root", "data1", "write", true);
-        TestEnforce(e, "root", "data2", "read", true);
-        TestEnforce(e, "root", "data2", "write", true);
+        Assert.False(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.False(e.Enforce("bob", "data2", "write"));
+        Assert.True(e.Enforce("root", "data1", "read"));
+        Assert.True(e.Enforce("root", "data1", "write"));
+        Assert.True(e.Enforce("root", "data2", "read"));
+        Assert.True(e.Enforce("root", "data2", "write"));
     }
 
     [Fact]
@@ -91,10 +90,10 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetBasicWithoutUserTestModel());
 
-        TestEnforceWithoutUsers(e, "data1", "read", true);
-        TestEnforceWithoutUsers(e, "data1", "write", false);
-        TestEnforceWithoutUsers(e, "data2", "read", false);
-        TestEnforceWithoutUsers(e, "data2", "write", true);
+        Assert.True(e.Enforce("data1", "read"));
+        Assert.False(e.Enforce("data1", "write"));
+        Assert.False(e.Enforce("data2", "read"));
+        Assert.True(e.Enforce("data2", "write"));
     }
 
     [Fact]
@@ -102,10 +101,10 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
 
-        TestEnforceWithoutUsers(e, "alice", "read", true);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", false);
-        TestEnforceWithoutUsers(e, "bob", "write", true);
+        Assert.True(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.False(e.Enforce("bob", "read"));
+        Assert.True(e.Enforce("bob", "write"));
     }
 
     [Fact]
@@ -114,14 +113,14 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewRbacTestModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -130,14 +129,14 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithResourceRoleTestModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", true);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.True(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -146,14 +145,14 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", true);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "domain1", "data1", "read"));
+        Assert.True(e.Enforce("alice", "domain1", "data1", "write"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "write"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "read"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "write"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "read"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "write"));
     }
 
     [Fact]
@@ -170,38 +169,38 @@ public partial class ModelTest
         e.AddGroupingPolicy("alice", "admin", "domain1");
         e.AddGroupingPolicy("bob", "admin", "domain2");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", true);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "domain1", "data1", "read"));
+        Assert.True(e.Enforce("alice", "domain1", "data1", "write"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "write"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "read"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "write"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "read"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "write"));
 
         // Remove all policy rules related to domain1 and data1.
         e.RemoveFilteredPolicy(1, "domain1", "data1");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.False(e.Enforce("alice", "domain1", "data1", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data1", "write"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "write"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "read"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "write"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "read"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "write"));
 
         // Remove the specified policy rule.
         e.RemovePolicy("admin", "domain2", "data2", "read");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.False(e.Enforce("alice", "domain1", "data1", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data1", "write"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "read"));
+        Assert.False(e.Enforce("alice", "domain1", "data2", "write"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "read"));
+        Assert.False(e.Enforce("bob", "domain2", "data1", "write"));
+        Assert.False(e.Enforce("bob", "domain2", "data2", "read"));
+        Assert.True(e.Enforce("bob", "domain2", "data2", "write"));
     }
 
     [Fact]
@@ -218,38 +217,38 @@ public partial class ModelTest
         await e.AddGroupingPolicyAsync("alice", "admin", "domain1");
         await e.AddGroupingPolicyAsync("bob", "admin", "domain2");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", true);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", true);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "domain1", "data1", "read"));
+        Assert.True(await e.EnforceAsync("alice", "domain1", "data1", "write"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "read"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "write"));
+        Assert.True(await e.EnforceAsync("bob", "domain2", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "domain2", "data2", "write"));
 
         // Remove all policy rules related to domain1 and data1.
         await e.RemoveFilteredPolicyAsync(1, "domain1", "data1");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", true);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data1", "read"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data1", "write"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "read"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "write"));
+        Assert.True(await e.EnforceAsync("bob", "domain2", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "domain2", "data2", "write"));
 
         // Remove the specified policy rule.
         await e.RemovePolicyAsync("admin", "domain2", "data2", "read");
 
-        TestDomainEnforce(e, "alice", "domain1", "data1", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data1", "write", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "domain1", "data2", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "read", false);
-        TestDomainEnforce(e, "bob", "domain2", "data2", "write", true);
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data1", "read"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data1", "write"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "read"));
+        Assert.False(await e.EnforceAsync("alice", "domain1", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data1", "write"));
+        Assert.False(await e.EnforceAsync("bob", "domain2", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "domain2", "data2", "write"));
     }
 
     [Fact]
@@ -258,14 +257,14 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDenyTestModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -276,7 +275,7 @@ public partial class ModelTest
             TestModelFixture.RbacWithDenyPolicyText));
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data2", "write", false);
+        Assert.False(e.Enforce("alice", "data2", "write"));
     }
 
     [Fact]
@@ -290,28 +289,28 @@ public partial class ModelTest
         // For Casbin, it is equivalent to: e.addGroupingPolicy("bob", "data2_admin")
         e.AddGroupingPolicy("bob", "data2_admin", "custom_data");
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", true);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.True(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
 
         // You should also take the custom data as a parameter when deleting a grouping policy.
         // e.removeGroupingPolicy("bob", "data2_admin") won't work.
         // Or you can remove it by using removeFilteredGroupingPolicy().
         e.RemoveGroupingPolicy("bob", "data2_admin", "custom_data");
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -325,28 +324,28 @@ public partial class ModelTest
         // For Casbin, it is equivalent to: e.addGroupingPolicy("bob", "data2_admin")
         await e.AddGroupingPolicyAsync("bob", "data2_admin", "custom_data");
 
-        await TestEnforceAsync(e, "alice", "data1", "read", true);
-        await TestEnforceAsync(e, "alice", "data1", "write", false);
-        await TestEnforceAsync(e, "alice", "data2", "read", true);
-        await TestEnforceAsync(e, "alice", "data2", "write", true);
-        await TestEnforceAsync(e, "bob", "data1", "read", false);
-        await TestEnforceAsync(e, "bob", "data1", "write", false);
-        await TestEnforceAsync(e, "bob", "data2", "read", true);
-        await TestEnforceAsync(e, "bob", "data2", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "data1", "read"));
+        Assert.False(await e.EnforceAsync("alice", "data1", "write"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "write"));
+        Assert.True(await e.EnforceAsync("bob", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "data2", "write"));
 
         // You should also take the custom data as a parameter when deleting a grouping policy.
         // e.removeGroupingPolicy("bob", "data2_admin") won't work.
         // Or you can remove it by using removeFilteredGroupingPolicy().
         await e.RemoveGroupingPolicyAsync("bob", "data2_admin", "custom_data");
 
-        await TestEnforceAsync(e, "alice", "data1", "read", true);
-        await TestEnforceAsync(e, "alice", "data1", "write", false);
-        await TestEnforceAsync(e, "alice", "data2", "read", true);
-        await TestEnforceAsync(e, "alice", "data2", "write", true);
-        await TestEnforceAsync(e, "bob", "data1", "read", false);
-        await TestEnforceAsync(e, "bob", "data1", "write", false);
-        await TestEnforceAsync(e, "bob", "data2", "read", false);
-        await TestEnforceAsync(e, "bob", "data2", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "data1", "read"));
+        Assert.False(await e.EnforceAsync("alice", "data1", "write"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "data2", "write"));
     }
 
     [Fact]
@@ -356,14 +355,14 @@ public partial class ModelTest
         e.SetRoleManager(new MockCustomRoleManager());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -374,14 +373,14 @@ public partial class ModelTest
         TestResource data1 = new("data1", "alice");
         TestResource data2 = new("data2", "bob");
 
-        TestEnforce(e, "alice", data1, "read", true);
-        TestEnforce(e, "alice", data1, "write", true);
-        TestEnforce(e, "alice", data2, "read", false);
-        TestEnforce(e, "alice", data2, "write", false);
-        TestEnforce(e, "bob", data1, "read", false);
-        TestEnforce(e, "bob", data1, "write", false);
-        TestEnforce(e, "bob", data2, "read", true);
-        TestEnforce(e, "bob", data2, "write", true);
+        Assert.True(e.Enforce("alice", data1, "read"));
+        Assert.True(e.Enforce("alice", data1, "write"));
+        Assert.False(e.Enforce("alice", data2, "read"));
+        Assert.False(e.Enforce("alice", data2, "write"));
+        Assert.False(e.Enforce("bob", data1, "read"));
+        Assert.False(e.Enforce("bob", data1, "write"));
+        Assert.True(e.Enforce("bob", data2, "read"));
+        Assert.True(e.Enforce("bob", data2, "write"));
     }
 
     [Fact]
@@ -392,20 +391,20 @@ public partial class ModelTest
         TestSubject subject2 = new("alice", 20);
         TestSubject subject3 = new("alice", 65);
 
-        TestEnforce(e, subject1, "/data1", "read", false);
-        TestEnforce(e, subject1, "/data2", "read", false);
-        TestEnforce(e, subject1, "/data1", "write", false);
-        TestEnforce(e, subject1, "/data2", "write", true);
+        Assert.False(e.Enforce(subject1, "/data1", "read"));
+        Assert.False(e.Enforce(subject1, "/data2", "read"));
+        Assert.False(e.Enforce(subject1, "/data1", "write"));
+        Assert.True(e.Enforce(subject1, "/data2", "write"));
 
-        TestEnforce(e, subject2, "/data1", "read", true);
-        TestEnforce(e, subject2, "/data2", "read", false);
-        TestEnforce(e, subject2, "/data1", "write", false);
-        TestEnforce(e, subject2, "/data2", "write", true);
+        Assert.True(e.Enforce(subject2, "/data1", "read"));
+        Assert.False(e.Enforce(subject2, "/data2", "read"));
+        Assert.False(e.Enforce(subject2, "/data1", "write"));
+        Assert.True(e.Enforce(subject2, "/data2", "write"));
 
-        TestEnforce(e, subject3, "/data1", "read", true);
-        TestEnforce(e, subject3, "/data2", "read", false);
-        TestEnforce(e, subject3, "/data1", "write", false);
-        TestEnforce(e, subject3, "/data2", "write", false);
+        Assert.True(e.Enforce(subject3, "/data1", "read"));
+        Assert.False(e.Enforce(subject3, "/data2", "read"));
+        Assert.False(e.Enforce(subject3, "/data1", "write"));
+        Assert.False(e.Enforce(subject3, "/data2", "write"));
     }
 
     [Fact]
@@ -413,27 +412,27 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetNewKeyMatchTestModel());
 
-        TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-        TestEnforce(e, "alice", "/alice_data/resource1", "POST", true);
-        TestEnforce(e, "alice", "/alice_data/resource2", "GET", true);
-        TestEnforce(e, "alice", "/alice_data/resource2", "POST", false);
-        TestEnforce(e, "alice", "/bob_data/resource1", "GET", false);
-        TestEnforce(e, "alice", "/bob_data/resource1", "POST", false);
-        TestEnforce(e, "alice", "/bob_data/resource2", "GET", false);
-        TestEnforce(e, "alice", "/bob_data/resource2", "POST", false);
+        Assert.True(e.Enforce("alice", "/alice_data/resource1", "GET"));
+        Assert.True(e.Enforce("alice", "/alice_data/resource1", "POST"));
+        Assert.True(e.Enforce("alice", "/alice_data/resource2", "GET"));
+        Assert.False(e.Enforce("alice", "/alice_data/resource2", "POST"));
+        Assert.False(e.Enforce("alice", "/bob_data/resource1", "GET"));
+        Assert.False(e.Enforce("alice", "/bob_data/resource1", "POST"));
+        Assert.False(e.Enforce("alice", "/bob_data/resource2", "GET"));
+        Assert.False(e.Enforce("alice", "/bob_data/resource2", "POST"));
 
-        TestEnforce(e, "bob", "/alice_data/resource1", "GET", false);
-        TestEnforce(e, "bob", "/alice_data/resource1", "POST", false);
-        TestEnforce(e, "bob", "/alice_data/resource2", "GET", true);
-        TestEnforce(e, "bob", "/alice_data/resource2", "POST", false);
-        TestEnforce(e, "bob", "/bob_data/resource1", "GET", false);
-        TestEnforce(e, "bob", "/bob_data/resource1", "POST", true);
-        TestEnforce(e, "bob", "/bob_data/resource2", "GET", false);
-        TestEnforce(e, "bob", "/bob_data/resource2", "POST", true);
+        Assert.False(e.Enforce("bob", "/alice_data/resource1", "GET"));
+        Assert.False(e.Enforce("bob", "/alice_data/resource1", "POST"));
+        Assert.True(e.Enforce("bob", "/alice_data/resource2", "GET"));
+        Assert.False(e.Enforce("bob", "/alice_data/resource2", "POST"));
+        Assert.False(e.Enforce("bob", "/bob_data/resource1", "GET"));
+        Assert.True(e.Enforce("bob", "/bob_data/resource1", "POST"));
+        Assert.False(e.Enforce("bob", "/bob_data/resource2", "GET"));
+        Assert.True(e.Enforce("bob", "/bob_data/resource2", "POST"));
 
-        TestEnforce(e, "cathy", "/cathy_data", "GET", true);
-        TestEnforce(e, "cathy", "/cathy_data", "POST", true);
-        TestEnforce(e, "cathy", "/cathy_data", "DELETE", false);
+        Assert.True(e.Enforce("cathy", "/cathy_data", "GET"));
+        Assert.True(e.Enforce("cathy", "/cathy_data", "POST"));
+        Assert.False(e.Enforce("cathy", "/cathy_data", "DELETE"));
     }
 
     [Fact]
@@ -444,7 +443,7 @@ public partial class ModelTest
             TestModelFixture.PriorityIndeterminatePolicyText));
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", false);
+        Assert.False(e.Enforce("alice", "data1", "read"));
     }
 
     [Fact]
@@ -453,14 +452,14 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewPriorityTestModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", true);
-        TestEnforce(e, "bob", "data2", "write", false);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.True(e.Enforce("bob", "data2", "read"));
+        Assert.False(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -469,26 +468,26 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewPriorityExplicitTestModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data1", "write", true);
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
-        TestEnforce(e, "data1_deny_group", "data1", "read", false);
-        TestEnforce(e, "data1_deny_group", "data1", "write", false);
-        TestEnforce(e, "data2_allow_group", "data2", "read", true);
-        TestEnforce(e, "data2_allow_group", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
+        Assert.False(e.Enforce("data1_deny_group", "data1", "read"));
+        Assert.False(e.Enforce("data1_deny_group", "data1", "write"));
+        Assert.True(e.Enforce("data2_allow_group", "data2", "read"));
+        Assert.True(e.Enforce("data2_allow_group", "data2", "write"));
 
         // add a higher priority policy
         e.AddPolicy("1", "bob", "data2", "write", "deny");
 
-        TestEnforce(e, "alice", "data1", "write", true);
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", false);
-        TestEnforce(e, "data1_deny_group", "data1", "read", false);
-        TestEnforce(e, "data1_deny_group", "data1", "write", false);
-        TestEnforce(e, "data2_allow_group", "data2", "read", true);
-        TestEnforce(e, "data2_allow_group", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "write"));
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.False(e.Enforce("bob", "data2", "write"));
+        Assert.False(e.Enforce("data1_deny_group", "data1", "read"));
+        Assert.False(e.Enforce("data1_deny_group", "data1", "write"));
+        Assert.True(e.Enforce("data2_allow_group", "data2", "read"));
+        Assert.True(e.Enforce("data2_allow_group", "data2", "write"));
     }
 
     [Fact]
@@ -497,37 +496,38 @@ public partial class ModelTest
         Enforcer e = new(TestModelFixture.GetNewPriorityExplicitDenyOverrideModel());
         e.BuildRoleLinks();
 
-        TestEnforce(e, "alice", "data2", "write", true);
-        TestEnforce(e, "bob", "data2", "read", true);
+        Assert.True(e.Enforce("alice", "data2", "write"));
+        Assert.True(e.Enforce("bob", "data2", "read"));
 
         // adding a new group, simulating behaviour when two different groups are added to the same person.
         e.AddPolicy("10", "data2_deny_group_new", "data2", "write", "deny");
         e.AddGroupingPolicy("alice", "data2_deny_group_new");
 
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data2", "read", true);
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.True(e.Enforce("bob", "data2", "read"));
 
         // expected enforcement result should be true,
         // as there is a policy with a lower rank 10, that produces allow result.
         e.AddPolicy("5", "alice", "data2", "write", "allow");
-        TestEnforce(e, "alice", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data2", "write"));
 
         // adding deny policy for alice for the same obj,
         // to ensure that if there is at least one deny, final result will be deny.
         e.AddPolicy("5", "alice", "data2", "write", "deny");
-        TestEnforce(e, "alice", "data2", "write", false);
+        Assert.False(e.Enforce("alice", "data2", "write"));
 
         // adding higher fake higher priority policy for alice,
         // expected enforcement result should be true (ignore this policy).
         e.AddPolicy("2", "alice", "data2", "write", "allow");
-        TestEnforce(e, "alice", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data2", "write"));
+
         e.AddPolicy("1", "fake-subject", "fake-object", "very-fake-action", "allow");
-        TestEnforce(e, "alice", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data2", "write"));
 
         // adding higher (less of 0) priority policy for alice,
         // to override group policies again.
         e.AddPolicy("-1", "alice", "data2", "write", "deny");
-        TestEnforce(e, "alice", "data2", "write", false);
+        Assert.False(e.Enforce("alice", "data2", "write"));
     }
 
     [Fact]
@@ -535,10 +535,10 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetNewKeyMatch2TestModel());
 
-        TestEnforce(e, "alice", "/alice_data", "GET", false);
-        TestEnforce(e, "alice", "/alice_data/resource1", "GET", true);
-        TestEnforce(e, "alice", "/alice_data2/myid", "GET", false);
-        TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
+        Assert.False(e.Enforce("alice", "/alice_data", "GET"));
+        Assert.True(e.Enforce("alice", "/alice_data/resource1", "GET"));
+        Assert.False(e.Enforce("alice", "/alice_data2/myid", "GET"));
+        Assert.True(e.Enforce("alice", "/alice_data2/myid/using/res_id", "GET"));
     }
 
     [Fact]
@@ -556,8 +556,8 @@ public partial class ModelTest
 
         e.AddFunction("keyMatchCustom", CustomFunction);
 
-        TestEnforce(e, "alice", "/alice_data2/myid", "GET", false);
-        TestEnforce(e, "alice", "/alice_data2/myid/using/res_id", "GET", true);
+        Assert.False(e.Enforce("alice", "/alice_data2/myid", "GET"));
+        Assert.True(e.Enforce("alice", "/alice_data2/myid/using/res_id", "GET"));
     }
 
     [Fact]
@@ -607,8 +607,8 @@ public partial class ModelTest
     public void TestAbacComment()
     {
         var model = TestModelFixture.GetNewTestModel(TestModelFixture.AbacCommentText);
-        Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
-        Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
+        Assert.Equal(3, model.Sections.GetRequestAssertion("r")?.Tokens.Count);
+        Assert.Equal(2, model.Sections.GetRequestAssertion("r")?.Tokens["act"]);
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
         Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
         Assert.Equal("r.sub == p.sub && r.obj == p.obj && r.act == p.act",
@@ -619,8 +619,8 @@ public partial class ModelTest
     public void TestRbacComment()
     {
         var model = TestModelFixture.GetNewTestModel(TestModelFixture.RbacCommentText);
-        Assert.Equal(3, model.Sections.GetRequestAssertion("r").Tokens.Count);
-        Assert.Equal(2, model.Sections.GetRequestAssertion("r").Tokens["act"]);
+        Assert.Equal(3, model.Sections.GetRequestAssertion("r")?.Tokens.Count);
+        Assert.Equal(2, model.Sections.GetRequestAssertion("r")?.Tokens["act"]);
         Assert.Equal(3, model.Sections.GetPolicyAssertion("p").Tokens.Count);
         Assert.Equal("_, _", model.Sections.GetRoleAssertion("g").Value);
         Assert.Equal("some(where (p.eft == allow))", model.Sections.GetPolicyEffectAssertion("e").Value);
@@ -633,17 +633,17 @@ public partial class ModelTest
     {
         Enforcer e = new Enforcer(TestModelFixture.GetNewCommaAndQuotationsModel());
 
-        TestEnforce(e, "alice", "Comma,Test", "Get", true);
-        TestEnforce(e, "alice", "Comma,Test", "Post", false);
-        TestEnforce(e, "alice", "\"Comma,Test\"", "Get", false);
-        TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Get", true);
-        TestEnforce(e, "bob", "\"Comma\",\"Quotations\",Test", "Post", false);
-        TestEnforce(e, "bob", "\"\"Comma\"\",\"\"Quotations\"\",Test", "Get", false);
-        TestEnforce(e, "bob", "\"\"\"Comma\"\",\"\"Quotations\"\",Test\"", "Get", false);
-        TestEnforce(e, "cindy", "\"Muti Quotations Test", "Get", true);
-        TestEnforce(e, "cindy", "\"Muti Quotations Test", "Post", false);
-        TestEnforce(e, "cindy", "\"\"Muti Quotations Test", "Get", false);
-        TestEnforce(e, "cindy", "\"\"Muti Quotations Test\"", "Get", false);
+        Assert.True(e.Enforce("alice", "Comma,Test", "Get"));
+        Assert.False(e.Enforce("alice", "Comma,Test", "Post"));
+        Assert.False(e.Enforce("alice", "\"Comma,Test\"", "Get"));
+        Assert.True(e.Enforce("bob", "\"Comma\",\"Quotations\",Test", "Get"));
+        Assert.False(e.Enforce("bob", "\"Comma\",\"Quotations\",Test", "Post"));
+        Assert.False(e.Enforce("bob", "\"\"Comma\"\",\"\"Quotations\"\",Test", "Get"));
+        Assert.False(e.Enforce("bob", "\"\"\"Comma\"\",\"\"Quotations\"\",Test\"", "Get"));
+        Assert.True(e.Enforce("cindy", "\"Muti Quotations Test", "Get"));
+        Assert.False(e.Enforce("cindy", "\"Muti Quotations Test", "Post"));
+        Assert.False(e.Enforce("cindy", "\"\"Muti Quotations Test", "Get"));
+        Assert.False(e.Enforce("cindy", "\"\"Muti Quotations Test\"", "Get"));
     }
 
     [Fact]
@@ -662,14 +662,13 @@ public partial class ModelTest
             TestModelFixture.RbacTokensWithSubstringRelationPolicyText));
         e.BuildRoleLinks();
 
-        TestDomainEnforce(e, "alice", "tenant1", "data1", "read", true);
-        TestDomainEnforce(e, "alice", "tenant1", "freeread", "read", true);
-        TestDomainEnforce(e, "alice", "tenant2", "data2", "read", false);
-        TestDomainEnforce(e, "alice", "tenant1", "data1", "write", false);
-        TestDomainEnforce(e, "bob", "tenant1", "data1", "read", false);
-        TestDomainEnforce(e, "alice", "tenant3", "freeread", "read", false);
-        TestDomainEnforce(e, "alice", "tenant1", "freeread", "write", false);
-
+        Assert.True(e.Enforce("alice", "tenant1", "data1", "read"));
+        Assert.True(e.Enforce("alice", "tenant1", "freeread", "read"));
+        Assert.False(e.Enforce("alice", "tenant2", "data2", "read"));
+        Assert.False(e.Enforce("alice", "tenant1", "data1", "write"));
+        Assert.False(e.Enforce("bob", "tenant1", "data1", "read"));
+        Assert.False(e.Enforce("alice", "tenant3", "freeread", "read"));
+        Assert.False(e.Enforce("alice", "tenant1", "freeread", "write"));
     }
 
     [Fact]
@@ -687,20 +686,20 @@ public partial class ModelTest
         TestSubject subjectd = new("donale", -1);
         TestSubject subjecte = new("eleena", 1000000009);
 
-        TestEnforce(e, subjecta, data1, "read", true);
-        TestEnforce(e, subjectb, data2, "write", true);
-        TestEnforce(e, subjectc, data1, "read", true);
-        TestEnforce(e, subjectc, data2, "write", true);
-        TestEnforce(e, subjecta, data2, "write", true);
-        TestEnforce(e, subjectb, data1, "read", true);
+        Assert.True(e.Enforce(subjecta, data1, "read"));
+        Assert.True(e.Enforce(subjectb, data2, "write"));
+        Assert.True(e.Enforce(subjectc, data1, "read"));
+        Assert.True(e.Enforce(subjectc, data2, "write"));
+        Assert.True(e.Enforce(subjecta, data2, "write"));
+        Assert.True(e.Enforce(subjectb, data1, "read"));
 
-        TestEnforce(e, subjecta, data1, "write", true);
-        TestEnforce(e, subjectb, data2, "read", true);
+        Assert.True(e.Enforce(subjecta, data1, "write"));
+        Assert.True(e.Enforce(subjectb, data2, "read"));
 
-        TestEnforce(e, subjectc, data1, "write", false);
-        TestEnforce(e, subjectc, data2, "read", false);
-        TestEnforce(e, subjectd, data1, "read", false);
-        TestEnforce(e, subjecte, data2, "write", false);
+        Assert.False(e.Enforce(subjectc, data1, "write"));
+        Assert.False(e.Enforce(subjectc, data2, "read"));
+        Assert.False(e.Enforce(subjectd, data1, "read"));
+        Assert.False(e.Enforce(subjecte, data2, "write"));
     }
 
     [Fact]
@@ -710,14 +709,14 @@ public partial class ModelTest
             TestModelFixture.BackslashLineFeedModelText,
             TestModelFixture.BackslashLineFeedPolicyText));
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -725,9 +724,9 @@ public partial class ModelTest
     {
         Enforcer e = new(TestModelFixture.GetBasicTestModel());
 
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "aliced", "ata1", "read", false);
-        TestEnforce(e, "alice", "data", "1read", false);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("aliced", "ata1", "read"));
+        Assert.False(e.Enforce("alice", "data", "1read"));
     }
 
     [Fact]
@@ -769,31 +768,5 @@ public partial class ModelTest
         Assert.True(e.Enforce(sub, obj1, "read"));
         Assert.True(e.Enforce(sub, obj2, "read"));
         Assert.False(e.Enforce(sub, obj3, "read"));
-    }
-
-    public class TestResource
-    {
-        public TestResource(string name, string owner)
-        {
-            Name = name;
-            Owner = owner;
-        }
-
-        public string Name { get; }
-
-        public string Owner { get; }
-    }
-
-    public class TestSubject
-    {
-        public TestSubject(string name, int age)
-        {
-            Name = name;
-            Age = age;
-        }
-
-        public string Name { get; }
-
-        public int Age { get; }
     }
 }

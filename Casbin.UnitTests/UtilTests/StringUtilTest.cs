@@ -6,56 +6,60 @@ namespace Casbin.UnitTests.UtilTests;
 
 public class StringUtilTest
 {
-    public static IEnumerable<object[]> RemoveCommentsTestData = new[]
-    {
-        new object[] { "r.act == p.act", "r.act == p.act # comments" },
-        new object[] { "r.act == p.act", "r.act == p.act#comments" },
-        new object[] { "r.act == p.act", "r.act == p.act###" }, new object[] { "", "### comments" },
-        new object[] { "r.act == p.act", "r.act == p.act" }
-    };
+    public static IEnumerable<object[]> RemoveCommentsTestData =
+    [
+        ["r.act == p.act", "r.act == p.act # comments"],
+        ["r.act == p.act", "r.act == p.act#comments"],
+        ["r.act == p.act", "r.act == p.act###"], ["", "### comments"],
+        ["r.act == p.act", "r.act == p.act"]
+    ];
 
-    public static IEnumerable<object[]> ReplaceEvalTestData = new[]
-    {
-        new object[] { "eval(rule1)", "a == b", new Dictionary<string, string> { ["rule1"] = "a == b" } },
-        new object[]
-        {
-            "eval(rule1) && c && d", "a == b && c && d", new Dictionary<string, string> { ["rule1"] = "a == b" }
-        },
-        new object[] { "eval(rule1)", "eval(rule1)", null },
-        new object[] { "eval(rule1) && c && d", "eval(rule1) && c && d", null },
-        new object[]
-        {
+    public static IEnumerable<object[]> ReplaceEvalTestData =
+    [
+        [
+            "eval(rule1)", "a == b",
+            new Dictionary<string, string> { ["rule1"] = "a == b" }],
+        [
+            "eval(rule1) && c && d", "a == b && c && d",
+            new Dictionary<string, string> { ["rule1"] = "a == b" }
+        ],
+        [
+            "eval(rule1)", "eval(rule1)", null
+        ],
+        [
+            "eval(rule1) && c && d", "eval(rule1) && c && d", null
+        ],
+        [
             "eval(rule1) || eval(rule2)", "a == b || a == c",
             new Dictionary<string, string> { ["rule1"] = "a == b", ["rule2"] = "a == c" }
-        },
-        new object[]
-        {
+        ],
+        [
             "eval(rule1) || eval(rule2) && c && d", "a == b || a == c && c && d",
             new Dictionary<string, string> { ["rule1"] = "a == b", ["rule2"] = "a == c" }
-        },
-        new object[]
-        {
+        ],
+        [
             "eval(rule1) || eval(rule2)", "a == b || eval(rule2)",
             new Dictionary<string, string> { ["rule1"] = "a == b" }
-        },
-        new object[]
-        {
+        ],
+        [
             "eval(rule1) || eval(rule2) && c && d", "a == b || eval(rule2) && c && d",
             new Dictionary<string, string> { ["rule1"] = "a == b" }
-        },
-        new object[]
-        {
+        ],
+        [
             "eval(rule1) || eval(rule2)", "eval(rule1) || a == c",
             new Dictionary<string, string> { ["rule2"] = "a == c" }
-        },
-        new object[]
-        {
+        ],
+        [
             "eval(rule1) || eval(rule2) && c && d", "eval(rule1) || a == c && c && d",
             new Dictionary<string, string> { ["rule2"] = "a == c" }
-        },
-        new object[] { "eval(rule1) || eval(rule2)", "eval(rule1) || eval(rule2)", null },
-        new object[] { "eval(rule1) || eval(rule2) && c && d", "eval(rule1) || eval(rule2) && c && d", null }
-    };
+        ],
+        [
+            "eval(rule1) || eval(rule2)", "eval(rule1) || eval(rule2)", null
+        ],
+        [
+            "eval(rule1) || eval(rule2) && c && d", "eval(rule1) || eval(rule2) && c && d", null
+        ]
+    ];
 
     [Theory]
     [MemberData(nameof(RemoveCommentsTestData))]
