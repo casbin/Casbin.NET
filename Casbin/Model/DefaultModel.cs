@@ -159,9 +159,15 @@ namespace Casbin.Model
 
         public bool Validate()
         {
-            // 1. check assertion is valid
-            // 2. compile expression
-            return false;
+            // Required sections check.
+            if (Sections.ContainsSection(PermConstants.Section.RequestSection) is false ||
+                Sections.ContainsSection(PermConstants.Section.PolicySection) is false ||
+                Sections.ContainsSection(PermConstants.Section.PolicyEffectSection) is false ||
+                Sections.ContainsSection(PermConstants.Section.MatcherSection) is false)
+            {
+                return false;
+            }
+            return true;
         }
     }
 }
