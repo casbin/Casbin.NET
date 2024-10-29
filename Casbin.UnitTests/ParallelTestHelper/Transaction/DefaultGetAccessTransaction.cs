@@ -7,7 +7,7 @@ namespace Casbin.UnitTests.ParallelTest
 {
     public class DefaultGetAccessTransaction<TRequest> : ITransaction<TRequest> where TRequest : IRequestValues
     {
-        private List<TRequest> _requests = new List<TRequest>();
+        private List<TRequest> _requests = [];
 
         public DefaultGetAccessTransaction(TRequest request)
         {

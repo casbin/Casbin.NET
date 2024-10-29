@@ -82,32 +82,39 @@ public partial class Enforcer
 
         if (context.View.HasPolicyParameter && session.HasNextPolicy)
         {
-            int policyIndex = 0;
-            while (scanner.GetNext(out IPolicyValues outValues))
+            try
             {
-                TPolicy policyValues = (TPolicy)outValues;
-                session.PolicyIndex = policyIndex;
-
-                HandleBeforeExpression(in context, ref session, in effectChain, in requestValues, policyValues);
-                session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
-                    in requestValues, in policyValues);
-
-                if (session.IsChainEffector)
+                int policyIndex = 0;
+                while (scanner.GetNext(out IPolicyValues outValues))
                 {
-                    HandleExpressionResult(in context, ref session, ref effectChain, in requestValues, policyValues);
-                }
-                else
-                {
-                    HandleExpressionResult(in context, ref session, Effector, in requestValues, policyValues);
-                }
+                    TPolicy policyValues = (TPolicy)outValues;
+                    session.PolicyIndex = policyIndex;
 
-                if (session.Determined)
-                {
-                    scanner.Interrupt();
-                    break;
-                }
+                    HandleBeforeExpression(in context, ref session, in effectChain, in requestValues, policyValues);
+                    session.ExpressionResult = expressionHandler.Invoke(in context, session.ExpressionString,
+                        in requestValues, in policyValues);
 
-                policyIndex++;
+                    if (session.IsChainEffector)
+                    {
+                        HandleExpressionResult(in context, ref session, ref effectChain, in requestValues, policyValues);
+                    }
+                    else
+                    {
+                        HandleExpressionResult(in context, ref session, Effector, in requestValues, policyValues);
+                    }
+
+                    if (session.Determined)
+                    {
+                        scanner.Interrupt();
+                        break;
+                    }
+
+                    policyIndex++;
+                }
+            }
+            finally
+            {
+                scanner.Interrupt();
             }
         }
         else

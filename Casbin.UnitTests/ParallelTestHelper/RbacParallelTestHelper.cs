@@ -13,7 +13,7 @@ namespace Casbin.UnitTests.ParallelTest
         private IConsumer<TRequest> _consumer;
         public Enforcer _referedEnforcer;
         private ITransactionFactory _transactionFactory;
-        private List<ITransaction<TRequest>> _transactions = new List<ITransaction<TRequest>>();
+        private List<ITransaction<TRequest>> _transactions = [];
 
         public RbacParallelTestHelper(IConsumer<TRequest> consumer, Enforcer enforcer,
             ITransactionFactory transactionFactory,

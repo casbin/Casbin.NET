@@ -523,19 +523,17 @@ namespace Casbin
 
                     foreach (string role in roles)
                     {
-                        if (roleSet.Contains(role))
+                        if (roleSet.Add(role))
                         {
-                            continue;
+                            queue.Enqueue(role);
                         }
-
-                        roleSet.Add(role);
-                        queue.Enqueue(role);
                     }
                 }
             }
-
             roleSet.Remove(name);
-            return roleSet;
+            var roleList = roleSet.ToList();
+            roleList.Sort();
+            return roleList;
         }
 
         /// <summary>
@@ -562,7 +560,6 @@ namespace Casbin
             {
                 result.AddRange(GetPermissionsForUser(enforcer, role, domain));
             }
-
             return result;
         }
 

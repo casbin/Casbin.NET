@@ -26,26 +26,26 @@ public class RoleManagerTest
         //         /  \
         //       u1    u2
 
-        TestRole(roleManager, "u1", "g1", true);
-        TestRole(roleManager, "u1", "g2", false);
-        TestRole(roleManager, "u1", "g3", true);
-        TestRole(roleManager, "u2", "g1", true);
-        TestRole(roleManager, "u2", "g2", false);
-        TestRole(roleManager, "u2", "g3", true);
-        TestRole(roleManager, "u3", "g1", false);
-        TestRole(roleManager, "u3", "g2", true);
-        TestRole(roleManager, "u3", "g3", false);
-        TestRole(roleManager, "u4", "g1", false);
-        TestRole(roleManager, "u4", "g2", true);
-        TestRole(roleManager, "u4", "g3", true);
+        Assert.True(roleManager.HasLink("u1", "g1"));
+        Assert.False(roleManager.HasLink("u1", "g2"));
+        Assert.True(roleManager.HasLink("u1", "g3"));
+        Assert.True(roleManager.HasLink("u2", "g1"));
+        Assert.False(roleManager.HasLink("u2", "g2"));
+        Assert.True(roleManager.HasLink("u2", "g3"));
+        Assert.False(roleManager.HasLink("u3", "g1"));
+        Assert.True(roleManager.HasLink("u3", "g2"));
+        Assert.False(roleManager.HasLink("u3", "g3"));
+        Assert.False(roleManager.HasLink("u4", "g1"));
+        Assert.True(roleManager.HasLink("u4", "g2"));
+        Assert.True(roleManager.HasLink("u4", "g3"));
 
-        TestGetRoles(roleManager, "u1", new List<string> { "g1" });
-        TestGetRoles(roleManager, "u2", new List<string> { "g1" });
-        TestGetRoles(roleManager, "u3", new List<string> { "g2" });
-        TestGetRoles(roleManager, "u4", new List<string> { "g2", "g3" });
-        TestGetRoles(roleManager, "g1", new List<string> { "g3" });
-        TestGetRoles(roleManager, "g2", new List<string>());
-        TestGetRoles(roleManager, "g3", new List<string>());
+        TestGetRoles(roleManager, "u1", ["g1"]);
+        TestGetRoles(roleManager, "u2", ["g1"]);
+        TestGetRoles(roleManager, "u3", ["g2"]);
+        TestGetRoles(roleManager, "u4", ["g2", "g3"]);
+        TestGetRoles(roleManager, "g1", ["g3"]);
+        TestGetRoles(roleManager, "g2", []);
+        TestGetRoles(roleManager, "g3", []);
 
         roleManager.DeleteLink("g1", "g3");
         roleManager.DeleteLink("u4", "g2");
@@ -57,26 +57,26 @@ public class RoleManagerTest
         //         /  \
         //       u1    u2
 
-        TestRole(roleManager, "u1", "g1", true);
-        TestRole(roleManager, "u1", "g2", false);
-        TestRole(roleManager, "u1", "g3", false);
-        TestRole(roleManager, "u2", "g1", true);
-        TestRole(roleManager, "u2", "g2", false);
-        TestRole(roleManager, "u2", "g3", false);
-        TestRole(roleManager, "u3", "g1", false);
-        TestRole(roleManager, "u3", "g2", true);
-        TestRole(roleManager, "u3", "g3", false);
-        TestRole(roleManager, "u4", "g1", false);
-        TestRole(roleManager, "u4", "g2", false);
-        TestRole(roleManager, "u4", "g3", true);
+        Assert.True(roleManager.HasLink("u1", "g1"));
+        Assert.False(roleManager.HasLink("u1", "g2"));
+        Assert.False(roleManager.HasLink("u1", "g3"));
+        Assert.True(roleManager.HasLink("u2", "g1"));
+        Assert.False(roleManager.HasLink("u2", "g2"));
+        Assert.False(roleManager.HasLink("u2", "g3"));
+        Assert.False(roleManager.HasLink("u3", "g1"));
+        Assert.True(roleManager.HasLink("u3", "g2"));
+        Assert.False(roleManager.HasLink("u3", "g3"));
+        Assert.False(roleManager.HasLink("u4", "g1"));
+        Assert.False(roleManager.HasLink("u4", "g2"));
+        Assert.True(roleManager.HasLink("u4", "g3"));
 
-        TestGetRoles(roleManager, "u1", new List<string> { "g1" });
-        TestGetRoles(roleManager, "u2", new List<string> { "g1" });
-        TestGetRoles(roleManager, "u3", new List<string> { "g2" });
-        TestGetRoles(roleManager, "u4", new List<string> { "g3" });
-        TestGetRoles(roleManager, "g1", new List<string>());
-        TestGetRoles(roleManager, "g2", new List<string>());
-        TestGetRoles(roleManager, "g3", new List<string>());
+        TestGetRoles(roleManager, "u1", ["g1"]);
+        TestGetRoles(roleManager, "u2", ["g1"]);
+        TestGetRoles(roleManager, "u3", ["g2"]);
+        TestGetRoles(roleManager, "u4", ["g3"]);
+        TestGetRoles(roleManager, "g1", []);
+        TestGetRoles(roleManager, "g2", []);
+        TestGetRoles(roleManager, "g3", []);
     }
 
     [Fact]
@@ -97,25 +97,25 @@ public class RoleManagerTest
         //         /  \
         //       u1    u2
 
-        TestDomainRole(roleManager, "u1", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u1", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u1", "admin", "domain1", true);
-        TestDomainRole(roleManager, "u1", "admin", "domain2", false);
+        Assert.True(roleManager.HasLink("u1", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u1", "g1", "domain2"));
+        Assert.True(roleManager.HasLink("u1", "admin", "domain1"));
+        Assert.False(roleManager.HasLink("u1", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u2", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u2", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u2", "admin", "domain1", true);
-        TestDomainRole(roleManager, "u2", "admin", "domain2", false);
+        Assert.True(roleManager.HasLink("u2", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u2", "g1", "domain2"));
+        Assert.True(roleManager.HasLink("u2", "admin", "domain1"));
+        Assert.False(roleManager.HasLink("u2", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u3", "g1", "domain1", false);
-        TestDomainRole(roleManager, "u3", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u3", "admin", "domain1", false);
-        TestDomainRole(roleManager, "u3", "admin", "domain2", true);
+        Assert.False(roleManager.HasLink("u3", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u3", "g1", "domain2"));
+        Assert.False(roleManager.HasLink("u3", "admin", "domain1"));
+        Assert.True(roleManager.HasLink("u3", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u4", "g1", "domain1", false);
-        TestDomainRole(roleManager, "u4", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u4", "admin", "domain1", true);
-        TestDomainRole(roleManager, "u4", "admin", "domain2", true);
+        Assert.False(roleManager.HasLink("u4", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u4", "g1", "domain2"));
+        Assert.True(roleManager.HasLink("u4", "admin", "domain1"));
+        Assert.True(roleManager.HasLink("u4", "admin", "domain2"));
 
         roleManager.DeleteLink("g1", "admin", "domain1");
         roleManager.DeleteLink("u4", "admin", "domain2");
@@ -127,25 +127,25 @@ public class RoleManagerTest
         //         /  \
         //       u1    u2
 
-        TestDomainRole(roleManager, "u1", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u1", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u1", "admin", "domain1", false);
-        TestDomainRole(roleManager, "u1", "admin", "domain2", false);
+        Assert.True(roleManager.HasLink("u1", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u1", "g1", "domain2"));
+        Assert.False(roleManager.HasLink("u1", "admin", "domain1"));
+        Assert.False(roleManager.HasLink("u1", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u2", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u2", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u2", "admin", "domain1", false);
-        TestDomainRole(roleManager, "u2", "admin", "domain2", false);
+        Assert.True(roleManager.HasLink("u2", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u2", "g1", "domain2"));
+        Assert.False(roleManager.HasLink("u2", "admin", "domain1"));
+        Assert.False(roleManager.HasLink("u2", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u3", "g1", "domain1", false);
-        TestDomainRole(roleManager, "u3", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u3", "admin", "domain1", false);
-        TestDomainRole(roleManager, "u3", "admin", "domain2", true);
+        Assert.False(roleManager.HasLink("u3", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u3", "g1", "domain2"));
+        Assert.False(roleManager.HasLink("u3", "admin", "domain1"));
+        Assert.True(roleManager.HasLink("u3", "admin", "domain2"));
 
-        TestDomainRole(roleManager, "u4", "g1", "domain1", false);
-        TestDomainRole(roleManager, "u4", "g1", "domain2", false);
-        TestDomainRole(roleManager, "u4", "admin", "domain1", true);
-        TestDomainRole(roleManager, "u4", "admin", "domain2", false);
+        Assert.False(roleManager.HasLink("u4", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u4", "g1", "domain2"));
+        Assert.True(roleManager.HasLink("u4", "admin", "domain1"));
+        Assert.False(roleManager.HasLink("u4", "admin", "domain2"));
     }
 
     [Fact]
@@ -171,18 +171,18 @@ public class RoleManagerTest
         // All data is cleared.
         // No role inheritance now.
 
-        TestRole(roleManager, "u1", "g1", false);
-        TestRole(roleManager, "u1", "g2", false);
-        TestRole(roleManager, "u1", "g3", false);
-        TestRole(roleManager, "u2", "g1", false);
-        TestRole(roleManager, "u2", "g2", false);
-        TestRole(roleManager, "u2", "g3", false);
-        TestRole(roleManager, "u3", "g1", false);
-        TestRole(roleManager, "u3", "g2", false);
-        TestRole(roleManager, "u3", "g3", false);
-        TestRole(roleManager, "u4", "g1", false);
-        TestRole(roleManager, "u4", "g2", false);
-        TestRole(roleManager, "u4", "g3", false);
+        Assert.False(roleManager.HasLink("u1", "g1"));
+        Assert.False(roleManager.HasLink("u1", "g2"));
+        Assert.False(roleManager.HasLink("u1", "g3"));
+        Assert.False(roleManager.HasLink("u2", "g1"));
+        Assert.False(roleManager.HasLink("u2", "g2"));
+        Assert.False(roleManager.HasLink("u2", "g3"));
+        Assert.False(roleManager.HasLink("u3", "g1"));
+        Assert.False(roleManager.HasLink("u3", "g2"));
+        Assert.False(roleManager.HasLink("u3", "g3"));
+        Assert.False(roleManager.HasLink("u4", "g1"));
+        Assert.False(roleManager.HasLink("u4", "g2"));
+        Assert.False(roleManager.HasLink("u4", "g3"));
     }
 
     [Fact]
@@ -204,20 +204,20 @@ public class RoleManagerTest
         // 					|
         // 				   *:u3
 
-        TestDomainRole(roleManager, "u1", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u2", "g1", "domain1", false);
-        TestDomainRole(roleManager, "u2", "g1", "domain2", true);
-        TestDomainRole(roleManager, "u3", "g1", "domain1", true);
-        TestDomainRole(roleManager, "u3", "g1", "domain2", true);
-        TestDomainRole(roleManager, "u1", "g2", "domain1", false);
-        TestDomainRole(roleManager, "u4", "g2", "domain3", true);
-        TestDomainRole(roleManager, "u3", "g2", "domain3", false);
+        Assert.True(roleManager.HasLink("u1", "g1", "domain1"));
+        Assert.False(roleManager.HasLink("u2", "g1", "domain1"));
+        Assert.True(roleManager.HasLink("u2", "g1", "domain2"));
+        Assert.True(roleManager.HasLink("u3", "g1", "domain1"));
+        Assert.True(roleManager.HasLink("u3", "g1", "domain2"));
+        Assert.False(roleManager.HasLink("u1", "g2", "domain1"));
+        Assert.True(roleManager.HasLink("u4", "g2", "domain3"));
+        Assert.False(roleManager.HasLink("u3", "g2", "domain3"));
 
-        TestGetRolesWithDomain(roleManager, "u3", "domain1", new List<string> { "g1" });
-        TestGetRolesWithDomain(roleManager, "u1", "domain1", new List<string> { "g1" });
-        TestGetRolesWithDomain(roleManager, "u3", "domain2", new List<string> { "g1" });
-        TestGetRolesWithDomain(roleManager, "u1", "domain2", new List<string>());
-        TestGetRolesWithDomain(roleManager, "u4", "domain3", new List<string> { "g2" });
+        TestGetRolesWithDomain(roleManager, "u3", "domain1", ["g1"]);
+        TestGetRolesWithDomain(roleManager, "u1", "domain1", ["g1"]);
+        TestGetRolesWithDomain(roleManager, "u3", "domain2", ["g1"]);
+        TestGetRolesWithDomain(roleManager, "u1", "domain2", []);
+        TestGetRolesWithDomain(roleManager, "u4", "domain3", ["g2"]);
     }
 
     [Fact]
@@ -234,7 +234,7 @@ public class RoleManagerTest
         //				|
         // 			*:/book/:id
 
-        TestDomainRole(roleManager, "/book/1", "book_group", "domain1", true);
-        TestDomainRole(roleManager, "/book/2", "book_group", "domain1", true);
+        Assert.True(roleManager.HasLink("/book/1", "book_group", "domain1"));
+        Assert.True(roleManager.HasLink("/book/2", "book_group", "domain1"));
     }
 }

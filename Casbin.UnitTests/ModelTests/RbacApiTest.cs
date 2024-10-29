@@ -23,8 +23,8 @@ public class RbacApiTest
         TestGetRoles(e, "data2_admin", AsList());
         TestGetRoles(e, "non_exist", AsList());
 
-        TestHasRole(e, "alice", "data1_admin", false);
-        TestHasRole(e, "alice", "data2_admin", true);
+        Assert.False(e.HasRoleForUser("alice", "data1_admin"));
+        Assert.True(e.HasRoleForUser("alice", "data2_admin"));
 
         e.AddRoleForUser("alice", "data1_admin");
 
@@ -53,27 +53,27 @@ public class RbacApiTest
 
         e.AddRoleForUser("alice", "data2_admin");
 
-        TestEnforce(e, "alice", "data1", "read", false);
-        TestEnforce(e, "alice", "data1", "write", false);
+        Assert.False(e.Enforce("alice", "data1", "read"));
+        Assert.False(e.Enforce("alice", "data1", "write"));
 
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
 
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
 
         e.DeleteRole("data2_admin");
 
-        TestEnforce(e, "alice", "data1", "read", false);
-        TestEnforce(e, "alice", "data1", "write", false);
-        TestEnforce(e, "alice", "data2", "read", false);
-        TestEnforce(e, "alice", "data2", "write", false);
-        TestEnforce(e, "bob", "data1", "read", false);
-        TestEnforce(e, "bob", "data1", "write", false);
-        TestEnforce(e, "bob", "data2", "read", false);
-        TestEnforce(e, "bob", "data2", "write", true);
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("alice", "data2", "read"));
+        Assert.False(e.Enforce("alice", "data2", "write"));
+        Assert.False(e.Enforce("bob", "data1", "read"));
+        Assert.False(e.Enforce("bob", "data1", "write"));
+        Assert.False(e.Enforce("bob", "data2", "read"));
+        Assert.True(e.Enforce("bob", "data2", "write"));
     }
 
     [Fact]
@@ -87,8 +87,8 @@ public class RbacApiTest
         TestGetRoles(e, "data2_admin", AsList());
         TestGetRoles(e, "non_exist", AsList());
 
-        TestHasRole(e, "alice", "data1_admin", false);
-        TestHasRole(e, "alice", "data2_admin", true);
+        Assert.False(e.HasRoleForUser("alice", "data1_admin"));
+        Assert.True(e.HasRoleForUser("alice", "data2_admin"));
 
         await e.AddRoleForUserAsync("alice", "data1_admin");
 
@@ -117,27 +117,27 @@ public class RbacApiTest
 
         await e.AddRoleForUserAsync("alice", "data2_admin");
 
-        await TestEnforceAsync(e, "alice", "data1", "read", false);
-        await TestEnforceAsync(e, "alice", "data1", "write", false);
+        Assert.False(await e.EnforceAsync("alice", "data1", "read"));
+        Assert.False(await e.EnforceAsync("alice", "data1", "write"));
 
-        await TestEnforceAsync(e, "alice", "data2", "read", true);
-        await TestEnforceAsync(e, "alice", "data2", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "write"));
 
-        await TestEnforceAsync(e, "bob", "data1", "read", false);
-        await TestEnforceAsync(e, "bob", "data1", "write", false);
-        await TestEnforceAsync(e, "bob", "data2", "read", false);
-        await TestEnforceAsync(e, "bob", "data2", "write", true);
+        Assert.False(await e.EnforceAsync("bob", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "data2", "write"));
 
         await e.DeleteRoleAsync("data2_admin");
 
-        await TestEnforceAsync(e, "alice", "data1", "read", false);
-        await TestEnforceAsync(e, "alice", "data1", "write", false);
-        await TestEnforceAsync(e, "alice", "data2", "read", false);
-        await TestEnforceAsync(e, "alice", "data2", "write", false);
-        await TestEnforceAsync(e, "bob", "data1", "read", false);
-        await TestEnforceAsync(e, "bob", "data1", "write", false);
-        await TestEnforceAsync(e, "bob", "data2", "read", false);
-        await TestEnforceAsync(e, "bob", "data2", "write", true);
+        Assert.False(await e.EnforceAsync("bob", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "write"));
+        Assert.False(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.False(await e.EnforceAsync("alice", "data2", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "read"));
+        Assert.False(await e.EnforceAsync("bob", "data1", "write"));
+        Assert.False(await e.EnforceAsync("bob", "data2", "read"));
+        Assert.True(await e.EnforceAsync("bob", "data2", "write"));
     }
 
     [Fact]
@@ -146,8 +146,8 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
-        TestHasRole(e, "alice", "admin", true, "domain1");
-        TestHasRole(e, "alice", "admin", false, "domain2");
+        Assert.True(e.HasRoleForUser("alice", "admin", "domain1"));
+        Assert.False(e.HasRoleForUser("alice", "admin", "domain2"));
 
         TestGetRoles(e, "alice", AsList("admin"), "domain1");
         TestGetRoles(e, "bob", AsList(), "domain1");
@@ -204,8 +204,8 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetNewRbacWithDomainsTestModel());
         e.BuildRoleLinks();
 
-        TestHasRole(e, "alice", "admin", true, "domain1");
-        TestHasRole(e, "alice", "admin", false, "domain2");
+        Assert.True(e.HasRoleForUser("alice", "admin", "domain1"));
+        Assert.False(e.HasRoleForUser("alice", "admin", "domain2"));
 
         TestGetRoles(e, "alice", AsList("admin"), "domain1");
         TestGetRoles(e, "bob", AsList(), "domain1");
@@ -270,9 +270,9 @@ public class RbacApiTest
 
         _ = e.AddRolesForUser("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
         TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin", "data3_admin"));
-        TestEnforce(e, "alice", "data1", "read", true);
-        TestEnforce(e, "alice", "data2", "read", true);
-        TestEnforce(e, "alice", "data2", "write", true);
+        Assert.True(e.Enforce("alice", "data1", "read"));
+        Assert.True(e.Enforce("alice", "data2", "read"));
+        Assert.True(e.Enforce("alice", "data2", "write"));
     }
 
     [Fact]
@@ -289,9 +289,9 @@ public class RbacApiTest
 
         _ = await e.AddRolesForUserAsync("alice", AsList("data1_admin", "data2_admin", "data3_admin"));
         TestGetRoles(e, "alice", AsList("data1_admin", "data2_admin", "data3_admin"));
-        await TestEnforceAsync(e, "alice", "data1", "read", true);
-        await TestEnforceAsync(e, "alice", "data2", "read", true);
-        await TestEnforceAsync(e, "alice", "data2", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "data1", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "read"));
+        Assert.True(await e.EnforceAsync("alice", "data2", "write"));
     }
 
     [Fact]
@@ -300,46 +300,46 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
         e.BuildRoleLinks();
 
-        TestEnforceWithoutUsers(e, "alice", "read", true);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", false);
-        TestEnforceWithoutUsers(e, "bob", "write", true);
+        Assert.True(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.False(e.Enforce("bob", "read"));
+        Assert.True(e.Enforce("bob", "write"));
 
         TestGetPermissions(e, "alice", AsList(AsList("alice", "read")));
         TestGetPermissions(e, "bob", AsList(AsList("bob", "write")));
 
-        TestHasPermission(e, "alice", AsList("read"), true);
-        TestHasPermission(e, "alice", AsList("write"), false);
-        TestHasPermission(e, "bob", AsList("read"), false);
-        TestHasPermission(e, "bob", AsList("write"), true);
+        Assert.True(e.HasPermissionForUser("alice", "read"));
+        Assert.False(e.HasPermissionForUser("alice", "write"));
+        Assert.False(e.HasPermissionForUser("bob", "read"));
+        Assert.True(e.HasPermissionForUser("bob", "write"));
 
         _ = e.DeletePermission("read");
 
-        TestEnforceWithoutUsers(e, "alice", "read", false);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", false);
-        TestEnforceWithoutUsers(e, "bob", "write", true);
+        Assert.False(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.False(e.Enforce("bob", "read"));
+        Assert.True(e.Enforce("bob", "write"));
 
         _ = e.AddPermissionForUser("bob", "read");
 
-        TestEnforceWithoutUsers(e, "alice", "read", false);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", true);
-        TestEnforceWithoutUsers(e, "bob", "write", true);
+        Assert.False(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.True(e.Enforce("bob", "read"));
+        Assert.True(e.Enforce("bob", "write"));
 
         _ = e.DeletePermissionForUser("bob", "read");
 
-        TestEnforceWithoutUsers(e, "alice", "read", false);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", false);
-        TestEnforceWithoutUsers(e, "bob", "write", true);
+        Assert.False(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.False(e.Enforce("bob", "read"));
+        Assert.True(e.Enforce("bob", "write"));
 
         _ = e.DeletePermissionsForUser("bob");
 
-        TestEnforceWithoutUsers(e, "alice", "read", false);
-        TestEnforceWithoutUsers(e, "alice", "write", false);
-        TestEnforceWithoutUsers(e, "bob", "read", false);
-        TestEnforceWithoutUsers(e, "bob", "write", false);
+        Assert.False(e.Enforce("alice", "read"));
+        Assert.False(e.Enforce("alice", "write"));
+        Assert.False(e.Enforce("bob", "read"));
+        Assert.False(e.Enforce("bob", "write"));
     }
 
     [Fact]
@@ -348,46 +348,46 @@ public class RbacApiTest
         Enforcer e = new(TestModelFixture.GetBasicWithoutResourceTestModel());
         e.BuildRoleLinks();
 
-        await TestEnforceWithoutUsersAsync(e, "alice", "read", true);
-        await TestEnforceWithoutUsersAsync(e, "alice", "write", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "write", true);
+        Assert.True(await e.EnforceAsync("alice", "read"));
+        Assert.False(await e.EnforceAsync("alice", "write"));
+        Assert.False(await e.EnforceAsync("bob", "read"));
+        Assert.True(await e.EnforceAsync("bob", "write"));
 
         TestGetPermissions(e, "alice", AsList(AsList("alice", "read")));
         TestGetPermissions(e, "bob", AsList(AsList("bob", "write")));
 
-        TestHasPermission(e, "alice", AsList("read"), true);
-        TestHasPermission(e, "alice", AsList("write"), false);
-        TestHasPermission(e, "bob", AsList("read"), false);
-        TestHasPermission(e, "bob", AsList("write"), true);
+        Assert.True(e.HasPermissionForUser("alice", "read"));
+        Assert.False(e.HasPermissionForUser("alice", "write"));
+        Assert.False(e.HasPermissionForUser("bob", "read"));
+        Assert.True(e.HasPermissionForUser("bob", "write"));
 
         _ = await e.DeletePermissionAsync("read");
 
-        await TestEnforceWithoutUsersAsync(e, "alice", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "alice", "write", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "write", true);
+        Assert.False(await e.EnforceAsync("alice", "read"));
+        Assert.False(await e.EnforceAsync("alice", "write"));
+        Assert.False(await e.EnforceAsync("bob", "read"));
+        Assert.True(await e.EnforceAsync("bob", "write"));
 
         _ = await e.AddPermissionForUserAsync("bob", "read");
 
-        await TestEnforceWithoutUsersAsync(e, "alice", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "alice", "write", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "read", true);
-        await TestEnforceWithoutUsersAsync(e, "bob", "write", true);
+        Assert.False(await e.EnforceAsync("alice", "read"));
+        Assert.False(await e.EnforceAsync("alice", "write"));
+        Assert.True(await e.EnforceAsync("bob", "read"));
+        Assert.True(await e.EnforceAsync("bob", "write"));
 
         _ = await e.DeletePermissionForUserAsync("bob", "read");
 
-        await TestEnforceWithoutUsersAsync(e, "alice", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "alice", "write", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "write", true);
+        Assert.False(await e.EnforceAsync("alice", "read"));
+        Assert.False(await e.EnforceAsync("alice", "write"));
+        Assert.False(await e.EnforceAsync("bob", "read"));
+        Assert.True(await e.EnforceAsync("bob", "write"));
 
         _ = await e.DeletePermissionsForUserAsync("bob");
 
-        await TestEnforceWithoutUsersAsync(e, "alice", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "alice", "write", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "read", false);
-        await TestEnforceWithoutUsersAsync(e, "bob", "write", false);
+        Assert.False(await e.EnforceAsync("alice", "read"));
+        Assert.False(await e.EnforceAsync("alice", "write"));
+        Assert.False(await e.EnforceAsync("bob", "read"));
+        Assert.False(await e.EnforceAsync("bob", "write"));
     }
 
     [Fact]
@@ -442,7 +442,7 @@ public class RbacApiTest
             AsList("alice", "data1", "read")));
         TestGetPermissions(e, "bob", AsList(
             AsList("bob", "data2", "write")));
-        Assert.Equal(new[] { "admin", "data1_admin", "data2_admin" },
+        Assert.Equal(["admin", "data1_admin", "data2_admin"],
             e.GetImplicitRolesForUser("alice"));
         Assert.Equal(new string[0],
             e.GetImplicitRolesForUser("bob"));
@@ -457,10 +457,10 @@ public class RbacApiTest
             TestModelFixture.RbacWithHierarchyPolicyText));
         e.BuildRoleLinks();
 
-        Assert.Equal(new[] { "alice" }, e.GetImplicitUsersForPermission("data1", "read"));
-        Assert.Equal(new[] { "alice" }, e.GetImplicitUsersForPermission("data1", "write"));
-        Assert.Equal(new[] { "alice" }, e.GetImplicitUsersForPermission("data2", "read"));
-        Assert.Equal(new[] { "alice", "bob" }, e.GetImplicitUsersForPermission("data2", "write"));
+        Assert.Equal(["alice"], e.GetImplicitUsersForPermission("data1", "read"));
+        Assert.Equal(["alice"], e.GetImplicitUsersForPermission("data1", "write"));
+        Assert.Equal(["alice"], e.GetImplicitUsersForPermission("data2", "read"));
+        Assert.Equal(["alice", "bob"], e.GetImplicitUsersForPermission("data2", "write"));
 
         // Act
         e.ClearPolicy();
@@ -469,6 +469,6 @@ public class RbacApiTest
         _ = e.AddGroupingPolicy("alice", "admin");
 
         // Assert
-        Assert.Equal(new[] { "bob", "alice" }, e.GetImplicitUsersForPermission("data1", "read"));
+        Assert.Equal(["bob", "alice"], e.GetImplicitUsersForPermission("data1", "read"));
     }
 }

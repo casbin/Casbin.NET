@@ -6,7 +6,7 @@ namespace Casbin.Benchmark
     {
         public static string GetTestFilePath(string fileName)
         {
-            return Path.Combine("examples", fileName);
+            return Path.Combine("Examples", fileName);
         }
     }
 }

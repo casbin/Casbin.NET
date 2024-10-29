@@ -24,12 +24,12 @@ jobs:
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
       with:
         fetch-depth: 0
 
     - name: Setup .NET SDK
-      uses: actions/setup-dotnet@v1
+      uses: actions/setup-dotnet@v4
       with:
         dotnet-version: |
           3.1.x
@@ -75,7 +75,7 @@ jobs:
         }
 
     - name: Upload test results artefacts
-      uses: actions/upload-artifact@v1.0.0
+      uses: actions/upload-artifact@v4
       with:
         name: "drop-ci-test-results"
         path: './test-results'
@@ -87,12 +87,17 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
 
       - name: Run semantic-release
         run: |
           export PATH=$PATH:$(yarn global bin)
-          yarn global add semantic-release@19.0.2
+          yarn global add semantic-release@24.1.1
           semantic-release
 
   push-packages:
@@ -102,7 +107,7 @@ jobs:
 
       steps:
         - name: Checkout
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
           with:
             fetch-depth: 0
 
@@ -113,7 +118,7 @@ jobs:
           run: git tag -l -n
 
         - name: Setup .NET SDK
-          uses: actions/setup-dotnet@v1
+          uses: actions/setup-dotnet@v4
           with:
             dotnet-version: |
               3.1.x
@@ -148,7 +153,7 @@ jobs:
             }
 
         - name: Upload packages artefacts
-          uses: actions/upload-artifact@v1.0.0
+          uses: actions/upload-artifact@v4
           with:
             name: "drop-ci-packages"
             path: './packages'

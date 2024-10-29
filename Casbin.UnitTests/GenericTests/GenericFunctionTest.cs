@@ -30,6 +30,7 @@ public class GenericFunctionTest
         Assert.False(func1(Request.CreateValues("B", 1), Policy.CreateValues("B", 2)));
     }
 
+#if !NET452
     [Fact]
     public void TestGenericFunctionModel()
     {
@@ -63,5 +64,6 @@ public class GenericFunctionTest
         Assert.False(e.Enforce(1, 2));
         Assert.True(e.Enforce("1", "111"));
     }
+#endif
 
 }

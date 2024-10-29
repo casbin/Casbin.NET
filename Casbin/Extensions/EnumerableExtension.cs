@@ -173,5 +173,56 @@ namespace Casbin
         }
 
         #endregion
+
+        #region SetEquals
+        internal static bool SetEquals<T>(this IEnumerable<T> enumerable, IEnumerable<T> anotherEnumerable)
+        {
+            if (enumerable is null || anotherEnumerable is null)
+            {
+                return false;
+            }
+
+            if (enumerable is T[] array && anotherEnumerable is T[] anotherArray)
+            {
+                return array.SetEquals(anotherArray);
+            }
+
+            if (enumerable is IReadOnlyList<T> list && anotherEnumerable is IReadOnlyList<T> anotherList)
+            {
+                return list.SetEquals(anotherList);
+            }
+
+            var set = new HashSet<T>(enumerable);
+            var anotherSet = new HashSet<T>(anotherEnumerable);
+
+            return set.SetEquals(anotherSet);
+        }
+
+        internal static bool SetEquals<T>(this T[] array, T[] anotherArray)
+        {
+            if (array is null || anotherArray is null)
+            {
+                return false;
+            }
+
+            var set = new HashSet<T>(array);
+            var anotherSet = new HashSet<T>(anotherArray);
+
+            return set.SetEquals(anotherSet);
+        }
+
+        internal static bool SetEquals<T>(this IReadOnlyList<T> list, IReadOnlyList<T> anotherList)
+        {
+            if (list is null || anotherList is null)
+            {
+                return false;
+            }
+
+            var set = new HashSet<T>(list);
+            var anotherSet = new HashSet<T>(anotherList);
+
+            return set.SetEquals(anotherSet);
+        }
+        #endregion
     }
 }

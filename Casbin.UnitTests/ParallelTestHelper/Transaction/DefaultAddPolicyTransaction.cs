@@ -8,7 +8,7 @@ namespace Casbin.UnitTests.ParallelTest
 {
     public class DefaultAddPolicyTransaction<TRequest> : ITransaction<TRequest> where TRequest : IRequestValues
     {
-        private List<TRequest> _requests = new List<TRequest>();
+        private List<TRequest> _requests = [];
         public bool ExpectedResult { get; private set; } = false;
         public bool ActualResult { get; private set; } = true;
         public bool HasCompleted { get; private set; } = false;

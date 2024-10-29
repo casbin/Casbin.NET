@@ -8,9 +8,8 @@ namespace Casbin.UnitTests.ModelTests;
 [Collection("Model collection")]
 public class RbacApiWithDomainsTest
 {
-    private readonly TestModelFixture TestModelFixture;
-
-    public RbacApiWithDomainsTest(TestModelFixture testModelFixture) => TestModelFixture = testModelFixture;
+    private readonly TestModelFixture _testModelFixture;
+    public RbacApiWithDomainsTest(TestModelFixture testModelFixture) => _testModelFixture = testModelFixture;
 
     [Fact]
     public void TestGetDomainsForUser()
