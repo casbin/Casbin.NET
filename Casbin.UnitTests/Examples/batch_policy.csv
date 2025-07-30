@@ -1,0 +1,2 @@
+p, 77, Write, r.obj.type == "File" || r.obj.color== "Red", allow
+p, 55, Read, r.obj.type == "View", allow
