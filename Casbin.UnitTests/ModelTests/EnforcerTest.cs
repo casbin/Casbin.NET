@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Casbin.Model;
 using Casbin.Persist;
@@ -8,6 +10,10 @@ using Casbin.Persist.Adapter.Stream;
 using Casbin.Rbac;
 using Casbin.UnitTests.Fixtures;
 using Casbin.UnitTests.Mock;
+using DynamicExpresso;
+using Microsoft.VisualStudio.TestPlatform.CommunicationUtilities.DataCollection;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Xunit;
 using Xunit.Abstractions;
 using static Casbin.UnitTests.Util.TestUtil;
@@ -1234,6 +1240,136 @@ public class EnforcerTest
         await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data1", "write", []);
         await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "read", []);
         await e.TestEnforceExWithMatcherAsync(matcher, "bob", "data2", "write", []);
+    }
+    public class ObjectRequest : IRequestValues
+    {
+        public string Sub { get; set; }
+        public Attributes Obj { get; set; }
+        public string Action { get; set; }
+
+        public bool TrySetValue<T>(int index, T value)
+        {
+            try
+            {
+                switch (index)
+                {
+                    case 0:
+                        Sub = value as string ?? throw new InvalidCastException();
+                        break;
+                    case 1:
+                        Obj = value as Attributes ?? throw new InvalidCastException();
+                        break;
+                    case 2:
+                        Action = value as string ?? throw new InvalidCastException();
+                        break;
+                    default:
+                        return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public string this[int index] => index switch
+        {
+            0 => Sub,
+            1 => Obj.ToString(),
+            2 => Action,
+            _ => throw new IndexOutOfRangeException()
+        };
+        public object? GetValue(int index) => index switch
+        {
+            0 => Sub,
+            1 => Obj,
+            2 => Action,
+            _ => throw new IndexOutOfRangeException()
+        };
+
+        public int Count => 3;
+    }
+
+
+    public class Attributes : IRequestValues
+    {
+        public string type { get; set; }
+        public string color { get; set; }
+
+        public bool TrySetValue<T>(int index, T value)
+        {
+            try
+            {
+                switch (index)
+                {
+                    case 0:
+                        type = value as string ?? throw new InvalidCastException();
+                        break;
+                    case 1:
+                        color = value as string ?? throw new InvalidCastException();
+                        break;
+                    default:
+                        return false;
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public string this[int index] => index switch
+        {
+            0 => type,
+            1 => color,
+            _ => throw new IndexOutOfRangeException()
+        };
+
+        public object? GetValue(int index) => index switch
+        {
+            0 => type,
+            1 => color,
+            _ => throw new IndexOutOfRangeException()
+        };
+
+        public int Count => 2;
+    }
+
+    [Fact]
+    public void TestBatchEnforceWithEvalShouldFail()
+    {
+        var e = new Enforcer("Examples/batch_model.conf", "Examples/batch_policy.csv");
+
+        var reqs = new List<ObjectRequest>
+    {
+        new ObjectRequest
+        {
+            Sub = "77",
+            Obj = new Attributes { type = "File", color = "Blue" },
+            Action = "Write"
+        },
+        new ObjectRequest
+        {
+            Sub = "77",
+            Obj = new Attributes { type = "Folder", color = "Red" },
+            Action = "Write"
+        }
+    };
+        //Request<string,Attributes,string>[] requests = new Request<string, Attributes, string>[2];
+        var request1 = Request.CreateValues(reqs[0].Sub, reqs[0].Obj, reqs[0].Action);
+        var request2 = Request.CreateValues(reqs[1].Sub, reqs[1].Obj, reqs[1].Action);
+        RequestValues<string, Attributes, string>[] requests = new[] { request1, request2 };
+        // 使用 BatchEnforce：全返回 false
+        var batchResult = e.BatchEnforce(requests).ToList();
+        Assert.All(batchResult, result => Assert.True(result));
+
+        // 使用 Enforce 循环：正确判断
+        foreach (var req in reqs)
+        {
+            bool result = e.Enforce(req.Sub, req.Obj, req.Action);
+            Assert.True(result); // 会通过
+        }
     }
 
     #endregion
