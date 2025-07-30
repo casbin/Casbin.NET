@@ -1352,19 +1352,15 @@ public class EnforcerTest
             Action = "Write"
         }
     };
-        //Request<string,Attributes,string>[] requests = new Request<string, Attributes, string>[2];
         var request1 = Request.CreateValues(reqs[0].Sub, reqs[0].Obj, reqs[0].Action);
         var request2 = Request.CreateValues(reqs[1].Sub, reqs[1].Obj, reqs[1].Action);
         RequestValues<string, Attributes, string>[] requests = new[] { request1, request2 };
-        // 使用 BatchEnforce：全返回 false
         var batchResult = e.BatchEnforce(requests).ToList();
         Assert.All(batchResult, result => Assert.True(result));
-
-        // 使用 Enforce 循环：正确判断
         foreach (var req in reqs)
         {
             bool result = e.Enforce(req.Sub, req.Obj, req.Action);
-            Assert.True(result); // 会通过
+            Assert.True(result);
         }
     }
 
