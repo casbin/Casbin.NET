@@ -243,7 +243,7 @@ namespace Casbin
         /// <param name="enforcer"></param>
         /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
         /// <returns></returns>
-        public static async Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, Filter filter)
+        public static async Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, IPolicyFilter filter)
         {
             bool result = await enforcer.Model.LoadFilteredPolicyAsync(filter);
             if (result is false)
@@ -258,6 +258,16 @@ namespace Casbin
 
             return true;
         }
+
+        /// <summary>
+        /// Reloads a filtered policy from file/database.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        [Obsolete("Please use PolicyFilter instead")]
+        public static Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, Filter filter) =>
+            LoadFilteredPolicyAsync(enforcer, filter as IPolicyFilter);
 
         /// <summary>
         /// Saves the current policy (usually after changed with Casbin API)
