@@ -43,7 +43,7 @@ public class PolicyFilter : IPolicyFilter
         string policyType, int fieldIndex, IPolicyValues values)
         where T : IPersistPolicy
     {
-        if (fieldIndex > 12)
+        if (fieldIndex > 14)
         {
             throw new ArgumentOutOfRangeException(nameof(fieldIndex));
         }
@@ -56,7 +56,7 @@ public class PolicyFilter : IPolicyFilter
 
         int lastIndex = fieldIndex + fieldValueCount - 1;
 
-        if (lastIndex > 12)
+        if (lastIndex > 14)
         {
             throw new ArgumentOutOfRangeException(nameof(lastIndex));
         }
@@ -155,19 +155,37 @@ public class PolicyFilter : IPolicyFilter
 
         if (fieldIndex <= 10 && lastIndex >= 10)
         {
-            string field = values[5 - fieldIndex];
+            string field = values[10 - fieldIndex];
             if (string.IsNullOrWhiteSpace(field) is false)
             {
                 query = query.Where(p => p.Value11 == field);
             }
         }
 
-        if (lastIndex is 11) // and fieldIndex <= 11
+        if (fieldIndex <= 11 && lastIndex >= 11)
         {
             string field = values[11 - fieldIndex];
             if (string.IsNullOrWhiteSpace(field) is false)
             {
                 query = query.Where(p => p.Value12 == field);
+            }
+        }
+
+        if (fieldIndex <= 12 && lastIndex >= 12)
+        {
+            string field = values[12 - fieldIndex];
+            if (string.IsNullOrWhiteSpace(field) is false)
+            {
+                query = query.Where(p => p.Value13 == field);
+            }
+        }
+
+        if (fieldIndex <= 13 && lastIndex >= 13)
+        {
+            string field = values[13 - fieldIndex];
+            if (string.IsNullOrWhiteSpace(field) is false)
+            {
+                query = query.Where(p => p.Value14 == field);
             }
         }
 

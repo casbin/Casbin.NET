@@ -9,7 +9,7 @@ public static class Policy
 {
     public static bool SupportGeneric(int count)
     {
-        return count is >= 1 and <= 12;
+        return count is >= 1 and <= 14;
     }
 
     public static PolicyValues<T1> CreateValues<T1>(T1 value1) => new(value1);
@@ -55,6 +55,18 @@ public static class Policy
             T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12) =>
         new(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12);
 
+    public static PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>
+        CreateValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(T1 value1, T2 value2, T3 value3,
+            T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12,
+            T13 value13) =>
+        new(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13);
+
+    public static PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>
+        CreateValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(T1 value1, T2 value2, T3 value3,
+            T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12,
+            T13 value13, T14 value14) =>
+        new(value1, value2, value3, value4, value5, value6, value7, value8, value9, value10, value11, value12, value13, value14);
+
     public static IPolicyValues ValuesFrom(IReadOnlyList<string> values) =>
         values.Count switch
         {
@@ -88,6 +100,16 @@ public static class Policy
                 values[3] ?? string.Empty, values[4] ?? string.Empty, values[5] ?? string.Empty,
                 values[6] ?? string.Empty, values[7] ?? string.Empty, values[8] ?? string.Empty,
                 values[9] ?? string.Empty, values[10] ?? string.Empty, values[11] ?? string.Empty),
+            13 => CreateValues(values[0] ?? string.Empty, values[1] ?? string.Empty, values[2] ?? string.Empty,
+                values[3] ?? string.Empty, values[4] ?? string.Empty, values[5] ?? string.Empty,
+                values[6] ?? string.Empty, values[7] ?? string.Empty, values[8] ?? string.Empty,
+                values[9] ?? string.Empty, values[10] ?? string.Empty, values[11] ?? string.Empty,
+                values[12] ?? string.Empty),
+            14 => CreateValues(values[0] ?? string.Empty, values[1] ?? string.Empty, values[2] ?? string.Empty,
+                values[3] ?? string.Empty, values[4] ?? string.Empty, values[5] ?? string.Empty,
+                values[6] ?? string.Empty, values[7] ?? string.Empty, values[8] ?? string.Empty,
+                values[9] ?? string.Empty, values[10] ?? string.Empty, values[11] ?? string.Empty,
+                values[12] ?? string.Empty, values[13] ?? string.Empty),
             _ => new StringListPolicyValues(values)
         };
 
@@ -136,6 +158,20 @@ public static class Policy
                 values.GetValueOrDefault(6) ?? string.Empty, values.GetValueOrDefault(7) ?? string.Empty,
                 values.GetValueOrDefault(8) ?? string.Empty, values.GetValueOrDefault(9) ?? string.Empty,
                 values.GetValueOrDefault(10) ?? string.Empty, values.GetValueOrDefault(11) ?? string.Empty),
+            13 => CreateValues(values.GetValueOrDefault(0) ?? string.Empty, values.GetValueOrDefault(1) ?? string.Empty,
+                values.GetValueOrDefault(2) ?? string.Empty, values.GetValueOrDefault(3) ?? string.Empty,
+                values.GetValueOrDefault(4) ?? string.Empty, values.GetValueOrDefault(5) ?? string.Empty,
+                values.GetValueOrDefault(6) ?? string.Empty, values.GetValueOrDefault(7) ?? string.Empty,
+                values.GetValueOrDefault(8) ?? string.Empty, values.GetValueOrDefault(9) ?? string.Empty,
+                values.GetValueOrDefault(10) ?? string.Empty, values.GetValueOrDefault(11) ?? string.Empty,
+                values.GetValueOrDefault(12) ?? string.Empty),
+            14 => CreateValues(values.GetValueOrDefault(0) ?? string.Empty, values.GetValueOrDefault(1) ?? string.Empty,
+                values.GetValueOrDefault(2) ?? string.Empty, values.GetValueOrDefault(3) ?? string.Empty,
+                values.GetValueOrDefault(4) ?? string.Empty, values.GetValueOrDefault(5) ?? string.Empty,
+                values.GetValueOrDefault(6) ?? string.Empty, values.GetValueOrDefault(7) ?? string.Empty,
+                values.GetValueOrDefault(8) ?? string.Empty, values.GetValueOrDefault(9) ?? string.Empty,
+                values.GetValueOrDefault(10) ?? string.Empty, values.GetValueOrDefault(11) ?? string.Empty,
+                values.GetValueOrDefault(12) ?? string.Empty, values.GetValueOrDefault(13) ?? string.Empty),
             _ => new StringListPolicyValues(values, requiredCount)
         };
 
@@ -148,7 +184,15 @@ public static class Policy
     public static IPolicyValues ValuesFrom(IPersistPolicy values)
     {
         int count;
-        if (string.IsNullOrWhiteSpace(values.Value12) is false)
+        if (string.IsNullOrWhiteSpace(values.Value14) is false)
+        {
+            count = 14;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value13) is false)
+        {
+            count = 13;
+        }
+        else if (string.IsNullOrWhiteSpace(values.Value12) is false)
         {
             count = 12;
         }
@@ -223,7 +267,13 @@ public static class Policy
             12 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
                 values.Value6, values.Value7, values.Value8, values.Value9, values.Value10, values.Value11,
                 values.Value12),
-            _ => throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be between 1 and 12.")
+            13 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9, values.Value10, values.Value11,
+                values.Value12, values.Value13),
+            14 => CreateValues(values.Value1, values.Value2, values.Value3, values.Value4, values.Value5,
+                values.Value6, values.Value7, values.Value8, values.Value9, values.Value10, values.Value11,
+                values.Value12, values.Value13, values.Value14),
+            _ => throw new ArgumentOutOfRangeException(nameof(count), count, "Count must be between 1 and 14.")
         };
     }
 
@@ -265,8 +315,20 @@ public static class Policy
                 values.Value6 ?? string.Empty, values.Value7 ?? string.Empty, values.Value8 ?? string.Empty,
                 values.Value9 ?? string.Empty, values.Value10 ?? string.Empty,
                 values.Value11 ?? string.Empty, values.Value12 ?? string.Empty),
+            13 => CreateValues(values.Value1 ?? string.Empty, values.Value2 ?? string.Empty,
+                values.Value3 ?? string.Empty, values.Value4 ?? string.Empty, values.Value5 ?? string.Empty,
+                values.Value6 ?? string.Empty, values.Value7 ?? string.Empty, values.Value8 ?? string.Empty,
+                values.Value9 ?? string.Empty, values.Value10 ?? string.Empty,
+                values.Value11 ?? string.Empty, values.Value12 ?? string.Empty,
+                values.Value13 ?? string.Empty),
+            14 => CreateValues(values.Value1 ?? string.Empty, values.Value2 ?? string.Empty,
+                values.Value3 ?? string.Empty, values.Value4 ?? string.Empty, values.Value5 ?? string.Empty,
+                values.Value6 ?? string.Empty, values.Value7 ?? string.Empty, values.Value8 ?? string.Empty,
+                values.Value9 ?? string.Empty, values.Value10 ?? string.Empty,
+                values.Value11 ?? string.Empty, values.Value12 ?? string.Empty,
+                values.Value13 ?? string.Empty, values.Value14 ?? string.Empty),
             _ => throw new ArgumentOutOfRangeException(nameof(requiredCount), requiredCount,
-                "Required count must be between 1 and 12.")
+                "Required count must be between 1 and 14.")
         };
 
     public static IReadOnlyList<IPolicyValues> ValuesListFrom(IEnumerable<IEnumerable<string>> valuesList)

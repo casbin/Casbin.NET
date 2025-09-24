@@ -281,13 +281,71 @@ public record PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(T1
         new PolicyEnumerator<PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>>(this);
 }
 
+public record PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(T1 Value1, T2 Value2, T3 Value3,
+    T4 Value4,
+    T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11, T12 Value12, T13 Value13) : PolicyValues
+{
+    public override int Count => 13;
+
+    public override string this[int index] => index switch
+    {
+        0 => ToStringValue(Value1),
+        1 => ToStringValue(Value2),
+        2 => ToStringValue(Value3),
+        3 => ToStringValue(Value4),
+        4 => ToStringValue(Value5),
+        5 => ToStringValue(Value6),
+        6 => ToStringValue(Value7),
+        7 => ToStringValue(Value8),
+        8 => ToStringValue(Value9),
+        9 => ToStringValue(Value10),
+        10 => ToStringValue(Value11),
+        11 => ToStringValue(Value12),
+        12 => ToStringValue(Value13),
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>>(this);
+}
+
+public record PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(T1 Value1, T2 Value2, T3 Value3,
+    T4 Value4,
+    T5 Value5, T6 Value6, T7 Value7, T8 Value8, T9 Value9, T10 Value10, T11 Value11, T12 Value12, T13 Value13, T14 Value14) : PolicyValues
+{
+    public override int Count => 14;
+
+    public override string this[int index] => index switch
+    {
+        0 => ToStringValue(Value1),
+        1 => ToStringValue(Value2),
+        2 => ToStringValue(Value3),
+        3 => ToStringValue(Value4),
+        4 => ToStringValue(Value5),
+        5 => ToStringValue(Value6),
+        6 => ToStringValue(Value7),
+        7 => ToStringValue(Value8),
+        8 => ToStringValue(Value9),
+        9 => ToStringValue(Value10),
+        10 => ToStringValue(Value11),
+        11 => ToStringValue(Value12),
+        12 => ToStringValue(Value13),
+        13 => ToStringValue(Value14),
+        _ => throw new ArgumentOutOfRangeException(nameof(index))
+    };
+
+    public override IEnumerator<string> GetEnumerator() =>
+        new PolicyEnumerator<PolicyValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>>(this);
+}
+
 internal record DummyPolicyValues(string Value1 = "", string Value2 = "", string Value3 = "",
     string Value4 = "", string Value5 = "", string Value6 = "",
     string Value7 = "", string Value8 = "", string Value9 = "",
-    string Value10 = "", string Value11 = "", string Value12 = "") : PolicyValues
+    string Value10 = "", string Value11 = "", string Value12 = "",
+    string Value13 = "", string Value14 = "") : PolicyValues
 {
     public static new readonly DummyPolicyValues Empty = new();
-    public override int Count => 12;
+    public override int Count => 14;
 
     public override string this[int index] => index switch
     {
@@ -303,6 +361,8 @@ internal record DummyPolicyValues(string Value1 = "", string Value2 = "", string
         9 => Value10,
         10 => Value11,
         11 => Value12,
+        12 => Value13,
+        13 => Value14,
         _ => ""
     };
 

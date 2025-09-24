@@ -12,7 +12,7 @@ public class SupportCountTest
     [Fact]
     public void TestSupportCount()
     {
-        for (int i = 1; i <= 13; i++)
+        for (int i = 1; i <= 14; i++)
         {
             IEnforcer enforcer = new Enforcer(DefaultModel.CreateFromText(TestModelFixture.SupportCountModelText));
             string policyType = $"p{i}";
@@ -120,6 +120,13 @@ public class SupportCountTest
                 Assert.True(enforcer.Enforce(context, "value1", "value2", "value3", "value4", "value5", "value6",
                     "value7", "value8", "value9", "value10", "value11", "value12", "value13"));
                 break;
+            case 14:
+                Assert.True(enforcer.Enforce(context, Request.CreateValues("value1", "value2", "value3",
+                    "value4", "value5", "value6", "value7", "value8", "value9",
+                    "value10", "value11", "value12", "value13", "value14")));
+                Assert.True(enforcer.Enforce(context, "value1", "value2", "value3", "value4", "value5", "value6",
+                    "value7", "value8", "value9", "value10", "value11", "value12", "value13", "value14"));
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(requestCount));
         }
@@ -134,5 +141,14 @@ public class SupportCountTest
         }
 
         return Policy.ValuesFrom(policy);
+    }
+
+    [Fact]
+    public void TestUnsupportedCount()
+    {
+        // 测试不支持的情况 - 15个参数应该抛出异常
+        // 由于没有15个参数的CreateValues重载，我们需要测试SupportGeneric方法
+        Assert.False(Request.SupportGeneric(15));
+        Assert.False(Policy.SupportGeneric(15));
     }
 }

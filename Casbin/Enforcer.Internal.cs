@@ -58,6 +58,10 @@ public partial class Enforcer
                 string, string, string, string>>(in context, requestValues),
             12 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
                 string, string, string, string, string>>(in context, requestValues),
+            13 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
+                string, string, string, string, string, string>>(in context, requestValues),
+            14 => InternalEnforce<TRequest, PolicyValues<string, string, string, string, string, string, string,
+                string, string, string, string, string, string, string>>(in context, requestValues),
             _ => InternalEnforce<IRequestValues, IPolicyValues>(in context, requestValues)
         };
     }
