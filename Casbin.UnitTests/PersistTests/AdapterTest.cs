@@ -97,7 +97,8 @@ public class AdapterTest
         Enforcer e = new("Examples/basic_model.conf");
         Assert.False(e.Enforce("alice", "data1", "read"));
 
-        StreamAdapter a = new(File.OpenRead("Examples/basic_policy.csv"));
+        using FileStream stream = File.OpenRead("Examples/basic_policy.csv");
+        StreamAdapter a = new(stream);
         e.SetAdapter(a);
         e.LoadPolicy();
 
@@ -117,7 +118,8 @@ public class AdapterTest
         Enforcer e = new("Examples/basic_model.conf");
         Assert.False(await e.EnforceAsync("alice", "data1", "read"));
 
-        StreamAdapter a = new(File.OpenRead("Examples/basic_policy.csv"));
+        using FileStream stream = File.OpenRead("Examples/basic_policy.csv");
+        StreamAdapter a = new(stream);
         e.SetAdapter(a);
         await e.LoadPolicyAsync();
 
@@ -137,7 +139,8 @@ public class AdapterTest
         Enforcer e = new("Examples/basic_model.conf");
         Assert.False(e.Enforce("alice", "data1", "read"));
 
-        StreamAdapter a = new(File.OpenRead("Examples/basic_policy.csv"));
+        using FileStream stream = File.OpenRead("Examples/basic_policy.csv");
+        StreamAdapter a = new(stream);
         e.SetAdapter(a);
         e.LoadFilteredPolicy(new PolicyFilter(PermConstants.DefaultPolicyType, 0, Policy.ValuesFrom(["bob"])));
 
@@ -157,7 +160,8 @@ public class AdapterTest
         Enforcer e = new("Examples/basic_model.conf");
         Assert.False(await e.EnforceAsync("alice", "data1", "read"));
 
-        StreamAdapter a = new(File.OpenRead("Examples/basic_policy.csv"));
+        using FileStream stream = File.OpenRead("Examples/basic_policy.csv");
+        StreamAdapter a = new(stream);
         e.SetAdapter(a);
         await e.LoadFilteredPolicyAsync(new PolicyFilter(PermConstants.DefaultPolicyType, 0, Policy.ValuesFrom(["bob"])));
 
