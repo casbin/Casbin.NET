@@ -4,7 +4,7 @@ using Casbin.Model;
 
 namespace Casbin.Persist;
 
-public class PolicyFilter
+public class PolicyFilter : IPolicyFilter
 {
     public static readonly PolicyFilter Empty = new();
     private readonly int _fieldIndex;
