@@ -16,6 +16,8 @@ public interface IReadOnlyPersistPolicy
     public string Value10 { get; }
     public string Value11 { get; }
     public string Value12 { get; }
+    public string Value13 { get; }
+    public string Value14 { get; }
 }
 
 

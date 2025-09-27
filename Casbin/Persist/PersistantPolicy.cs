@@ -19,6 +19,8 @@ public class PersistPolicy : IPersistPolicy, IReadOnlyPersistPolicy
     public string Value10 { get; set; }
     public string Value11 { get; set; }
     public string Value12 { get; set; }
+    public string Value13 { get; set; }
+    public string Value14 { get; set; }
 
     public static TPersistPolicy Create<TPersistPolicy>(string type, IPolicyValues values)
         where TPersistPolicy : IPersistPolicy, new()
@@ -135,9 +137,40 @@ public class PersistPolicy : IPersistPolicy, IReadOnlyPersistPolicy
                 persistPolicy.Value11 = values[10];
                 persistPolicy.Value12 = values[11];
                 break;
+            case 13:
+                persistPolicy.Value1 = values[0];
+                persistPolicy.Value2 = values[1];
+                persistPolicy.Value3 = values[2];
+                persistPolicy.Value4 = values[3];
+                persistPolicy.Value5 = values[4];
+                persistPolicy.Value6 = values[5];
+                persistPolicy.Value7 = values[6];
+                persistPolicy.Value8 = values[7];
+                persistPolicy.Value9 = values[8];
+                persistPolicy.Value10 = values[9];
+                persistPolicy.Value11 = values[10];
+                persistPolicy.Value12 = values[11];
+                persistPolicy.Value13 = values[12];
+                break;
+            case 14:
+                persistPolicy.Value1 = values[0];
+                persistPolicy.Value2 = values[1];
+                persistPolicy.Value3 = values[2];
+                persistPolicy.Value4 = values[3];
+                persistPolicy.Value5 = values[4];
+                persistPolicy.Value6 = values[5];
+                persistPolicy.Value7 = values[6];
+                persistPolicy.Value8 = values[7];
+                persistPolicy.Value9 = values[8];
+                persistPolicy.Value10 = values[9];
+                persistPolicy.Value11 = values[10];
+                persistPolicy.Value12 = values[11];
+                persistPolicy.Value13 = values[12];
+                persistPolicy.Value14 = values[13];
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(values), values.Count,
-                    "The number of values must be between 1 and 12.");
+                    "The number of values must be between 1 and 14.");
         }
 
         return persistPolicy;

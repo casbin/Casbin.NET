@@ -1185,4 +1185,240 @@ public static partial class EnforcerExtension
     }
 
     #endregion
+
+    #region Generic Enforce Count 13
+
+    public static bool Enforce<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer, T1 value1,
+        T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10,
+        T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        return enforcer.Enforce(enforcer.CreateContext(), request);
+    }
+
+    public static Task<bool> EnforceAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer,
+        T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10,
+        T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        return enforcer.EnforceAsync(enforcer.CreateContext(), request);
+    }
+
+    public static bool Enforce<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer,
+        EnforceContext context, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer,
+        EnforceContext context, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceEx<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer, T1 value1, T2 value2,
+            T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11,
+            T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer, T1 value1, T2 value2,
+            T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11,
+            T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static bool EnforceWithMatcher<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer,
+        string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceWithMatcherAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(
+        this IEnforcer enforcer, string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6,
+        T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceExWithMatcher<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer, string matcher,
+            T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9,
+            T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExWithMatcherAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13>(this IEnforcer enforcer,
+            string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+            T9 value9, T10 value10, T11 value11, T12 value12, T13 value13)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    #endregion
+
+    #region Generic Enforce Count 14
+
+    public static bool Enforce<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer, T1 value1,
+        T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10,
+        T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        return enforcer.Enforce(enforcer.CreateContext(), request);
+    }
+
+    public static Task<bool> EnforceAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer,
+        T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10,
+        T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        return enforcer.EnforceAsync(enforcer.CreateContext(), request);
+    }
+
+    public static bool Enforce<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer,
+        EnforceContext context, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer,
+        EnforceContext context, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceEx<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer, T1 value1, T2 value2,
+            T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11,
+            T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer, T1 value1, T2 value2,
+            T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9, T10 value10, T11 value11,
+            T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContext(true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static bool EnforceWithMatcher<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer,
+        string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+        T9 value9, T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.Enforce(context, request);
+    }
+
+    public static Task<bool> EnforceWithMatcherAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(
+        this IEnforcer enforcer, string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6,
+        T7 value7, T8 value8, T9 value9, T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher);
+        return enforcer.EnforceAsync(context, request);
+    }
+
+    public static (bool Result, IEnumerable<IEnumerable<string>> Explains)
+        EnforceExWithMatcher<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer, string matcher,
+            T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8, T9 value9,
+            T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = enforcer.Enforce(context, request);
+        return (result, context.Explanations);
+    }
+
+    public static async Task<(bool Result, IEnumerable<IEnumerable<string>> Explains)>
+        EnforceExWithMatcherAsync<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T13, T14>(this IEnforcer enforcer,
+            string matcher, T1 value1, T2 value2, T3 value3, T4 value4, T5 value5, T6 value6, T7 value7, T8 value8,
+            T9 value9, T10 value10, T11 value11, T12 value12, T13 value13, T14 value14)
+    {
+        var request = Request.CreateValues(value1, value2, value3, value4, value5, value6, value7, value8, value9,
+            value10,
+            value11, value12, value13, value14);
+        EnforceContext context = enforcer.CreateContextWithMatcher(matcher, true);
+        bool result = await enforcer.EnforceAsync(context, request);
+        return (result, context.Explanations);
+    }
+
+    #endregion
 }

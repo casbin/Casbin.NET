@@ -16,6 +16,8 @@ public interface IPersistPolicy
     public string Value10 { get; set; }
     public string Value11 { get; set; }
     public string Value12 { get; set; }
+    public string Value13 { get; set; }
+    public string Value14 { get; set; }
 }
 
 
