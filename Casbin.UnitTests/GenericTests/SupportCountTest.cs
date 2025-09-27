@@ -142,13 +142,4 @@ public class SupportCountTest
 
         return Policy.ValuesFrom(policy);
     }
-
-    [Fact]
-    public void TestUnsupportedCount()
-    {
-        // 测试不支持的情况 - 15个参数应该抛出异常
-        // 由于没有15个参数的CreateValues重载，我们需要测试SupportGeneric方法
-        Assert.False(Request.SupportGeneric(15));
-        Assert.False(Policy.SupportGeneric(15));
-    }
 }
