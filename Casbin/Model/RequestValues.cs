@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Casbin.Model;
 
@@ -46,6 +47,11 @@ public struct RequestValues<T> : IRequestValues
                 return false;
         }
     }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}]";
+    }
 }
 
 public struct RequestValues<T1, T2> : IRequestValues
@@ -81,6 +87,11 @@ public struct RequestValues<T1, T2> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}]";
     }
 }
 
@@ -123,6 +134,11 @@ public struct RequestValues<T1, T2, T3> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}]";
     }
 }
 
@@ -171,6 +187,11 @@ public struct RequestValues<T1, T2, T3, T4> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}]";
     }
 }
 
@@ -225,6 +246,11 @@ public struct RequestValues<T1, T2, T3, T4, T5> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}]";
     }
 }
 
@@ -285,6 +311,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}]";
     }
 }
 
@@ -351,6 +382,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}]";
     }
 }
 
@@ -423,6 +459,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}]";
     }
 }
 
@@ -502,6 +543,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9> : IRequestValues
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}]";
     }
 }
 
@@ -587,6 +633,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> : IRequestV
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}, {RequestValues.ToStringValue(Value10)}]";
     }
 }
 
@@ -678,6 +729,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> : IReq
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}, {RequestValues.ToStringValue(Value10)}, {RequestValues.ToStringValue(Value11)}]";
     }
 }
 
@@ -775,6 +831,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> :
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}, {RequestValues.ToStringValue(Value10)}, {RequestValues.ToStringValue(Value11)}, {RequestValues.ToStringValue(Value12)}]";
     }
 }
 
@@ -878,6 +939,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}, {RequestValues.ToStringValue(Value10)}, {RequestValues.ToStringValue(Value11)}, {RequestValues.ToStringValue(Value12)}, {RequestValues.ToStringValue(Value13)}]";
     }
 }
 
@@ -987,6 +1053,11 @@ public struct RequestValues<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12, T
             default:
                 return false;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"[{RequestValues.ToStringValue(Value1)}, {RequestValues.ToStringValue(Value2)}, {RequestValues.ToStringValue(Value3)}, {RequestValues.ToStringValue(Value4)}, {RequestValues.ToStringValue(Value5)}, {RequestValues.ToStringValue(Value6)}, {RequestValues.ToStringValue(Value7)}, {RequestValues.ToStringValue(Value8)}, {RequestValues.ToStringValue(Value9)}, {RequestValues.ToStringValue(Value10)}, {RequestValues.ToStringValue(Value11)}, {RequestValues.ToStringValue(Value12)}, {RequestValues.ToStringValue(Value13)}, {RequestValues.ToStringValue(Value14)}]";
     }
 }
 
@@ -1110,6 +1181,11 @@ public struct StringRequestValues : IRequestValues
                 return false;
         }
     }
+
+    public override string ToString()
+    {
+        return $"[{Value1}, {Value2}, {Value3}, {Value4}, {Value5}, {Value6}, {Value7}, {Value8}, {Value9}, {Value10}, {Value11}, {Value12}, {Value13}, {Value14}]";
+    }
 }
 
 public readonly struct ListRequestValues<TValue> : IRequestValues
@@ -1151,5 +1227,21 @@ public readonly struct ListRequestValues<TValue> : IRequestValues
 
         _values[index] = v;
         return true;
+    }
+
+    public override string ToString()
+    {
+        var sb = new StringBuilder();
+        sb.Append('[');
+        for (var i = 0; i < _values.Count; i++)
+        {
+            if (i > 0)
+            {
+                sb.Append(", ");
+            }
+            sb.Append(RequestValues.ToStringValue(_values[i]));
+        }
+        sb.Append(']');
+        return sb.ToString();
     }
 }
