@@ -167,6 +167,13 @@ namespace Casbin.Model
                 return false;
             }
 
+            if (model.PolicyStoreHolder.PolicyStore is null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot load incremental filtered policy when policy store is not initialized. " +
+                    "Call LoadPolicy() or LoadFilteredPolicy() first.");
+            }
+
             model.AdapterHolder.FilteredAdapter.LoadIncrementalFilteredPolicy(
                 model.PolicyStoreHolder.PolicyStore, filter);
             return true;
@@ -182,6 +189,13 @@ namespace Casbin.Model
             if (model.AdapterHolder.FilteredAdapter is null)
             {
                 return false;
+            }
+
+            if (model.PolicyStoreHolder.PolicyStore is null)
+            {
+                throw new InvalidOperationException(
+                    "Cannot load incremental filtered policy when policy store is not initialized. " +
+                    "Call LoadPolicy() or LoadFilteredPolicy() first.");
             }
 
             await model.AdapterHolder.FilteredAdapter.LoadIncrementalFilteredPolicyAsync(

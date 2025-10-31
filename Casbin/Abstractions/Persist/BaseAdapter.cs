@@ -226,8 +226,9 @@ public abstract class BaseAdapter
         // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
         if (filter is null)
         {
-            LoadPolicy(store);
-            return;
+            throw new ArgumentNullException(nameof(filter),
+                "Filter cannot be null for incremental filtered policy loading. " +
+                "Use LoadPolicy() to load all policies instead.");
         }
 
         IEnumerable<IPersistPolicy> policies = ReadPersistPolicy();
