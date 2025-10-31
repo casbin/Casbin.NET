@@ -10,5 +10,9 @@ namespace Casbin.Persist
         void LoadFilteredPolicy(IPolicyStore store, IPolicyFilter filter);
 
         Task LoadFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter);
+
+        void LoadIncrementalFilteredPolicy(IPolicyStore store, IPolicyFilter filter);
+
+        Task LoadIncrementalFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter);
     }
 }

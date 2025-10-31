@@ -155,6 +155,40 @@ namespace Casbin.Model
             return true;
         }
 
+        public static bool LoadIncrementalFilteredPolicy(this IModel model, IPolicyFilter filter)
+        {
+            if (model.AdapterHolder.Adapter is null)
+            {
+                return false;
+            }
+
+            if (model.AdapterHolder.FilteredAdapter is null)
+            {
+                return false;
+            }
+
+            model.AdapterHolder.FilteredAdapter.LoadIncrementalFilteredPolicy(
+                model.PolicyStoreHolder.PolicyStore, filter);
+            return true;
+        }
+
+        public static async Task<bool> LoadIncrementalFilteredPolicyAsync(this IModel model, IPolicyFilter filter)
+        {
+            if (model.AdapterHolder.Adapter is null)
+            {
+                return false;
+            }
+
+            if (model.AdapterHolder.FilteredAdapter is null)
+            {
+                return false;
+            }
+
+            await model.AdapterHolder.FilteredAdapter.LoadIncrementalFilteredPolicyAsync(
+                model.PolicyStoreHolder.PolicyStore, filter);
+            return true;
+        }
+
         public static bool SavePolicy(this IModel model)
         {
             if (model.AdapterHolder.Adapter is null)

@@ -221,6 +221,36 @@ public abstract class BaseAdapter
 #endif
     }
 
+    public void LoadIncrementalFilteredPolicy(IPolicyStore store, IPolicyFilter filter)
+    {
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+        if (filter is null)
+        {
+            LoadPolicy(store);
+            return;
+        }
+
+        IEnumerable<IPersistPolicy> policies = ReadPersistPolicy();
+        policies = filter.Apply(policies.AsQueryable());
+        foreach (IPersistPolicy policy in policies)
+        {
+            int requiredCount = store.GetRequiredValuesCount(policy.Section, policy.Type);
+            IPolicyValues values = Policy.ValuesFrom(policy, requiredCount);
+            store.AddPolicy(policy.Section, policy.Type, values);
+        }
+        IsFiltered = true;
+    }
+
+    public Task LoadIncrementalFilteredPolicyAsync(IPolicyStore store, IPolicyFilter filter)
+    {
+        LoadIncrementalFilteredPolicy(store, filter);
+#if !NET452
+        return Task.CompletedTask;
+#else
+        return Task.FromResult(true);
+#endif
+    }
+
     #endregion
 
     protected IEnumerable<IPersistPolicy> ReadPersistPolicy()
