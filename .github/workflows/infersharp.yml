@@ -1,6 +1,11 @@
 name: InferSharp
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - 1.x
+  pull_request:
 
 jobs:
   InferSharp:

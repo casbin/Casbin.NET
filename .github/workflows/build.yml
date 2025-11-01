@@ -1,6 +1,11 @@
 name: Build
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - master
+      - 1.x
+  pull_request:
 
 env:
   SHA: ${{ GITHUB.SHA }}
