@@ -229,6 +229,7 @@ namespace Casbin
                 return false;
             }
 
+            enforcer.ClearCache();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
@@ -251,6 +252,7 @@ namespace Casbin
                 return false;
             }
 
+            enforcer.ClearCache();
             if (enforcer.AutoBuildRoleLinks)
             {
                 enforcer.BuildRoleLinks();
@@ -268,6 +270,52 @@ namespace Casbin
         [Obsolete("Please use PolicyFilter instead")]
         public static Task<bool> LoadFilteredPolicyAsync(this IEnforcer enforcer, Filter filter) =>
             LoadFilteredPolicyAsync(enforcer, filter as IPolicyFilter);
+
+        /// <summary>
+        /// Appends a filtered policy from file/database without clearing the existing policies.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public static bool LoadIncrementalFilteredPolicy(this IEnforcer enforcer, IPolicyFilter filter)
+        {
+            bool result = enforcer.Model.LoadIncrementalFilteredPolicy(filter);
+            if (result is false)
+            {
+                return false;
+            }
+
+            enforcer.ClearCache();
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Appends a filtered policy from file/database without clearing the existing policies.
+        /// </summary>
+        /// <param name="enforcer"></param>
+        /// <param name="filter">The filter used to specify which type of policy should be loaded.</param>
+        /// <returns></returns>
+        public static async Task<bool> LoadIncrementalFilteredPolicyAsync(this IEnforcer enforcer, IPolicyFilter filter)
+        {
+            bool result = await enforcer.Model.LoadIncrementalFilteredPolicyAsync(filter);
+            if (result is false)
+            {
+                return false;
+            }
+
+            enforcer.ClearCache();
+            if (enforcer.AutoBuildRoleLinks)
+            {
+                enforcer.BuildRoleLinks();
+            }
+
+            return true;
+        }
 
         /// <summary>
         /// Saves the current policy (usually after changed with Casbin API)

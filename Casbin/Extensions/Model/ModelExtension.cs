@@ -94,36 +94,27 @@ namespace Casbin.Model
 
         public static bool LoadFilteredPolicy(this IModel model, IPolicyFilter filter)
         {
-            if (model.AdapterHolder.Adapter is null)
-            {
-                return false;
-            }
-
-            if (model.AdapterHolder.FilteredAdapter is null)
-            {
-                return false;
-            }
-
-            DefaultPolicyStore policyStore = new();
-            foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
-            {
-                policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
-            }
-
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
-            {
-                foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
-                {
-                    policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
-                }
-            }
-
-            model.AdapterHolder.FilteredAdapter.LoadFilteredPolicy(policyStore, filter);
-            model.PolicyStoreHolder.PolicyStore = policyStore;
-            return true;
+            model.PolicyStoreHolder.PolicyStore?.ClearPolicy();
+            return LoadFilteredPolicyInternal(model, filter);
         }
 
         public static async Task<bool> LoadFilteredPolicyAsync(this IModel model, IPolicyFilter filter)
+        {
+            model.PolicyStoreHolder.PolicyStore?.ClearPolicy();
+            return await LoadFilteredPolicyInternalAsync(model, filter);
+        }
+
+        public static bool LoadIncrementalFilteredPolicy(this IModel model, IPolicyFilter filter)
+        {
+            return LoadFilteredPolicyInternal(model, filter);
+        }
+
+        public static async Task<bool> LoadIncrementalFilteredPolicyAsync(this IModel model, IPolicyFilter filter)
+        {
+            return await LoadFilteredPolicyInternalAsync(model, filter);
+        }
+
+        private static bool LoadFilteredPolicyInternal(IModel model, IPolicyFilter filter)
         {
             if (model.AdapterHolder.Adapter is null)
             {
@@ -135,23 +126,61 @@ namespace Casbin.Model
                 return false;
             }
 
-            DefaultPolicyStore policyStore = new();
-            foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
+            // Initialize policy store if it doesn't exist
+            if (model.PolicyStoreHolder.PolicyStore is null)
             {
-                policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
-            }
-
-            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
-            {
-                foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                DefaultPolicyStore policyStore = new();
+                foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
                 {
-                    policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
+                    policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
                 }
+
+                if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
+                {
+                    foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                    {
+                        policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
+                    }
+                }
+                model.PolicyStoreHolder.PolicyStore = policyStore;
             }
 
-            await model.AdapterHolder.FilteredAdapter.LoadFilteredPolicyAsync(policyStore,
-                filter);
-            model.PolicyStoreHolder.PolicyStore = policyStore;
+            model.AdapterHolder.FilteredAdapter.LoadFilteredPolicy(model.PolicyStoreHolder.PolicyStore, filter);
+            return true;
+        }
+
+        private static async Task<bool> LoadFilteredPolicyInternalAsync(IModel model, IPolicyFilter filter)
+        {
+            if (model.AdapterHolder.Adapter is null)
+            {
+                return false;
+            }
+
+            if (model.AdapterHolder.FilteredAdapter is null)
+            {
+                return false;
+            }
+
+            // Initialize policy store if it doesn't exist
+            if (model.PolicyStoreHolder.PolicyStore is null)
+            {
+                DefaultPolicyStore policyStore = new();
+                foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
+                {
+                    policyStore.AddNode(PermConstants.Section.PolicySection, pair.Key, pair.Value);
+                }
+
+                if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
+                {
+                    foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                    {
+                        policyStore.AddNode(PermConstants.Section.RoleSection, pair.Key, pair.Value);
+                    }
+                }
+                model.PolicyStoreHolder.PolicyStore = policyStore;
+            }
+
+            await model.AdapterHolder.FilteredAdapter.LoadFilteredPolicyAsync(model.PolicyStoreHolder.PolicyStore, filter);
             return true;
         }
 
