@@ -940,6 +940,59 @@ public class EnforcerTest
     }
 
     [Fact]
+    public void TestAutoSaveGroupingPolicy()
+    {
+        // This test verifies that AddGroupingPolicy() respects the AutoSave flag.
+        // When AutoSave is disabled, grouping policy changes should not be saved to the adapter.
+
+        MockSingleAdapter adapter = new("Examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", adapter);
+
+        // Verify initial state: alice has data2_admin role
+        Assert.True(e.HasGroupingPolicy("alice", "data2_admin"));
+        Assert.False(e.HasGroupingPolicy("bob", "data2_admin"));
+
+        adapter.ClearSavedPolicies();
+        e.EnableAutoSave(false);
+
+        // Because AutoSave is disabled, the grouping policy change should only affect
+        // the policy in Casbin enforcer, it should NOT call the adapter.
+        e.AddGroupingPolicy("bob", "data2_admin");
+
+        // Verify the change is in memory
+        Assert.True(e.HasGroupingPolicy("bob", "data2_admin"));
+
+        // Verify the adapter was NOT called because AutoSave is disabled
+        Assert.Empty(adapter.SavedPolicies);
+    }
+
+    [Fact]
+    public async Task TestAutoSaveGroupingPolicyAsync()
+    {
+        // This test verifies that AddGroupingPolicyAsync() respects the AutoSave flag.
+        // When AutoSave is disabled, grouping policy changes should not be saved to the adapter.
+
+        MockSingleAdapter adapter = new("Examples/rbac_policy.csv");
+        Enforcer e = new("Examples/rbac_model.conf", adapter);
+
+        // Verify initial state
+        Assert.True(e.HasGroupingPolicy("alice", "data2_admin"));
+        Assert.False(e.HasGroupingPolicy("bob", "data2_admin"));
+
+        adapter.ClearSavedPolicies();
+        e.EnableAutoSave(false);
+
+        // Add grouping policy with AutoSave disabled
+        await e.AddGroupingPolicyAsync("bob", "data2_admin");
+
+        // Verify the change is in memory
+        Assert.True(e.HasGroupingPolicy("bob", "data2_admin"));
+
+        // Verify the adapter was NOT called because AutoSave is disabled
+        Assert.Empty(adapter.SavedPolicies);
+    }
+
+    [Fact]
     public void TestInitWithAdapter()
     {
         FileAdapter adapter = new("Examples/basic_policy.csv");
