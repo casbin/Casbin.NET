@@ -228,9 +228,19 @@ namespace Casbin.Model
 
         public static void SetAutoSave(this IModel model, bool autoSave)
         {
+            // Set AutoSave for policy assertions (section "p")
             foreach (KeyValuePair<string, PolicyAssertion> pair in model.Sections.GetPolicyAssertions())
             {
                 pair.Value.PolicyManager.AutoSave = autoSave;
+            }
+
+            // Set AutoSave for role/grouping assertions (section "g") if they exist
+            if (model.Sections.ContainsSection(PermConstants.Section.RoleSection))
+            {
+                foreach (KeyValuePair<string, RoleAssertion> pair in model.Sections.GetRoleAssertions())
+                {
+                    pair.Value.PolicyManager.AutoSave = autoSave;
+                }
             }
         }
 
