@@ -1,5 +1,6 @@
 ﻿#if !NET452
 using System;
+using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Xunit.Abstractions;
 
@@ -11,11 +12,14 @@ namespace Casbin.UnitTests.Mock
 
         public MockLogger(ITestOutputHelper testOutputHelper) => _testOutputHelper = testOutputHelper;
 
+        public List<(LogLevel Level, Exception Exception, string Message)> Logs { get; } = new();
+
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception,
             Func<TState, Exception, string> formatter)
         {
             string outPut = formatter(state, null);
             _testOutputHelper.WriteLine(outPut);
+            Logs.Add((logLevel, exception, outPut));
         }
 
         public bool IsEnabled(LogLevel logLevel) => true;

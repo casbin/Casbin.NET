@@ -1290,4 +1290,33 @@ public class EnforcerTest
     }
 
     #endregion
+
+#if !NET452
+    #region ExpressionHandler Tests
+
+    [Fact]
+    public void TestExpressionHandlerSingleQuoteReplacement()
+    {
+        Enforcer e = new(TestModelFixture.GetBasicTestModel());
+        // Single quotes should be replaced with double quotes to handle DynamicExpresso limitations
+        string matcherWithSingleQuotes = "r.sub == 'alice' && r.obj == p.obj && r.act == p.act";
+
+        Assert.True(e.EnforceWithMatcher(matcherWithSingleQuotes, "alice", "data1", "read"));
+        Assert.False(e.EnforceWithMatcher(matcherWithSingleQuotes, "alice", "data1", "write"));
+        Assert.False(e.EnforceWithMatcher(matcherWithSingleQuotes, "bob", "data1", "read"));
+    }
+
+    [Fact]
+    public void TestExpressionHandlerLogsWarningOnInvalidExpression()
+    {
+        var logger = new MockLogger<Enforcer>(_testOutputHelper);
+        Enforcer e = new(TestModelFixture.GetBasicTestModel()) { Logger = logger };
+
+        // An invalid expression should return false and log a warning
+        Assert.False(e.EnforceWithMatcher("this_is_not_valid!!!", "alice", "data1", "read"));
+        Assert.Contains(logger.Logs, log => log.Level == Microsoft.Extensions.Logging.LogLevel.Warning);
+    }
+
+    #endregion
+#endif
 }
