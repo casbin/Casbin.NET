@@ -72,12 +72,6 @@ public partial class Enforcer
     {
         EnforceSession session = new EnforceSession();
         IExpressionHandler expressionHandler = Model.ExpressionHandler;
-#if !NET452
-        if (expressionHandler is ExpressionHandler exprHandler)
-        {
-            exprHandler.Logger = Logger;
-        }
-#endif
         PolicyScanner<TRequest> scanner = context.View.PolicyAssertion.Scan(in requestValues);
 
         EffectChain effectChain = new();
