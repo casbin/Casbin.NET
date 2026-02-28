@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Casbin.Caching;
 using Casbin.Effect;
+using Casbin.Evaluation;
 using Casbin.Model;
 using Casbin.Persist;
 using Casbin.Persist.Adapter.File;
@@ -84,7 +85,22 @@ namespace Casbin
             set => Model.WatcherHolder.Watcher = value;
         }
 
-        public IModel Model { get; set; }
+        private IModel _model;
+
+        public IModel Model
+        {
+            get => _model;
+            set
+            {
+                _model = value;
+#if !NET452
+                if (value?.ExpressionHandler is ExpressionHandler exprHandler)
+                {
+                    exprHandler.Logger = _logger;
+                }
+#endif
+            }
+        }
 
         public IReadOnlyAdapter Adapter
         {
@@ -99,7 +115,20 @@ namespace Casbin
         }
 
 #if !NET452
-        public ILogger Logger { get; set; }
+        private ILogger _logger;
+
+        public ILogger Logger
+        {
+            get => _logger;
+            set
+            {
+                _logger = value;
+                if (_model?.ExpressionHandler is ExpressionHandler exprHandler)
+                {
+                    exprHandler.Logger = value;
+                }
+            }
+        }
 #endif
 
         #endregion
